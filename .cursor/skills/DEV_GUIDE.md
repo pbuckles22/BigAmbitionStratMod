@@ -19,6 +19,12 @@ If merge-ready **compiles**, count every compile (test/Debug **and** Release). G
 
 C# reference implementations: DerailValleyModv2, LurkWall.
 
+### Evidence sink (only if this repo has a runtime)
+
+Named events go in a **durable file** documented in TEST_PLAN.md. Human opens it; agent Reads it. Debugger-only Trace is not evidence. **Skip** for this template, docs-only, and stacks with no runtime.
+
+C# references: DerailValleyModv2 (`Player.log` `T2 …`), LurkWall (`%LocalAppData%\LurkWall\lurkwall.log`).
+
 ---
 
 ## When you adopt Python (JIT — add when a project needs it)
