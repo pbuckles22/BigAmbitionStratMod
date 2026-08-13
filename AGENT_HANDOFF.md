@@ -138,7 +138,7 @@ When shipping: update **PM_PLAN**, **doc/PROJECT_STATUS.md**, and **Current stat
 
 ## Current state
 
-- **Template:** Agentic rules and skills in place; contributor onboarding norm (CONTRIBUTING, PROJECT_STATUS, GitHub templates).
+- **Template:** Agentic rules and skills in place; contributor onboarding norm (CONTRIBUTING, PROJECT_STATUS, GitHub templates). Compiling stacks must count every merge-ready compile (`testing.mdc` → *Compile counter*); non-compiling stacks skip.
 - **Next:** Add your codebase; document run/test commands here and in TEST_PLAN.md.
 
 ## Run and test
@@ -152,6 +152,8 @@ When shipping: update **PM_PLAN**, **doc/PROJECT_STATUS.md**, and **Current stat
 ```
 
 Replace the block above with your real commands and keep them in sync with TEST_PLAN.md.
+
+**Compile counter:** If those commands **compile**, count every compile (test/Debug and Release are separate). Local gitignored counter + binary `+N` when the toolchain allows. Skip for non-compiling repos (scripts, twitchurl*, DJ tools). See `.cursor/rules/testing.mdc` and [TEST_TDD.md](.cursor/skills/TEST_TDD.md).
 
 ## Conventions
 

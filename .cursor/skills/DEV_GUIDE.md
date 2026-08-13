@@ -13,6 +13,12 @@ Describe how you organize source, tests, and integration or E2E assets. Point to
 - Prefer pure functions for business logic where possible.
 - See AGENT_HANDOFF.md for run/test commands and source of truth.
 
+### Compile counter (only if this repo compiles)
+
+If merge-ready **compiles**, count every compile (test/Debug **and** Release). Gitignored `build_number.txt` (seed `build_number.txt.example` = `0`); inject `+N` into the binary informational version when the toolchain allows. Skip IDE/design-time. **Skip this whole section** for scripts, bookmarklets, twitchurl*, DJ tools, docs-only.
+
+C# reference implementations: DerailValleyModv2, LurkWall.
+
 ---
 
 ## When you adopt Python (JIT — add when a project needs it)

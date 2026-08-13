@@ -25,3 +25,5 @@ Use when behavior spans a real runtime (browser, device, network, or native APIs
 ---
 
 **Handoff:** Document the exact commands you use for coverage in AGENT_HANDOFF.md so agents can run them consistently.
+
+**Compile counter:** If Tier 1 **compiles**, count every compile (test/Debug **and** Release). Non-compiling stacks skip. See `.cursor/rules/testing.mdc`.

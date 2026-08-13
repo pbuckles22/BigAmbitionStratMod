@@ -43,7 +43,7 @@ Treat these as satisfied **before** `git commit` on anything beyond trivial doc 
 
 1. **TDD / tests** — [TEST_TDD.md](../TEST_TDD.md) + [tester](../tester/SKILL.md): failing test first when the changed surface is covered by Tier 1 or Tier 2; suite green for what you touched.
 2. **Lint + format** — covered by your merge-ready command (linter, Prettier/formatter check).
-3. **Full merge-ready** — your project's merge-ready command green (tests, build, E2E if applicable).
+3. **Full merge-ready** — your project's merge-ready command green (tests, build, E2E if applicable). If the stack **compiles**, run **and count** every documented compile (typically test/Debug **and** Release); a green test compile does not replace Release. Non-compiling stacks (scripts, twitchurl*, DJ tools) skip the counter.
 4. **Quality** — For non-trivial edits, use [code-quality-gate](../code-quality-gate/SKILL.md) as appropriate (readability, complexity, obvious foot-guns).
 
 When 1–4 are green: **commit** (and **push** when integrating to `main` per AGENT_HANDOFF). That is the **done** state — not "waiting for the user to open a PR."

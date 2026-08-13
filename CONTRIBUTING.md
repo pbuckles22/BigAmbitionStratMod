@@ -31,7 +31,7 @@ cd AgenticTemplate
 # Install your stack toolchain, then open in Cursor
 ```
 
-Document your **merge-ready command** in [AGENT_HANDOFF.md](AGENT_HANDOFF.md) and [TEST_PLAN.md](TEST_PLAN.md).
+Document your **merge-ready command** in [AGENT_HANDOFF.md](AGENT_HANDOFF.md) and [TEST_PLAN.md](TEST_PLAN.md). If this repo **compiles**, that gate must run and count every compile configuration (see `testing.mdc` → *Compile counter*). Scripts-only / twitchurl* / DJ tools skip the counter.
 
 ## Variant templates
 

@@ -16,6 +16,7 @@ Document the toolchain in AGENT_HANDOFF.md and TEST_PLAN.md. Variants add **5–
 | Next story while current is uncommitted / waiting on a human | `one-story-one-ship.mdc` |
 | Cursor commit/PR attribution | `no-cursor-commit-attribution.mdc` |
 | Tiers, evidence logs, harvest into tests | `testing.mdc` + `TEST_TDD.md` |
+| Compiling stack skips a compile / +BUILD | `testing.mdc` → *Compile counter* |
 | Handoff / epic close | `handoff-checklist.mdc`, `epic-close.mdc` |
 | Gemini drop | `gemini-handoff.mdc` |
 | Branch / commit / push | `github-feature-workflow` skill + AGENT_HANDOFF Git workflow |

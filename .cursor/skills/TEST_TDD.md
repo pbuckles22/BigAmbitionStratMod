@@ -54,3 +54,11 @@ Anti-patterns: per-frame spam; logs with no test that can replay the decision; t
 ## Merge-ready
 
 Document your **merge-ready** or **CI** command in **AGENT_HANDOFF.md** and run it before merge when your team uses that gate.
+
+### Compile counter (compiling stacks only)
+
+If this repo **compiles**, merge-ready must **run and count** every compile configuration it documents (usually test/Debug **and** Release). Do not treat `test` as covering the Release/production compile.
+
+- **Do:** gitignored local counter (e.g. `build_number.txt`, seed `build_number.txt.example` = `0`); increment on a real compile; skip design-time/IntelliSense; inject `+N` into the binary informational version when the stack supports it.
+- **Do not:** commit the counter; write `+N` into tracked public version files; increment on IDE design-time builds.
+- **Skip** when nothing compiles (scripts, bookmarklets, twitchurl*, DJ library tools, docs-only). Tests/docs are the gate.
