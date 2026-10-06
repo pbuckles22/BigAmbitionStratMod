@@ -9,7 +9,10 @@ Thank you for contributing. This template uses **tracked documentation** as the 
 3. [PM_PLAN.md](PM_PLAN.md) — phased checklist (customize for your product)
 4. [AGENT_HANDOFF.md](AGENT_HANDOFF.md) — run/test commands, merge-ready gate, conventions
 5. [TEST_PLAN.md](TEST_PLAN.md) — test tiers
-6. [doc/requirements/](doc/requirements/) — product specs (add as needed)
+6. [doc/VERSIONING.md](doc/VERSIONING.md) — public version (plan coordinate; never backwards)
+7. [doc/requirements/](doc/requirements/) — product specs (add as needed)
+
+Ship commands (do not skip): **UCPH** parks the feature branch, **CMPH** lands `main` and keeps the branch, **CMPHD** also deletes it, **SWAT** is epic close. See [.cursor/rules/wrap-on-command.mdc](.cursor/rules/wrap-on-command.mdc).
 
 ## Local session notes vs GitHub
 

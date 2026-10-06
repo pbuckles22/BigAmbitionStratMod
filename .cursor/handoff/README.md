@@ -4,8 +4,10 @@
 
 **Session narratives (usually gitignored):**
 
-- **`doc/handoff/NNNN-HANDOFF-YYYY-MM-DD_HHmm.md`** — optional naming for dated session notes (monotonic `NNNN`).
-- **`.cursor/handoff/NNNN-handoff-YYYY-MM-DD_HHmm.md`** — alternative location (monotonic `NNNN`).
+- **`doc/handoff/NNNN-HANDOFF-YYYY-MM-DD_HHmm.md`** — prefer. Body = **Receiver brief**. Last line is **Filename**. Shape: [`_template.md`](_template.md).
+- **`.cursor/handoff/NNNN-handoff-YYYY-MM-DD_HHmm.md`** — copy of the same brief.
+
+UCPH and CMPH **chat** must paste that brief. A git-only note with no chat is incomplete. Gates (PASS/WARN) are SWAT only.
 
 **Naming rules (do not overwrite history):**
 
@@ -32,4 +34,4 @@ See [`.gitignore`](../.gitignore). If you need a **tracked** contributor guide u
 
 **Product state on GitHub:** [doc/PROJECT_STATUS.md](../../doc/PROJECT_STATUS.md), [PM_PLAN.md](../../PM_PLAN.md), [AGENT_HANDOFF.md](../../AGENT_HANDOFF.md) → *Current state*. **Norm:** [CONTRIBUTING.md](../../CONTRIBUTING.md). Promote session decisions to tracked docs before merge.
 
-Run the handoff checklist (`.cursor/rules/handoff-checklist.mdc`) before writing a handoff note.
+Ship cadence is `.cursor/rules/wrap-on-command.mdc`. The review swarm (`.cursor/rules/handoff-checklist.mdc`) runs on SWAT, not on every UCPH or CMPH.

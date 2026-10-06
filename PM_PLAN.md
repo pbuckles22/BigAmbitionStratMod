@@ -7,4 +7,6 @@ Replace with your project’s phases and sprints.
 - **Phase 0:** Template in place; document your stack and test commands in AGENT_HANDOFF.md and TEST_PLAN.md.
 - **Next:** Add your codebase and roadmap.
 
+Operating model (keep these when you replace this plan): `.cursor/rules/` ship commands (UCPH, CMPH, SWAT), human check, and plan-coordinate versioning. Do not delete them to “clean up” a new clone.
+
 Keep this file in sync with AGENT_HANDOFF "Current state" and `doc/requirements/` when you add them.

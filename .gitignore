@@ -32,6 +32,20 @@ coverage/
 # .venv/
 # vendor/
 
+# Full-repo Gemini XML dump (script/Export-GeminiSnapshot.ps1)
+Gemini_Snapshot.txt
+Gemini_Snapshot_*.txt
+
+# Transient Gemini drop (keep README and empty dropzone marker)
+doc/gemini/*
+!doc/gemini/README.md
+!doc/gemini/dropzone/
+doc/gemini/dropzone/*
+!doc/gemini/dropzone/.gitkeep
+
+# Local compile counter. Never commit.
+build_number.txt
+
 # Local handoff notes (keep template _template.md and README in repo)
 .cursor/handoff/handoff-*.md
 .cursor/handoff/*-handoff-*.md

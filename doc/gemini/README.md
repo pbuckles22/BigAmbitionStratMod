@@ -1,14 +1,9 @@
-# `doc/gemini/` — transient Gemini exchange folder
+# Gemini drop
 
-**Purpose:** a scratch drop-zone for handing files to an external LLM (Gemini) and bringing its
-output back. **Not canonical** — the repo source and tracked docs are the source of truth.
+Transient pack for an external LLM. **Not canonical.** Live source wins.
 
-**Conventions** (see [`.cursor/rules/gemini-handoff.mdc`](../../.cursor/rules/gemini-handoff.mdc)):
+Tracked: this README only. Pack files, `dropzone/` contents, and `Gemini_Snapshot.txt` are gitignored.
 
-- **Flat** — no subdirectories.
-- **≤ 10 files total** (this `README.md` included). Copy only what's needed.
-- **Transient** — wiped and reloaded on each reuse; only this `README.md` persists.
-- On "hand off to Gemini", the agent creates this folder if missing and fills it with a context
-  Markdown (e.g. `CONTEXT.md`) plus the relevant code files (flattened by base name).
+Rules: [.cursor/rules/gemini-handoff.mdc](../../.cursor/rules/gemini-handoff.mdc).
 
-Anything Gemini returns should be folded into canonical code/docs, not left here.
+Full-repo dump: `script/Export-GeminiSnapshot.ps1` (output is gitignored at the repo root).

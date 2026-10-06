@@ -22,10 +22,23 @@ Goal: reach a **confident, bounded next step** using **minimal context**.
    - `TEST_PLAN.md` (Tier 1 / Tier 2 validation gates)
 
 3. **Most recent session handoff note** (if present)  
-   - `.cursor/handoff/NNNN-handoff-YYYY-MM-DD_HHmm.md` (**highest `NNNN`**, tie-break by timestamp)  
-   - and/or `doc/handoff/NNNN-HANDOFF-YYYY-MM-DD_HHmm.md` (same rule)
+   - `doc/handoff/NNNN-HANDOFF-YYYY-MM-DD_HHmm.md` or `.cursor/handoff/NNNN-handoff-YYYY-MM-DD_HHmm.md` (**highest `NNNN`**)  
+   - Expect a **Receiver brief** (Objective, Git, Decisions, In/Out, Acceptance, Next steps, Measured, Filename). Spec: [`.cursor/handoff/_template.md`](../../handoff/_template.md).  
+   - Read **that file only** for the session delta. Older notes are history. Do not use them to second-guess a later **Git** block.
 
 4. **If the task is code-touching:** read the smallest set of files necessary to act safely.
+
+---
+
+## Git truth — do not re-prove the last ship
+
+`AGENT_HANDOFF.md` → *Current state* plus the latest brief **Git** table are the land record.
+
+- If **On** is **`origin/main @ sha`** and story **N.M** is `[x]`: **start at Next steps.** Do not `git log`, `git fetch`, or re-merge to confirm. Do not narrate that you checked it landed.
+- `git status` is only to see if *your* tree is dirty before you edit.
+- Re-check git only when Git truth is missing, says not merged or WIP, the user asked “is it on main?”, or you are the agent who will merge.
+
+Mismatch (the brief says landed, Current state still names a feature branch): **Current state on the branch you have checked out wins.** Ask. Do not silently re-do the merge.
 
 ---
 
@@ -39,6 +52,7 @@ After reading, produce a short brief with:
   - **Out of scope**:
 - **Constraints**: branch policy, “no guessing”, validation tier.
 - **Acceptance criteria**: 2–5 verifiable checks.
+- **Git**: one line from Git truth (`origin/main @ sha` or not merged, plus the next story). If that ship already landed, do not put “confirm it is on main” in Next steps.
 - **Next steps**: 3–7 bite-sized steps, each with a validation hook.
 - **Open questions**: only if something blocks safe progress.
 

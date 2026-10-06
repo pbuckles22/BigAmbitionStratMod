@@ -3,7 +3,7 @@ name: pm-governance
 description: >-
   Project management and governance. Use when planning sprints, making scope
   decisions, enforcing quality gates, identifying risks, or closing an epic.
-  Epic close runs automatically when an epic is done — do not wait for the user to ask.
+  Epic close is SWAT: reviews and a release only when SWAT is the job and they granted it.
 ---
 
 # PM governance — Project
@@ -28,7 +28,7 @@ Use this skill when doing sprint planning, scope tradeoffs, quality gates, risk 
 - User asks for sprint planning, scope review, or "what's MVP."
 - Deciding whether a feature belongs in current vs next sprint.
 - Before marking a build or feature "done."
-- **Whenever an epic’s in-scope acceptance is met** — run [Epic close](#epic-close-automatic) without waiting to be asked.
+- **When they typed SWAT**, or this CMPH is the epic’s last in-scope story — run [Epic close](#epic-close-swat). A mid-epic land is not SWAT.
 
 ## Output
 
@@ -39,9 +39,9 @@ Use this skill when doing sprint planning, scope tradeoffs, quality gates, risk 
 
 ---
 
-## Epic close (automatic)
+## Epic close (SWAT)
 
-**Policy:** When the last in-scope story of an epic is done (acceptance met, cuts recorded, Tier 1 green, applicable Tier 2 smoke done), **run this procedure in the same session**. Do not wait for “please close the epic.” See [.cursor/rules/epic-close.mdc](../../rules/epic-close.mdc).
+**Policy:** When the last in-scope story of an epic is done **and** SWAT permission is granted (they typed **SWAT**, or that story’s **CMPH**), run this procedure in the same session. See [wrap-on-command.mdc](../../rules/wrap-on-command.mdc). A mid-epic CMPH is not SWAT.
 
 ### Done means
 
@@ -51,15 +51,16 @@ Use this skill when doing sprint planning, scope tradeoffs, quality gates, risk 
 
 ### Procedure (do all)
 
-1. **Handoff-checklist gates** — Run [.cursor/rules/handoff-checklist.mdc](../../rules/handoff-checklist.mdc) for the epic’s shipped surface: code review, tech debt, tests/coverage, security when relevant, Tier 2 if needed. Record PASS/WARN/FAIL and results in the close note. **Do not skip.**
+1. **SWAT gates** — Run [.cursor/rules/handoff-checklist.mdc](../../rules/handoff-checklist.mdc) → *SWAT / epic close only*. Do **not** run this swarm on a mid-epic UCPH or CMPH. Record PASS/WARN/FAIL in the close note.
 2. **PM_PLAN** — Mark the phase/epic **Status: complete** (date). Move leftover non-epic items to the next phase or backlog.
 3. **Product / epics doc** — One-line epic status (`**Status:** complete — YYYY-MM-DD`) when you maintain that file.
 4. **doc/PROJECT_STATUS.md** + **AGENT_HANDOFF.md** → *Current state* — epic closed; **Next** = next phase only (do not invent work).
 5. **TEST_PLAN / TECH_DEBT / RISKS** — Align with closed scope; promote persistent debt into `TECH_DEBT.md`.
 6. **README** — One-line product state if the public blurb is stale.
 7. **Local handoff / close note** — required; include review, debt, tests, close results (same sections as handoff).
-8. **Commit + push** per github-feature-workflow / `AGENT_HANDOFF.md`.
-9. **Summarize for the user** — dual-audience close results. Do **not** start the next epic’s implementation unless the user already asked.
+8. **Commit + push the feature branch** per github-feature-workflow / `AGENT_HANDOFF.md`. Merge to `main` only with CMPH permission.
+9. **After merge to `main`:** if RELEASE.md says this product cuts epic releases, cut a **GitHub Release** for the public version. Do not wait to be asked. Do not upload to a store until the product doc says it is distributable.
+10. **Summarize for the user** — dual-audience close results. Do **not** start the next epic’s implementation unless the user already asked.
 
 ### Do not auto-do on close
 

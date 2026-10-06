@@ -49,8 +49,8 @@ git push origin main
 | Shared (sync from upstream)                | Stack-specific (keep yours)           |
 | ------------------------------------------ | ------------------------------------- |
 | Most skills (techwriter, tester, code-reviewer, code-quality-gate, tech-lead, etc.) | `DEV_GUIDE.md` (architecture, tooling) |
-| Rules (`one-story-one-ship`, `no-cursor-commit-attribution`, `testing.mdc`, handoff-checklist, epic-close, gemini-handoff) | `TEST_TDD.md` (commands + evidence names) |
-| Handoff templates                          | `DESIGN_SYSTEM.md` (UI framework)     |
+| Rules (`one-story-one-ship`, `wrap-on-command`, `no-auto-merge-main`, `human-check`, `pm-versioning`, `no-cursor-commit-attribution`, `testing.mdc`, handoff-checklist, epic-close, gemini-handoff) | `TEST_TDD.md` (commands + evidence names) |
+| Handoff Receiver brief                     | `DESIGN_SYSTEM.md` (UI framework)     |
 | Operating model skills (green-and-clean, etc.) | `always.mdc` (5–10 project invariant lines only) |
 |                                            | `AGENT_HANDOFF.md` (run/test section) |
 |                                            | Optional overlay rules (install/smoke paths) |
@@ -126,7 +126,7 @@ When something breaks, use evidence-driven triage and keep it bounded:
 
 - **Techwriter:** Use when editing README, AGENT_HANDOFF, or internal docs.
 - **Tester:** Black-box tests; run your **documented** test command after changes; keep the suite green. See [TEST_PLAN.md](TEST_PLAN.md).
-- **Handoff (mandatory):** When the user wants a handoff, run code review (code-reviewer), tech debt (tech-debt-evaluator), and your **tests or coverage** as documented below; record in the handoff note. See [.cursor/rules/handoff-checklist.mdc](.cursor/rules/handoff-checklist.mdc).
+- **Handoff:** **UCPH** and **CMPH** paste a Receiver brief ([.cursor/handoff/_template.md](.cursor/handoff/_template.md)). The review swarm runs on **SWAT** only. See [.cursor/rules/wrap-on-command.mdc](.cursor/rules/wrap-on-command.mdc).
 
 ## Contributor onboarding (norm)
 
@@ -138,8 +138,8 @@ When shipping: update **PM_PLAN**, **doc/PROJECT_STATUS.md**, and **Current stat
 
 ## Current state
 
-- **Template:** Agentic rules and skills in place; contributor onboarding norm (CONTRIBUTING, PROJECT_STATUS, GitHub templates). Compiling stacks must count every merge-ready compile (`testing.mdc` → *Compile counter*); runtimes must write named evidence to a **file** (`testing.mdc` → *Evidence sink*). Non-compiling / no-runtime stacks skip both.
-- **Next:** Add your codebase; document run/test commands here and in TEST_PLAN.md.
+- **Template:** Agentic rules and skills in place. Ship cadence is **UCPH** (park the feature branch), **CMPH** (land `main`, keep the branch), **CMPHD** (land and delete), **SWAT** (epic close). Public versions use a plan coordinate and must not go backwards ([doc/VERSIONING.md](doc/VERSIONING.md)). Compiling stacks still count every merge-ready compile (`testing.mdc` → *Compile counter*). Runtimes still write named evidence to a **file** (`testing.mdc` → *Evidence sink*). Non-compiling / no-runtime stacks skip both.
+- **Next:** Add your codebase; document run/test commands here and in TEST_PLAN.md. Do not delete the ship-command rules when you replace PM_PLAN.
 
 ## Run and test
 
@@ -170,11 +170,11 @@ Replace the block above with your real commands and keep them in sync with TEST_
 Document **your** team rules here and keep them in sync with what you run locally.
 
 1. **Integration branch:** Usually **`main`**. All shipped product state (PM_PLAN, roadmap checkboxes) should reflect what is merged here.
-2. **Optional short-lived branches:** For larger slices, use `feature/<topic>` or `fix/<topic>`, then merge or rebase into `main`. Agents should follow [.cursor/skills/github-feature-workflow/SKILL.md](.cursor/skills/github-feature-workflow/SKILL.md) when branching or pushing.
-3. **Before push / merge-ready:** Run your **full gate** (document it in the **Run and test** section above — e.g. tests + build + integration/E2E). Same checks should run in CI if you use GitHub Actions (or equivalent).
+2. **Feature branches:** One story per branch, `feature/<story-id>-short-topic`. Follow [.cursor/skills/github-feature-workflow/SKILL.md](.cursor/skills/github-feature-workflow/SKILL.md) and [.cursor/rules/wrap-on-command.mdc](.cursor/rules/wrap-on-command.mdc). Push the feature branch after the gate. Merge to `main` only after **CMPH** permission ([.cursor/rules/no-auto-merge-main.mdc](.cursor/rules/no-auto-merge-main.mdc)). **UCPH** does not merge.
+3. **Before push / merge-ready:** Run your **full gate** (document it in the **Run and test** section above — e.g. tests + build + integration/E2E). CI should run the headless suite. A build that needs a local device or private binary stays local.
 4. **After push — verify CI:** Agents do not get GitHub failure emails. When Actions exist, run `gh run watch --repo OWNER/REPO` (or `gh run list` + `gh run view --log-failed`) before declaring work done on `main`. See [.cursor/skills/github-feature-workflow/SKILL.md](.cursor/skills/github-feature-workflow/SKILL.md).
-5. **Pull requests:** **Optional** in this template — set `Required` or `Optional` for your org. If optional, direct push to `main` after green CI is still valid; if required, open a PR and use the same test plan text you ran locally.
-6. **After merge:** Delete the local feature branch; delete the remote feature branch if your flow created one.
+5. **Pull requests:** **Optional**. Do not invent a PR step.
+6. **After merge:** **CMPH** keeps the feature branch. **CMPHD** deletes local and remote after `main` is pushed. Record the land sha in [doc/PROJECT_STATUS.md](doc/PROJECT_STATUS.md). See [doc/git/Feature_Branch_Archaeology.md](doc/git/Feature_Branch_Archaeology.md).
 
 ---
 
@@ -182,13 +182,13 @@ Document **your** team rules here and keep them in sync with what you run locall
 
 When ending a session:
 
-1. Run the handoff checklist ([handoff-checklist.mdc](.cursor/rules/handoff-checklist.mdc)).
-2. Update **PM_PLAN.md** when shipped scope changed.
-3. Update **[doc/PROJECT_STATUS.md](doc/PROJECT_STATUS.md)** and **Current state** above (required for contributor-visible changes).
-4. Optional local note: `.cursor/handoff/NNNN-handoff-*.md` ([template](.cursor/handoff/_template.md)) — gitignored; promote decisions to tracked docs.
+1. On **UCPH** or **CMPH**, paste the Receiver brief in chat and write the same body to the handoff note ([template](.cursor/handoff/_template.md)). Do not run the review swarm.
+2. On **SWAT**, run [handoff-checklist.mdc](.cursor/rules/handoff-checklist.mdc) first.
+3. Update **PM_PLAN.md** when shipped scope changed.
+4. Update **[doc/PROJECT_STATUS.md](doc/PROJECT_STATUS.md)** and **Current state** above (required for contributor-visible changes).
 
-## Epic close (automatic)
+## Epic close (SWAT)
 
-When an epic’s in-scope work is done, **do not wait for the user to ask**. Run [.cursor/rules/epic-close.mdc](.cursor/rules/epic-close.mdc) / pm-governance *Epic close*: **handoff checklist first**, then mark the epic complete in plan/status docs, close note, commit/push, summarize. See [.cursor/skills/pm-governance/SKILL.md](.cursor/skills/pm-governance/SKILL.md).
+Do not close an epic because it looks done. Run [.cursor/rules/epic-close.mdc](.cursor/rules/epic-close.mdc) only when they typed **SWAT**, or this **CMPH** is the epic’s last in-scope story. See [.cursor/skills/pm-governance/SKILL.md](.cursor/skills/pm-governance/SKILL.md).
 
 Anything the team must see on GitHub belongs in **PROJECT_STATUS**, **PM_PLAN**, **README**, or the **PR** — not only gitignored handoff files.
