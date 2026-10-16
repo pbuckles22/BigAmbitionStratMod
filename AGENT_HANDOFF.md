@@ -138,7 +138,7 @@ When shipping: update **PM_PLAN**, **doc/PROJECT_STATUS.md**, and **Current stat
 
 ## Current state
 
-- **Template:** Agentic rules and skills in place. Ship cadence is **UCPH** (park the feature branch), **CMPH** (land `main`, keep the branch), **CMPHD** (land and delete), **SWAT** (epic close). Public versions use a plan coordinate and must not go backwards ([doc/VERSIONING.md](doc/VERSIONING.md)). Compiling stacks still count every merge-ready compile (`testing.mdc` → *Compile counter*). Runtimes still write named evidence to a **file** (`testing.mdc` → *Evidence sink*). Non-compiling / no-runtime stacks skip both.
+- **Template:** Agentic rules and skills in place. Ship cadence is **UCPH** (park the feature branch), **CMPH** (land `main`, keep the branch), **CMPHD** (land and delete), **SWAT** (epic close). Public versions use a plan coordinate and must not go backwards ([doc/VERSIONING.md](doc/VERSIONING.md)). Compiling stacks still count every merge-ready compile (`testing.mdc` → *Compile counter*). Runtimes still write named evidence to a **file** (`testing.mdc` → *Evidence sink*). A batch or soak is not the regression suite: extract the decision and lock a named Tier 1 test before the next long run (`testing.mdc` → *Long run*). Non-compiling / no-runtime stacks skip the counter and the evidence file.
 - **Next:** Add your codebase; document run/test commands here and in TEST_PLAN.md. Do not delete the ship-command rules when you replace PM_PLAN.
 
 ## Run and test
@@ -156,6 +156,8 @@ Replace the block above with your real commands and keep them in sync with TEST_
 **Compile counter:** If those commands **compile**, count every compile (test/Debug and Release are separate). Local gitignored counter + binary `+N` when the toolchain allows. Skip for non-compiling repos (scripts, twitchurl*, DJ tools). See `.cursor/rules/testing.mdc` and [TEST_TDD.md](.cursor/skills/TEST_TDD.md).
 
 **Evidence sink:** If the product has a runtime, named events go in a durable file documented in TEST_PLAN.md. Debugger-only Trace is not evidence. This template has no runtime — skip.
+
+**Long run:** A batch or soak is not the regression suite. Extract the decision and lock a named Tier 1 test before the next long run (`testing.mdc` → *Long run*).
 
 ## Conventions
 

@@ -14,6 +14,8 @@ Thank you for contributing. This template uses **tracked documentation** as the 
 
 Ship commands (do not skip): **UCPH** parks the feature branch, **CMPH** lands `main` and keeps the branch, **CMPHD** also deletes it, **SWAT** is epic close. See [.cursor/rules/wrap-on-command.mdc](.cursor/rules/wrap-on-command.mdc).
 
+A batch or soak is not the regression suite. Extract the decision and lock a named Tier 1 test before the next long run ([.cursor/rules/testing.mdc](.cursor/rules/testing.mdc) → *Long run*).
+
 ## Local session notes vs GitHub
 
 | Location | On GitHub? | Purpose |

@@ -29,3 +29,5 @@ Use when behavior spans a real runtime (browser, device, network, or native APIs
 **Compile counter:** If Tier 1 **compiles**, count every compile (test/Debug **and** Release). Non-compiling stacks skip. See `.cursor/rules/testing.mdc`.
 
 **Evidence sink:** If the product has a runtime, document the **file path** for named evidence lines here (human opens it; agent Reads it). Debugger-only Trace is not evidence. This template has no runtime — skip.
+
+**Long run:** A batch or soak is not Tier 1. When it trips a gate, extract that decision and add a named Tier 1 test before the next long run. See `.cursor/rules/testing.mdc`.

@@ -37,7 +37,7 @@ Nothing else. No plan essay, no reviewer skills, no handoff note, until they say
 ## Still mandatory inside the fast loop
 
 - Human **PASS** (or an explicit waive) before commit, when the ship changes what they run ([human-check.mdc](human-check.mdc)).
-- A named Tier 1 test for any lock that can be expressed without the runtime ([testing.mdc](testing.mdc)).
+- A named Tier 1 test for any lock that can be expressed without the runtime, including a decision a long run just found ([testing.mdc](testing.mdc) → *Long run*).
 - Measured numbers in chat when a runtime session produced them. “See the log” is not a verdict.
 
 ## Forbidden

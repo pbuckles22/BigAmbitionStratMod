@@ -1,5 +1,5 @@
 ---
-description: Two-tier tests, evidence logs, and harvest into Tier 1 / CI
+description: Two-tier tests, evidence logs, and long-run harvest into Tier 1
 alwaysApply: true
 ---
 
@@ -12,6 +12,7 @@ alwaysApply: true
 - **Evidence (non-noise logs):** New behavior emits **discrete, structured, named events** on meaningful transitions (lifecycle, decision, gate trip, error). No per-tick / per-frame spam. Silent success is a defect.
 - **Evidence sink:** Those events must land in a **durable file** (or the stack’s documented player/runtime log) that a human can open and an agent can Read. Document the path in TEST_PLAN.md. Debugger-only `Trace`/`Debug`/`console.log` with no file is **not** evidence. **Skip** when there is no runtime (this template, docs-only). Scripts/bookmarklets/twitchurl*/DJ tools: only if they already have a log; do not invent a compile counter or a log they cannot use.
 - **Harvest:** A human/Tier 2 find or evidence line that can be expressed without the runtime **must** become a Tier 1 test (named after the scenario) before the next ship. Logs are the input to TDD/CI, not a substitute for a pass/fail check.
+- **Long run:** A batch, soak, or other long run is not the regression net. When it finds a decision, extract that decision into a pure function (or the stack’s headless equivalent) and lock it with a named Tier 1 test before the next long run. “The next batch will catch it” is not a plan.
 - **Merge-ready:** Run the command in AGENT_HANDOFF.md before commit when the project uses that gate. If the repo already has a Markdown linter config, run it when the ship edits Markdown. Do not add a linter only to satisfy this line.
 - **CI:** Automation runs the headless suite. A build that needs a local device, SDK, or private binary stays on the machine that has it. Keep that split in the workflow file. Do not treat the runtime log as the regression suite.
 - **Compile counter (compiling stacks only):** If merge-ready **compiles** (dotnet, cargo, go, native, etc.), **count every compile** that gate runs — typically the test/Debug compile **and** the Release/production compile. A green test run does **not** replace the Release compile. Persist a **local, gitignored** counter and inject it into the binary’s informational version when the toolchain allows. Skip IDE/design-time rebuilds. Fresh clones start from the seed. **Skip this entirely** when the repo does not compile (scripts, bookmarklets, twitchurl*, DJ tools, docs-only).

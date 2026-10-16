@@ -15,7 +15,7 @@ Use this skill when writing or running tests, or when touching app logic or new 
 - **Test-first (tiers):** When [TEST_PLAN.md](../../../TEST_PLAN.md) defines **Tier 1** and **Tier 2**, use red → green at each tier that covers the change (fast feedback first when both apply; browser-only work may start at Tier 2). See TEST_TDD.md.
 - **TDD loop:** (1) Tier 1 red/green if logic is covered by Tier 1. (2) Tier 2 red/green if integration or E2E is required. (3) Document if needed. (4) Run your **merge-ready** command from AGENT_HANDOFF.md before merge when your project defines one. If the stack **compiles**, that gate must include every documented compile (test/Debug **and** Release) and increment the local +BUILD counter. Non-compiling stacks skip the counter.
 - **Continuous:** Run your project test command after each small step. Keep the suite green.
-- **Evidence loop:** New behavior writes named events to the documented evidence file (TEST_TDD → *Evidence loop* + TEST_PLAN path). After smoke or a pasted log, harvest into a Tier 1 test. Do not treat logs as green without a pass/fail check. Debugger-only Trace is not evidence.
+- **Evidence loop:** New behavior writes named events to the documented evidence file (TEST_TDD → *Evidence loop* + TEST_PLAN path). After smoke or a pasted log, harvest into a Tier 1 test. A long run’s find is extracted into a pure decision and locked in Tier 1 before the next long run. Do not treat logs as green without a pass/fail check. Debugger-only Trace is not evidence.
 
 ## Source of truth
 

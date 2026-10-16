@@ -44,10 +44,10 @@ Field/runtime evidence is how this template stays honest when CI cannot run the 
 
 1. **Emit** — Each new behavior ships discrete, structured events (stable name + fields you would assert on). Lifecycle and decisions yes; per-tick traces no. Write them to the **documented evidence file** (TEST_PLAN.md). Debugger-only Trace/Debug is not evidence. Document the names and the path in TEST_PLAN.md.
 2. **Verify** — Human/Tier 2 uses those events in that file (plus the documented install/run step) as the checklist. A missing expected line is a fail. “Nothing visible” is not proof the code ran unless the file also has the named line.
-3. **Harvest** — After a find or a PASS with a useful trace: extract pure inputs → outputs. Add or extend a **Tier 1** test named after the scenario. Keep the evidence line as the Tier 2 checklist item.
-4. **CI** — Merge-ready / CI runs that Tier 1 test every time. Do not leave “we’ll catch it next smoke” as the only net.
+3. **Harvest** — After a find or a PASS with a useful trace: extract the decision into a pure function (inputs → outputs). Add or extend a **Tier 1** test named after the scenario before the next ship, and before the next batch or soak when a long run found it. Keep the evidence line as the Tier 2 checklist item.
+4. **CI** — Merge-ready / CI runs that Tier 1 test every time. A long run is not that net. Do not leave “we’ll catch it next batch” as the plan.
 
-Anti-patterns: per-frame spam; logs with no test that can replay the decision; treating a pasted log as green without a pass/fail check; calling a ship a PASS when neither human nor agent can open the evidence file.
+Anti-patterns: per-frame spam; logs with no test that can replay the decision; treating a pasted log as green without a pass/fail check; calling a ship a PASS when neither human nor agent can open the evidence file; shipping a long-run fix with no Tier 1 test of the decision.
 
 ---
 

@@ -9,6 +9,7 @@ Document your real gate in `AGENT_HANDOFF.md` and `TEST_PLAN.md`, then treat it 
 - Tier 1 is green (fast feedback)
 - If the stack compiles: every documented compile ran (test/Debug **and** Release) and the local +BUILD counter incremented; skip the counter when nothing compiles
 - Tier 2 is run when behavior demands integration/E2E validation
+- A long-run find is locked in Tier 1 before the next batch or soak (`testing.mdc` → *Long run*)
 - Tracked docs updated when workflow/expectations change
 - Rollback path is clear (a revert commit is usually sufficient)
 
