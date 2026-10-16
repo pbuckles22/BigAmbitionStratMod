@@ -38,7 +38,7 @@ Nothing else. No plan essay, no reviewer skills, no handoff note, until they say
 
 - Human **PASS** (or an explicit waive) before commit, when the ship changes what they run ([human-check.mdc](human-check.mdc)).
 - A named Tier 1 test for any lock that can be expressed without the runtime, including a decision a long run just found ([testing.mdc](testing.mdc) → *Long run*).
-- The integration chain for the behaviors this change sits in, not only the new unit test ([integration-chain.mdc](integration-chain.mdc)).
+- The integration chain for the behaviors this change sits in, named `Chain: first → … → this`, not only the new unit test ([integration-chain.mdc](integration-chain.mdc) → *Prefix*).
 - Measured numbers in chat when a runtime session produced them. “See the log” is not a verdict.
 
 ## Forbidden

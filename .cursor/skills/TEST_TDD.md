@@ -45,7 +45,9 @@ Isolated red/green proves the piece. It does not prove shipped behaviors **1..X*
 3. **Green** — Implement until that chain test and the piece’s own test both pass.
 4. Run the suite that contains the chain in the merge-ready command. Do not run only the new file.
 
-The harness loads the production module and calls the real function. Assert the value the next stage reads. When two decisions can both match, name which one wins. A reimplementation in the test’s language, or a grep of the source, is not this test. See [integration-chain.mdc](../rules/integration-chain.mdc) → *Harness*.
+The harness loads the production module and calls the real function. Assert the value the next stage reads. When two decisions can both match, name which one wins. A reimplementation in the test’s language, or a grep of the source, is not this test.
+
+The new chain test walks from the first shipped behavior through this one. Its first line is `Chain: first → … → this`. Each step receives what the previous step produced. After both the unit test and that prefix are green, look once for a missing unit case and a missing chain case. See [integration-chain.mdc](../rules/integration-chain.mdc) → *Harness* and *Prefix*.
 
 ---
 

@@ -13,7 +13,7 @@ A new piece joins that chain in the **same** ship as its own unit test. Do not l
 
 ## Required
 
-1. **Name the chain** in the test name (which behaviors, in order).
+1. **Name the chain** in the test’s first line, starting at the first shipped behavior: `Chain: first → … → this`. See *Prefix*.
 2. **Call through.** The neighbors this change integrates with stay real. A mock of the neighbor you just changed is not an integration test.
 3. **Run the suite** that contains those chain tests in the merge-ready gate, not only the new unit test.
 4. **Keep old chains.** A new piece’s unit test does not replace a chain that already covers 1..X.
@@ -32,6 +32,16 @@ Load the production module and call the real function. The test does not reimple
 
 The outer call is the chain. The inner call stays required.
 
+## Prefix
+
+The new chain test walks from the first shipped behavior through this one, in order.
+
+Each step receives what the previous step produced. A planted fixture belongs in the unit test. The chain deals, calls, or reads the real output of the step before it.
+
+Older prefix tests stay. The new test does not copy their assertion text, and it does not replace them.
+
+After the unit test and this prefix are green, look once for a missing unit case and a missing chain case.
+
 ## Still required
 
 Isolated red/green for the piece you are changing. The chain does not replace it. See [testing.mdc](testing.mdc) and TEST_TDD.md.
@@ -44,3 +54,6 @@ Isolated red/green for the piece you are changing. The chain does not replace it
 - Treating a runtime log or a single manual pass as the proof that 1..X still work together.
 - Reimplementing the decision in the test’s language and calling that the chain.
 - Grepping the production source for a string and calling that the chain.
+- A chain whose first step is the new behavior, when earlier shipped behaviors feed it.
+- Planting the input the previous step would have produced, then calling only the new function.
+- Stopping when the new unit test is green, without looking for a missing unit case and a missing chain case.

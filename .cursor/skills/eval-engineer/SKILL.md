@@ -65,6 +65,7 @@ Pick the smallest set that fits:
 - Treating a pasted log as proof **without** a pass/fail check or a test that can replay the decision
 - Treating the next batch or soak as the regression net for a decision already seen
 - Reimplementing a decision in the test, or grepping the source, and calling that the chain (`integration-chain.mdc` → *Harness*)
+- A chain that starts at the new piece, or plants the input the previous step would have produced (`integration-chain.mdc` → *Prefix*)
 - Adding evals without documenting when to run them
 - Silent success (no discrete evidence) on new behavior
 
