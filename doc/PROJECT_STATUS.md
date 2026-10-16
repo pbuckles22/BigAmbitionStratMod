@@ -18,8 +18,9 @@
 |--------|------|
 | **`main`** | Integration branch — template baseline |
 | **`feature/long-run-harvest`** | Kept after CMPH |
+| **`feature/chain-harness`** | Kept after CMPH |
 
-**Last land:** `bc45b50` on `main`.
+**Last land:** `e4ca9e0` on `main`.
 
 ---
 
