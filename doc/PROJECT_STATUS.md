@@ -20,6 +20,7 @@
 | **`feature/long-run-harvest`** | Kept after CMPH |
 | **`feature/chain-harness`** | Kept after CMPH |
 | **`feature/chain-prefix`** | Kept after CMPH |
+| **`feature/handoff-receiver-framing`** | Kept after CMPH |
 
 **Last land:** `6de6b5d` on `main`.
 
@@ -39,6 +40,7 @@
 - **Leverage log:** [LEVERAGE.md](LEVERAGE.md) and a blank [LEVERAGE_REGISTER.md](LEVERAGE_REGISTER.md)
 - **Long-run harvest:** a batch or soak find becomes a named Tier 1 test of the extracted decision before the next long run (`testing.mdc` → *Long run*)
 - **Chain harness:** the chain test loads the production module and locks the value the next stage reads (`integration-chain.mdc` → *Harness*). Its first line is `Chain: first → … → this`, and each step receives what the previous step produced (*Prefix*).
+- **Receiver framing:** the brief opens with `You are the agent to execute the below hand off.` **Next** names the story. **Acceptance** and **Next steps** list the unit tests and the chain test written red before production code.
 
 ---
 

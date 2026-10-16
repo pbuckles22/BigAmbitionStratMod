@@ -138,7 +138,7 @@ When shipping: update **PM_PLAN**, **doc/PROJECT_STATUS.md**, and **Current stat
 
 ## Current state
 
-- **Template:** Agentic rules and skills in place. Ship cadence is **UCPH** (park the feature branch), **CMPH** (land `main`, keep the branch), **CMPHD** (land and delete), **SWAT** (epic close). Public versions use a plan coordinate and must not go backwards ([doc/VERSIONING.md](doc/VERSIONING.md)). Compiling stacks still count every merge-ready compile (`testing.mdc` → *Compile counter*). Runtimes still write named evidence to a **file** (`testing.mdc` → *Evidence sink*). A batch or soak is not the regression suite: extract the decision and lock a named Tier 1 test before the next long run (`testing.mdc` → *Long run*). A chain test loads the production module and locks the value the next stage reads (`integration-chain.mdc` → *Harness*). Its first line is `Chain: first → … → this`, and each step receives what the previous step produced (`integration-chain.mdc` → *Prefix*). Non-compiling / no-runtime stacks skip the counter and the evidence file.
+- **Template:** Agentic rules and skills in place. Ship cadence is **UCPH** (park the feature branch), **CMPH** (land `main`, keep the branch), **CMPHD** (land and delete), **SWAT** (epic close). Public versions use a plan coordinate and must not go backwards ([doc/VERSIONING.md](doc/VERSIONING.md)). Compiling stacks still count every merge-ready compile (`testing.mdc` → *Compile counter*). Runtimes still write named evidence to a **file** (`testing.mdc` → *Evidence sink*). A batch or soak is not the regression suite: extract the decision and lock a named Tier 1 test before the next long run (`testing.mdc` → *Long run*). A chain test loads the production module and locks the value the next stage reads (`integration-chain.mdc` → *Harness*). Its first line is `Chain: first → … → this`, and each step receives what the previous step produced (`integration-chain.mdc` → *Prefix*). A receiver brief opens with `You are the agent to execute the below hand off.`, names the next story, and lists the unit and chain tests to write red before production code. Non-compiling / no-runtime stacks skip the counter and the evidence file.
 - **Next:** Add your codebase; document run/test commands here and in TEST_PLAN.md. Do not delete the ship-command rules when you replace PM_PLAN.
 
 ## Run and test
@@ -184,7 +184,7 @@ Document **your** team rules here and keep them in sync with what you run locall
 
 When ending a session:
 
-1. On **UCPH** or **CMPH**, paste the Receiver brief in chat and write the same body to the handoff note ([template](.cursor/handoff/_template.md)). Do not run the review swarm.
+1. On **UCPH** or **CMPH**, open with `You are the agent to execute the below hand off.` Paste the Receiver brief in second person ([template](.cursor/handoff/_template.md)). **Next** names the story you will start. **Acceptance** and **Next steps** list the unit tests and the chain test to write red before production code. Do not run the review swarm.
 2. On **SWAT**, run [handoff-checklist.mdc](.cursor/rules/handoff-checklist.mdc) first.
 3. Update **PM_PLAN.md** when shipped scope changed.
 4. Update **[doc/PROJECT_STATUS.md](doc/PROJECT_STATUS.md)** and **Current state** above (required for contributor-visible changes).
