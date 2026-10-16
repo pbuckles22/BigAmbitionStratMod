@@ -16,6 +16,8 @@ Ship commands (do not skip): **UCPH** parks the feature branch, **CMPH** lands `
 
 A batch or soak is not the regression suite. Extract the decision and lock a named Tier 1 test before the next long run ([.cursor/rules/testing.mdc](.cursor/rules/testing.mdc) → *Long run*).
 
+A chain test loads the production module and locks the value the next stage reads ([.cursor/rules/integration-chain.mdc](.cursor/rules/integration-chain.mdc) → *Harness*).
+
 ## Local session notes vs GitHub
 
 | Location | On GitHub? | Purpose |

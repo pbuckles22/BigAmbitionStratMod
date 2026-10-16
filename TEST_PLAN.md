@@ -13,6 +13,17 @@ Define **Tier 1** (fast feedback: unit, headless, or local) and **Tier 2** (inte
 
 ---
 
+## Integration chain (1..X together)
+
+Headless tests that run shipped behaviors **together**, through real interfaces. The harness loads the production module and asserts the value the next stage reads. Isolated unit red/green does not replace this. Document the command (it is usually the Tier 1 suite, once the chain tests live there). Rule: [.cursor/rules/integration-chain.mdc](.cursor/rules/integration-chain.mdc) → *Harness*.
+
+```bash
+# Same runner as Tier 1 once chain tests are in that suite
+# Example: npm test
+```
+
+---
+
 ## Tier 2: Integration / E2E
 
 Use when behavior spans a real runtime (browser, device, network, or native APIs).

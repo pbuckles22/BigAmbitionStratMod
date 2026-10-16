@@ -21,6 +21,8 @@ Document the toolchain in AGENT_HANDOFF.md and TEST_PLAN.md. Variants add **5–
 | Cursor commit/PR attribution | `no-cursor-commit-attribution.mdc` |
 | Tiers, evidence logs, harvest into tests | `testing.mdc` + `TEST_TDD.md` |
 | Long run treated as the only regression net | `testing.mdc` → *Long run* |
+| One piece green while chain 1..X is untested | `integration-chain.mdc` |
+| Chain test reimplements the decision or greps source | `integration-chain.mdc` → *Harness* |
 | Debugger-only Trace as “evidence” | `testing.mdc` → *Evidence sink* |
 | Compiling stack skips a compile / +BUILD | `testing.mdc` → *Compile counter* |
 | Handoff / epic close | `wrap-on-command.mdc`, `handoff-checklist.mdc`, `epic-close.mdc` |

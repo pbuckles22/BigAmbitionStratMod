@@ -36,6 +36,17 @@ Use when behavior must hold in a real runtime (browser, device, network, DB — 
 
 Never leave failing tests on the default branch.
 
+### Integration chain (with the unit test, not instead of it)
+
+Isolated red/green proves the piece. It does not prove shipped behaviors **1..X** still work together.
+
+1. Name the chain this change sits in (who calls it, who it calls, what runs after it).
+2. **Red** — Add or extend a test that runs those behaviors through their real interfaces and fails if any step breaks.
+3. **Green** — Implement until that chain test and the piece’s own test both pass.
+4. Run the suite that contains the chain in the merge-ready command. Do not run only the new file.
+
+The harness loads the production module and calls the real function. Assert the value the next stage reads. When two decisions can both match, name which one wins. A reimplementation in the test’s language, or a grep of the source, is not this test. See [integration-chain.mdc](../rules/integration-chain.mdc) → *Harness*.
+
 ---
 
 ## Evidence loop (logs → tests → CI)
