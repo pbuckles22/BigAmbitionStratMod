@@ -17,6 +17,9 @@
 | Branch | Role |
 |--------|------|
 | **`main`** | Integration branch — template baseline |
+| **`feature/long-run-harvest`** | Kept after CMPH |
+
+**Last land:** `bc45b50` on `main`.
 
 ---
 
