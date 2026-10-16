@@ -22,7 +22,7 @@
 | **`feature/chain-prefix`** | Kept after CMPH |
 | **`feature/handoff-receiver-framing`** | Kept after CMPH |
 
-**Last land:** `6de6b5d` on `main`.
+**Last land:** `7705f35` on `main`. Branch `feature/handoff-receiver-framing` kept.
 
 ---
 
