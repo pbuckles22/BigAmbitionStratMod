@@ -49,7 +49,7 @@ git push origin main
 | Shared (sync from upstream)                | Stack-specific (keep yours)           |
 | ------------------------------------------ | ------------------------------------- |
 | Most skills (techwriter, tester, code-reviewer, code-quality-gate, tech-lead, etc.) | `DEV_GUIDE.md` (architecture, tooling) |
-| Rules (`one-story-one-ship`, `wrap-on-command`, `no-auto-merge-main`, `human-check`, `pm-versioning`, `no-cursor-commit-attribution`, `testing.mdc`, handoff-checklist, epic-close, gemini-handoff) | `TEST_TDD.md` (commands + evidence names) |
+| Rules (`one-story-one-ship`, `wrap-on-command`, `no-auto-merge-main`, `human-check`, `pm-versioning`, `no-cursor-commit-attribution`, `testing.mdc`, `integration-chain.mdc`, handoff-checklist, epic-close, gemini-handoff) | `TEST_TDD.md` (commands + evidence names) |
 | Handoff Receiver brief                     | `DESIGN_SYSTEM.md` (UI framework)     |
 | Operating model skills (green-and-clean, etc.) | `always.mdc` (5–10 project invariant lines only) |
 |                                            | `AGENT_HANDOFF.md` (run/test section) |
