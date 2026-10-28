@@ -18,7 +18,7 @@ Document your real gate in `AGENT_HANDOFF.md` and `TEST_PLAN.md`, then treat it 
 
 Scheme: `MAJOR.EPIC.COUNTER` plus optional `.FIX`. The counter is ships inside the epic, not the story id. Never go backwards. See [doc/VERSIONING.md](doc/VERSIONING.md).
 
-Current public version: **1.1.1** (`script/statement_ledger.py`).
+Current public version: **1.1.2** (`script/statement_ledger.py`).
 
 This product cuts epic releases: yes, a GitHub Release on SWAT after that close is on `main`. Do not upload to a store until a product doc says it is distributable. Local `+BUILD` stays gitignored. There is no compile counter.
 

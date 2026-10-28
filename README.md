@@ -6,7 +6,7 @@ Cursor **rules**, **skills**, **handoff protocol**, and **test discipline** for 
 
 **Start with [CONTRIBUTING.md](CONTRIBUTING.md)** — reading order, tracked vs gitignored docs, PR expectations.
 
-**Current work:** [doc/PROJECT_STATUS.md](doc/PROJECT_STATUS.md)
+**Current work:** [doc/PROJECT_STATUS.md](doc/PROJECT_STATUS.md). Save ledger 1.1.2 writes statement rows and a portfolio.
 
 ## Quick start
 

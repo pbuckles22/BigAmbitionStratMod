@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
-"""Turn a financial summary into statement rows that carry a street.
+"""Turn a financial summary into statement rows, then a portfolio.
 
   python script/statement_ledger.py
 
-Gunzips and indexes the dropzone save, then writes
-doc/gemini/cache/ledger/statements.csv. One line is appended to
-doc/gemini/cache/ledger.log.
+Gunzips and indexes the dropzone save, writes
+doc/gemini/cache/ledger/statements.csv, and joins each street and number to
+BuildingRegistration for doc/gemini/cache/ledger/portfolio.csv. One line per
+file is appended to doc/gemini/cache/ledger.log.
 """
 
 from __future__ import annotations
@@ -17,7 +18,29 @@ import struct
 import sys
 from pathlib import Path
 
-VERSION = "1.1.1"
+VERSION = "1.1.2"
+
+FAMILIES = {
+    "ba:businesstype_fastfoodrestaurant": "food",
+    "ba:businesstype_coffeeshop": "food",
+    "ba:businesstype_fruitandvegetablestore": "food",
+    "ba:businesstype_liquorstore": "food",
+    "ba:businesstype_clothingstore": "durables",
+    "ba:businesstype_electronicsstore": "durables",
+    "ba:businesstype_furniturestore": "durables",
+    "ba:businesstype_cardealership": "durables",
+    "ba:businesstype_florist": "specialty",
+    "ba:businesstype_hairdresser": "service",
+    "ba:businesstype_gym": "service",
+    "ba:businesstype_nightclub": "service",
+    "ba:businesstype_travelagency": "service",
+    "ba:businesstype_eventplanningagency": "service",
+    "ba:businesstype_lawfirm": "office",
+    "ba:businesstype_recruitmentagency": "office",
+    "ba:businesstype_webdevelopmentagency": "office",
+    "ba:businesstype_wholesalestore": "warehouse",
+    "ba:businesstype_truckgarage": "warehouse",
+}
 
 FLOAT_FIELDS = {
     "TotalSales": "sales",
@@ -41,6 +64,8 @@ COLUMNS = (
     "theft",
     "profit",
 )
+
+PORTFOLIO_COLUMNS = ("business", "family", "street", "number", "tco")
 
 
 def _slice():
@@ -136,6 +161,101 @@ def rows_between(data: bytes, start: int, end: int) -> list[dict]:
     return rows
 
 
+def family_for(business_type: str) -> str | None:
+    return FAMILIES.get(business_type)
+
+
+def buildings_between(data: bytes, start: int, end: int) -> list[dict]:
+    """Walk BuildingRegistration. Street and number become a business and a family."""
+    street = None
+    number = None
+    business = None
+    expect = None
+    rows: list[dict] = []
+    for pos, type_byte, text, key_end in iter_keys(data, start, end):
+        if expect is not None and pos == expect[1]:
+            kind = expect[0]
+            expect = None
+            if kind == "street":
+                street = text
+            elif kind == "business":
+                business = text
+            elif kind == "type":
+                family = family_for(text)
+                if street is not None and number is not None and business and family:
+                    rows.append(
+                        {
+                            "street": street,
+                            "number": number,
+                            "business": business,
+                            "family": family,
+                        }
+                    )
+                street = None
+                number = None
+                business = None
+            continue
+        expect = None
+        if text == "StreetName":
+            street = None
+            number = None
+            business = None
+            expect = ("street", key_end)
+            continue
+        if text == "StreetNumber":
+            number = _int_at(data, type_byte, key_end)
+            continue
+        if text == "BusinessName":
+            expect = ("business", key_end)
+            continue
+        if text == "businessTypeName":
+            expect = ("type", key_end)
+    return rows
+
+
+def _money(row: dict, name: str) -> float:
+    value = row.get(name)
+    if value is None or value == "":
+        return 0.0
+    return float(value)
+
+
+def portfolio_rows(statements: list[dict], buildings: list[dict]) -> list[dict]:
+    """One row per joined business. TCO is goods + wages + rent + marketing, averaged on days present."""
+    index = {}
+    for building in buildings:
+        if not building.get("business") or not building.get("family"):
+            continue
+        index[(building["street"], int(building["number"]))] = building
+    buckets: dict[tuple, list[float]] = {}
+    for row in statements:
+        key = (row["street"], int(row["number"]))
+        building = index.get(key)
+        if building is None:
+            continue
+        cost = (
+            _money(row, "goods")
+            + _money(row, "wages")
+            + _money(row, "rent")
+            + _money(row, "marketing")
+        )
+        buckets.setdefault(key, []).append(cost)
+    rows = []
+    for key in sorted(buckets):
+        costs = buckets[key]
+        building = index[key]
+        rows.append(
+            {
+                "business": building["business"],
+                "family": building["family"],
+                "street": key[0],
+                "number": key[1],
+                "tco": sum(costs) / len(costs),
+            }
+        )
+    return rows
+
+
 def format_number(value) -> str:
     if value is None:
         return ""
@@ -190,14 +310,66 @@ def write_statements(save: Path, csv_path: Path, log_path: Path) -> int:
     return len(rows)
 
 
+def _read_statements(csv_path: Path) -> list[dict]:
+    with csv_path.open(encoding="utf-8", newline="") as handle:
+        return list(csv.DictReader(handle))
+
+
+def _portfolio_csv_row(row: dict) -> dict:
+    return {
+        "business": row["business"],
+        "family": row["family"],
+        "street": row["street"],
+        "number": format_number(row["number"]),
+        "tco": format_number(row["tco"]),
+    }
+
+
+def write_portfolio(statements_csv: Path, csv_path: Path, log_path: Path) -> int:
+    data = (SLICE.CACHE / "save.bin").read_bytes()
+    start, end = _region_bounds("buildings")
+    buildings = buildings_between(data, start, end)
+    statements = _read_statements(statements_csv)
+    rows = portfolio_rows(statements, buildings)
+    csv_path.parent.mkdir(parents=True, exist_ok=True)
+    with csv_path.open("w", encoding="utf-8", newline="") as handle:
+        writer = csv.DictWriter(handle, fieldnames=PORTFOLIO_COLUMNS, lineterminator="\n")
+        writer.writeheader()
+        for row in rows:
+            writer.writerow(_portfolio_csv_row(row))
+    first = statements[0] if statements else {}
+    joined = next(
+        (
+            row
+            for row in rows
+            if row["street"] == first.get("street") and str(row["number"]) == str(first.get("number"))
+        ),
+        rows[0] if rows else {},
+    )
+    log_path.parent.mkdir(parents=True, exist_ok=True)
+    line = (
+        f"portfolio.written version={VERSION} rows={len(rows)} "
+        f"business={joined.get('business')} family={joined.get('family')} "
+        f"street={joined.get('street')} number={format_number(joined.get('number'))} "
+        f"tco={format_number(joined.get('tco'))}\n"
+    )
+    with log_path.open("a", encoding="utf-8") as handle:
+        handle.write(line)
+    return len(rows)
+
+
 def main(argv: list[str] | None = None) -> int:
     del argv
     save = SLICE.default_save()
-    csv_path = SLICE.CACHE / "ledger" / "statements.csv"
+    ledger_dir = SLICE.CACHE / "ledger"
+    statements_path = ledger_dir / "statements.csv"
+    portfolio_path = ledger_dir / "portfolio.csv"
     log_path = SLICE.CACHE / "ledger.log"
-    count = write_statements(save, csv_path, log_path)
+    count = write_statements(save, statements_path, log_path)
+    businesses = write_portfolio(statements_path, portfolio_path, log_path)
     print(f"version {VERSION}")
-    print(f"Wrote {count} rows to {csv_path}")
+    print(f"Wrote {count} rows to {statements_path}")
+    print(f"Wrote {businesses} rows to {portfolio_path}")
     return 0
 
 

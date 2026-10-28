@@ -8,7 +8,7 @@
 
 ## Summary
 
-**BigAmbitionStratMod** 1.1.1 — statement rows with a street in `doc/gemini/cache/ledger/statements.csv`. 5,865 rows. First row: day 953, `ba:street_firstavenue`, number 38, profit 69652.2188. Rules come from AgenticTemplate (`upstream`). `origin` is this repo.
+**BigAmbitionStratMod** 1.1.2 — Epic 1 complete. Statement rows carry a street, and `portfolio.csv` is one row per joined business with a family and an average TCO. 17 businesses. Chaotic Clothing #3 is durables at `ba:street_firstavenue` 38, tco 15947.5216. Rules come from AgenticTemplate (`upstream`). `origin` is this repo.
 
 ---
 
@@ -17,14 +17,15 @@
 | Branch | Role |
 |--------|------|
 | **`main`** | Integration branch |
-| **`feature/1.1-statement-street`** | Kept after this CMPH |
+| **`feature/1.2-portfolio-join`** | Kept after this CMPH |
+| **`feature/1.1-statement-street`** | Kept after the 1.1 CMPH |
 | **`feature/standup-save-tools`** | Kept after the standup CMPH |
 | **`feature/long-run-harvest`** | Kept after CMPH (template history) |
 | **`feature/chain-harness`** | Kept after CMPH (template history) |
 | **`feature/chain-prefix`** | Kept after CMPH (template history) |
 | **`feature/handoff-receiver-framing`** | Kept after CMPH (template history) |
 
-**Last land:** `fb405d4` on `main`. Version 1.1.1. Branch `feature/1.1-statement-street` kept. Repo: https://github.com/pbuckles22/BigAmbitionStratMod.
+**Last land:** recorded after this merge on `main`. Version 1.1.2. Branch `feature/1.2-portfolio-join` kept. Repo: https://github.com/pbuckles22/BigAmbitionStratMod.
 
 ---
 
@@ -48,7 +49,7 @@
 
 ## Next up (maintainers)
 
-- Story **1.2** when asked: join statements to buildings and write `portfolio.csv`.
+- No story until one is named. Epic 1 is complete.
 - Variants: merge upstream when AgenticTemplate skills/rules change
 
 ---

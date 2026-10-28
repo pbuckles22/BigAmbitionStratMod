@@ -85,3 +85,35 @@ def test_chain_gunzip_index_next_statement(statement_csv):
     assert int(row["day"]) == 953
     rolled = next(index for index, item in enumerate(rows) if int(item["day"]) == 954)
     assert int(rows[rolled - 1]["day"]) == 953
+
+
+def test_chain_gunzip_index_statement_portfolio(statement_csv, tmp_path):
+    """Chain: gunzip → index → statement → portfolio"""
+    csv_path, log_path = statement_csv
+    statements = _rows(csv_path)
+    portfolio_path = tmp_path / "portfolio.csv"
+    ledger.write_portfolio(csv_path, portfolio_path, log_path)
+    portfolio = _rows(portfolio_path)
+    first = statements[0]
+    match = next(
+        row
+        for row in portfolio
+        if row["street"] == first["street"] and row["number"] == first["number"]
+    )
+    assert match["business"] == "Chaotic Clothing #3"
+    text = log_path.read_text(encoding="utf-8")
+    assert "portfolio.written" in text
+    assert "Chaotic Clothing #3" in text
+
+
+def test_chain_gunzip_index_statement_portfolio_span(statement_csv, tmp_path):
+    """Chain: gunzip → index → statement → portfolio span"""
+    csv_path, log_path = statement_csv
+    portfolio_path = tmp_path / "portfolio.csv"
+    ledger.write_portfolio(csv_path, portfolio_path, log_path)
+    portfolio = _rows(portfolio_path)
+    match = next(row for row in portfolio if row["business"] == "Chaotic Hair #8")
+    assert match["family"] == "service"
+    assert match["street"] == "ba:street_fifthavenue"
+    assert int(match["number"]) == 37
+    assert float(match["tco"]) == pytest.approx(4003.3822)
