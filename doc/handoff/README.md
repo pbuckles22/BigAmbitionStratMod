@@ -1,6 +1,6 @@
 # Handoff (optional, local)
 
-Session notes under **`NNNN-HANDOFF-*.md`** or **`.cursor/handoff/*-handoff-*.md`** are **gitignored** by default.
+Session notes under **`NNNN-HANDOFF-*.md`** are **gitignored** by default. Shape and the 220-word cap: [`.cursor/rules/handoff-v2.mdc`](../../.cursor/rules/handoff-v2.mdc). Chat names the file. It does not paste the note.
 
 ## Tracked source of truth (norm)
 

@@ -11,7 +11,7 @@ Close-out words name the **work**. Green tests are not permission.
 
 | Command | Permission to | What the agent does |
 |---------|---------------|---------------------|
-| **UCPH** | Park WIP on the **feature branch** (no `main`) | After the human check **PASS** (or an explicit waive): confirm evidence, harvest if needed, merge-ready gate, truth docs, **commit**, **`git push -u origin <feature-branch>`**, Receiver brief. Does **not** merge, delete the branch, or run reviewer skills. |
+| **UCPH** | Park WIP on the **feature branch** (no `main`) | After the human check **PASS** (or an explicit waive): confirm evidence, harvest if needed, merge-ready gate, truth docs, **commit**, **`git push -u origin <feature-branch>`**, handoff note per [handoff-v2.mdc](handoff-v2.mdc). Chat is the three-line pointer. Does **not** merge, delete the branch, or run reviewer skills. |
 | **CMPH** | Land this ship on `main` | Same truth, docs, and tests as UCPH, then **merge to `main`** and **push `origin main`**. **Keep** the feature branch. Does **not** run reviewer skills. |
 | **CMPHD** | Land on `main` and **delete** the feature branch | Same as CMPH, then delete local and remote. Only this command (or an explicit “delete the branch”) may delete. |
 | **SWAT** | Close the epic | code-reviewer; dead-code-remover when that skill is available; tech-debt-evaluator; security-reviewer only if the epic touched credentials, logging, networking, or files; merge-ready gate; then [epic-close.mdc](epic-close.mdc). Does **not** merge a mid-epic story by itself. |
@@ -45,5 +45,6 @@ Nothing else. No plan essay, no reviewer skills, no handoff note, until they say
 
 - Reviewer, dead-code, or tech-debt skills on a mid-epic **UCPH** or **CMPH**.
 - Handoff or status prose in the same turn as a fix, unless they said **UCPH**, **CMPH**, or **SWAT**.
+- Pasting the handoff note into chat. Chat is the three-line pointer in [handoff-v2.mdc](handoff-v2.mdc).
 - Treating **UCPH** as permission to merge `main`.
 - Using “the docs are not updated yet” to delay a build they can run.

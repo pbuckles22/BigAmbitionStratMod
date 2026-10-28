@@ -11,7 +11,7 @@ All agent skills and source-of-truth docs live here.
 | **tester** | [tester/SKILL.md](tester/SKILL.md) | Adding or changing tests; evidence loop (logs → Tier 1); black-box only. |
 | **green-and-clean** | [green-and-clean/SKILL.md](green-and-clean/SKILL.md) | Operating model: no guessing, bounded scope, verifiable steps, clean context. |
 | **context-bootstrapper** | [context-bootstrapper/SKILL.md](context-bootstrapper/SKILL.md) | Receiving-agent bootstrap: minimal read order + receiver brief. |
-| **session-summarizer** | [session-summarizer/SKILL.md](session-summarizer/SKILL.md) | Leaving-agent: UCPH/CMPH Receiver brief in chat and `doc/handoff/`. |
+| **session-summarizer** | [session-summarizer/SKILL.md](session-summarizer/SKILL.md) | Leaving-agent: handoff v2 note in `doc/handoff/`; chat is a three-line pointer. |
 | **tech-debt-evaluator** | [tech-debt-evaluator/SKILL.md](tech-debt-evaluator/SKILL.md) | Assessing tech debt; refactor/sprint planning. |
 | **code-reviewer** | [code-reviewer/SKILL.md](code-reviewer/SKILL.md) | Reviewing diffs/PRs; correctness, conventions, tests. |
 | **code-quality-gate** | [code-quality-gate/SKILL.md](code-quality-gate/SKILL.md) | Diff-scoped maintainability: readability, structure, anti-spaghetti (companion to code-reviewer). |

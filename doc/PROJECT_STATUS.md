@@ -2,13 +2,13 @@
 
 **Human-readable current state.** Keep in sync with [AGENT_HANDOFF.md](../AGENT_HANDOFF.md) → *Current state* when milestones ship.
 
-**Last updated:** 2026-10-16
+**Last updated:** 2026-10-28
 
 ---
 
 ## Summary
 
-**AgenticTemplate** — stack-agnostic Cursor rules, skills, handoff protocol, and TDD discipline. No application runtime; bolt-ons add their own stack.
+**BigAmbitionStratMod** — private tools that read a Big Ambitions `.hsg` and, later, a decision mod. Rules come from AgenticTemplate (`upstream`). `origin` is this repo.
 
 ---
 

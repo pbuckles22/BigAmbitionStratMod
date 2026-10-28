@@ -26,7 +26,7 @@ Document the toolchain in AGENT_HANDOFF.md and TEST_PLAN.md. Variants add **5–
 | Chain starts at the new piece, or plants the previous step’s output | `integration-chain.mdc` → *Prefix* |
 | Debugger-only Trace as “evidence” | `testing.mdc` → *Evidence sink* |
 | Compiling stack skips a compile / +BUILD | `testing.mdc` → *Compile counter* |
-| Handoff / epic close | `wrap-on-command.mdc`, `handoff-checklist.mdc`, `epic-close.mdc` |
+| Handoff / epic close | `handoff-v2.mdc`, `wrap-on-command.mdc`, `handoff-checklist.mdc`, `epic-close.mdc` |
 | Gemini drop | `gemini-handoff.mdc` |
 | Branch / commit / push | `github-feature-workflow` skill + AGENT_HANDOFF Git workflow |
 

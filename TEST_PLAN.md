@@ -7,8 +7,7 @@ Define **Tier 1** (fast feedback: unit, headless, or local) and **Tier 2** (inte
 ## Tier 1: Fast feedback
 
 ```bash
-# Example: npm test
-# Example: pytest -q
+python -m py_compile script/Export-SaveGameText.py script/Slice-SaveGame.py
 ```
 
 ---

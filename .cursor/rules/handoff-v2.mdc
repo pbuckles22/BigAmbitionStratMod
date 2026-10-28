@@ -1,0 +1,60 @@
+---
+description: Handoff v2 — one short note, a three-line chat pointer, each fact once
+globs: "**/doc/handoff/*.md,**/.cursor/handoff/*.md"
+alwaysApply: false
+---
+
+# Handoff v2
+
+The receiver can open files. Chat names the note. The note is the only copy of the session delta.
+
+Leave product invariants in `always.mdc`. Leave story done-when lines in `PM_PLAN.md`. Leave chain prefix rules in `integration-chain.mdc`. Leave test locks in the tests. A handoff that restates those is over budget before it starts.
+
+Older notes stay as history. Do not edit them. New notes follow this file.
+
+## Chat (three lines, nothing else)
+
+```
+You are the agent to execute the below hand off.
+Read `doc/handoff/NNNN-HANDOFF-YYYY-MM-DD_HHmm.md`.
+Next: story X.Y when asked.
+```
+
+## Note
+
+One file: `doc/handoff/NNNN-HANDOFF-YYYY-MM-DD_HHmm.md`. No second copy under `.cursor/handoff/`. New `NNNN`. Never edit an old note. Local timestamp `YYYY-MM-DD_HHmm`.
+
+**≤ 220 words.** Second person. Shape: [`.cursor/handoff/_template.md`](../handoff/_template.md).
+
+| Heading | Contains | Leave out |
+|---------|----------|-----------|
+| Objective | One sentence: which story, when asked | Sha, version, tests |
+| Git | Story, Version, On, Do not, Next | A second copy of those cells anywhere else |
+| Decisions | Deltas this ship, one sentence each | Invariants, branch lists, test replay |
+| In / Out | The next contract, and what is out | Test names, the step list |
+| Acceptance (met) | `headless`, or the human-check result | Case list, counts |
+| Acceptance (not yet) | Each red test once: name + one sentence. Chain name and the calls. One look for a missing unit and a missing chain | A retelling under In or Next steps |
+| Next steps | Order of work | Restating the tests |
+| Measured | Counts versus the prior run, or `none this turn` | Shas |
+| Blockers | Facts not in git. Omit the heading when there are none | Anything already in Git |
+| Filename | Last line | |
+
+“Which story, when asked” appears in Objective and in Git **Next**. Nowhere else.
+
+This line stays verbatim, on its own line, between **Next steps** and **Measured**:
+
+`write thorough tests. red, integration, find missing ones of both kinds.`
+
+Gates stay in the SWAT file only ([handoff-checklist.mdc](handoff-checklist.mdc)).
+
+## Tracked state, also once
+
+`AGENT_HANDOFF.md` → *Current state* is Product (one sentence plus links), On, Next, Blockers. It does not retell stories or rules.
+
+`PM_PLAN.md` keeps done-when and a chain-name index. It does not grow an assertion essay.
+
+`doc/PROJECT_STATUS.md` summary is one short paragraph. Its branch table is the only branch list.
+
+## Receiver
+
+Open the named file once. Do not open older notes. Do not open a twin copy. Do not echo this brief. Start the named story only when the human asks. Trust **On**. `git status` is for a dirty tree before an edit.

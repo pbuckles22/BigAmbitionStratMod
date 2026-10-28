@@ -2,7 +2,7 @@
 
 ## Purpose
 
-This repo is an **agentic template**: Cursor rules, skills, handoff protocol, and testing discipline. **Replace** stack-specific placeholders below with your project's commands (test runner, coverage, integration or E2E).
+BigAmbitionStratMod is a private decision tool for a Big Ambitions save. It keeps the agentic rules and adds save-to-text tools. **Sync:** `upstream` is [AgenticTemplate](https://github.com/pbuckles22/AgenticTemplate). `origin` is this repo. Pull shared rule updates with `git fetch upstream && git merge upstream/main`.
 
 ---
 
@@ -49,8 +49,8 @@ git push origin main
 | Shared (sync from upstream)                | Stack-specific (keep yours)           |
 | ------------------------------------------ | ------------------------------------- |
 | Most skills (techwriter, tester, code-reviewer, code-quality-gate, tech-lead, etc.) | `DEV_GUIDE.md` (architecture, tooling) |
-| Rules (`one-story-one-ship`, `wrap-on-command`, `no-auto-merge-main`, `human-check`, `pm-versioning`, `no-cursor-commit-attribution`, `testing.mdc`, `integration-chain.mdc`, handoff-checklist, epic-close, gemini-handoff) | `TEST_TDD.md` (commands + evidence names) |
-| Handoff Receiver brief                     | `DESIGN_SYSTEM.md` (UI framework)     |
+| Rules (`one-story-one-ship`, `wrap-on-command`, `no-auto-merge-main`, `human-check`, `pm-versioning`, `no-cursor-commit-attribution`, `testing.mdc`, `integration-chain.mdc`, `handoff-v2`, handoff-checklist, epic-close, gemini-handoff) | `TEST_TDD.md` (commands + evidence names) |
+| Handoff v2 note                            | `DESIGN_SYSTEM.md` (UI framework)     |
 | Operating model skills (green-and-clean, etc.) | `always.mdc` (5–10 project invariant lines only) |
 |                                            | `AGENT_HANDOFF.md` (run/test section) |
 |                                            | Optional overlay rules (install/smoke paths) |
@@ -92,7 +92,7 @@ Contributors and agents use **tracked docs** for product truth. See [CONTRIBUTIN
 - **Level 1:** [CONTRIBUTING.md](CONTRIBUTING.md), [doc/PROJECT_STATUS.md](doc/PROJECT_STATUS.md), `.cursor/rules/always.mdc`, this file
 - **Level 2:** [PM_PLAN.md](PM_PLAN.md), [TEST_PLAN.md](TEST_PLAN.md)
 - **Level 3:** current task plan + acceptance criteria
-- **Level 4 (optional, local only):** `.cursor/handoff/NNNN-handoff-*.md` — gitignored; never sole source of truth
+- **Level 4 (local session delta):** `doc/handoff/NNNN-HANDOFF-*.md` — gitignored. Chat names that file. It is not product truth. Older notes stay unread.
 
 Token hygiene: prefer Level 1 + Level 2 + current files over transcript dumps.
 
@@ -126,7 +126,7 @@ When something breaks, use evidence-driven triage and keep it bounded:
 
 - **Techwriter:** Use when editing README, AGENT_HANDOFF, or internal docs.
 - **Tester:** Black-box tests; run your **documented** test command after changes; keep the suite green. See [TEST_PLAN.md](TEST_PLAN.md).
-- **Handoff:** **UCPH** and **CMPH** paste a Receiver brief ([.cursor/handoff/_template.md](.cursor/handoff/_template.md)). The review swarm runs on **SWAT** only. See [.cursor/rules/wrap-on-command.mdc](.cursor/rules/wrap-on-command.mdc).
+- **Handoff:** [handoff-v2.mdc](.cursor/rules/handoff-v2.mdc). Chat names the note. The review swarm runs on **SWAT** only.
 
 ## Contributor onboarding (norm)
 
@@ -138,20 +138,20 @@ When shipping: update **PM_PLAN**, **doc/PROJECT_STATUS.md**, and **Current stat
 
 ## Current state
 
-- **Template:** Agentic rules and skills in place. Ship cadence is **UCPH** (park the feature branch), **CMPH** (land `main`, keep the branch), **CMPHD** (land and delete), **SWAT** (epic close). Public versions use a plan coordinate and must not go backwards ([doc/VERSIONING.md](doc/VERSIONING.md)). Compiling stacks still count every merge-ready compile (`testing.mdc` → *Compile counter*). Runtimes still write named evidence to a **file** (`testing.mdc` → *Evidence sink*). A batch or soak is not the regression suite: extract the decision and lock a named Tier 1 test before the next long run (`testing.mdc` → *Long run*). A chain test loads the production module and locks the value the next stage reads (`integration-chain.mdc` → *Harness*). Its first line is `Chain: first → … → this`, and each step receives what the previous step produced (`integration-chain.mdc` → *Prefix*). A receiver brief opens with `You are the agent to execute the below hand off.`, names the next story, and lists the unit and chain tests to write red before production code. Non-compiling / no-runtime stacks skip the counter and the evidence file.
-- **Next:** Add your codebase; document run/test commands here and in TEST_PLAN.md. Do not delete the ship-command rules when you replace PM_PLAN.
+- **Product:** Private save tools for the Chaotic empire. Handoff v2 is in `.cursor/rules/handoff-v2.mdc`. `script/Export-SaveGameText.py` and `script/Slice-SaveGame.py` read the `.hsg` in `doc/gemini/dropzone/`.
+- **On:** this land, `origin` `pbuckles22/BigAmbitionStratMod`.
+- **Next:** Re-slice the build 3682 save, then story **1.1** when asked.
+- **Blockers:** Dropzone still holds the 12.6 MB EA 0.9 file. The live save is the 7.7 MB file under `SaveGames\Big Ambitions\`.
 
 ## Run and test
 
 **Document your commands** (examples — replace with yours):
 
 ```bash
-# e.g. npm test && npm run build
-# e.g. cargo test
-# e.g. pytest
+python -m py_compile script/Export-SaveGameText.py script/Slice-SaveGame.py
 ```
 
-Replace the block above with your real commands and keep them in sync with TEST_PLAN.md.
+Run that from the repo root before commit. There is no compile counter. The save cache under `doc/gemini/cache/` is gitignored.
 
 **Compile counter:** If those commands **compile**, count every compile (test/Debug and Release are separate). Local gitignored counter + binary `+N` when the toolchain allows. Skip for non-compiling repos (scripts, twitchurl*, DJ tools). See `.cursor/rules/testing.mdc` and [TEST_TDD.md](.cursor/skills/TEST_TDD.md).
 
@@ -182,12 +182,9 @@ Document **your** team rules here and keep them in sync with what you run locall
 
 ## Handoff protocol
 
-When ending a session:
+On **UCPH**, **CMPH**, or **SWAT**, follow [handoff-v2.mdc](.cursor/rules/handoff-v2.mdc). Chat is three lines naming the note. The note is the only copy of the session delta.
 
-1. On **UCPH** or **CMPH**, open with `You are the agent to execute the below hand off.` Paste the Receiver brief in second person ([template](.cursor/handoff/_template.md)). **Next** names the story you will start. **Acceptance** and **Next steps** list the unit tests and the chain test to write red before production code. Do not run the review swarm.
-2. On **SWAT**, run [handoff-checklist.mdc](.cursor/rules/handoff-checklist.mdc) first.
-3. Update **PM_PLAN.md** when shipped scope changed.
-4. Update **[doc/PROJECT_STATUS.md](doc/PROJECT_STATUS.md)** and **Current state** above (required for contributor-visible changes).
+Sync **On**, version, **Next**, and **Blockers** into *Current state* above. Update **PM_PLAN.md** and **[doc/PROJECT_STATUS.md](doc/PROJECT_STATUS.md)** when shipped scope changed. **SWAT** gates stay in [handoff-checklist.mdc](.cursor/rules/handoff-checklist.mdc). Do not run that swarm on UCPH or CMPH.
 
 ## Epic close (SWAT)
 

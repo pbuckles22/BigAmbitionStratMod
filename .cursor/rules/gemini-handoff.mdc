@@ -67,6 +67,18 @@ The user said **repo to text**, **full dump**, **snapshot**, or **upload the rep
 
 Upload: `doc/gemini/Gemini_Snapshot.txt` + `CONTEXT.md`.
 
+### Saved-game-to-text
+
+The user said **saved game to text** or **save game to text**.
+
+1. Run `python script/Export-SaveGameText.py` at the repo root.
+2. It reads the `.hsg` in `doc/gemini/dropzone/` and writes gitignored `doc/gemini/empire_summary.md`.
+3. Leave the `.hsg` in `dropzone/`. Do not start an upload pack unless they asked for one.
+
+### Save map
+
+When they ask for the full save, the slices, or where a value lives in the 136 MB blob, run `python script/Slice-SaveGame.py` once. Read `doc/gemini/cache/MAP.md` and the TSV under `by-region/` or `by-topic/`. Do not gunzip the `.hsg` again. A lookup is `python script/Slice-SaveGame.py --name Money` or `--region financials`.
+
 ## After replies
 
 Fold accepted results into canonical code and docs. Clear `dropzone/` contents when done. **Leave the folder.** The root pack may be wiped on the next reuse. Do not treat gemini contents as durable state.
