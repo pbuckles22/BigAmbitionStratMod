@@ -139,7 +139,7 @@ When shipping: update **PM_PLAN**, **doc/PROJECT_STATUS.md**, and **Current stat
 ## Current state
 
 - **Product:** Private save tools for the Chaotic empire. Version 1.1.1. `script/statement_ledger.py` writes `doc/gemini/cache/ledger/statements.csv` from the `.hsg` in `doc/gemini/dropzone/`.
-- **On:** `origin/main @ SHIPSHA` — https://github.com/pbuckles22/BigAmbitionStratMod. Branch `feature/1.1-statement-street` kept.
+- **On:** `origin/main @ 3d55c0e` — https://github.com/pbuckles22/BigAmbitionStratMod. Branch `feature/1.1-statement-street` kept.
 - **Next:** Story **1.2** when asked.
 - **Blockers:** none.
 
