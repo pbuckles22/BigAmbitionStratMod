@@ -16,13 +16,14 @@
 
 | Branch | Role |
 |--------|------|
-| **`main`** | Integration branch — template baseline |
-| **`feature/long-run-harvest`** | Kept after CMPH |
-| **`feature/chain-harness`** | Kept after CMPH |
-| **`feature/chain-prefix`** | Kept after CMPH |
-| **`feature/handoff-receiver-framing`** | Kept after CMPH |
+| **`main`** | Integration branch |
+| **`feature/standup-save-tools`** | Kept after this CMPH |
+| **`feature/long-run-harvest`** | Kept after CMPH (template history) |
+| **`feature/chain-harness`** | Kept after CMPH (template history) |
+| **`feature/chain-prefix`** | Kept after CMPH (template history) |
+| **`feature/handoff-receiver-framing`** | Kept after CMPH (template history) |
 
-**Last land:** `7705f35` on `main`. Branch `feature/handoff-receiver-framing` kept.
+**Last land:** `503b63c` on `main`. Branch `feature/standup-save-tools` kept. Repo: https://github.com/pbuckles22/BigAmbitionStratMod.
 
 ---
 

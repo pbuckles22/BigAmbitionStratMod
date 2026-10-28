@@ -139,7 +139,7 @@ When shipping: update **PM_PLAN**, **doc/PROJECT_STATUS.md**, and **Current stat
 ## Current state
 
 - **Product:** Private save tools for the Chaotic empire. Handoff v2 is in `.cursor/rules/handoff-v2.mdc`. `script/Export-SaveGameText.py` and `script/Slice-SaveGame.py` read the `.hsg` in `doc/gemini/dropzone/`.
-- **On:** this land, `origin` `pbuckles22/BigAmbitionStratMod`.
+- **On:** `origin/main @ 503b63c` — https://github.com/pbuckles22/BigAmbitionStratMod. Branch `feature/standup-save-tools` kept.
 - **Next:** Re-slice the build 3682 save, then story **1.1** when asked.
 - **Blockers:** Dropzone still holds the 12.6 MB EA 0.9 file. The live save is the 7.7 MB file under `SaveGames\Big Ambitions\`.
 
