@@ -23,7 +23,7 @@
 | **`feature/chain-prefix`** | Kept after CMPH (template history) |
 | **`feature/handoff-receiver-framing`** | Kept after CMPH (template history) |
 
-**Last land:** `2e964e0` on `main`. Branch `feature/standup-save-tools` kept. Repo: https://github.com/pbuckles22/BigAmbitionStratMod.
+**Last land:** `30adac7` on `main`. Branch `feature/standup-save-tools` kept. Repo: https://github.com/pbuckles22/BigAmbitionStratMod.
 
 ---
 
