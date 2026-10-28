@@ -9,9 +9,9 @@ The .hsg is gzip. The decompressed save is about 136 MB. This script writes
 that blob to doc/gemini/cache/save.bin a single time, then an index of the
 length-prefixed UTF-16 strings. Later lookups read the index, not the .hsg.
 
-Slices are byte ranges (player, world-items, buildings, warehouses, people,
-logistics, financials). Permutations are the same strings written again by
-region and by topic, so a question opens one small file.
+Slices are byte ranges (player, buildings, warehouses, people, logistics,
+financials). Item instances sit on each building. Permutations are the same
+strings written again by region and by topic, so a question opens one small file.
 """
 
 from __future__ import annotations
@@ -30,7 +30,6 @@ CACHE = REPO / "doc" / "gemini" / "cache"
 
 LANDMARKS = (
     ("player", "GameInstance, BigAmbitions"),
-    ("world-items", "WorldItemsHashSet"),
     ("buildings", "BuildingRegistration, BigAmbitions"),
     ("warehouses", "Entities.Warehouse, BigAmbitions"),
     ("people", "Entities.EmployeeInstance, BigAmbitions"),
@@ -146,11 +145,18 @@ def topic_for(key: str) -> str | None:
 
 def build(save: Path) -> None:
     data, blob = load_bin(save)
+    db_path = CACHE / "save-index.sqlite"
+    if db_path.exists():
+        db_path.unlink()
     regions = find_regions(data)
     by_region = CACHE / "by-region"
     by_topic = CACHE / "by-topic"
     by_region.mkdir(parents=True, exist_ok=True)
     by_topic.mkdir(parents=True, exist_ok=True)
+    for stale_name in ("world-items-values.tsv", "world-items-numbers.tsv"):
+        stale = by_region / stale_name
+        if stale.is_file():
+            stale.unlink()
 
     region_files = {
         row["name"]: {
@@ -169,9 +175,6 @@ def build(save: Path) -> None:
     for handle in topics.values():
         handle.write("region\tkey\tvalue\tpos\n")
 
-    db_path = CACHE / "save-index.sqlite"
-    if db_path.exists():
-        db_path.unlink()
     db = sqlite3.connect(db_path)
     db.execute("CREATE TABLE strings (pos INTEGER PRIMARY KEY, region TEXT, kind TEXT, type INTEGER, text TEXT, vlen INTEGER, parent TEXT)")
     db.execute("CREATE TABLE regions (name TEXT PRIMARY KEY, start INTEGER, end INTEGER, marker TEXT)")
@@ -320,7 +323,7 @@ def write_map(save: Path, size: int, regions: list[dict], counts: dict, accepted
         "- `python script/Slice-SaveGame.py --region financials` — keys in one region, from the index only.",
         "- `python script/Slice-SaveGame.py --name Money` — every Money hit, from the index only.",
         "",
-        "World items are the long middle of the file. Business, warehouse, staff, route, and statement questions use the other regions.",
+        "Item instances sit on each building. Business, warehouse, staff, route, and statement questions use the regions above.",
         "",
         "A number whose type code is not yet known stays in `save.bin` at the string's `pos`. The index still has the field name and offset, so the next decode seeks there instead of scanning 136 MB.",
         "",

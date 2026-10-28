@@ -138,24 +138,25 @@ When shipping: update **PM_PLAN**, **doc/PROJECT_STATUS.md**, and **Current stat
 
 ## Current state
 
-- **Product:** Private save tools for the Chaotic empire. Handoff v2 is in `.cursor/rules/handoff-v2.mdc`. `script/Export-SaveGameText.py` and `script/Slice-SaveGame.py` read the `.hsg` in `doc/gemini/dropzone/`.
-- **On:** `origin/main @ 30adac7` — https://github.com/pbuckles22/BigAmbitionStratMod. Branch `feature/standup-save-tools` kept.
-- **Next:** Re-slice the build 3682 save, then story **1.1** when asked.
-- **Blockers:** Dropzone still holds the 12.6 MB EA 0.9 file. The live save is the 7.7 MB file under `SaveGames\Big Ambitions\`.
+- **Product:** Private save tools for the Chaotic empire. Version 1.1.1. `script/statement_ledger.py` writes `doc/gemini/cache/ledger/statements.csv` from the `.hsg` in `doc/gemini/dropzone/`.
+- **On:** `origin/main @ SHIPSHA` — https://github.com/pbuckles22/BigAmbitionStratMod. Branch `feature/1.1-statement-street` kept.
+- **Next:** Story **1.2** when asked.
+- **Blockers:** none.
 
 ## Run and test
 
 **Document your commands** (examples — replace with yours):
 
 ```bash
-python -m py_compile script/Export-SaveGameText.py script/Slice-SaveGame.py
+python -m pytest -q
+python -m py_compile script/Export-SaveGameText.py script/Slice-SaveGame.py script/statement_ledger.py
 ```
 
-Run that from the repo root before commit. There is no compile counter. The save cache under `doc/gemini/cache/` is gitignored.
+Run that from the repo root before commit. There is no compile counter. The save cache under `doc/gemini/cache/` is gitignored. Statement export appends `statements.written` to `doc/gemini/cache/ledger.log`.
 
 **Compile counter:** If those commands **compile**, count every compile (test/Debug and Release are separate). Local gitignored counter + binary `+N` when the toolchain allows. Skip for non-compiling repos (scripts, twitchurl*, DJ tools). See `.cursor/rules/testing.mdc` and [TEST_TDD.md](.cursor/skills/TEST_TDD.md).
 
-**Evidence sink:** If the product has a runtime, named events go in a durable file documented in TEST_PLAN.md. Debugger-only Trace is not evidence. This template has no runtime — skip.
+**Evidence sink:** `doc/gemini/cache/ledger.log`. Statement export appends one `statements.written` line. Debugger-only Trace is not evidence.
 
 **Long run:** A batch or soak is not the regression suite. Extract the decision and lock a named Tier 1 test before the next long run (`testing.mdc` → *Long run*).
 

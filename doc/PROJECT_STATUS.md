@@ -8,7 +8,7 @@
 
 ## Summary
 
-**BigAmbitionStratMod** — private tools that read a Big Ambitions `.hsg` and, later, a decision mod. Rules come from AgenticTemplate (`upstream`). `origin` is this repo.
+**BigAmbitionStratMod** 1.1.1 — statement rows with a street in `doc/gemini/cache/ledger/statements.csv`. 5,865 rows. First row: day 953, `ba:street_firstavenue`, number 38, profit 69652.2188. Rules come from AgenticTemplate (`upstream`). `origin` is this repo.
 
 ---
 
@@ -17,13 +17,14 @@
 | Branch | Role |
 |--------|------|
 | **`main`** | Integration branch |
-| **`feature/standup-save-tools`** | Kept after this CMPH |
+| **`feature/1.1-statement-street`** | Kept after this CMPH |
+| **`feature/standup-save-tools`** | Kept after the standup CMPH |
 | **`feature/long-run-harvest`** | Kept after CMPH (template history) |
 | **`feature/chain-harness`** | Kept after CMPH (template history) |
 | **`feature/chain-prefix`** | Kept after CMPH (template history) |
 | **`feature/handoff-receiver-framing`** | Kept after CMPH (template history) |
 
-**Last land:** `30adac7` on `main`. Branch `feature/standup-save-tools` kept. Repo: https://github.com/pbuckles22/BigAmbitionStratMod.
+**Last land:** `SHIPSHA` on `main`. Version 1.1.1. Branch `feature/1.1-statement-street` kept. Repo: https://github.com/pbuckles22/BigAmbitionStratMod.
 
 ---
 
@@ -47,7 +48,7 @@
 
 ## Next up (maintainers)
 
-- Consumers: clone → customize AGENT_HANDOFF run/test → add product code under `doc/requirements/`
+- Story **1.2** when asked: join statements to buildings and write `portfolio.csv`.
 - Variants: merge upstream when AgenticTemplate skills/rules change
 
 ---

@@ -7,7 +7,8 @@ Define **Tier 1** (fast feedback: unit, headless, or local) and **Tier 2** (inte
 ## Tier 1: Fast feedback
 
 ```bash
-python -m py_compile script/Export-SaveGameText.py script/Slice-SaveGame.py
+python -m pytest -q
+python -m py_compile script/Export-SaveGameText.py script/Slice-SaveGame.py script/statement_ledger.py
 ```
 
 ---
@@ -17,9 +18,10 @@ python -m py_compile script/Export-SaveGameText.py script/Slice-SaveGame.py
 Headless tests that run shipped behaviors **together**, through real interfaces. The new chain test’s first line is `Chain: first → … → this`. It walks from the first shipped behavior through this one, and each step receives what the previous step produced. The harness loads the production module and asserts the value the next stage reads. Isolated unit red/green does not replace this. Document the command (it is usually the Tier 1 suite, once the chain tests live there). Rule: [.cursor/rules/integration-chain.mdc](.cursor/rules/integration-chain.mdc) → *Prefix*.
 
 ```bash
-# Same runner as Tier 1 once chain tests are in that suite
-# Example: npm test
+python -m pytest -q tests/test_statement_street.py
 ```
+
+The chain reads the build 3682 `.hsg` in `doc/gemini/dropzone/`. Evidence line `statements.written` is appended to `doc/gemini/cache/ledger.log`.
 
 ---
 
@@ -38,6 +40,6 @@ Use when behavior spans a real runtime (browser, device, network, or native APIs
 
 **Compile counter:** If Tier 1 **compiles**, count every compile (test/Debug **and** Release). Non-compiling stacks skip. See `.cursor/rules/testing.mdc`.
 
-**Evidence sink:** If the product has a runtime, document the **file path** for named evidence lines here (human opens it; agent Reads it). Debugger-only Trace is not evidence. This template has no runtime — skip.
+**Evidence sink:** `doc/gemini/cache/ledger.log`. Statement export appends one `statements.written` line (version, row count, first street, profit).
 
 **Long run:** A batch or soak is not Tier 1. When it trips a gate, extract that decision and add a named Tier 1 test before the next long run. See `.cursor/rules/testing.mdc`.

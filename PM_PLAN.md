@@ -2,10 +2,10 @@
 
 Replace with your project’s phases and sprints.
 
-## Placeholder
+## Epic 1 — Save ledger
 
-- **Phase 0:** Template in place; document your stack and test commands in AGENT_HANDOFF.md and TEST_PLAN.md.
-- **Next:** Re-slice the build 3682 save, then story **1.1** (statement rows with a street). The epic ladder lives in the session plan. Do not start 1.1 on the old 12.6 MB cache.
+- **1.1** `[x]` Statement rows with a street. `doc/gemini/cache/ledger/statements.csv` columns: day, street, number, sales, goods, wages, rent, marketing, theft, profit. Chain: `gunzip → index → statement`. Version 1.1.1.
+- **Next:** story **1.2** when asked. Join each statement street and number to BuildingRegistration. `portfolio.csv` is one row per business, with family (food / durables / specialty / service / office / hq / warehouse) and TCO = goods + wages + rent + marketing, averaged over the days present. Chain: `gunzip → index → statement → portfolio`.
 
 Operating model (keep these when you replace this plan): `.cursor/rules/` ship commands (UCPH, CMPH, SWAT), human check, plan-coordinate versioning, long-run harvest (`testing.mdc`), and the chain harness and prefix (`integration-chain.mdc`). Do not delete them to “clean up” a new clone.
 

@@ -16,11 +16,11 @@ Document your real gate in `AGENT_HANDOFF.md` and `TEST_PLAN.md`, then treat it 
 
 ### Version
 
-Default for a product with `PM_PLAN`: `MAJOR.EPIC.COUNTER` plus optional `.FIX`. The counter is ships inside the epic, not the story id. Never go backwards. See [doc/VERSIONING.md](doc/VERSIONING.md).
+Scheme: `MAJOR.EPIC.COUNTER` plus optional `.FIX`. The counter is ships inside the epic, not the story id. Never go backwards. See [doc/VERSIONING.md](doc/VERSIONING.md).
 
-Libraries may use SemVer. Ops scripts may use a date. Write the choice here when you adopt one. Local `+BUILD` stays gitignored.
+Current public version: **1.1.1** (`script/statement_ledger.py`).
 
-GitHub Release: on **SWAT**, after that close is on `main`, when this file says the product cuts epic releases. Do not upload to a store until a product doc says it is distributable.
+This product cuts epic releases: yes, a GitHub Release on SWAT after that close is on `main`. Do not upload to a store until a product doc says it is distributable. Local `+BUILD` stays gitignored. There is no compile counter.
 
 ### Rollback
 
