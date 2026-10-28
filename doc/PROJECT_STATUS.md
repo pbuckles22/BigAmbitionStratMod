@@ -24,7 +24,7 @@
 | **`feature/chain-prefix`** | Kept after CMPH (template history) |
 | **`feature/handoff-receiver-framing`** | Kept after CMPH (template history) |
 
-**Last land:** `3d55c0e` on `main`. Version 1.1.1. Branch `feature/1.1-statement-street` kept. Repo: https://github.com/pbuckles22/BigAmbitionStratMod.
+**Last land:** `fb405d4` on `main`. Version 1.1.1. Branch `feature/1.1-statement-street` kept. Repo: https://github.com/pbuckles22/BigAmbitionStratMod.
 
 ---
 
