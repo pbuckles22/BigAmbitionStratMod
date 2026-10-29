@@ -155,3 +155,77 @@ def test_chain_gunzip_index_statement_portfolio_span(statement_csv, tmp_path):
     assert match["street"] == "ba:street_fifthavenue"
     assert int(match["number"]) == 37
     assert float(match["tco"]) == pytest.approx(4003.3822)
+
+
+def _section(text: str, start: str, end: str) -> str:
+    body = text.split(f"## {start}", 1)[1]
+    if end == "":
+        return body
+    return body.split(f"## {end}", 1)[0]
+
+
+def _table_rows(section: str) -> list[list[str]]:
+    rows = []
+    for line in section.splitlines():
+        if not line.startswith("| "):
+            continue
+        cells = [cell.strip() for cell in line.strip().strip("|").split("|")]
+        if not cells or cells[0].startswith("-") or cells[0] in {"business", "street", "warehouse"}:
+            continue
+        rows.append(cells)
+    return rows
+
+
+def test_chain_gunzip_index_statement_seven_day_sales(statement_csv):
+    """Chain: gunzip → index → statement → seven-day sales"""
+    csv_path, _log_path = statement_csv
+    statements = _rows(csv_path)
+    hair = ledger.sales_between(statements, "ba:street_fifthavenue", 38, 1007, 1013)
+    kabobs = ledger.sales_between(statements, "ba:street_firstavenue", 5, 1007, 1013)
+    assert hair == pytest.approx(143251)
+    assert kabobs == pytest.approx(72610.35)
+
+
+def test_chain_gunzip_index_statement_portfolio_routes_report(statement_csv, tmp_path):
+    """Chain: gunzip → index → statement → portfolio → routes → report"""
+    csv_path, log_path = statement_csv
+    portfolio_path = tmp_path / "portfolio.csv"
+    routes_path = tmp_path / "routes.csv"
+    warehouses_path = tmp_path / "warehouses.csv"
+    report_path = tmp_path / "REPORT.md"
+    ledger.write_portfolio(csv_path, portfolio_path, log_path)
+    ledger.write_routes(portfolio_path, routes_path, warehouses_path, log_path)
+    ledger.write_report(csv_path, portfolio_path, warehouses_path, report_path, log_path)
+    text = report_path.read_text(encoding="utf-8")
+    rows = _table_rows(_section(text, "Bottom 10 by profit", "Top offices"))
+    assert rows[-1][0] == "Chaotic Kabobs #5"
+    assert rows[-1][4] == "898.6715"
+    logged = log_path.read_text(encoding="utf-8")
+    assert "report.written" in logged
+    assert "bottom=Chaotic Kabobs #5" in logged
+    assert "profit=898.6715" in logged
+
+
+def test_chain_gunzip_index_statement_portfolio_routes_report_mix(statement_csv, tmp_path):
+    """Chain: gunzip → index → statement → portfolio → routes → report mix"""
+    csv_path, log_path = statement_csv
+    portfolio_path = tmp_path / "portfolio.csv"
+    routes_path = tmp_path / "routes.csv"
+    warehouses_path = tmp_path / "warehouses.csv"
+    report_path = tmp_path / "REPORT.md"
+    ledger.write_portfolio(csv_path, portfolio_path, log_path)
+    ledger.write_routes(portfolio_path, routes_path, warehouses_path, log_path)
+    ledger.write_report(csv_path, portfolio_path, warehouses_path, report_path, log_path)
+    text = report_path.read_text(encoding="utf-8")
+    offices = _table_rows(_section(text, "Top offices", "Streets with 3+ of one family"))
+    assert offices[0][0] == "Chaotic Devs"
+    streets = _table_rows(_section(text, "Streets with 3+ of one family", "Warehouses that mix families"))
+    assert ["ba:street_fifthavenue", "service", "4"] in streets
+    assert ["ba:street_fourthavenue", "food", "3"] in streets
+    assert all(row[0] != "ba:street_firstavenue" or row[1] != "durables" for row in streets)
+    mixes = _table_rows(_section(text, "Warehouses that mix families", ""))
+    w6 = next(row for row in mixes if row[0] == "W6")
+    assert w6[1] == "ba:street_fifthavenue"
+    assert w6[2] == "43"
+    assert w6[3] == "food, service"
+    assert all(row[0] != "W1" for row in mixes)

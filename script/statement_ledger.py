@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
-"""Turn a financial summary into statement rows, a portfolio, and routes.
+"""Turn a financial summary into statement rows, a portfolio, routes, and a rank report.
 
   python script/statement_ledger.py
 
 Gunzips and indexes the dropzone save, writes
 doc/gemini/cache/ledger/statements.csv, joins each street and number to
-BuildingRegistration for portfolio.csv, then writes routes.csv and
-warehouses.csv. One line per file is appended to doc/gemini/cache/ledger.log.
+BuildingRegistration for portfolio.csv, writes routes.csv and warehouses.csv,
+then writes REPORT.md. One line per file is appended to doc/gemini/cache/ledger.log.
 """
 
 from __future__ import annotations
@@ -18,7 +18,7 @@ import struct
 import sys
 from pathlib import Path
 
-VERSION = "1.2.1"
+VERSION = "1.2.2"
 
 FAMILIES = {
     "ba:businesstype_fastfoodrestaurant": "food",
@@ -70,6 +70,85 @@ PORTFOLIO_COLUMNS = ("business", "family", "street", "number", "tco")
 ROUTE_COLUMNS = ("warehouse", "destination", "item", "day", "truck")
 
 WAREHOUSE_COLUMNS = ("warehouse", "street", "number", "item", "amount")
+
+IGNORED_CARGO = {
+    "ba:itemname_ceilinglampwarehouse",
+    "ba:itemname_closedcardboardbox",
+    "ba:itemname_deliveryspot",
+    "ba:itemname_flatbedspawner",
+    "ba:itemname_handtruckspawner",
+    "ba:itemname_palletshelf",
+    "ba:itemname_paperbag",
+}
+
+_ITEM_GROUPS = {
+    "food": {
+        "apple",
+        "banana",
+        "beer",
+        "bottleofwine",
+        "burger",
+        "carrot",
+        "cigar",
+        "cigarette",
+        "croissant",
+        "cupcake",
+        "cupofcoffee",
+        "donut",
+        "frenchfries",
+        "freshfood",
+        "frozenfood",
+        "hotdog",
+        "icecream",
+        "kabob",
+        "lettuce",
+        "margarita",
+        "martini",
+        "pear",
+        "pizza",
+        "salad",
+        "sodacan",
+        "tomato",
+        "whisky",
+    },
+    "durables": {
+        "cheapjewelry",
+        "classiccheapfemaleclothing",
+        "classiccheapmaleclothing",
+        "classicexpensivefemaleclothing",
+        "classicexpensivemaleclothing",
+        "earbuds01",
+        "expensivejewelry",
+        "headphones01",
+        "moderncheapfemaleclothing",
+        "moderncheapmaleclothing",
+        "modernexpensivefemaleclothing",
+        "modernexpensivemaleclothing",
+        "smartphone1",
+        "smartphone2",
+        "smartwatch1",
+        "smartwatch2",
+    },
+    "specialty": {
+        "cheapflower",
+        "cheapgift",
+        "expensiveflower",
+        "expensivegift",
+        "limitededitionbook",
+        "motivationalbook",
+        "novel",
+        "picturebook",
+        "technicalmanual",
+        "youngnovel",
+    },
+    "service": {"haircareproduct"},
+}
+
+ITEM_FAMILIES = {
+    f"ba:itemname_{name}": family
+    for family, names in _ITEM_GROUPS.items()
+    for name in names
+}
 
 WAREHOUSE_ADDRESS = {"assignedWarehouseAddress", "wholesaleAddress", "targetAddress"}
 
@@ -597,6 +676,240 @@ def write_routes(
     return len(routes)
 
 
+def sales_between(statements: list[dict], street: str, number: int, first_day: int, last_day: int) -> float:
+    """Sum sales for one address. Days outside the window stay out. Profit is not sales."""
+    total = 0.0
+    address = int(number)
+    for row in statements:
+        try:
+            row_number = int(row["number"])
+            day = int(row["day"])
+            sales = float(row["sales"])
+        except (TypeError, ValueError, KeyError):
+            continue
+        if row.get("street") != street or row_number != address:
+            continue
+        if first_day <= day <= last_day:
+            total += sales
+    return total
+
+
+def business_profits(statements: list[dict], portfolio: list[dict]) -> list[dict]:
+    """Average daily profit over the days that business is present."""
+    index = {}
+    for building in portfolio:
+        if not building.get("business"):
+            continue
+        try:
+            number = int(building["number"])
+        except (TypeError, ValueError, KeyError):
+            continue
+        index[(building.get("street"), number)] = building
+    buckets: dict[tuple, list[float]] = {}
+    for row in statements:
+        try:
+            number = int(row["number"])
+            profit = float(row["profit"])
+        except (TypeError, ValueError, KeyError):
+            continue
+        key = (row.get("street"), number)
+        if key not in index:
+            continue
+        buckets.setdefault(key, []).append(profit)
+    rows = []
+    for key, values in buckets.items():
+        building = index[key]
+        rows.append(
+            {
+                "business": building["business"],
+                "family": building.get("family") or "",
+                "street": key[0],
+                "number": key[1],
+                "profit": sum(values) / len(values),
+            }
+        )
+    return rows
+
+
+def bottom_by_profit(rows: list[dict], limit: int = 10) -> list[dict]:
+    """Lowest profit last. The same profit keeps the later business name at the bottom."""
+    ordered = sorted(rows, key=lambda row: (-float(row["profit"]), str(row["business"])))
+    if len(ordered) <= limit:
+        return ordered
+    return ordered[-limit:]
+
+
+def top_offices(rows: list[dict]) -> list[dict]:
+    """Office family only. Highest profit is the first row."""
+    offices = [row for row in rows if row.get("family") == "office"]
+    return sorted(offices, key=lambda row: (-float(row["profit"]), str(row["business"])))
+
+
+def street_clusters(portfolio: list[dict], minimum: int = 3) -> list[dict]:
+    """Streets with at least `minimum` businesses of one family."""
+    counts: dict[tuple, int] = {}
+    for row in portfolio:
+        street = row.get("street")
+        family = row.get("family")
+        if not street or not family:
+            continue
+        key = (street, family)
+        counts[key] = counts.get(key, 0) + 1
+    clusters = [
+        {"street": street, "family": family, "count": count}
+        for (street, family), count in counts.items()
+        if count >= minimum
+    ]
+    return sorted(clusters, key=lambda row: (row["street"], row["family"]))
+
+
+def item_family(item: str) -> str | None:
+    """Retail family for a cargo item. Warehouse gear and bags are not a family."""
+    if not item or item in IGNORED_CARGO:
+        return None
+    return ITEM_FAMILIES.get(item, "unknown")
+
+
+def _warehouse_sort_key(name: str) -> tuple:
+    digits = "".join(ch for ch in name if ch.isdigit())
+    prefix = "".join(ch for ch in name if not ch.isdigit())
+    return (prefix, int(digits) if digits else 0, name)
+
+
+def warehouse_mixes(rows: list[dict]) -> list[dict]:
+    """A warehouse mixes when its cargo covers two or more retail families."""
+    groups: dict[tuple, set[str]] = {}
+    for row in rows:
+        family = item_family(str(row.get("item") or ""))
+        if family is None:
+            continue
+        try:
+            number = int(row["number"])
+        except (TypeError, ValueError, KeyError):
+            continue
+        key = (str(row.get("warehouse") or ""), str(row.get("street") or ""), number)
+        groups.setdefault(key, set()).add(family)
+    mixed = []
+    for (warehouse, street, number), families in groups.items():
+        if len(families) < 2:
+            continue
+        mixed.append(
+            {
+                "warehouse": warehouse,
+                "street": street,
+                "number": number,
+                "families": ", ".join(sorted(families)),
+            }
+        )
+    return sorted(
+        mixed,
+        key=lambda row: (_warehouse_sort_key(row["warehouse"]), row["street"], row["number"]),
+    )
+
+
+def _section_table(title: str, headers: tuple[str, ...], rows: list[tuple]) -> list[str]:
+    lines = [f"## {title}", ""]
+    if not rows:
+        lines.extend(["None.", ""])
+        return lines
+    lines.append("| " + " | ".join(headers) + " |")
+    lines.append("| " + " | ".join("---" for _ in headers) + " |")
+    for row in rows:
+        lines.append("| " + " | ".join(str(cell) for cell in row) + " |")
+    lines.append("")
+    return lines
+
+
+def render_report(profits: list[dict], portfolio: list[dict], warehouses: list[dict]) -> str:
+    """Bottom 10 by profit, top offices, street clusters, and mixed warehouses."""
+    lines = ["# Rank report", ""]
+    lines.extend(
+        _section_table(
+            "Bottom 10 by profit",
+            ("business", "family", "street", "number", "profit"),
+            [
+                (
+                    row["business"],
+                    row["family"],
+                    row["street"],
+                    format_number(row["number"]),
+                    format_number(row["profit"]),
+                )
+                for row in bottom_by_profit(profits)
+            ],
+        )
+    )
+    lines.extend(
+        _section_table(
+            "Top offices",
+            ("business", "family", "street", "number", "profit"),
+            [
+                (
+                    row["business"],
+                    row["family"],
+                    row["street"],
+                    format_number(row["number"]),
+                    format_number(row["profit"]),
+                )
+                for row in top_offices(profits)
+            ],
+        )
+    )
+    lines.extend(
+        _section_table(
+            "Streets with 3+ of one family",
+            ("street", "family", "count"),
+            [
+                (row["street"], row["family"], format_number(row["count"]))
+                for row in street_clusters(portfolio)
+            ],
+        )
+    )
+    lines.extend(
+        _section_table(
+            "Warehouses that mix families",
+            ("warehouse", "street", "number", "families"),
+            [
+                (
+                    row["warehouse"],
+                    row["street"],
+                    format_number(row["number"]),
+                    row["families"],
+                )
+                for row in warehouse_mixes(warehouses)
+            ],
+        )
+    )
+    return "\n".join(lines).rstrip() + "\n"
+
+
+def write_report(
+    statements_csv: Path,
+    portfolio_csv: Path,
+    warehouses_csv: Path,
+    report_path: Path,
+    log_path: Path,
+) -> int:
+    statements = _read_statements(statements_csv)
+    portfolio = _read_statements(portfolio_csv)
+    warehouses = _read_statements(warehouses_csv)
+    profits = business_profits(statements, portfolio)
+    report_path.parent.mkdir(parents=True, exist_ok=True)
+    report_path.write_text(render_report(profits, portfolio, warehouses), encoding="utf-8")
+    bottom = bottom_by_profit(profits)
+    bottom_row = bottom[-1] if bottom else {}
+    log_path.parent.mkdir(parents=True, exist_ok=True)
+    line = (
+        f"report.written version={VERSION} bottom={bottom_row.get('business', '')} "
+        f"profit={format_number(bottom_row.get('profit'))} "
+        f"offices={len(top_offices(profits))} streets={len(street_clusters(portfolio))} "
+        f"mixes={len(warehouse_mixes(warehouses))}\n"
+    )
+    with log_path.open("a", encoding="utf-8") as handle:
+        handle.write(line)
+    return len(bottom)
+
+
 def main(argv: list[str] | None = None) -> int:
     del argv
     save = SLICE.default_save()
@@ -605,15 +918,18 @@ def main(argv: list[str] | None = None) -> int:
     portfolio_path = ledger_dir / "portfolio.csv"
     routes_path = ledger_dir / "routes.csv"
     warehouses_path = ledger_dir / "warehouses.csv"
+    report_path = ledger_dir / "REPORT.md"
     log_path = SLICE.CACHE / "ledger.log"
     count = write_statements(save, statements_path, log_path)
     businesses = write_portfolio(statements_path, portfolio_path, log_path)
     routes = write_routes(portfolio_path, routes_path, warehouses_path, log_path)
+    write_report(statements_path, portfolio_path, warehouses_path, report_path, log_path)
     print(f"version {VERSION}")
     print(f"Wrote {count} rows to {statements_path}")
     print(f"Wrote {businesses} rows to {portfolio_path}")
     print(f"Wrote {routes} rows to {routes_path}")
     print(f"Wrote warehouses to {warehouses_path}")
+    print(f"Wrote report to {report_path}")
     return 0
 
 

@@ -8,7 +8,7 @@
 
 ## Summary
 
-**BigAmbitionStratMod** 1.2.1 — Epic 1 complete. Story 2.1 writes four route rows and warehouse cargo counts. The cheap-gift route is day 1016 from `ba:street_firststreet` 37 to `ba:street_fifthavenue` 36. W1 holds 45 sodacans. 17 businesses. 5865 statement rows. Rules come from AgenticTemplate (`upstream`). `origin` is this repo.
+**BigAmbitionStratMod** 1.2.2 — Epic 1 complete. Story 2.2 writes `REPORT.md`: bottom 10 by average daily profit, top offices, street clusters, and mixed warehouses. Chaotic Kabobs #5 is the bottom row. Chaotic Hair #5 is the top row. 17 businesses. 5865 statement rows. Rules come from AgenticTemplate (`upstream`). `origin` is this repo.
 
 ---
 
@@ -17,7 +17,8 @@
 | Branch | Role |
 |--------|------|
 | **`main`** | Integration branch |
-| **`feature/2.1-routes`** | Kept after this CMPH |
+| **`feature/2.2-rank-report`** | Kept after this CMPH |
+| **`feature/2.1-routes`** | Kept after the 2.1 CMPH |
 | **`feature/plan-epic-ladder`** | Kept after the ladder CMPH |
 | **`feature/1.2-portfolio-join`** | Kept after the 1.2 CMPH |
 | **`feature/1.1-statement-street`** | Kept after the 1.1 CMPH |
@@ -27,7 +28,7 @@
 | **`feature/chain-prefix`** | Kept after CMPH (template history) |
 | **`feature/handoff-receiver-framing`** | Kept after CMPH (template history) |
 
-**Last land:** `c400f5e` on `main`. Version 1.2.1. Branch `feature/2.1-routes` kept. Repo: https://github.com/pbuckles22/BigAmbitionStratMod.
+**Last land:** `LANDSHA` on `main`. Version 1.2.2. Branch `feature/2.2-rank-report` kept. Repo: https://github.com/pbuckles22/BigAmbitionStratMod.
 
 ---
 
@@ -51,7 +52,7 @@
 
 ## Next up (maintainers)
 
-- Story **2.2** when asked. Rank report in `REPORT.md`. Story 2.1 is complete.
+- Story **2.3** when asked. Saved-game-to-text runs the ledger through the report. Story 2.2 is complete.
 - Variants: merge upstream when AgenticTemplate skills/rules change
 
 ---
