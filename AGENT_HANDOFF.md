@@ -139,7 +139,7 @@ When shipping: update **PM_PLAN**, **doc/PROJECT_STATUS.md**, and **Current stat
 ## Current state
 
 - **Product:** Private save tools for the Chaotic empire. Version 1.3.1. Build 3682 Managed DLL names and hashes are pinned in `doc/requirements/game-build.md`. Epic 3 is in progress. The ladder through Epic 6 is in `PM_PLAN.md`.
-- **On:** `origin/main @ becc36a` — https://github.com/pbuckles22/BigAmbitionStratMod. Branch `feature/2.3-save-text` kept.
+- **On:** `origin/main @ b6da5a0` — https://github.com/pbuckles22/BigAmbitionStratMod. Branch `feature/3.1-game-build` kept.
 - **Next:** Story **3.2** when asked. Mod skeleton from the official SDK. `dotnet build` installs to `ModsLocal` and logs `mod.loaded` with the game build.
 - **Blockers:** none.
 
