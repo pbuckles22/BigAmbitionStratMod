@@ -19,7 +19,7 @@ This is the durable home for technical debt across sessions. Handoff notes can m
 
 (High ROI; frequent pain; not blocking.)
 
-- Every `statement_ledger` run deletes and rebuilds `save-index.sqlite` (~2.3M strings) even when `save.bin` is already current. Reuse the index when the blob is unchanged.
+- (none)
 
 ## Accept for now
 

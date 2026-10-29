@@ -72,7 +72,7 @@ Upload: `doc/gemini/Gemini_Snapshot.txt` + `CONTEXT.md`.
 The user said **saved game to text** or **save game to text**.
 
 1. Run `python script/Export-SaveGameText.py` at the repo root.
-2. It reads the `.hsg` in `doc/gemini/dropzone/` and writes gitignored `doc/gemini/empire_summary.md`.
+2. It runs the ledger through the report for the `.hsg` in `doc/gemini/dropzone/` and writes gitignored `doc/gemini/empire_summary.md`.
 3. Leave the `.hsg` in `dropzone/`. Do not start an upload pack unless they asked for one.
 
 ### Save map

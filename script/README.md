@@ -4,7 +4,7 @@ This stack-agnostic template does not ship a test runner. Add scripts here (for 
 
 `Export-GeminiSnapshot.ps1` writes a gitignored XML dump of the repo for an external LLM. Focused packs still use [doc/gemini/](../doc/gemini/README.md).
 
-`Export-SaveGameText.py` turns a Big Ambitions `.hsg` in `doc/gemini/dropzone/` into gitignored `doc/gemini/empire_summary.md`. The phrase is **saved game to text**.
+`Export-SaveGameText.py` runs the ledger through the rank report for the `.hsg` in `doc/gemini/dropzone/` and writes gitignored `doc/gemini/empire_summary.md`. The phrase is **saved game to text**. The file names the bottom business.
 
 `Slice-SaveGame.py` gunzips that save once into `doc/gemini/cache/save.bin` and writes a string index plus region and topic slices. Later questions read the cache. The map is `doc/gemini/cache/MAP.md`.
 

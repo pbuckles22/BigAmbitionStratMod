@@ -138,9 +138,9 @@ When shipping: update **PM_PLAN**, **doc/PROJECT_STATUS.md**, and **Current stat
 
 ## Current state
 
-- **Product:** Private save tools for the Chaotic empire. Version 1.2.2. `script/statement_ledger.py` writes `statements.csv`, `portfolio.csv`, `routes.csv`, `warehouses.csv`, and `REPORT.md` from the `.hsg` in `doc/gemini/dropzone/`. Epic 1 is complete. Story 2.2 is complete. The ladder through Epic 6 is in `PM_PLAN.md`.
-- **On:** `origin/main @ c122669` — https://github.com/pbuckles22/BigAmbitionStratMod. Branch `feature/2.2-rank-report` kept.
-- **Next:** Story **2.3** when asked. Saved-game-to-text runs the ledger through the report.
+- **Product:** Private save tools for the Chaotic empire. Version 1.2.2. Saved-game-to-text runs the ledger through the report and names the bottom business. A current save index stays. Epic 2 is complete. The ladder through Epic 6 is in `PM_PLAN.md`.
+- **On:** `origin/main @ LANDSHA` — https://github.com/pbuckles22/BigAmbitionStratMod. Branch `feature/2.3-save-text` kept.
+- **Next:** Story **3.1** when asked. Pin Managed DLL names and hashes into `doc/requirements/game-build.md`.
 - **Blockers:** none.
 
 ## Run and test
@@ -152,11 +152,11 @@ python -m pytest -q
 python -m py_compile script/Export-SaveGameText.py script/Slice-SaveGame.py script/statement_ledger.py
 ```
 
-Run that from the repo root before commit. There is no compile counter. The save cache under `doc/gemini/cache/` is gitignored. Statement export appends `statements.written` to `doc/gemini/cache/ledger.log`. Portfolio export appends `portfolio.written`. Route export appends `routes.written`. Report export appends `report.written`.
+Run that from the repo root before commit. There is no compile counter. The story gate reuses `doc/gemini/cache/save.bin` and `save-index.sqlite` when both are current for the dropzone `.hsg`. Rebuild with `python script/Slice-SaveGame.py`, then run the story gate again, when that `.hsg` changes, when `script/Slice-SaveGame.py` changes, or at epic close. `write_statements` calls `ensure_index`, which keeps that index. `build()` deletes the sqlite when the index is stale. The save cache under `doc/gemini/cache/` is gitignored. Statement export appends `statements.written` to `doc/gemini/cache/ledger.log`. Portfolio export appends `portfolio.written`. Route export appends `routes.written`. Report export appends `report.written`. Saved-game-to-text appends `savetext.written`.
 
 **Compile counter:** If those commands **compile**, count every compile (test/Debug and Release are separate). Local gitignored counter + binary `+N` when the toolchain allows. Skip for non-compiling repos (scripts, twitchurl*, DJ tools). See `.cursor/rules/testing.mdc` and [TEST_TDD.md](.cursor/skills/TEST_TDD.md).
 
-**Evidence sink:** `doc/gemini/cache/ledger.log`. Statement export appends one `statements.written` line. Portfolio export appends one `portfolio.written` line. Route export appends one `routes.written` line. Report export appends one `report.written` line. Debugger-only Trace is not evidence.
+**Evidence sink:** `doc/gemini/cache/ledger.log`. Statement export appends one `statements.written` line. Portfolio export appends one `portfolio.written` line. Route export appends one `routes.written` line. Report export appends one `report.written` line. Saved-game-to-text appends one `savetext.written` line. Debugger-only Trace is not evidence.
 
 **Long run:** A batch or soak is not the regression suite. Extract the decision and lock a named Tier 1 test before the next long run (`testing.mdc` → *Long run*).
 

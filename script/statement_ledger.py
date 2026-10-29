@@ -3,7 +3,7 @@
 
   python script/statement_ledger.py
 
-Gunzips and indexes the dropzone save, writes
+Reuses a current save index, writes
 doc/gemini/cache/ledger/statements.csv, joins each street and number to
 BuildingRegistration for portfolio.csv, writes routes.csv and warehouses.csv,
 then writes REPORT.md. One line per file is appended to doc/gemini/cache/ledger.log.
@@ -552,7 +552,7 @@ def _region_bounds(name: str) -> tuple[int, int]:
 
 
 def write_statements(save: Path, csv_path: Path, log_path: Path) -> int:
-    SLICE.build(save)
+    SLICE.ensure_index(save)
     data = (SLICE.CACHE / "save.bin").read_bytes()
     start, end = _region_bounds("financials")
     rows = rows_between(data, start, end)
@@ -910,9 +910,9 @@ def write_report(
     return len(bottom)
 
 
-def main(argv: list[str] | None = None) -> int:
-    del argv
-    save = SLICE.default_save()
+def run(save: Path | None = None) -> str:
+    """Statements, portfolio, routes, then the rank report. Returns the report text."""
+    save = save or SLICE.default_save()
     ledger_dir = SLICE.CACHE / "ledger"
     statements_path = ledger_dir / "statements.csv"
     portfolio_path = ledger_dir / "portfolio.csv"
@@ -930,6 +930,12 @@ def main(argv: list[str] | None = None) -> int:
     print(f"Wrote {routes} rows to {routes_path}")
     print(f"Wrote warehouses to {warehouses_path}")
     print(f"Wrote report to {report_path}")
+    return report_path.read_text(encoding="utf-8")
+
+
+def main(argv: list[str] | None = None) -> int:
+    del argv
+    run()
     return 0
 
 

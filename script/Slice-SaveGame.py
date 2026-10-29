@@ -143,6 +143,32 @@ def topic_for(key: str) -> str | None:
     return None
 
 
+def index_is_current(save: Path) -> bool:
+    """True when save.bin and the sqlite match this .hsg and are at least as new as it."""
+    blob = CACHE / "save.bin"
+    db_path = CACHE / "save-index.sqlite"
+    meta_path = CACHE / "regions.json"
+    if not save.is_file() or not blob.is_file() or not db_path.is_file() or not meta_path.is_file():
+        return False
+    try:
+        recorded = json.loads(meta_path.read_text(encoding="utf-8")).get("save")
+    except (OSError, json.JSONDecodeError):
+        return False
+    if recorded != save.name:
+        return False
+    blob_mtime = blob.stat().st_mtime
+    if blob_mtime < save.stat().st_mtime:
+        return False
+    return db_path.stat().st_mtime >= blob_mtime
+
+
+def ensure_index(save: Path) -> None:
+    """Keep a current index. Rescan only when the blob or the sqlite is stale."""
+    if index_is_current(save):
+        return
+    build(save)
+
+
 def build(save: Path) -> None:
     data, blob = load_bin(save)
     db_path = CACHE / "save-index.sqlite"
