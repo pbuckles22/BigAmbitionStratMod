@@ -8,7 +8,7 @@
 
 ## Summary
 
-**BigAmbitionStratMod** 1.3.3 — Epic 3 is in progress. F8 dumps yesterday’s business statements to `statements.csv` and logs `csv.written`. The 1.3.2 skeleton and the Epic 2 ledger are unchanged. Rules come from AgenticTemplate (`upstream`). `origin` is this repo.
+**BigAmbitionStratMod** 1.3.4 — Epic 3 is in progress. F8 dumps yesterday’s statements and the route CSVs. A warehouse hold is cargo. The Epic 2 ledger is unchanged. Rules come from AgenticTemplate (`upstream`). `origin` is this repo.
 
 ---
 
@@ -17,7 +17,8 @@
 | Branch | Role |
 |--------|------|
 | **`main`** | Integration branch |
-| **`feature/3.3-hotkey-statements`** | Kept after this CMPH |
+| **`feature/3.4-route-csvs`** | This ship, until the land sha is recorded |
+| **`feature/3.3-hotkey-statements`** | Kept after the 3.3 CMPH |
 | **`feature/3.2-mod-skeleton`** | Kept after the 3.2 CMPH |
 | **`feature/3.1-game-build`** | Kept after the 3.1 CMPH |
 | **`feature/2.3-save-text`** | Kept after the 2.3 CMPH |
@@ -56,7 +57,7 @@
 
 ## Next up (maintainers)
 
-- Story **3.4** when asked. Dump warehouses and delivery plans to the route CSVs. Epic 3 is in progress.
+- Story **3.5** when asked. Auto dump at day rollover. Log `day.rolled`. Epic 3 is in progress.
 - Variants: merge upstream when AgenticTemplate skills/rules change
 
 ---

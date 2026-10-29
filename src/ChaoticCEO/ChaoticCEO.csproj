@@ -6,9 +6,9 @@
     <LangVersion>latest</LangVersion>
     <RootNamespace>ChaoticCEO</RootNamespace>
     <AssemblyName>ChaoticCEO</AssemblyName>
-    <Version>1.3.3</Version>
-    <AssemblyVersion>1.3.3.0</AssemblyVersion>
-    <FileVersion>1.3.3.0</FileVersion>
+    <Version>1.3.4</Version>
+    <AssemblyVersion>1.3.4.0</AssemblyVersion>
+    <FileVersion>1.3.4.0</FileVersion>
     <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
     <GameManaged Condition="'$(GameManaged)' == ''">C:\Program Files (x86)\Steam\steamapps\common\Big Ambitions\Big Ambitions_Data\Managed</GameManaged>
   </PropertyGroup>
@@ -53,6 +53,7 @@
       <_NeedsBump Condition="Exists('$(TargetPath)') and $([System.IO.File]::GetLastWriteTime('$(MSBuildThisFileDirectory)ChaoticCeoMod.cs').Ticks) &gt; $(_DllTime)">true</_NeedsBump>
       <_NeedsBump Condition="Exists('$(TargetPath)') and $([System.IO.File]::GetLastWriteTime('$(MSBuildThisFileDirectory)StatementDump.cs').Ticks) &gt; $(_DllTime)">true</_NeedsBump>
       <_NeedsBump Condition="Exists('$(TargetPath)') and $([System.IO.File]::GetLastWriteTime('$(MSBuildThisFileDirectory)LiveDump.cs').Ticks) &gt; $(_DllTime)">true</_NeedsBump>
+      <_NeedsBump Condition="Exists('$(TargetPath)') and $([System.IO.File]::GetLastWriteTime('$(MSBuildThisFileDirectory)RouteDump.cs').Ticks) &gt; $(_DllTime)">true</_NeedsBump>
       <_NeedsBump Condition="Exists('$(TargetPath)') and $([System.IO.File]::GetLastWriteTime('$(MSBuildProjectFullPath)').Ticks) &gt; $(_DllTime)">true</_NeedsBump>
     </PropertyGroup>
     <Copy SourceFiles="$(_NumberSeed)" DestinationFiles="$(_NumberFile)" Condition="!Exists('$(_NumberFile)')" />

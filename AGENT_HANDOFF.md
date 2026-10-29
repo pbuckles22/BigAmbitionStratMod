@@ -138,9 +138,9 @@ When shipping: update **PM_PLAN**, **doc/PROJECT_STATUS.md**, and **Current stat
 
 ## Current state
 
-- **Product:** Private save tools for the Chaotic empire, plus the ChaoticCEO mod. Version 1.3.3. Build 3682 stays pinned in `doc/requirements/game-build.md`. Release `dotnet build` installs `ChaoticCEO.dll` to ModsLocal. F8 dumps yesterday’s statements and logs `csv.written`. Epic 3 is in progress. The ladder through Epic 6 is in `PM_PLAN.md`.
-- **On:** `origin/main @ 0f04b1b` — https://github.com/pbuckles22/BigAmbitionStratMod. Branch `feature/3.3-hotkey-statements` kept.
-- **Next:** Story **3.4** when asked. Dump warehouses and delivery plans to the route CSVs.
+- **Product:** Private save tools for the Chaotic empire, plus the ChaoticCEO mod. Version 1.3.4. Build 3682 stays pinned in `doc/requirements/game-build.md`. Release `dotnet build` installs `ChaoticCEO.dll` to ModsLocal. F8 dumps yesterday’s statements and the route CSVs, and logs `csv.written` and `routes.written`. A warehouse hold is cargo. Epic 3 is in progress. The ladder through Epic 6 is in `PM_PLAN.md`.
+- **On:** `feature/3.4-route-csvs` — not merged. https://github.com/pbuckles22/BigAmbitionStratMod
+- **Next:** Story **3.5** when asked. Auto dump at day rollover. Log `day.rolled`.
 - **Blockers:** none.
 
 ## Run and test
@@ -156,9 +156,9 @@ dotnet build src/ChaoticCEO/ChaoticCEO.csproj -c Release -p:GameManaged="C:\Prog
 
 Run that from the repo root before commit. `dotnet test` is the Debug compile. The Release command is the production compile and installs `ChaoticCEO.dll` to `%USERPROFILE%\AppData\LocalLow\Hovgaard Games\Big Ambitions\ModsLocal\ChaoticCEO\`. The story gate reuses `doc/gemini/cache/save.bin` and `save-index.sqlite` when both are current for the dropzone `.hsg`. Rebuild with `python script/Slice-SaveGame.py`, then run the story gate again, when that `.hsg` changes, when `script/Slice-SaveGame.py` changes, or at epic close. `write_statements` calls `ensure_index`, which keeps that index. `build()` deletes the sqlite when the index is stale. The save cache under `doc/gemini/cache/` is gitignored. Statement export appends `statements.written` to `doc/gemini/cache/ledger.log`. Portfolio export appends `portfolio.written`. Route export appends `routes.written`. Report export appends `report.written`. Saved-game-to-text appends `savetext.written`.
 
-**Compile counter:** The mod compiles. `dotnet test` and the Release `dotnet build` each count when they compile. The gitignored counter is `build_number.txt` (seed `build_number.txt.example`). The binary informational version is `1.3.3+N`. The public version stays `1.3.3`. See `.cursor/rules/testing.mdc` and [TEST_TDD.md](.cursor/skills/TEST_TDD.md).
+**Compile counter:** The mod compiles. `dotnet test` and the Release `dotnet build` each count when they compile. The gitignored counter is `build_number.txt` (seed `build_number.txt.example`). The binary informational version is `1.3.4+N`. The public version stays `1.3.4`. See `.cursor/rules/testing.mdc` and [TEST_TDD.md](.cursor/skills/TEST_TDD.md).
 
-**Evidence sink:** `doc/gemini/cache/ledger.log`. The mod writes `%LocalAppData%\ChaoticCEO\ceo.log`. The hotkey appends one `csv.written` line and writes `%LocalAppData%\ChaoticCEO\statements.csv`. Statement export appends one `statements.written` line. Portfolio export appends one `portfolio.written` line. Route export appends one `routes.written` line. Report export appends one `report.written` line. Saved-game-to-text appends one `savetext.written` line. Debugger-only Trace is not evidence.
+**Evidence sink:** `doc/gemini/cache/ledger.log`. The mod writes `%LocalAppData%\ChaoticCEO\ceo.log`. The hotkey appends one `csv.written` line and writes `%LocalAppData%\ChaoticCEO\statements.csv`, then appends one `routes.written` line and writes `routes.csv` and `warehouses.csv`. Statement export appends one `statements.written` line. Portfolio export appends one `portfolio.written` line. Route export appends one `routes.written` line. Report export appends one `report.written` line. Saved-game-to-text appends one `savetext.written` line. Debugger-only Trace is not evidence.
 
 **Long run:** A batch or soak is not the regression suite. Extract the decision and lock a named Tier 1 test before the next long run (`testing.mdc` → *Long run*).
 
