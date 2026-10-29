@@ -17,7 +17,8 @@
 | Branch | Role |
 |--------|------|
 | **`main`** | Integration branch |
-| **`feature/3.4-route-csvs`** | Kept after this CMPH |
+| **`feature/save-bin-reuse`** | Kept after this CMPH |
+| **`feature/3.4-route-csvs`** | Kept after the 3.4 CMPH |
 | **`feature/3.3-hotkey-statements`** | Kept after the 3.3 CMPH |
 | **`feature/3.2-mod-skeleton`** | Kept after the 3.2 CMPH |
 | **`feature/3.1-game-build`** | Kept after the 3.1 CMPH |
@@ -33,7 +34,7 @@
 | **`feature/chain-prefix`** | Kept after CMPH (template history) |
 | **`feature/handoff-receiver-framing`** | Kept after CMPH (template history) |
 
-**Last land:** `92b91d3` on `main`. Version 1.3.4. Branch `feature/3.4-route-csvs` kept. Repo: https://github.com/pbuckles22/BigAmbitionStratMod.
+**Last land:** `aa48921` on `main`. Version 1.3.4. Branch `feature/save-bin-reuse` kept. Repo: https://github.com/pbuckles22/BigAmbitionStratMod.
 
 ---
 
