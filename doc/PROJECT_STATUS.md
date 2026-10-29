@@ -8,7 +8,7 @@
 
 ## Summary
 
-**BigAmbitionStratMod** 1.3.4 — Epic 3 is in progress. F8 dumps yesterday’s statements and the route CSVs. A warehouse hold is cargo. The Epic 2 ledger is unchanged. Rules come from AgenticTemplate (`upstream`). `origin` is this repo.
+**BigAmbitionStratMod** 1.3.5 — Epic 3 closed 2026-10-29. F8 dumps yesterday’s statements and the route CSVs. A day change dumps once and logs `day.rolled`. A warehouse hold is cargo. A current `save.bin` is not read again. The Epic 2 ledger is unchanged. Rules come from AgenticTemplate (`upstream`). `origin` is this repo.
 
 ---
 
@@ -17,7 +17,9 @@
 | Branch | Role |
 |--------|------|
 | **`main`** | Integration branch |
-| **`feature/3.4-route-csvs`** | Kept after this CMPH |
+| **`feature/3.5-day-rollover`** | Kept after this CMPH |
+| **`feature/save-bin-reuse`** | Kept after the save.bin CMPH |
+| **`feature/3.4-route-csvs`** | Kept after the 3.4 CMPH |
 | **`feature/3.3-hotkey-statements`** | Kept after the 3.3 CMPH |
 | **`feature/3.2-mod-skeleton`** | Kept after the 3.2 CMPH |
 | **`feature/3.1-game-build`** | Kept after the 3.1 CMPH |
@@ -57,7 +59,7 @@
 
 ## Next up (maintainers)
 
-- Story **3.5** when asked. Auto dump at day rollover. Log `day.rolled`. Epic 3 is in progress.
+- Story **4.1** when asked. Pure C# advisor library. Epic 3 is closed.
 - Variants: merge upstream when AgenticTemplate skills/rules change
 
 ---

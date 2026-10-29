@@ -11,6 +11,7 @@ namespace ChaoticCEO
     [ModEntryOnInitializationLoad]
     public class ChaoticCeoMod : IModBigAmbitions
     {
+        private readonly DayWatch _days = new DayWatch();
         private bool _hooked;
         private string _localAppData = "";
 
@@ -23,7 +24,7 @@ namespace ChaoticCEO
             _localAppData = localAppData;
             if (!_hooked)
             {
-                UnityLifecycleProvider.OnUpdate += DumpOnHotkey;
+                UnityLifecycleProvider.OnUpdate += OnFrame;
                 _hooked = true;
             }
 
@@ -34,11 +35,17 @@ namespace ChaoticCEO
         {
             if (_hooked)
             {
-                UnityLifecycleProvider.OnUpdate -= DumpOnHotkey;
+                UnityLifecycleProvider.OnUpdate -= OnFrame;
                 _hooked = false;
             }
 
             return Task.CompletedTask;
+        }
+
+        private void OnFrame()
+        {
+            DumpOnHotkey();
+            LiveDump.Roll(_days, _localAppData);
         }
 
         private void DumpOnHotkey()

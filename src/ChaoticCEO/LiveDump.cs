@@ -18,6 +18,22 @@ namespace ChaoticCEO
             return line;
         }
 
+        public static string? Roll(DayWatch watch, string localAppData)
+        {
+            if (watch == null || string.IsNullOrEmpty(localAppData))
+            {
+                return null;
+            }
+
+            var current = SaveGameManager.Current;
+            if (current == null || !watch.Due(current.Day))
+            {
+                return null;
+            }
+
+            return watch.Tick(localAppData, current.Day, Days(current), Plans(current), Holds(current));
+        }
+
         private static IReadOnlyList<FinancialDay> Days(GameInstance? current)
         {
             if (current == null || current.financialSummaries == null)

@@ -25,7 +25,7 @@ This is the durable home for technical debt across sessions. Handoff notes can m
 
 (Isolated + workaround + revisit trigger.)
 
-- (none)
+- The Epic 3 header says the mod CSV is diffed against the ledger CSV for the same day. Stories 3.3–3.5 lock the mod dump. The human check compared counts. Revisit if Epic 4 needs that diff as a test.
 
 ---
 
