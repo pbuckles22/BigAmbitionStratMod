@@ -138,9 +138,9 @@ When shipping: update **PM_PLAN**, **doc/PROJECT_STATUS.md**, and **Current stat
 
 ## Current state
 
-- **Product:** Private save tools for the Chaotic empire. Version 1.3.1. Build 3682 Managed DLL names and hashes are pinned in `doc/requirements/game-build.md`. Epic 3 is in progress. The ladder through Epic 6 is in `PM_PLAN.md`.
-- **On:** `origin/main @ b6da5a0` — https://github.com/pbuckles22/BigAmbitionStratMod. Branch `feature/3.1-game-build` kept.
-- **Next:** Story **3.2** when asked. Mod skeleton from the official SDK. `dotnet build` installs to `ModsLocal` and logs `mod.loaded` with the game build.
+- **Product:** Private save tools for the Chaotic empire, plus the ChaoticCEO mod skeleton. Version 1.3.2. Build 3682 stays pinned in `doc/requirements/game-build.md`. Release `dotnet build` installs `ChaoticCEO.dll` to ModsLocal. The mod logs `mod.loaded` with that build. Epic 3 is in progress. The ladder through Epic 6 is in `PM_PLAN.md`.
+- **On:** `origin/main` after this CMPH — https://github.com/pbuckles22/BigAmbitionStratMod. Branch `feature/3.2-mod-skeleton` kept.
+- **Next:** Story **3.3** when asked. Hotkey dumps yesterday’s `FinancialSummary` to `statements.csv` and logs `csv.written`.
 - **Blockers:** none.
 
 ## Run and test
@@ -150,13 +150,15 @@ When shipping: update **PM_PLAN**, **doc/PROJECT_STATUS.md**, and **Current stat
 ```bash
 python -m pytest -q
 python -m py_compile script/Export-SaveGameText.py script/Slice-SaveGame.py script/statement_ledger.py script/game_build.py
+dotnet test src/ChaoticCEO.Tests/ChaoticCEO.Tests.csproj -p:GameManaged="C:\Program Files (x86)\Steam\steamapps\common\Big Ambitions\Big Ambitions_Data\Managed"
+dotnet build src/ChaoticCEO/ChaoticCEO.csproj -c Release -p:GameManaged="C:\Program Files (x86)\Steam\steamapps\common\Big Ambitions\Big Ambitions_Data\Managed"
 ```
 
-Run that from the repo root before commit. There is no compile counter. The story gate reuses `doc/gemini/cache/save.bin` and `save-index.sqlite` when both are current for the dropzone `.hsg`. Rebuild with `python script/Slice-SaveGame.py`, then run the story gate again, when that `.hsg` changes, when `script/Slice-SaveGame.py` changes, or at epic close. `write_statements` calls `ensure_index`, which keeps that index. `build()` deletes the sqlite when the index is stale. The save cache under `doc/gemini/cache/` is gitignored. Statement export appends `statements.written` to `doc/gemini/cache/ledger.log`. Portfolio export appends `portfolio.written`. Route export appends `routes.written`. Report export appends `report.written`. Saved-game-to-text appends `savetext.written`.
+Run that from the repo root before commit. `dotnet test` is the Debug compile. The Release command is the production compile and installs `ChaoticCEO.dll` to `%USERPROFILE%\AppData\LocalLow\Hovgaard Games\Big Ambitions\ModsLocal\ChaoticCEO\`. The story gate reuses `doc/gemini/cache/save.bin` and `save-index.sqlite` when both are current for the dropzone `.hsg`. Rebuild with `python script/Slice-SaveGame.py`, then run the story gate again, when that `.hsg` changes, when `script/Slice-SaveGame.py` changes, or at epic close. `write_statements` calls `ensure_index`, which keeps that index. `build()` deletes the sqlite when the index is stale. The save cache under `doc/gemini/cache/` is gitignored. Statement export appends `statements.written` to `doc/gemini/cache/ledger.log`. Portfolio export appends `portfolio.written`. Route export appends `routes.written`. Report export appends `report.written`. Saved-game-to-text appends `savetext.written`.
 
-**Compile counter:** If those commands **compile**, count every compile (test/Debug and Release are separate). Local gitignored counter + binary `+N` when the toolchain allows. Skip for non-compiling repos (scripts, twitchurl*, DJ tools). See `.cursor/rules/testing.mdc` and [TEST_TDD.md](.cursor/skills/TEST_TDD.md).
+**Compile counter:** The mod compiles. `dotnet test` and the Release `dotnet build` each count when they compile. The gitignored counter is `build_number.txt` (seed `build_number.txt.example`). The binary informational version is `1.3.2+N`. The public version stays `1.3.2`. See `.cursor/rules/testing.mdc` and [TEST_TDD.md](.cursor/skills/TEST_TDD.md).
 
-**Evidence sink:** `doc/gemini/cache/ledger.log`. Statement export appends one `statements.written` line. Portfolio export appends one `portfolio.written` line. Route export appends one `routes.written` line. Report export appends one `report.written` line. Saved-game-to-text appends one `savetext.written` line. Debugger-only Trace is not evidence.
+**Evidence sink:** `doc/gemini/cache/ledger.log`. The mod writes `%LocalAppData%\ChaoticCEO\ceo.log`. Statement export appends one `statements.written` line. Portfolio export appends one `portfolio.written` line. Route export appends one `routes.written` line. Report export appends one `report.written` line. Saved-game-to-text appends one `savetext.written` line. Debugger-only Trace is not evidence.
 
 **Long run:** A batch or soak is not the regression suite. Extract the decision and lock a named Tier 1 test before the next long run (`testing.mdc` → *Long run*).
 

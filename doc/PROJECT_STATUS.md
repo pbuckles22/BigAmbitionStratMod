@@ -8,7 +8,7 @@
 
 ## Summary
 
-**BigAmbitionStratMod** 1.3.1 — Epic 3 is in progress. Build 3682 pins `BigAmbitions.dll` and `BigAmbitions.ModAPI.dll` in `doc/requirements/game-build.md`. The ledger from Epic 2 is unchanged. Rules come from AgenticTemplate (`upstream`). `origin` is this repo.
+**BigAmbitionStratMod** 1.3.2 — Epic 3 is in progress. The mod skeleton installs `ChaoticCEO.dll` to ModsLocal and logs `mod.loaded` for build 3682. The 1.3.1 pin and the Epic 2 ledger are unchanged. Rules come from AgenticTemplate (`upstream`). `origin` is this repo.
 
 ---
 
@@ -17,7 +17,8 @@
 | Branch | Role |
 |--------|------|
 | **`main`** | Integration branch |
-| **`feature/3.1-game-build`** | Kept after this CMPH |
+| **`feature/3.2-mod-skeleton`** | Kept after this CMPH |
+| **`feature/3.1-game-build`** | Kept after the 3.1 CMPH |
 | **`feature/2.3-save-text`** | Kept after the 2.3 CMPH |
 | **`feature/2.2-rank-report`** | Kept after the 2.2 CMPH |
 | **`feature/2.1-routes`** | Kept after the 2.1 CMPH |
@@ -30,7 +31,7 @@
 | **`feature/chain-prefix`** | Kept after CMPH (template history) |
 | **`feature/handoff-receiver-framing`** | Kept after CMPH (template history) |
 
-**Last land:** `b6da5a0` on `main`. Version 1.3.1. Branch `feature/3.1-game-build` kept. Repo: https://github.com/pbuckles22/BigAmbitionStratMod.
+**Last land:** pending this CMPH on `main`. Version 1.3.2. Branch `feature/3.2-mod-skeleton` kept. Repo: https://github.com/pbuckles22/BigAmbitionStratMod.
 
 ---
 
@@ -54,7 +55,7 @@
 
 ## Next up (maintainers)
 
-- Story **3.2** when asked. Mod skeleton from the official SDK. Epic 3 is in progress.
+- Story **3.3** when asked. Hotkey dump of yesterday’s `FinancialSummary`. Epic 3 is in progress.
 - Variants: merge upstream when AgenticTemplate skills/rules change
 
 ---
