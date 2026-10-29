@@ -8,7 +8,7 @@
 
 ## Summary
 
-**BigAmbitionStratMod** 1.3.5 — Epic 3 closed 2026-10-29. F8 dumps yesterday’s statements and the route CSVs. A day change dumps once and logs `day.rolled`. A warehouse hold is cargo. A current `save.bin` is not read again. The Epic 2 ledger is unchanged. Rules come from AgenticTemplate (`upstream`). `origin` is this repo.
+**BigAmbitionStratMod** 1.4.1 — Epic 4 is in progress on `feature/4.1-advisor-library` (not merged). The advisor library ranks by average daily profit and is not on screen. F8 still dumps yesterday’s statements and the route CSVs. A day change dumps once and logs `day.rolled`. A warehouse hold is cargo. A current `save.bin` is not read again. Epic 3 is closed on `main`. Rules come from AgenticTemplate (`upstream`). `origin` is this repo.
 
 ---
 
@@ -16,7 +16,8 @@
 
 | Branch | Role |
 |--------|------|
-| **`main`** | Integration branch |
+| **`main`** | Integration branch. Last land `9830617`, version 1.3.5 |
+| **`feature/4.1-advisor-library`** | Story 4.1. Not merged |
 | **`feature/3.5-day-rollover`** | Kept after this CMPH |
 | **`feature/save-bin-reuse`** | Kept after the save.bin CMPH |
 | **`feature/3.4-route-csvs`** | Kept after the 3.4 CMPH |
@@ -59,7 +60,7 @@
 
 ## Next up (maintainers)
 
-- Story **4.1** when asked. Pure C# advisor library. Epic 3 is closed.
+- Story **4.2** when asked. Overlay: red rows, mixed-warehouse warnings, and where to open next.
 - Variants: merge upstream when AgenticTemplate skills/rules change
 
 ---
