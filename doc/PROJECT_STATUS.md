@@ -8,7 +8,7 @@
 
 ## Summary
 
-**BigAmbitionStratMod** 1.3.4 — Epic 3 is in progress. F8 dumps yesterday’s statements and the route CSVs. A warehouse hold is cargo. The Epic 2 ledger is unchanged. Rules come from AgenticTemplate (`upstream`). `origin` is this repo.
+**BigAmbitionStratMod** 1.3.4 — Epic 3 is in progress. F8 dumps yesterday’s statements and the route CSVs. A warehouse hold is cargo. A current `save.bin` is not read again. The Epic 2 ledger is unchanged. Rules come from AgenticTemplate (`upstream`). `origin` is this repo.
 
 ---
 
