@@ -138,9 +138,9 @@ When shipping: update **PM_PLAN**, **doc/PROJECT_STATUS.md**, and **Current stat
 
 ## Current state
 
-- **Product:** Private save tools for the Chaotic empire. Version 1.1.2. `script/statement_ledger.py` writes `doc/gemini/cache/ledger/statements.csv` and `portfolio.csv` from the `.hsg` in `doc/gemini/dropzone/`. Epic 1 is complete.
-- **On:** `origin/main @ 8b56e68` — https://github.com/pbuckles22/BigAmbitionStratMod. Branch `feature/1.2-portfolio-join` kept.
-- **Next:** No story until one is named.
+- **Product:** Private save tools for the Chaotic empire. Version 1.1.2. `script/statement_ledger.py` writes `doc/gemini/cache/ledger/statements.csv` and `portfolio.csv` from the `.hsg` in `doc/gemini/dropzone/`. Epic 1 is complete. The ladder through Epic 6 is in `PM_PLAN.md`.
+- **On:** `origin/main @ 7b90f5f` — https://github.com/pbuckles22/BigAmbitionStratMod. Branch `feature/1.2-portfolio-join` kept.
+- **Next:** Story **2.1** when asked. Decode delivery plans into `routes.csv` and `warehouses.csv`.
 - **Blockers:** none.
 
 ## Run and test

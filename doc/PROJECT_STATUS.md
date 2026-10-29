@@ -17,7 +17,8 @@
 | Branch | Role |
 |--------|------|
 | **`main`** | Integration branch |
-| **`feature/1.2-portfolio-join`** | Kept after this CMPH |
+| **`feature/plan-epic-ladder`** | Kept after this CMPH |
+| **`feature/1.2-portfolio-join`** | Kept after the 1.2 CMPH |
 | **`feature/1.1-statement-street`** | Kept after the 1.1 CMPH |
 | **`feature/standup-save-tools`** | Kept after the standup CMPH |
 | **`feature/long-run-harvest`** | Kept after CMPH (template history) |
@@ -49,7 +50,7 @@
 
 ## Next up (maintainers)
 
-- No story until one is named. Epic 1 is complete.
+- Story **2.1** when asked. Decode delivery plans into `routes.csv` and `warehouses.csv`. Epic 1 is complete.
 - Variants: merge upstream when AgenticTemplate skills/rules change
 
 ---

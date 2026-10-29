@@ -1,6 +1,14 @@
-# PM_PLAN — Project
+# PM_PLAN — BigAmbitionStratMod
 
-Replace with your project’s phases and sprints.
+Private decision tool for one Big Ambitions save. Version scheme `MAJOR.EPIC.COUNTER`. Current public version **1.1.2**. The first ship of a new epic is `1.N.1`. Never go backwards.
+
+## Context
+
+The game is Mono, build **3682**. A mod builds with `dotnet build` against `BigAmbitions_Data\Managed` (`BigAmbitions.dll`, `BigAmbitions.ModAPI.dll`). Python save tools live in `script/`. The mod, when it exists, lives in `src/`. Evidence for the ledger is `doc/gemini/cache/ledger.log`. The mod will write `%LocalAppData%\ChaoticCEO\ceo.log`. There is no compile counter until the mod epic.
+
+Epic 1 closed on 17 businesses and 5865 statement rows. `ba:businesstype_liquorstore` is **food**. Do not relabel it inside a routes story. A warehouse story may add a specialty override only with a new test.
+
+One story per branch. Human check after **2.2**, after **3.3**, and on every Epic 5 story. Epics 5 and 6 wait until the one before them works. Monte Carlo is only **6.4–6.6**.
 
 ## Epic 1 — Save ledger
 
@@ -8,7 +16,68 @@ Replace with your project’s phases and sprints.
 
 - **1.1** `[x]` Statement rows with a street. `doc/gemini/cache/ledger/statements.csv` columns: day, street, number, sales, goods, wages, rent, marketing, theft, profit. Chain: `gunzip → index → statement`. Version 1.1.1.
 - **1.2** `[x]` Join each statement street and number to BuildingRegistration. `portfolio.csv` is one row per business, with family (food / durables / specialty / service / office / hq / warehouse) and TCO = goods + wages + rent + marketing, averaged over the days present. Chain: `gunzip → index → statement → portfolio`. Version 1.1.2.
-- **Next:** no story until one is named.
+
+Routes, the rank report, and saved-game-to-text wiring were cut from this epic. They are Epic 2.
+
+## Epic 2 — Routes and rank report
+
+**Status:** next
+
+Save-side. No game process.
+
+- **2.1** `[ ]` Decode `deliveryPlans` to `doc/gemini/cache/ledger/routes.csv` (`warehouse, destination, item, day, truck`) and `warehouses.csv` (what each warehouse holds). Chain: `gunzip → index → statement → portfolio → routes`. Log `routes.written`.
+- **2.2** `[ ]` `doc/gemini/cache/ledger/REPORT.md`: bottom 10 by profit, top offices, streets with 3+ of one family, warehouses that mix families. Chain: `gunzip → index → statement → portfolio → routes → report`. Log `report.written`. Human check against BizMan for the top row and the bottom row.
+- **2.3** `[ ]` Saved-game-to-text runs the ledger through the report. Chain: `gunzip → index → statement → portfolio → routes → report` on the real save.
+
+## Epic 3 — Read-only mod
+
+**Status:** later
+
+Same CSV schema as the ledger, read from live memory. The chain diffs the mod CSV against the ledger CSV for the same day.
+
+- **3.1** `[ ]` Pin Managed DLL names and hashes into `doc/requirements/game-build.md`.
+- **3.2** `[ ]` Mod skeleton from the official SDK. `dotnet build` installs to `ModsLocal`. Log `mod.loaded` with the game build to `ceo.log`. Document `dotnet test` and `dotnet build -c Release -p:GameManaged=...` in AGENT_HANDOFF. The compile counter starts here.
+- **3.3** `[ ]` Hotkey dumps yesterday’s `FinancialSummary` to `statements.csv`. Log `csv.written`.
+- **3.4** `[ ]` Dump warehouses and delivery plans to the route CSVs.
+- **3.5** `[ ]` Auto dump at day rollover. Log `day.rolled`.
+
+## Epic 4 — Advisor
+
+**Status:** later
+
+The human still clicks.
+
+- **4.1** `[ ]` Pure C# library, unit-tested: `Rank`, `CloseCandidates`, `WarehouseFamilyMix`, `StreetClusters`. Same rules as 2.2.
+- **4.2** `[ ]` Overlay: red rows, mixed-warehouse warnings, and where to open next.
+- **4.3** `[ ]` One explain line per recommendation. Log `advice.shown`.
+
+## Epic 5 — Autopilot
+
+**Status:** later
+
+Each action is opt-in, logged, and undone by reload. A wrong soak decision becomes a named Tier 1 test in the Epic 4 library before the next soak.
+
+- **5.1** `[ ]` Retail prices from `ItemSoldPerPriceEntry`.
+- **5.2** `[ ]` Delivery plans: one family per warehouse, recurring runs.
+- **5.3** `[ ]` Staffing via `HrManagerPlan` / `HeadhunterPlan`.
+- **5.4** `[ ]` Clone a chain layout onto a new store when a street cluster qualifies.
+- **5.5** `[ ]` Close after N red days. Confirm dialog first, then a toggle.
+- **5.6** `[ ]` Buy the building under HQ, then under the food warehouse, then on owned streets.
+
+## Epic 6 — Headless sim and Monte Carlo
+
+**Status:** later
+
+Not started until Epic 5 works. **6.1–6.3** are one deterministic sim. **6.4–6.6** add randomness.
+
+- **6.1** `[ ]` Fit demand and cost curves from the ledger CSVs.
+- **6.2** `[ ]` Day stepper using the Epic 4 library. Same `portfolio.csv` shape.
+- **6.3** `[ ]` Calibration: a sim from day 1000 lands within tolerance of the real ledger at day 1014.
+- **6.4** `[ ]` Seeded demand, rival, and hiring noise. Distribution of net worth at day 365.
+- **6.5** `[ ]` Compare policies. Keep the best median with an acceptable worst case.
+- **6.6** `[ ]` New-game mode: start fresh, and the autopilot follows the chosen policy.
+
+**Next:** story **2.1** when asked.
 
 Operating model (keep these when you replace this plan): `.cursor/rules/` ship commands (UCPH, CMPH, SWAT), human check, plan-coordinate versioning, long-run harvest (`testing.mdc`), and the chain harness and prefix (`integration-chain.mdc`). Do not delete them to “clean up” a new clone.
 
