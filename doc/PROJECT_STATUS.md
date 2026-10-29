@@ -8,7 +8,7 @@
 
 ## Summary
 
-**BigAmbitionStratMod** 1.2.2 — Epic 2 complete. Saved-game-to-text runs the ledger through the rank report and names the bottom business. A current save index stays. Chaotic Kabobs #5 is that business. Rules come from AgenticTemplate (`upstream`). `origin` is this repo.
+**BigAmbitionStratMod** 1.3.1 — Epic 3 is in progress. Build 3682 pins `BigAmbitions.dll` and `BigAmbitions.ModAPI.dll` in `doc/requirements/game-build.md`. The ledger from Epic 2 is unchanged. Rules come from AgenticTemplate (`upstream`). `origin` is this repo.
 
 ---
 
@@ -17,7 +17,8 @@
 | Branch | Role |
 |--------|------|
 | **`main`** | Integration branch |
-| **`feature/2.3-save-text`** | Kept after this CMPH |
+| **`feature/3.1-game-build`** | Kept after this CMPH |
+| **`feature/2.3-save-text`** | Kept after the 2.3 CMPH |
 | **`feature/2.2-rank-report`** | Kept after the 2.2 CMPH |
 | **`feature/2.1-routes`** | Kept after the 2.1 CMPH |
 | **`feature/plan-epic-ladder`** | Kept after the ladder CMPH |
@@ -53,7 +54,7 @@
 
 ## Next up (maintainers)
 
-- Story **3.1** when asked. Pin Managed DLL names and hashes into `doc/requirements/game-build.md`. Epic 2 is complete.
+- Story **3.2** when asked. Mod skeleton from the official SDK. Epic 3 is in progress.
 - Variants: merge upstream when AgenticTemplate skills/rules change
 
 ---

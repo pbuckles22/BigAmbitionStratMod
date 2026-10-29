@@ -138,9 +138,9 @@ When shipping: update **PM_PLAN**, **doc/PROJECT_STATUS.md**, and **Current stat
 
 ## Current state
 
-- **Product:** Private save tools for the Chaotic empire. Version 1.2.2. Saved-game-to-text runs the ledger through the report and names the bottom business. A current save index stays. Epic 2 is complete. The ladder through Epic 6 is in `PM_PLAN.md`.
+- **Product:** Private save tools for the Chaotic empire. Version 1.3.1. Build 3682 Managed DLL names and hashes are pinned in `doc/requirements/game-build.md`. Epic 3 is in progress. The ladder through Epic 6 is in `PM_PLAN.md`.
 - **On:** `origin/main @ becc36a` — https://github.com/pbuckles22/BigAmbitionStratMod. Branch `feature/2.3-save-text` kept.
-- **Next:** Story **3.1** when asked. Pin Managed DLL names and hashes into `doc/requirements/game-build.md`.
+- **Next:** Story **3.2** when asked. Mod skeleton from the official SDK. `dotnet build` installs to `ModsLocal` and logs `mod.loaded` with the game build.
 - **Blockers:** none.
 
 ## Run and test
@@ -149,7 +149,7 @@ When shipping: update **PM_PLAN**, **doc/PROJECT_STATUS.md**, and **Current stat
 
 ```bash
 python -m pytest -q
-python -m py_compile script/Export-SaveGameText.py script/Slice-SaveGame.py script/statement_ledger.py
+python -m py_compile script/Export-SaveGameText.py script/Slice-SaveGame.py script/statement_ledger.py script/game_build.py
 ```
 
 Run that from the repo root before commit. There is no compile counter. The story gate reuses `doc/gemini/cache/save.bin` and `save-index.sqlite` when both are current for the dropzone `.hsg`. Rebuild with `python script/Slice-SaveGame.py`, then run the story gate again, when that `.hsg` changes, when `script/Slice-SaveGame.py` changes, or at epic close. `write_statements` calls `ensure_index`, which keeps that index. `build()` deletes the sqlite when the index is stale. The save cache under `doc/gemini/cache/` is gitignored. Statement export appends `statements.written` to `doc/gemini/cache/ledger.log`. Portfolio export appends `portfolio.written`. Route export appends `routes.written`. Report export appends `report.written`. Saved-game-to-text appends `savetext.written`.

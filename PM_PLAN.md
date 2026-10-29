@@ -1,10 +1,10 @@
 # PM_PLAN — BigAmbitionStratMod
 
-Private decision tool for one Big Ambitions save. Version scheme `MAJOR.EPIC.COUNTER`. Current public version **1.2.2**. The first ship of a new epic is `1.N.1`. Never go backwards.
+Private decision tool for one Big Ambitions save. Version scheme `MAJOR.EPIC.COUNTER`. Current public version **1.3.1**. The first ship of a new epic is `1.N.1`. Never go backwards.
 
 ## Context
 
-The game is Mono, build **3682**. A mod builds with `dotnet build` against `BigAmbitions_Data\Managed` (`BigAmbitions.dll`, `BigAmbitions.ModAPI.dll`). Python save tools live in `script/`. The mod, when it exists, lives in `src/`. Evidence for the ledger is `doc/gemini/cache/ledger.log`. The mod will write `%LocalAppData%\ChaoticCEO\ceo.log`. There is no compile counter until the mod epic.
+The game is Mono, build **3682**. A mod builds with `dotnet build` against `Big Ambitions_Data\Managed` (`BigAmbitions.dll`, `BigAmbitions.ModAPI.dll`). The pin is `doc/requirements/game-build.md`. Python save tools live in `script/`. The mod, when it exists, lives in `src/`. Evidence for the ledger is `doc/gemini/cache/ledger.log`. The mod will write `%LocalAppData%\ChaoticCEO\ceo.log`. There is no compile counter until the mod epic.
 
 Epic 1 closed on 17 businesses and 5865 statement rows. `ba:businesstype_liquorstore` is **food**. Do not relabel it inside a routes story. A warehouse story may add a specialty override only with a new test.
 
@@ -31,11 +31,11 @@ Save-side. No game process.
 
 ## Epic 3 — Read-only mod
 
-**Status:** next
+**Status:** in progress
 
 Same CSV schema as the ledger, read from live memory. The chain diffs the mod CSV against the ledger CSV for the same day.
 
-- **3.1** `[ ]` Pin Managed DLL names and hashes into `doc/requirements/game-build.md`.
+- **3.1** `[x]` Pin Managed DLL names and hashes into `doc/requirements/game-build.md`. Version 1.3.1.
 - **3.2** `[ ]` Mod skeleton from the official SDK. `dotnet build` installs to `ModsLocal`. Log `mod.loaded` with the game build to `ceo.log`. Document `dotnet test` and `dotnet build -c Release -p:GameManaged=...` in AGENT_HANDOFF. The compile counter starts here.
 - **3.3** `[ ]` Hotkey dumps yesterday’s `FinancialSummary` to `statements.csv`. Log `csv.written`.
 - **3.4** `[ ]` Dump warehouses and delivery plans to the route CSVs.
@@ -77,7 +77,7 @@ Not started until Epic 5 works. **6.1–6.3** are one deterministic sim. **6.4�
 - **6.5** `[ ]` Compare policies. Keep the best median with an acceptable worst case.
 - **6.6** `[ ]` New-game mode: start fresh, and the autopilot follows the chosen policy.
 
-**Next:** story **3.1** when asked.
+**Next:** story **3.2** when asked.
 
 Operating model (keep these when you replace this plan): `.cursor/rules/` ship commands (UCPH, CMPH, SWAT), human check, plan-coordinate versioning, long-run harvest (`testing.mdc`), and the chain harness and prefix (`integration-chain.mdc`). Do not delete them to “clean up” a new clone.
 
