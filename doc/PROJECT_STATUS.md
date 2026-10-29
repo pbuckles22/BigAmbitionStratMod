@@ -28,7 +28,7 @@
 | **`feature/chain-prefix`** | Kept after CMPH (template history) |
 | **`feature/handoff-receiver-framing`** | Kept after CMPH (template history) |
 
-**Last land:** `6162e0b` on `main`. Version 1.2.2. Branch `feature/2.2-rank-report` kept. Repo: https://github.com/pbuckles22/BigAmbitionStratMod.
+**Last land:** `c122669` on `main`. Version 1.2.2. Branch `feature/2.2-rank-report` kept. Repo: https://github.com/pbuckles22/BigAmbitionStratMod.
 
 ---
 
