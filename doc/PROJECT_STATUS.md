@@ -8,7 +8,7 @@
 
 ## Summary
 
-**BigAmbitionStratMod** 1.4.2 — Epic 4 is in progress on `main`. The overlay marks a close candidate red, warns on a mixed warehouse, and names a street with 3 or more of one family as where to open next. Those marks are not drawn. F8 still dumps yesterday’s statements and the route CSVs. A day change dumps once and logs `day.rolled`. A warehouse hold is cargo. A current `save.bin` is not read again. Epic 3 is closed. Rules come from AgenticTemplate (`upstream`). `origin` is this repo.
+**BigAmbitionStratMod** 1.4.3 — Epic 4 is closed on `main`. Each recommendation has one explain line. Recording it logs `advice.shown`. The running game does not write that line, and the overlay marks are not drawn. F8 still dumps yesterday’s statements and the route CSVs. A day change dumps once and logs `day.rolled`. A warehouse hold is cargo. A current `save.bin` is not read again. Rules come from AgenticTemplate (`upstream`). `origin` is this repo.
 
 ---
 
@@ -16,7 +16,8 @@
 
 | Branch | Role |
 |--------|------|
-| **`main`** | Integration branch. Last land `18ba3ec`, version 1.4.2 |
+| **`main`** | Integration branch. Version 1.4.3 |
+| **`feature/4.3-advice-line`** | Story 4.3. Kept after this CMPH |
 | **`feature/4.2-advisor-overlay`** | Story 4.2. Kept after this CMPH |
 | **`feature/4.1-advisor-library`** | Kept after story 4.1 |
 | **`feature/3.5-day-rollover`** | Kept after this CMPH |
@@ -37,7 +38,7 @@
 | **`feature/chain-prefix`** | Kept after CMPH (template history) |
 | **`feature/handoff-receiver-framing`** | Kept after CMPH (template history) |
 
-**Last land:** `18ba3ec` on `main`. Version 1.4.2. Branch `feature/4.2-advisor-overlay` kept. Repo: https://github.com/pbuckles22/BigAmbitionStratMod.
+**Last land:** version 1.4.3 on `main`. Branch `feature/4.3-advice-line` kept. Repo: https://github.com/pbuckles22/BigAmbitionStratMod.
 
 ---
 
@@ -61,7 +62,7 @@
 
 ## Next up (maintainers)
 
-- Story **4.3** when asked. One explain line per recommendation. Log `advice.shown`.
+- Story **5.1** when asked. Retail prices from `ItemSoldPerPriceEntry`.
 - Variants: merge upstream when AgenticTemplate skills/rules change
 
 ---
