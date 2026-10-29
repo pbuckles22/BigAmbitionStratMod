@@ -139,7 +139,7 @@ When shipping: update **PM_PLAN**, **doc/PROJECT_STATUS.md**, and **Current stat
 ## Current state
 
 - **Product:** Private save tools for the Chaotic empire, plus the ChaoticCEO mod. Version 1.4.3. Build 3682 stays pinned in `doc/requirements/game-build.md`. Release `dotnet build` installs `ChaoticCEO.dll` to ModsLocal. F8 dumps yesterday’s statements and the route CSVs, and logs `csv.written` and `routes.written`. A day change dumps once and logs `day.rolled`. A warehouse hold is cargo. Each recommendation has one explain line, and recording it logs `advice.shown`. The running game does not write that line. The overlay marks are not drawn. A current `save.bin` is not read again. Epic 4 is closed. The ladder through Epic 6 is in `PM_PLAN.md`.
-- **On:** `origin/main`. `feature/4.3-advice-line` kept. https://github.com/pbuckles22/BigAmbitionStratMod
+- **On:** `origin/main @ 89e6b56`. `feature/4.3-advice-line` kept. https://github.com/pbuckles22/BigAmbitionStratMod
 - **Next:** Story **5.1** when asked. Retail prices from `ItemSoldPerPriceEntry`.
 - **Blockers:** none.
 

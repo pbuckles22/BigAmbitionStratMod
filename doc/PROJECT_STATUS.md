@@ -16,7 +16,7 @@
 
 | Branch | Role |
 |--------|------|
-| **`main`** | Integration branch. Version 1.4.3 |
+| **`main`** | Integration branch. Last land `89e6b56`, version 1.4.3 |
 | **`feature/4.3-advice-line`** | Story 4.3. Kept after this CMPH |
 | **`feature/4.2-advisor-overlay`** | Story 4.2. Kept after this CMPH |
 | **`feature/4.1-advisor-library`** | Kept after story 4.1 |
@@ -38,7 +38,7 @@
 | **`feature/chain-prefix`** | Kept after CMPH (template history) |
 | **`feature/handoff-receiver-framing`** | Kept after CMPH (template history) |
 
-**Last land:** version 1.4.3 on `main`. Branch `feature/4.3-advice-line` kept. Repo: https://github.com/pbuckles22/BigAmbitionStratMod.
+**Last land:** `89e6b56` on `main`. Version 1.4.3. Branch `feature/4.3-advice-line` kept. Repo: https://github.com/pbuckles22/BigAmbitionStratMod.
 
 ---
 
