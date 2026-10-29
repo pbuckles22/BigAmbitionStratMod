@@ -139,7 +139,7 @@ When shipping: update **PM_PLAN**, **doc/PROJECT_STATUS.md**, and **Current stat
 ## Current state
 
 - **Product:** Private save tools for the Chaotic empire. Version 1.2.2. Saved-game-to-text runs the ledger through the report and names the bottom business. A current save index stays. Epic 2 is complete. The ladder through Epic 6 is in `PM_PLAN.md`.
-- **On:** `origin/main @ LANDSHA` — https://github.com/pbuckles22/BigAmbitionStratMod. Branch `feature/2.3-save-text` kept.
+- **On:** `origin/main @ 16a64c1` — https://github.com/pbuckles22/BigAmbitionStratMod. Branch `feature/2.3-save-text` kept.
 - **Next:** Story **3.1** when asked. Pin Managed DLL names and hashes into `doc/requirements/game-build.md`.
 - **Blockers:** none.
 

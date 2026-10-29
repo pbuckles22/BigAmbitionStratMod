@@ -29,7 +29,7 @@
 | **`feature/chain-prefix`** | Kept after CMPH (template history) |
 | **`feature/handoff-receiver-framing`** | Kept after CMPH (template history) |
 
-**Last land:** `LANDSHA` on `main`. Version 1.2.2. Branch `feature/2.3-save-text` kept. Repo: https://github.com/pbuckles22/BigAmbitionStratMod.
+**Last land:** `16a64c1` on `main`. Version 1.2.2. Branch `feature/2.3-save-text` kept. Repo: https://github.com/pbuckles22/BigAmbitionStratMod.
 
 ---
 
