@@ -4,7 +4,7 @@ namespace ChaoticCEO
 {
     public static class LoadLog
     {
-        public const string Version = "1.3.2";
+        public const string Version = "1.3.3";
         public const string PinnedBuild = "3682";
         public const string ModId = "ChaoticCEO";
 

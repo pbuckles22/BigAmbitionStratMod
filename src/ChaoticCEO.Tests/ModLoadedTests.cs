@@ -13,7 +13,7 @@ public class ModLoadedTests
 
         var line = LoadLog.Record(path);
 
-        Assert.Equal("mod.loaded version=1.3.2 build=3682", line);
+        Assert.Equal("mod.loaded version=1.3.3 build=3682", line);
         Assert.Equal(line, File.ReadAllText(path).TrimEnd('\r', '\n'));
     }
 
@@ -25,7 +25,7 @@ public class ModLoadedTests
 
         var line = LoadLog.Record(path, "1000");
 
-        Assert.Equal("mod.loaded version=1.3.2 build=1000", line);
+        Assert.Equal("mod.loaded version=1.3.3 build=1000", line);
         Assert.DoesNotContain("3682", File.ReadAllText(path));
     }
 
@@ -41,8 +41,8 @@ public class ModLoadedTests
         Assert.Equal(
             new[]
             {
-                "mod.loaded version=1.3.2 build=1",
-                "mod.loaded version=1.3.2 build=2",
+                "mod.loaded version=1.3.3 build=1",
+                "mod.loaded version=1.3.3 build=2",
             },
             File.ReadAllLines(path));
     }
@@ -65,7 +65,7 @@ public class ModLoadedTests
         var line = LoadLog.RecordPinned(dir.Path);
 
         var path = Path.Combine(dir.Path, "ChaoticCEO", "ceo.log");
-        Assert.Equal("mod.loaded version=1.3.2 build=3682", line);
+        Assert.Equal("mod.loaded version=1.3.3 build=3682", line);
         Assert.Equal(line, File.ReadAllText(path).TrimEnd('\r', '\n'));
     }
 
@@ -74,7 +74,7 @@ public class ModLoadedTests
     {
         var product = FileVersionInfo.GetVersionInfo(typeof(LoadLog).Assembly.Location).ProductVersion;
 
-        Assert.Matches(@"^1\.3\.2\+\d+$", product);
+        Assert.Matches(@"^1\.3\.3\+\d+$", product);
     }
 
     [Fact]
@@ -148,6 +148,73 @@ public class ModLoadedTests
         Assert.Contains("build=" + pin.Build, line);
         Assert.Contains("build=" + pin.Build, recorded);
         Assert.DoesNotContain(pin.DllHash, recorded);
+    }
+
+    [Fact]
+    public void Dll_pin_loaded_csv_locks_csv_written()
+    {
+        // Chain: dll → pin → loaded → csv
+        var pin = PinDlls();
+        using var dir = new TempLog();
+
+        var loaded = LoadLog.RecordPinned(dir.Path);
+        var written = StatementDump.Write(
+            dir.Path,
+            1014,
+            new[]
+            {
+                new FinancialDay(
+                    1014,
+                    new[] { new StatementRow("ba:street_today", 1, 9f, 0f, 0f, 0f, 0f, 0f, 9f) }),
+                new FinancialDay(
+                    1013,
+                    new[]
+                    {
+                        new StatementRow(
+                            "ba:street_fourthavenue",
+                            28,
+                            65477f,
+                            3897.2825f,
+                            9793.2383f,
+                            1099f,
+                            0f,
+                            0f,
+                            50687.4805f),
+                    }),
+            });
+
+        var log = File.ReadAllText(Path.Combine(dir.Path, "ChaoticCEO", "ceo.log"));
+        Assert.Equal(LoadLog.Line(pin.Build), loaded);
+        Assert.Contains(loaded, log);
+        Assert.Equal(
+            "csv.written version=1.3.3 rows=1 day=1013 street=ba:street_fourthavenue number=28 profit=50687.4805",
+            written);
+        Assert.Contains(written, log);
+        Assert.DoesNotContain(pin.DllHash, log);
+        Assert.DoesNotContain("ba:street_today", File.ReadAllText(StatementDump.CsvPath(dir.Path)));
+    }
+
+    [Fact]
+    public void Dll_pin_loaded_csv_locks_an_empty_yesterday()
+    {
+        // Chain: dll → pin → loaded → csv empty
+        var pin = PinDlls();
+        using var dir = new TempLog();
+
+        var loaded = LoadLog.RecordPinned(dir.Path);
+        var written = StatementDump.Write(
+            dir.Path,
+            1014,
+            new[] { new FinancialDay(1014, new[] { new StatementRow("ba:street_today", 1, 9f, 0f, 0f, 0f, 0f, 0f, 9f) }) });
+
+        var log = File.ReadAllText(Path.Combine(dir.Path, "ChaoticCEO", "ceo.log"));
+        var csv = File.ReadAllText(StatementDump.CsvPath(dir.Path)).Replace("\r\n", "\n");
+        Assert.Equal(LoadLog.Line(pin.Build), loaded);
+        Assert.StartsWith(loaded, log.TrimStart('\uFEFF'));
+        Assert.Equal("csv.written version=1.3.3 rows=0 day=1013 street= number= profit=", written);
+        Assert.Contains(written, log);
+        Assert.Equal("day,street,number,sales,goods,wages,rent,marketing,theft,profit\n", csv);
+        Assert.DoesNotContain(pin.DllHash, log);
     }
 
     private static Pin PinDlls()

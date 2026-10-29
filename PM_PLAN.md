@@ -1,10 +1,10 @@
 # PM_PLAN — BigAmbitionStratMod
 
-Private decision tool for one Big Ambitions save. Version scheme `MAJOR.EPIC.COUNTER`. Current public version **1.3.2**. The first ship of a new epic is `1.N.1`. Never go backwards.
+Private decision tool for one Big Ambitions save. Version scheme `MAJOR.EPIC.COUNTER`. Current public version **1.3.3**. The first ship of a new epic is `1.N.1`. Never go backwards.
 
 ## Context
 
-The game is Mono, build **3682**. A mod builds with `dotnet build` against `Big Ambitions_Data\Managed` (`BigAmbitions.dll`, `BigAmbitions.ModAPI.dll`). The pin is `doc/requirements/game-build.md`. Python save tools live in `script/`. The mod, when it exists, lives in `src/`. Evidence for the ledger is `doc/gemini/cache/ledger.log`. The mod writes `%LocalAppData%\ChaoticCEO\ceo.log`. The compile counter is gitignored `build_number.txt`. The mod informational version is `1.3.2+N`.
+The game is Mono, build **3682**. A mod builds with `dotnet build` against `Big Ambitions_Data\Managed` (`BigAmbitions.dll`, `BigAmbitions.ModAPI.dll`). The pin is `doc/requirements/game-build.md`. Python save tools live in `script/`. The mod, when it exists, lives in `src/`. Evidence for the ledger is `doc/gemini/cache/ledger.log`. The mod writes `%LocalAppData%\ChaoticCEO\ceo.log`. The compile counter is gitignored `build_number.txt`. The mod informational version is `1.3.3+N`.
 
 Epic 1 closed on 17 businesses and 5865 statement rows. `ba:businesstype_liquorstore` is **food**. Do not relabel it inside a routes story. A warehouse story may add a specialty override only with a new test.
 
@@ -37,7 +37,7 @@ Same CSV schema as the ledger, read from live memory. The chain diffs the mod CS
 
 - **3.1** `[x]` Pin Managed DLL names and hashes into `doc/requirements/game-build.md`. Version 1.3.1.
 - **3.2** `[x]` Mod skeleton from the official SDK. `dotnet build` installs to `ModsLocal`. Log `mod.loaded` with the game build to `ceo.log`. `dotnet test` and `dotnet build -c Release -p:GameManaged=...` are in AGENT_HANDOFF. Chain: `dll → pin → loaded`. The compile counter starts here. Version 1.3.2.
-- **3.3** `[ ]` Hotkey dumps yesterday’s `FinancialSummary` to `statements.csv`. Log `csv.written`.
+- **3.3** `[x]` Hotkey dumps yesterday’s `FinancialSummary` to `statements.csv`. Log `csv.written`. Chain: `dll → pin → loaded → csv`. Version 1.3.3.
 - **3.4** `[ ]` Dump warehouses and delivery plans to the route CSVs.
 - **3.5** `[ ]` Auto dump at day rollover. Log `day.rolled`.
 
@@ -77,7 +77,7 @@ Not started until Epic 5 works. **6.1–6.3** are one deterministic sim. **6.4�
 - **6.5** `[ ]` Compare policies. Keep the best median with an acceptable worst case.
 - **6.6** `[ ]` New-game mode: start fresh, and the autopilot follows the chosen policy.
 
-**Next:** story **3.3** when asked.
+**Next:** story **3.4** when asked.
 
 Operating model (keep these when you replace this plan): `.cursor/rules/` ship commands (UCPH, CMPH, SWAT), human check, plan-coordinate versioning, long-run harvest (`testing.mdc`), and the chain harness and prefix (`integration-chain.mdc`). Do not delete them to “clean up” a new clone.
 

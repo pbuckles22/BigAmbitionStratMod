@@ -79,6 +79,42 @@ def test_IndexReuse_a_different_save_is_not_current(tmp_path):
     assert slice_save.index_is_current(other) is False
 
 
+def test_BlobReuse_a_renamed_save_is_not_the_cached_blob():
+    assert (
+        slice_save.reuse_blob(
+            "Recover #1 (Modded).hsg",
+            "New chaotic Save Game.hsg",
+            10.0,
+            10.0,
+        )
+        is False
+    )
+
+
+def test_BlobReuse_an_older_blob_is_not_reused():
+    assert (
+        slice_save.reuse_blob(
+            "Recover #1 (Modded).hsg",
+            "Recover #1 (Modded).hsg",
+            9.0,
+            10.0,
+        )
+        is False
+    )
+
+
+def test_BlobReuse_keeps_the_same_save_when_the_blob_is_newer():
+    assert (
+        slice_save.reuse_blob(
+            "Recover #1 (Modded).hsg",
+            "Recover #1 (Modded).hsg",
+            10.0,
+            10.0,
+        )
+        is True
+    )
+
+
 def test_SaveText_locks_the_bottom_business():
     text = export.render_export("save.hsg", KABOBS_REPORT)
     assert "Bottom business: Chaotic Kabobs #5" in text

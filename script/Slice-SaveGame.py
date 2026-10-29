@@ -76,10 +76,31 @@ def default_save() -> Path:
     raise SystemExit(f"More than one .hsg in {DROPZONE}. Pass a path:\n{names}")
 
 
+def recorded_save_name() -> str | None:
+    meta = CACHE / "regions.json"
+    if not meta.is_file():
+        return None
+    try:
+        name = json.loads(meta.read_text(encoding="utf-8")).get("save")
+    except (OSError, json.JSONDecodeError):
+        return None
+    return name if isinstance(name, str) else None
+
+
+def reuse_blob(save_name: str, recorded_name: str | None, blob_mtime: float, save_mtime: float) -> bool:
+    """Keep save.bin only when it was built from this file and is not older than it."""
+    return recorded_name == save_name and blob_mtime >= save_mtime
+
+
 def load_bin(save: Path) -> tuple[bytes, Path]:
     CACHE.mkdir(parents=True, exist_ok=True)
     blob = CACHE / "save.bin"
-    if blob.is_file() and blob.stat().st_mtime >= save.stat().st_mtime:
+    if blob.is_file() and reuse_blob(
+        save.name,
+        recorded_save_name(),
+        blob.stat().st_mtime,
+        save.stat().st_mtime,
+    ):
         print(f"Using cached {blob} ({blob.stat().st_size} bytes)")
         return blob.read_bytes(), blob
     print(f"Decompressing {save.name} once...")

@@ -2,13 +2,13 @@
 
 **Human-readable current state.** Keep in sync with [AGENT_HANDOFF.md](../AGENT_HANDOFF.md) → *Current state* when milestones ship.
 
-**Last updated:** 2026-10-28
+**Last updated:** 2026-10-29
 
 ---
 
 ## Summary
 
-**BigAmbitionStratMod** 1.3.2 — Epic 3 is in progress. The mod skeleton installs `ChaoticCEO.dll` to ModsLocal and logs `mod.loaded` for build 3682. The 1.3.1 pin and the Epic 2 ledger are unchanged. Rules come from AgenticTemplate (`upstream`). `origin` is this repo.
+**BigAmbitionStratMod** 1.3.3 — Epic 3 is in progress. F8 dumps yesterday’s business statements to `statements.csv` and logs `csv.written`. The 1.3.2 skeleton and the Epic 2 ledger are unchanged. Rules come from AgenticTemplate (`upstream`). `origin` is this repo.
 
 ---
 
@@ -17,7 +17,8 @@
 | Branch | Role |
 |--------|------|
 | **`main`** | Integration branch |
-| **`feature/3.2-mod-skeleton`** | Kept after this CMPH |
+| **`feature/3.3-hotkey-statements`** | This ship, until the land sha is recorded |
+| **`feature/3.2-mod-skeleton`** | Kept after the 3.2 CMPH |
 | **`feature/3.1-game-build`** | Kept after the 3.1 CMPH |
 | **`feature/2.3-save-text`** | Kept after the 2.3 CMPH |
 | **`feature/2.2-rank-report`** | Kept after the 2.2 CMPH |
@@ -55,7 +56,7 @@
 
 ## Next up (maintainers)
 
-- Story **3.3** when asked. Hotkey dump of yesterday’s `FinancialSummary`. Epic 3 is in progress.
+- Story **3.4** when asked. Dump warehouses and delivery plans to the route CSVs. Epic 3 is in progress.
 - Variants: merge upstream when AgenticTemplate skills/rules change
 
 ---
