@@ -26,7 +26,7 @@
 | **`feature/chain-prefix`** | Kept after CMPH (template history) |
 | **`feature/handoff-receiver-framing`** | Kept after CMPH (template history) |
 
-**Last land:** `8b56e68` on `main`. Version 1.1.2. Branch `feature/1.2-portfolio-join` kept. Repo: https://github.com/pbuckles22/BigAmbitionStratMod.
+**Last land:** `c10151a` on `main`. Version 1.1.2. Branch `feature/plan-epic-ladder` kept. Repo: https://github.com/pbuckles22/BigAmbitionStratMod.
 
 ---
 
