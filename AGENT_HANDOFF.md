@@ -139,7 +139,7 @@ When shipping: update **PM_PLAN**, **doc/PROJECT_STATUS.md**, and **Current stat
 ## Current state
 
 - **Product:** Private save tools for the Chaotic empire, plus the ChaoticCEO mod. Version 1.3.3. Build 3682 stays pinned in `doc/requirements/game-build.md`. Release `dotnet build` installs `ChaoticCEO.dll` to ModsLocal. F8 dumps yesterday’s statements and logs `csv.written`. Epic 3 is in progress. The ladder through Epic 6 is in `PM_PLAN.md`.
-- **On:** `feature/3.3-hotkey-statements` — not merged. https://github.com/pbuckles22/BigAmbitionStratMod
+- **On:** `origin/main @ 0f04b1b` — https://github.com/pbuckles22/BigAmbitionStratMod. Branch `feature/3.3-hotkey-statements` kept.
 - **Next:** Story **3.4** when asked. Dump warehouses and delivery plans to the route CSVs.
 - **Blockers:** none.
 

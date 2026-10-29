@@ -17,7 +17,7 @@
 | Branch | Role |
 |--------|------|
 | **`main`** | Integration branch |
-| **`feature/3.3-hotkey-statements`** | This ship, until the land sha is recorded |
+| **`feature/3.3-hotkey-statements`** | Kept after this CMPH |
 | **`feature/3.2-mod-skeleton`** | Kept after the 3.2 CMPH |
 | **`feature/3.1-game-build`** | Kept after the 3.1 CMPH |
 | **`feature/2.3-save-text`** | Kept after the 2.3 CMPH |
@@ -32,7 +32,7 @@
 | **`feature/chain-prefix`** | Kept after CMPH (template history) |
 | **`feature/handoff-receiver-framing`** | Kept after CMPH (template history) |
 
-**Last land:** `dddb857` on `main`. Version 1.3.2. Branch `feature/3.2-mod-skeleton` kept. Repo: https://github.com/pbuckles22/BigAmbitionStratMod.
+**Last land:** `0f04b1b` on `main`. Version 1.3.3. Branch `feature/3.3-hotkey-statements` kept. Repo: https://github.com/pbuckles22/BigAmbitionStratMod.
 
 ---
 
