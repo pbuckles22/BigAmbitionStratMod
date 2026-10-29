@@ -35,7 +35,7 @@
 | **`feature/chain-prefix`** | Kept after CMPH (template history) |
 | **`feature/handoff-receiver-framing`** | Kept after CMPH (template history) |
 
-**Last land:** `92b91d3` on `main`. Version 1.3.4. Branch `feature/3.4-route-csvs` kept. Repo: https://github.com/pbuckles22/BigAmbitionStratMod.
+**Last land:** `aa48921` on `main`. Version 1.3.4. Branch `feature/save-bin-reuse` kept. Repo: https://github.com/pbuckles22/BigAmbitionStratMod.
 
 ---
 

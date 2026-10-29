@@ -138,8 +138,8 @@ When shipping: update **PM_PLAN**, **doc/PROJECT_STATUS.md**, and **Current stat
 
 ## Current state
 
-- **Product:** Private save tools for the Chaotic empire, plus the ChaoticCEO mod. Version 1.3.5. Build 3682 stays pinned in `doc/requirements/game-build.md`. Release `dotnet build` installs `ChaoticCEO.dll` to ModsLocal. F8 dumps yesterday’s statements and the route CSVs, and logs `csv.written` and `routes.written`. A day change dumps once and logs `day.rolled`. A warehouse hold is cargo. Epic 3 is closed. The ladder through Epic 6 is in `PM_PLAN.md`.
-- **On:** `feature/3.5-day-rollover` — merging to `main` this ship. https://github.com/pbuckles22/BigAmbitionStratMod. Branch kept.
+- **Product:** Private save tools for the Chaotic empire, plus the ChaoticCEO mod. Version 1.3.5. Build 3682 stays pinned in `doc/requirements/game-build.md`. Release `dotnet build` installs `ChaoticCEO.dll` to ModsLocal. F8 dumps yesterday’s statements and the route CSVs, and logs `csv.written` and `routes.written`. A day change dumps once and logs `day.rolled`. A warehouse hold is cargo. A current `save.bin` is not read again. Epic 3 is closed. The ladder through Epic 6 is in `PM_PLAN.md`.
+- **On:** `feature/3.5-day-rollover` — merging to `main` this ship. https://github.com/pbuckles22/BigAmbitionStratMod. Branch kept. `feature/save-bin-reuse` kept.
 - **Next:** Story **4.1** when asked. Pure C# advisor library: `Rank`, `CloseCandidates`, `WarehouseFamilyMix`, `StreetClusters`.
 - **Blockers:** none.
 
