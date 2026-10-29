@@ -31,7 +31,7 @@
 | **`feature/chain-prefix`** | Kept after CMPH (template history) |
 | **`feature/handoff-receiver-framing`** | Kept after CMPH (template history) |
 
-**Last land:** pending this CMPH on `main`. Version 1.3.2. Branch `feature/3.2-mod-skeleton` kept. Repo: https://github.com/pbuckles22/BigAmbitionStratMod.
+**Last land:** `dddb857` on `main`. Version 1.3.2. Branch `feature/3.2-mod-skeleton` kept. Repo: https://github.com/pbuckles22/BigAmbitionStratMod.
 
 ---
 

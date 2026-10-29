@@ -139,7 +139,7 @@ When shipping: update **PM_PLAN**, **doc/PROJECT_STATUS.md**, and **Current stat
 ## Current state
 
 - **Product:** Private save tools for the Chaotic empire, plus the ChaoticCEO mod skeleton. Version 1.3.2. Build 3682 stays pinned in `doc/requirements/game-build.md`. Release `dotnet build` installs `ChaoticCEO.dll` to ModsLocal. The mod logs `mod.loaded` with that build. Epic 3 is in progress. The ladder through Epic 6 is in `PM_PLAN.md`.
-- **On:** `origin/main` after this CMPH — https://github.com/pbuckles22/BigAmbitionStratMod. Branch `feature/3.2-mod-skeleton` kept.
+- **On:** `origin/main @ dddb857` — https://github.com/pbuckles22/BigAmbitionStratMod. Branch `feature/3.2-mod-skeleton` kept.
 - **Next:** Story **3.3** when asked. Hotkey dumps yesterday’s `FinancialSummary` to `statements.csv` and logs `csv.written`.
 - **Blockers:** none.
 
