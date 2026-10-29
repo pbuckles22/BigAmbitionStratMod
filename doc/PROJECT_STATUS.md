@@ -16,7 +16,7 @@
 
 | Branch | Role |
 |--------|------|
-| **`main`** | Integration branch. Last land `9830617`, version 1.3.5 |
+| **`main`** | Integration branch. Last land `18ba3ec`, version 1.4.2 |
 | **`feature/4.2-advisor-overlay`** | Story 4.2. Kept after this CMPH |
 | **`feature/4.1-advisor-library`** | Kept after story 4.1 |
 | **`feature/3.5-day-rollover`** | Kept after this CMPH |
@@ -37,7 +37,7 @@
 | **`feature/chain-prefix`** | Kept after CMPH (template history) |
 | **`feature/handoff-receiver-framing`** | Kept after CMPH (template history) |
 
-**Last land:** `9830617` on `main`. Version 1.3.5. Branch `feature/3.5-day-rollover` kept. Repo: https://github.com/pbuckles22/BigAmbitionStratMod.
+**Last land:** `18ba3ec` on `main`. Version 1.4.2. Branch `feature/4.2-advisor-overlay` kept. Repo: https://github.com/pbuckles22/BigAmbitionStratMod.
 
 ---
 
