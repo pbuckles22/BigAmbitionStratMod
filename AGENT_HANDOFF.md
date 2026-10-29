@@ -139,7 +139,7 @@ When shipping: update **PM_PLAN**, **doc/PROJECT_STATUS.md**, and **Current stat
 ## Current state
 
 - **Product:** Private save tools for the Chaotic empire, plus the ChaoticCEO mod. Version 1.5.1. Build 3682 stays pinned in `doc/requirements/game-build.md`. Release `dotnet build` installs `ChaoticCEO.dll` to ModsLocal. F8 dumps yesterday’s statements and the route CSVs, and logs `csv.written` and `routes.written`. A day change dumps once and logs `day.rolled`. A warehouse hold is cargo. Each recommendation has one explain line, and recording it logs `advice.shown`. The running game does not write that line. A retail price is the sold price from `ItemSoldPerPriceEntry`. The larger amount wins, and a tie keeps the later price. The running game does not set prices. The overlay marks are not drawn. A current `save.bin` is not read again. Epic 4 is closed. The ladder through Epic 6 is in `PM_PLAN.md`.
-- **On:** `origin/main` after this CMPH. `feature/5.1-retail-prices` kept. https://github.com/pbuckles22/BigAmbitionStratMod
+- **On:** `origin/main @ 736bdde`. `feature/5.1-retail-prices` kept. https://github.com/pbuckles22/BigAmbitionStratMod
 - **Next:** Story **5.2** when asked. Delivery plans: one family per warehouse, recurring runs.
 - **Blockers:** none.
 

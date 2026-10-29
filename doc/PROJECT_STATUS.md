@@ -16,7 +16,7 @@
 
 | Branch | Role |
 |--------|------|
-| **`main`** | Integration branch. Last land recorded after this CMPH, version 1.5.1 |
+| **`main`** | Integration branch. Last land `736bdde`, version 1.5.1 |
 | **`feature/5.1-retail-prices`** | Story 5.1. Kept after this CMPH |
 | **`feature/4.3-advice-line`** | Story 4.3. Kept after this CMPH |
 | **`feature/4.2-advisor-overlay`** | Story 4.2. Kept after this CMPH |
@@ -39,7 +39,7 @@
 | **`feature/chain-prefix`** | Kept after CMPH (template history) |
 | **`feature/handoff-receiver-framing`** | Kept after CMPH (template history) |
 
-**Last land:** recorded after this CMPH on `main`. Version 1.5.1. Branch `feature/5.1-retail-prices` kept. Repo: https://github.com/pbuckles22/BigAmbitionStratMod.
+**Last land:** `736bdde` on `main`. Version 1.5.1. Branch `feature/5.1-retail-prices` kept. Repo: https://github.com/pbuckles22/BigAmbitionStratMod.
 
 ---
 
