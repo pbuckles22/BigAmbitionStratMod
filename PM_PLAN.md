@@ -1,6 +1,6 @@
 # PM_PLAN — BigAmbitionStratMod
 
-Private decision tool for one Big Ambitions save. Version scheme `MAJOR.EPIC.COUNTER`. Current public version **1.1.2**. The first ship of a new epic is `1.N.1`. Never go backwards.
+Private decision tool for one Big Ambitions save. Version scheme `MAJOR.EPIC.COUNTER`. Current public version **1.2.1**. The first ship of a new epic is `1.N.1`. Never go backwards.
 
 ## Context
 
@@ -25,7 +25,7 @@ Routes, the rank report, and saved-game-to-text wiring were cut from this epic. 
 
 Save-side. No game process.
 
-- **2.1** `[ ]` Decode `deliveryPlans` to `doc/gemini/cache/ledger/routes.csv` (`warehouse, destination, item, day, truck`) and `warehouses.csv` (what each warehouse holds). Chain: `gunzip → index → statement → portfolio → routes`. Log `routes.written`.
+- **2.1** `[x]` Decode delivery plans to `doc/gemini/cache/ledger/routes.csv` (`warehouse, destination, item, day, truck`) and `warehouses.csv` (what each warehouse holds). Chain: `gunzip → index → statement → portfolio → routes`. Log `routes.written`. Version 1.2.1.
 - **2.2** `[ ]` `doc/gemini/cache/ledger/REPORT.md`: bottom 10 by profit, top offices, streets with 3+ of one family, warehouses that mix families. Chain: `gunzip → index → statement → portfolio → routes → report`. Log `report.written`. Human check against BizMan for the top row and the bottom row.
 - **2.3** `[ ]` Saved-game-to-text runs the ledger through the report. Chain: `gunzip → index → statement → portfolio → routes → report` on the real save.
 
@@ -77,7 +77,7 @@ Not started until Epic 5 works. **6.1–6.3** are one deterministic sim. **6.4�
 - **6.5** `[ ]` Compare policies. Keep the best median with an acceptable worst case.
 - **6.6** `[ ]` New-game mode: start fresh, and the autopilot follows the chosen policy.
 
-**Next:** story **2.1** when asked.
+**Next:** story **2.2** when asked.
 
 Operating model (keep these when you replace this plan): `.cursor/rules/` ship commands (UCPH, CMPH, SWAT), human check, plan-coordinate versioning, long-run harvest (`testing.mdc`), and the chain harness and prefix (`integration-chain.mdc`). Do not delete them to “clean up” a new clone.
 

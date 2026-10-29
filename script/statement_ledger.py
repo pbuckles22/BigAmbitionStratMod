@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
-"""Turn a financial summary into statement rows, then a portfolio.
+"""Turn a financial summary into statement rows, a portfolio, and routes.
 
   python script/statement_ledger.py
 
 Gunzips and indexes the dropzone save, writes
-doc/gemini/cache/ledger/statements.csv, and joins each street and number to
-BuildingRegistration for doc/gemini/cache/ledger/portfolio.csv. One line per
-file is appended to doc/gemini/cache/ledger.log.
+doc/gemini/cache/ledger/statements.csv, joins each street and number to
+BuildingRegistration for portfolio.csv, then writes routes.csv and
+warehouses.csv. One line per file is appended to doc/gemini/cache/ledger.log.
 """
 
 from __future__ import annotations
@@ -18,7 +18,7 @@ import struct
 import sys
 from pathlib import Path
 
-VERSION = "1.1.2"
+VERSION = "1.2.1"
 
 FAMILIES = {
     "ba:businesstype_fastfoodrestaurant": "food",
@@ -66,6 +66,23 @@ COLUMNS = (
 )
 
 PORTFOLIO_COLUMNS = ("business", "family", "street", "number", "tco")
+
+ROUTE_COLUMNS = ("warehouse", "destination", "item", "day", "truck")
+
+WAREHOUSE_COLUMNS = ("warehouse", "street", "number", "item", "amount")
+
+WAREHOUSE_ADDRESS = {"assignedWarehouseAddress", "wholesaleAddress", "targetAddress"}
+
+DESTINATION_ADDRESS = {"deliveryTargetAddress", "businessAddress", "destinationAddress"}
+
+ITEM_FIELDS = {
+    "itemName",
+    "amount",
+    "boxes",
+    "amountOrderedLastWeek",
+    "amountOrderedThisWeek",
+    "targetAmount",
+}
 
 
 def _slice():
@@ -256,6 +273,174 @@ def portfolio_rows(statements: list[dict], buildings: list[dict]) -> list[dict]:
     return rows
 
 
+def _label(street: str, number: int, portfolio: list[dict] | None) -> str:
+    if portfolio:
+        for row in portfolio:
+            try:
+                same_number = int(row["number"]) == int(number)
+            except (TypeError, ValueError, KeyError):
+                continue
+            if row.get("street") == street and same_number and row.get("business"):
+                return str(row["business"])
+    return f"{street} {number}"
+
+
+def _keeps_item_list(text: str) -> bool:
+    if text in ITEM_FIELDS:
+        return True
+    if text.startswith("System.Collections"):
+        return True
+    return "DeliveryContractItem" in text or "ItemAmount" in text
+
+
+def routes_between(
+    data: bytes, start: int, end: int, portfolio: list[dict] | None = None
+) -> list[dict]:
+    """One delivery plan becomes rows of warehouse, destination, item, day, and truck."""
+    warehouse = None
+    destination = None
+    day = None
+    truck = ""
+    role = None
+    pending_street = None
+    expect_street = None
+    expect_item = None
+    expect_truck = None
+    in_items = False
+    rows: list[dict] = []
+    for pos, type_byte, text, key_end in iter_keys(data, start, end):
+        if expect_street is not None and pos == expect_street:
+            pending_street = text
+            expect_street = None
+            continue
+        if expect_item is not None and pos == expect_item:
+            expect_item = None
+            if warehouse is not None and destination is not None and in_items:
+                rows.append(
+                    {
+                        "warehouse": warehouse,
+                        "destination": destination,
+                        "item": text,
+                        "day": day,
+                        "truck": truck,
+                    }
+                )
+            continue
+        if expect_truck is not None and pos == expect_truck:
+            truck = text
+            expect_truck = None
+            continue
+        if role and text in ("streetName", "StreetName"):
+            expect_street = key_end
+            continue
+        if role and pending_street is not None and text in ("streetNumber", "StreetNumber"):
+            number = _int_at(data, type_byte, key_end)
+            if number is not None:
+                label = _label(pending_street, number, portfolio)
+                if role == "warehouse":
+                    warehouse = label
+                else:
+                    destination = label
+            pending_street = None
+            role = None
+            continue
+        if in_items and not _keeps_item_list(text):
+            in_items = False
+            warehouse = None
+            destination = None
+            day = None
+            truck = ""
+        if text in WAREHOUSE_ADDRESS:
+            role = "warehouse"
+            pending_street = None
+            continue
+        if text in DESTINATION_ADDRESS:
+            role = "destination"
+            pending_street = None
+            continue
+        if text in ("nextDeliveryDay", "dayOfDelivery"):
+            value = _int_at(data, type_byte, key_end)
+            if value is not None:
+                day = value
+            continue
+        if text == "vehicleTypeName":
+            expect_truck = key_end
+            continue
+        if text in ("items", "stockTargets"):
+            in_items = True
+            continue
+        if text == "itemName" and in_items:
+            expect_item = key_end
+    return rows
+
+
+def warehouses_between(data: bytes, start: int, end: int) -> list[dict]:
+    """Cargo on a warehouse building. A delivery item is not stock."""
+    street = None
+    number = None
+    business = None
+    is_warehouse = False
+    in_cargo = False
+    expect = None
+    counts: dict[tuple, int] = {}
+    order: list[tuple] = []
+    for pos, type_byte, text, key_end in iter_keys(data, start, end):
+        if expect is not None and pos == expect[1]:
+            kind = expect[0]
+            expect = None
+            if kind == "street":
+                street = text
+            elif kind == "business":
+                business = text
+            elif kind == "type":
+                is_warehouse = text == "ba:businesstype_warehouse"
+            elif kind == "item" and in_cargo and is_warehouse and business and street and number is not None:
+                key = (business, street, number, text)
+                if key not in counts:
+                    order.append(key)
+                    counts[key] = 0
+                counts[key] += 1
+            continue
+        expect = None
+        if text == "StreetName":
+            street = None
+            number = None
+            business = None
+            is_warehouse = False
+            in_cargo = False
+            expect = ("street", key_end)
+            continue
+        if text == "StreetNumber":
+            number = _int_at(data, type_byte, key_end)
+            continue
+        if text == "BusinessName":
+            expect = ("business", key_end)
+            continue
+        if text == "businessTypeName":
+            expect = ("type", key_end)
+            continue
+        if text == "cargoInstances" and is_warehouse:
+            in_cargo = True
+            continue
+        if text == "deliveryTransactions":
+            in_cargo = False
+            continue
+        if text == "itemName" and in_cargo:
+            expect = ("item", key_end)
+    rows = []
+    for business_name, street_name, street_number, item in order:
+        rows.append(
+            {
+                "warehouse": business_name,
+                "street": street_name,
+                "number": street_number,
+                "item": item,
+                "amount": counts[(business_name, street_name, street_number, item)],
+            }
+        )
+    return rows
+
+
 def format_number(value) -> str:
     if value is None:
         return ""
@@ -358,18 +543,77 @@ def write_portfolio(statements_csv: Path, csv_path: Path, log_path: Path) -> int
     return len(rows)
 
 
+def _route_csv_row(row: dict) -> dict:
+    return {
+        "warehouse": row["warehouse"],
+        "destination": row["destination"],
+        "item": row["item"],
+        "day": format_number(row.get("day")),
+        "truck": row.get("truck") or "",
+    }
+
+
+def _warehouse_csv_row(row: dict) -> dict:
+    return {
+        "warehouse": row["warehouse"],
+        "street": row["street"],
+        "number": format_number(row["number"]),
+        "item": row["item"],
+        "amount": format_number(row["amount"]),
+    }
+
+
+def write_routes(
+    portfolio_csv: Path, routes_csv: Path, warehouses_csv: Path, log_path: Path
+) -> int:
+    portfolio = _read_statements(portfolio_csv)
+    data = (SLICE.CACHE / "save.bin").read_bytes()
+    logistics_start, _logistics_end = _region_bounds("logistics")
+    _financials_start, financials_end = _region_bounds("financials")
+    routes = routes_between(data, logistics_start, financials_end, portfolio)
+    warehouse_start, warehouse_end = _region_bounds("warehouses")
+    held = warehouses_between(data, warehouse_start, warehouse_end)
+    routes_csv.parent.mkdir(parents=True, exist_ok=True)
+    with routes_csv.open("w", encoding="utf-8", newline="") as handle:
+        writer = csv.DictWriter(handle, fieldnames=ROUTE_COLUMNS, lineterminator="\n")
+        writer.writeheader()
+        for row in routes:
+            writer.writerow(_route_csv_row(row))
+    with warehouses_csv.open("w", encoding="utf-8", newline="") as handle:
+        writer = csv.DictWriter(handle, fieldnames=WAREHOUSE_COLUMNS, lineterminator="\n")
+        writer.writeheader()
+        for row in held:
+            writer.writerow(_warehouse_csv_row(row))
+    first = routes[0] if routes else {}
+    log_path.parent.mkdir(parents=True, exist_ok=True)
+    line = (
+        f"routes.written version={VERSION} routes={len(routes)} warehouses={len(held)} "
+        f"portfolio={len(portfolio)} warehouse={first.get('warehouse')} "
+        f"destination={first.get('destination')} item={first.get('item')} "
+        f"day={format_number(first.get('day'))}\n"
+    )
+    with log_path.open("a", encoding="utf-8") as handle:
+        handle.write(line)
+    return len(routes)
+
+
 def main(argv: list[str] | None = None) -> int:
     del argv
     save = SLICE.default_save()
     ledger_dir = SLICE.CACHE / "ledger"
     statements_path = ledger_dir / "statements.csv"
     portfolio_path = ledger_dir / "portfolio.csv"
+    routes_path = ledger_dir / "routes.csv"
+    warehouses_path = ledger_dir / "warehouses.csv"
     log_path = SLICE.CACHE / "ledger.log"
     count = write_statements(save, statements_path, log_path)
     businesses = write_portfolio(statements_path, portfolio_path, log_path)
+    routes = write_routes(portfolio_path, routes_path, warehouses_path, log_path)
     print(f"version {VERSION}")
     print(f"Wrote {count} rows to {statements_path}")
     print(f"Wrote {businesses} rows to {portfolio_path}")
+    print(f"Wrote {routes} rows to {routes_path}")
+    print(f"Wrote warehouses to {warehouses_path}")
     return 0
 
 

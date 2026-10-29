@@ -8,4 +8,4 @@ This stack-agnostic template does not ship a test runner. Add scripts here (for 
 
 `Slice-SaveGame.py` gunzips that save once into `doc/gemini/cache/save.bin` and writes a string index plus region and topic slices. Later questions read the cache. The map is `doc/gemini/cache/MAP.md`.
 
-`statement_ledger.py` reads that index and writes `doc/gemini/cache/ledger/statements.csv` (`day, street, number, sales, goods, wages, rent, marketing, theft, profit`) and `doc/gemini/cache/ledger/portfolio.csv` (`business, family, street, number, tco`). Version `1.1.2`.
+`statement_ledger.py` reads that index and writes `doc/gemini/cache/ledger/statements.csv` (`day, street, number, sales, goods, wages, rent, marketing, theft, profit`), `portfolio.csv` (`business, family, street, number, tco`), `routes.csv` (`warehouse, destination, item, day, truck`), and `warehouses.csv` (`warehouse, street, number, item, amount`). Version `1.2.1`.

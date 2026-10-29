@@ -106,6 +106,44 @@ def test_chain_gunzip_index_statement_portfolio(statement_csv, tmp_path):
     assert "Chaotic Clothing #3" in text
 
 
+def test_chain_gunzip_index_statement_portfolio_routes(statement_csv, tmp_path):
+    """Chain: gunzip → index → statement → portfolio → routes"""
+    csv_path, log_path = statement_csv
+    portfolio_path = tmp_path / "portfolio.csv"
+    routes_path = tmp_path / "routes.csv"
+    warehouses_path = tmp_path / "warehouses.csv"
+    ledger.write_portfolio(csv_path, portfolio_path, log_path)
+    ledger.write_routes(portfolio_path, routes_path, warehouses_path, log_path)
+    routes = _rows(routes_path)
+    assert len(routes) == 4
+    match = next(row for row in routes if row["item"] == "ba:itemname_cheapgift")
+    assert match["warehouse"] == "ba:street_firststreet 37"
+    assert match["destination"] == "ba:street_fifthavenue 36"
+    assert match["day"] == "1016"
+    text = log_path.read_text(encoding="utf-8")
+    assert "routes.written" in text
+    assert "portfolio=17" in text
+
+
+def test_chain_gunzip_index_statement_portfolio_routes_hold(statement_csv, tmp_path):
+    """Chain: gunzip → index → statement → portfolio → routes hold"""
+    csv_path, log_path = statement_csv
+    portfolio_path = tmp_path / "portfolio.csv"
+    routes_path = tmp_path / "routes.csv"
+    warehouses_path = tmp_path / "warehouses.csv"
+    ledger.write_portfolio(csv_path, portfolio_path, log_path)
+    ledger.write_routes(portfolio_path, routes_path, warehouses_path, log_path)
+    held = _rows(warehouses_path)
+    match = next(
+        row
+        for row in held
+        if row["warehouse"] == "W1" and row["item"] == "ba:itemname_sodacan"
+    )
+    assert match["street"] == "ba:street_fourthstreet"
+    assert match["number"] == "46"
+    assert match["amount"] == "45"
+
+
 def test_chain_gunzip_index_statement_portfolio_span(statement_csv, tmp_path):
     """Chain: gunzip → index → statement → portfolio span"""
     csv_path, log_path = statement_csv

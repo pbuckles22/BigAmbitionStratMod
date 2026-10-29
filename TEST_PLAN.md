@@ -18,12 +18,12 @@ python -m py_compile script/Export-SaveGameText.py script/Slice-SaveGame.py scri
 Headless tests that run shipped behaviors **together**, through real interfaces. The new chain test’s first line is `Chain: first → … → this`. It walks from the first shipped behavior through this one, and each step receives what the previous step produced. The harness loads the production module and asserts the value the next stage reads. Isolated unit red/green does not replace this. Document the command (it is usually the Tier 1 suite, once the chain tests live there). Rule: [.cursor/rules/integration-chain.mdc](.cursor/rules/integration-chain.mdc) → *Prefix*.
 
 ```bash
-python -m pytest -q tests/test_statement_street.py tests/test_portfolio_join.py
+python -m pytest -q tests/test_statement_street.py tests/test_portfolio_join.py tests/test_routes.py
 ```
 
-The chain reads the build 3682 `.hsg` in `doc/gemini/dropzone/`. Evidence lines `statements.written` and `portfolio.written` are appended to `doc/gemini/cache/ledger.log`.
+The chain reads the build 3682 `.hsg` in `doc/gemini/dropzone/`. Evidence lines `statements.written`, `portfolio.written`, and `routes.written` are appended to `doc/gemini/cache/ledger.log`.
 
-`Chain: gunzip → index → statement → portfolio` reads the statement file, joins street and number, and locks Chaotic Clothing #3. `Chain: gunzip → index → statement → portfolio span` locks Chaotic Hair #8, family service, tco 4003.3822.
+`Chain: gunzip → index → statement → portfolio` reads the statement file, joins street and number, and locks Chaotic Clothing #3. `Chain: gunzip → index → statement → portfolio span` locks Chaotic Hair #8, family service, tco 4003.3822. `Chain: gunzip → index → statement → portfolio → routes` reads that portfolio and locks the Fifth Avenue 36 destination. `Chain: gunzip → index → statement → portfolio → routes hold` locks W1 sodacan amount 45.
 
 ---
 
@@ -42,7 +42,16 @@ Use when behavior spans a real runtime (browser, device, network, or native APIs
 
 **Compile counter:** If Tier 1 **compiles**, count every compile (test/Debug **and** Release). Non-compiling stacks skip. See `.cursor/rules/testing.mdc`.
 
-**Evidence sink:** `doc/gemini/cache/ledger.log`. Statement export appends one `statements.written` line (version, row count, first street, profit). Portfolio export appends one `portfolio.written` line (version, row count, business, family, street, number, tco).
+**Evidence sink:** `doc/gemini/cache/ledger.log`. Statement export appends one `statements.written` line (version, row count, first street, profit). Portfolio export appends one `portfolio.written` line (version, row count, business, family, street, number, tco). Route export appends one `routes.written` line (version, route count, warehouse count, portfolio count, warehouse, destination, item, day).
+
+## Story 2.1 human check
+
+1. Open `doc/gemini/cache/ledger/routes.csv` and `warehouses.csv` after `python script/statement_ledger.py`.
+2. `routes.csv` columns: warehouse, destination, item, day, truck. Four rows. The warehouse is `ba:street_firststreet 37`. The destination is `ba:street_fifthavenue 36`.
+3. Find the cheap-gift row and the W1 row in `warehouses.csv`.
+4. **PASS if** the cheap-gift route is day `1016` with an empty truck, and W1 at `ba:street_fourthstreet` number 46 holds `ba:itemname_sodacan` amount `45`. **FAIL if** the route count is not 4, the destination is a food-delivery street, or the sodacan amount is `95`.
+5. `doc/gemini/cache/ledger.log` contains `routes.written` with `version=1.2.1`, `routes=4`, and `portfolio=17`.
+6. Version marker: `1.2.1` printed by the script and on that log line.
 
 ## Story 1.2 human check
 
