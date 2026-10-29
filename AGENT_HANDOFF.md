@@ -139,7 +139,7 @@ When shipping: update **PM_PLAN**, **doc/PROJECT_STATUS.md**, and **Current stat
 ## Current state
 
 - **Product:** Private save tools for the Chaotic empire. Version 1.2.1. `script/statement_ledger.py` writes `statements.csv`, `portfolio.csv`, `routes.csv`, and `warehouses.csv` from the `.hsg` in `doc/gemini/dropzone/`. Epic 1 is complete. Story 2.1 is complete. The ladder through Epic 6 is in `PM_PLAN.md`.
-- **On:** `origin/main @ LANDSHA` — https://github.com/pbuckles22/BigAmbitionStratMod. Branch `feature/2.1-routes` kept.
+- **On:** `origin/main @ c8bbf4a` — https://github.com/pbuckles22/BigAmbitionStratMod. Branch `feature/2.1-routes` kept.
 - **Next:** Story **2.2** when asked. Rank report in `doc/gemini/cache/ledger/REPORT.md`.
 - **Blockers:** none.
 
