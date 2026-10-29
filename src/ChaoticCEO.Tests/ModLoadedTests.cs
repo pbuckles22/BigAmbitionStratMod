@@ -13,7 +13,7 @@ public class ModLoadedTests
 
         var line = LoadLog.Record(path);
 
-        Assert.Equal("mod.loaded version=1.4.1 build=3682", line);
+        Assert.Equal("mod.loaded version=1.4.2 build=3682", line);
         Assert.Equal(line, File.ReadAllText(path).TrimEnd('\r', '\n'));
     }
 
@@ -25,7 +25,7 @@ public class ModLoadedTests
 
         var line = LoadLog.Record(path, "1000");
 
-        Assert.Equal("mod.loaded version=1.4.1 build=1000", line);
+        Assert.Equal("mod.loaded version=1.4.2 build=1000", line);
         Assert.DoesNotContain("3682", File.ReadAllText(path));
     }
 
@@ -41,8 +41,8 @@ public class ModLoadedTests
         Assert.Equal(
             new[]
             {
-                "mod.loaded version=1.4.1 build=1",
-                "mod.loaded version=1.4.1 build=2",
+                "mod.loaded version=1.4.2 build=1",
+                "mod.loaded version=1.4.2 build=2",
             },
             File.ReadAllLines(path));
     }
@@ -65,7 +65,7 @@ public class ModLoadedTests
         var line = LoadLog.RecordPinned(dir.Path);
 
         var path = Path.Combine(dir.Path, "ChaoticCEO", "ceo.log");
-        Assert.Equal("mod.loaded version=1.4.1 build=3682", line);
+        Assert.Equal("mod.loaded version=1.4.2 build=3682", line);
         Assert.Equal(line, File.ReadAllText(path).TrimEnd('\r', '\n'));
     }
 
@@ -74,7 +74,7 @@ public class ModLoadedTests
     {
         var product = FileVersionInfo.GetVersionInfo(typeof(LoadLog).Assembly.Location).ProductVersion;
 
-        Assert.Matches(@"^1\.4\.1\+\d+$", product);
+        Assert.Matches(@"^1\.4\.2\+\d+$", product);
     }
 
     [Fact]
@@ -187,7 +187,7 @@ public class ModLoadedTests
         Assert.Equal(LoadLog.Line(pin.Build), loaded);
         Assert.Contains(loaded, log);
         Assert.Equal(
-            "csv.written version=1.4.1 rows=1 day=1013 street=ba:street_fourthavenue number=28 profit=50687.4805",
+            "csv.written version=1.4.2 rows=1 day=1013 street=ba:street_fourthavenue number=28 profit=50687.4805",
             written);
         Assert.Contains(written, log);
         Assert.DoesNotContain(pin.DllHash, log);
@@ -211,7 +211,7 @@ public class ModLoadedTests
         var csv = File.ReadAllText(StatementDump.CsvPath(dir.Path)).Replace("\r\n", "\n");
         Assert.Equal(LoadLog.Line(pin.Build), loaded);
         Assert.StartsWith(loaded, log.TrimStart('\uFEFF'));
-        Assert.Equal("csv.written version=1.4.1 rows=0 day=1013 street= number= profit=", written);
+        Assert.Equal("csv.written version=1.4.2 rows=0 day=1013 street= number= profit=", written);
         Assert.Contains(written, log);
         Assert.Equal("day,street,number,sales,goods,wages,rent,marketing,theft,profit\n", csv);
         Assert.DoesNotContain(pin.DllHash, log);
@@ -268,7 +268,7 @@ public class ModLoadedTests
             loaded + "\n" + written + "\n" + routes + "\n",
             log);
         Assert.Equal(
-            "routes.written version=1.4.1 routes=1 warehouses=1 warehouse=ba:street_fourthstreet 46 destination=ba:street_firstavenue 38 item=ba:itemname_sodacan day=1016",
+            "routes.written version=1.4.2 routes=1 warehouses=1 warehouse=ba:street_fourthstreet 46 destination=ba:street_firstavenue 38 item=ba:itemname_sodacan day=1016",
             routes);
         Assert.Contains("50687.4805", File.ReadAllText(StatementDump.CsvPath(dir.Path)));
         Assert.Contains("ba:street_firstavenue 38", File.ReadAllText(RouteDump.RoutesPath(dir.Path)));
@@ -311,7 +311,7 @@ public class ModLoadedTests
         Assert.Equal(LoadLog.Line(pin.Build), loaded);
         Assert.Equal(loaded + "\n" + written + "\n" + routes + "\n", log);
         Assert.Equal(
-            "routes.written version=1.4.1 routes=0 warehouses=0 warehouse= destination= item= day=",
+            "routes.written version=1.4.2 routes=0 warehouses=0 warehouse= destination= item= day=",
             routes);
         Assert.Contains(written, log);
         Assert.Equal(
@@ -400,7 +400,7 @@ public class ModLoadedTests
         var log = File.ReadAllText(Path.Combine(dir.Path, "ChaoticCEO", "ceo.log")).Replace("\r\n", "\n");
         Assert.Null(armed);
         Assert.Equal(LoadLog.Line(pin.Build), loaded);
-        Assert.Equal("day.rolled version=1.4.1 day=1014", rolled);
+        Assert.Equal("day.rolled version=1.4.2 day=1014", rolled);
         Assert.Equal(
             loaded + "\n" + written + "\n" + routes + "\n" + written + "\n" + routes + "\n" + rolled + "\n",
             log);
@@ -427,12 +427,12 @@ public class ModLoadedTests
         var log = File.ReadAllText(Path.Combine(dir.Path, "ChaoticCEO", "ceo.log")).Replace("\r\n", "\n");
         Assert.Null(armed);
         Assert.Equal(LoadLog.Line(pin.Build), loaded);
-        Assert.Equal("day.rolled version=1.4.1 day=1014", rolled);
+        Assert.Equal("day.rolled version=1.4.2 day=1014", rolled);
         Assert.Equal(
             loaded + "\n" + written + "\n" + routes + "\n" + written + "\n" + routes + "\n" + rolled + "\n",
             log);
         Assert.Equal(
-            "routes.written version=1.4.1 routes=0 warehouses=0 warehouse= destination= item= day=",
+            "routes.written version=1.4.2 routes=0 warehouses=0 warehouse= destination= item= day=",
             routes);
         Assert.Contains("50687.4805", File.ReadAllText(StatementDump.CsvPath(dir.Path)));
         Assert.Equal(
@@ -481,10 +481,10 @@ public class ModLoadedTests
 
         var log = File.ReadAllText(Path.Combine(dir.Path, "ChaoticCEO", "ceo.log")).Replace("\r\n", "\n");
         Assert.Equal(LoadLog.Line(pin.Build), loaded);
-        Assert.Equal("day.rolled version=1.4.1 day=1014", rolled);
-        Assert.Equal("day.rolled version=1.4.1 day=1015", next);
+        Assert.Equal("day.rolled version=1.4.2 day=1014", rolled);
+        Assert.Equal("day.rolled version=1.4.2 day=1015", next);
         Assert.Contains(loaded + "\n" + written + "\n" + routes + "\n", log);
-        Assert.EndsWith(rolled + "\n" + "csv.written version=1.4.1 rows=1 day=1014 street=ba:street_today number=1 profit=9" + "\n" + routes + "\n" + next + "\n", log);
+        Assert.EndsWith(rolled + "\n" + "csv.written version=1.4.2 rows=1 day=1014 street=ba:street_today number=1 profit=9" + "\n" + routes + "\n" + next + "\n", log);
         Assert.Equal(2, log.Split(new[] { "day.rolled" }, StringSplitOptions.None).Length - 1);
         Assert.Contains("1014,ba:street_today,1,", File.ReadAllText(StatementDump.CsvPath(dir.Path)));
         Assert.DoesNotContain(pin.DllHash, log);
@@ -513,9 +513,9 @@ public class ModLoadedTests
         var bottom = ranked[ranked.Count - 1];
         Assert.Null(armed);
         Assert.Equal(LoadLog.Line(pin.Build), loaded);
-        Assert.Equal("day.rolled version=1.4.1 day=1014", rolled);
+        Assert.Equal("day.rolled version=1.4.2 day=1014", rolled);
         Assert.Equal(
-            "csv.written version=1.4.1 rows=1 day=1013 street=ba:street_fourthavenue number=28 profit=50687.4805",
+            "csv.written version=1.4.2 rows=1 day=1013 street=ba:street_fourthavenue number=28 profit=50687.4805",
             written);
         Assert.Contains("ba:street_firstavenue 38", File.ReadAllText(RouteDump.RoutesPath(dir.Path)));
         Assert.Equal("ba:street_fourthavenue", bottom.Street);
@@ -572,7 +572,7 @@ public class ModLoadedTests
 
         var bottom = ranked[ranked.Count - 1];
         Assert.Equal(LoadLog.Line(pin.Build), loaded);
-        Assert.Equal("day.rolled version=1.4.1 day=1014", rolled);
+        Assert.Equal("day.rolled version=1.4.2 day=1014", rolled);
         Assert.Equal(new[] { "ba:street_high", "ba:street_low" }, ranked.Select(row => row.Street));
         Assert.Equal(2, bottom.Number);
         Assert.Equal(-40d, bottom.Profit);
@@ -605,15 +605,114 @@ public class ModLoadedTests
 
         Assert.Null(armed);
         Assert.Equal(LoadLog.Line(pin.Build), loaded);
-        Assert.Equal("day.rolled version=1.4.1 day=1014", rolled);
+        Assert.Equal("day.rolled version=1.4.2 day=1014", rolled);
         Assert.Equal(
-            "routes.written version=1.4.1 routes=0 warehouses=0 warehouse= destination= item= day=",
+            "routes.written version=1.4.2 routes=0 warehouses=0 warehouse= destination= item= day=",
             routes);
         Assert.Contains("50687.4805", File.ReadAllText(StatementDump.CsvPath(dir.Path)));
         Assert.Equal("ba:street_fourthavenue", ranked[ranked.Count - 1].Street);
         Assert.Equal(28, ranked[ranked.Count - 1].Number);
         Assert.Empty(mixes);
         Assert.Contains(written, File.ReadAllText(Path.Combine(dir.Path, "ChaoticCEO", "ceo.log")));
+        Assert.DoesNotContain(pin.DllHash, File.ReadAllText(Path.Combine(dir.Path, "ChaoticCEO", "ceo.log")));
+    }
+
+    [Fact]
+    public void Dll_pin_loaded_csv_routes_day_rank_overlay_locks_the_red_row()
+    {
+        // Chain: dll → pin → loaded → csv → routes → day → rank → overlay
+        var pin = PinDlls();
+        using var dir = new TempLog();
+        var days = ChainDays();
+        var stops = ChainStops();
+        var holds = ChainHolds();
+
+        var loaded = LoadLog.RecordPinned(dir.Path);
+        var written = StatementDump.Write(dir.Path, 1014, days);
+        var routes = RouteDump.Write(dir.Path, stops, holds);
+        var watch = new DayWatch();
+        var armed = watch.Tick(dir.Path, 1013, days, stops, holds);
+        var rolled = watch.Tick(dir.Path, 1014, days, stops, holds);
+        var ranked = Advisor.RankFile(StatementDump.CsvPath(dir.Path));
+        var rows = Overlay.FromRank(
+            ranked,
+            Advisor.WarehouseFamilyMixFile(RouteDump.WarehousesPath(dir.Path)),
+            Array.Empty<StreetCluster>());
+
+        var red = rows.Where(row => row.Tone == "red").ToArray();
+        var bottom = ranked[ranked.Count - 1];
+        Assert.Null(armed);
+        Assert.Equal(LoadLog.Line(pin.Build), loaded);
+        Assert.Equal("day.rolled version=1.4.2 day=1014", rolled);
+        Assert.Equal(
+            "csv.written version=1.4.2 rows=1 day=1013 street=ba:street_fourthavenue number=28 profit=50687.4805",
+            written);
+        Assert.Contains("ba:street_firstavenue 38", File.ReadAllText(RouteDump.RoutesPath(dir.Path)));
+        Assert.Equal(bottom.Street, red[red.Length - 1].Street);
+        Assert.Equal(bottom.Number, red[red.Length - 1].Number);
+        Assert.Equal(bottom.Profit, red[red.Length - 1].Profit, 4);
+        Assert.Equal("ba:street_fourthavenue", red[red.Length - 1].Street);
+        Assert.Equal(28, red[red.Length - 1].Number);
+        Assert.Equal(50687.4805, red[red.Length - 1].Profit, 4);
+        Assert.DoesNotContain(rows, row => row.Tone == "warning");
+        Assert.Contains(routes, File.ReadAllText(Path.Combine(dir.Path, "ChaoticCEO", "ceo.log")));
+        Assert.DoesNotContain(pin.DllHash, File.ReadAllText(Path.Combine(dir.Path, "ChaoticCEO", "ceo.log")));
+    }
+
+    [Fact]
+    public void Dll_pin_loaded_csv_routes_day_rank_overlay_locks_the_mix_warning()
+    {
+        // Chain: dll → pin → loaded → csv → routes → day → rank → overlay mix
+        var pin = PinDlls();
+        using var dir = new TempLog();
+        var days = new[]
+        {
+            new FinancialDay(
+                1013,
+                new[]
+                {
+                    new StatementRow("ba:street_high", 1, 1f, 0f, 0f, 0f, 0f, 0f, 100f),
+                    new StatementRow("ba:street_low", 2, 999f, 0f, 0f, 0f, 0f, 0f, -40f),
+                }),
+        };
+        var holds = RouteDump.CountHolds(
+            "W1",
+            "ba:street_fourthstreet",
+            46,
+            new[] { "ba:itemname_ceilinglampwarehouse", "ba:itemname_paperbag" },
+            new[] { "ba:itemname_sodacan", "ba:itemname_cheapgift" });
+
+        var loaded = LoadLog.RecordPinned(dir.Path);
+        StatementDump.Write(dir.Path, 1014, days);
+        RouteDump.Write(dir.Path, ChainStops(), holds);
+        var watch = new DayWatch();
+        Assert.Null(watch.Tick(dir.Path, 1013, days, ChainStops(), holds));
+        var rolled = watch.Tick(dir.Path, 1014, days, ChainStops(), holds);
+        var ranked = Advisor.RankFile(StatementDump.CsvPath(dir.Path));
+        var rows = Overlay.FromRank(
+            ranked,
+            Advisor.WarehouseFamilyMixFile(RouteDump.WarehousesPath(dir.Path)),
+            Array.Empty<StreetCluster>());
+
+        var red = rows.Where(row => row.Tone == "red").ToArray();
+        var warnings = rows.Where(row => row.Tone == "warning").ToArray();
+        var warehouses = File.ReadAllText(RouteDump.WarehousesPath(dir.Path));
+        var bottom = ranked[ranked.Count - 1];
+        Assert.Equal(LoadLog.Line(pin.Build), loaded);
+        Assert.Equal("day.rolled version=1.4.2 day=1014", rolled);
+        Assert.Equal(bottom.Street, red[red.Length - 1].Street);
+        Assert.Equal(bottom.Number, red[red.Length - 1].Number);
+        Assert.Equal(bottom.Profit, red[red.Length - 1].Profit);
+        Assert.Equal("ba:street_low", red[red.Length - 1].Street);
+        Assert.Equal(2, red[red.Length - 1].Number);
+        Assert.Equal(-40d, red[red.Length - 1].Profit);
+        Assert.Equal(new[] { "W1" }, warnings.Select(row => row.Business));
+        Assert.Equal("food, specialty", warnings[0].Detail);
+        Assert.Equal("ba:street_fourthstreet", warnings[0].Street);
+        Assert.Equal(46, warnings[0].Number);
+        Assert.DoesNotContain("ba:itemname_ceilinglampwarehouse", warehouses);
+        Assert.DoesNotContain("ba:itemname_paperbag", warehouses);
+        Assert.Contains("ba:itemname_sodacan", warehouses);
         Assert.DoesNotContain(pin.DllHash, File.ReadAllText(Path.Combine(dir.Path, "ChaoticCEO", "ceo.log")));
     }
 

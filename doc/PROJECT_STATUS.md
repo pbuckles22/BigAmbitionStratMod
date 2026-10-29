@@ -8,7 +8,7 @@
 
 ## Summary
 
-**BigAmbitionStratMod** 1.4.1 — Epic 4 is in progress on `feature/4.1-advisor-library` (not merged). The advisor library ranks by average daily profit and is not on screen. F8 still dumps yesterday’s statements and the route CSVs. A day change dumps once and logs `day.rolled`. A warehouse hold is cargo. A current `save.bin` is not read again. Epic 3 is closed on `main`. Rules come from AgenticTemplate (`upstream`). `origin` is this repo.
+**BigAmbitionStratMod** 1.4.2 — Epic 4 is in progress on `main`. The overlay marks a close candidate red, warns on a mixed warehouse, and names a street with 3 or more of one family as where to open next. Those marks are not drawn. F8 still dumps yesterday’s statements and the route CSVs. A day change dumps once and logs `day.rolled`. A warehouse hold is cargo. A current `save.bin` is not read again. Epic 3 is closed. Rules come from AgenticTemplate (`upstream`). `origin` is this repo.
 
 ---
 
@@ -17,7 +17,8 @@
 | Branch | Role |
 |--------|------|
 | **`main`** | Integration branch. Last land `9830617`, version 1.3.5 |
-| **`feature/4.1-advisor-library`** | Story 4.1. Not merged |
+| **`feature/4.2-advisor-overlay`** | Story 4.2. Kept after this CMPH |
+| **`feature/4.1-advisor-library`** | Kept after story 4.1 |
 | **`feature/3.5-day-rollover`** | Kept after this CMPH |
 | **`feature/save-bin-reuse`** | Kept after the save.bin CMPH |
 | **`feature/3.4-route-csvs`** | Kept after the 3.4 CMPH |
@@ -60,7 +61,7 @@
 
 ## Next up (maintainers)
 
-- Story **4.2** when asked. Overlay: red rows, mixed-warehouse warnings, and where to open next.
+- Story **4.3** when asked. One explain line per recommendation. Log `advice.shown`.
 - Variants: merge upstream when AgenticTemplate skills/rules change
 
 ---
