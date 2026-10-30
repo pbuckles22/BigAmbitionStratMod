@@ -16,7 +16,7 @@
 
 | Branch | Role |
 |--------|------|
-| **`main`** | Integration branch. Last land recorded after this CMPH, version 1.5.5 |
+| **`main`** | Integration branch. Last land `31fd681`, version 1.5.5 |
 | **`feature/5.5-close`** | Story 5.5. Kept after this CMPH |
 | **`feature/5.4-layout`** | Story 5.4. Kept after this CMPH |
 | **`feature/5.3-staffing`** | Story 5.3. Kept after this CMPH |
@@ -43,7 +43,7 @@
 | **`feature/chain-prefix`** | Kept after CMPH (template history) |
 | **`feature/handoff-receiver-framing`** | Kept after CMPH (template history) |
 
-**Last land:** recorded after this CMPH on `main`. Version 1.5.5. Branch `feature/5.5-close` kept. Repo: https://github.com/pbuckles22/BigAmbitionStratMod.
+**Last land:** `31fd681` on `main`. Version 1.5.5. Branch `feature/5.5-close` kept. Repo: https://github.com/pbuckles22/BigAmbitionStratMod.
 
 ---
 
