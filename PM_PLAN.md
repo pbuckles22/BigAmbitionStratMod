@@ -1,10 +1,10 @@
 # PM_PLAN — BigAmbitionStratMod
 
-Private decision tool for one Big Ambitions save. Version scheme `MAJOR.EPIC.COUNTER`. Current public version **1.5.4**. The first ship of a new epic is `1.N.1`. Never go backwards.
+Private decision tool for one Big Ambitions save. Version scheme `MAJOR.EPIC.COUNTER`. Current public version **1.5.5**. The first ship of a new epic is `1.N.1`. Never go backwards.
 
 ## Context
 
-The game is Mono, build **3682**. A mod builds with `dotnet build` against `Big Ambitions_Data\Managed` (`BigAmbitions.dll`, `BigAmbitions.ModAPI.dll`). The pin is `doc/requirements/game-build.md`. Python save tools live in `script/`. The mod, when it exists, lives in `src/`. Evidence for the ledger is `doc/gemini/cache/ledger.log`. The mod writes `%LocalAppData%\ChaoticCEO\ceo.log`. The compile counter is gitignored `build_number.txt`. The mod informational version is `1.5.4+N`.
+The game is Mono, build **3682**. A mod builds with `dotnet build` against `Big Ambitions_Data\Managed` (`BigAmbitions.dll`, `BigAmbitions.ModAPI.dll`). The pin is `doc/requirements/game-build.md`. Python save tools live in `script/`. The mod, when it exists, lives in `src/`. Evidence for the ledger is `doc/gemini/cache/ledger.log`. The mod writes `%LocalAppData%\ChaoticCEO\ceo.log`. The compile counter is gitignored `build_number.txt`. The mod informational version is `1.5.5+N`.
 
 Epic 1 closed on 17 businesses and 5865 statement rows. `ba:businesstype_liquorstore` is **food**. Do not relabel it inside a routes story. A warehouse story may add a specialty override only with a new test.
 
@@ -61,7 +61,7 @@ Each action is opt-in, logged, and undone by reload. A wrong soak decision becom
 - **5.2** `[x]` Delivery plans: one family per warehouse, recurring runs. The larger cargo amount wins. A tie keeps the later family. A recurring stop beats a one-day contract. Chain: `dll → pin → loaded → csv → routes → day → rank → overlay → advice → prices → plans`. Version 1.5.2.
 - **5.3** `[x]` Staffing via `HrManagerPlan` / `HeadhunterPlan`. One role keeps one plan. The role is the warehouse family from the delivery plan. The larger amount wins. A tie keeps the later plan. Amount 0 is not a plan. An unlimited amount beats a finite count. Chain: `dll → pin → loaded → csv → routes → day → rank → overlay → advice → prices → plans → staffing`. Version 1.5.3.
 - **5.4** `[x]` Clone a chain layout onto a new store when a street cluster qualifies. One qualifying cluster keeps one clone. The family is the staffing role. The larger interior score wins. A tie keeps the later layout. Score 0 is not a layout. A later cluster without a new store keeps the earlier clone. A count below 3 does not qualify. Chain: `dll → pin → loaded → csv → routes → day → rank → overlay → advice → prices → plans → staffing → layout`. Version 1.5.4.
-- **5.5** `[ ]` Close after N red days. Confirm dialog first, then a toggle.
+- **5.5** `[x]` Close after N red days. Confirm dialog first, then a toggle. N red days on the layout street and family keep one close. A red day is profit below zero. The longer current streak wins. A tie keeps the later store. A green day breaks the streak. An empty layout keeps no close. Chain: `dll → pin → loaded → csv → routes → day → rank → overlay → advice → prices → plans → staffing → layout → close`. Version 1.5.5.
 - **5.6** `[ ]` Buy the building under HQ, then under the food warehouse, then on owned streets.
 
 ## Epic 6 — Headless sim and Monte Carlo
@@ -77,7 +77,7 @@ Not started until Epic 5 works. **6.1–6.3** are one deterministic sim. **6.4�
 - **6.5** `[ ]` Compare policies. Keep the best median with an acceptable worst case.
 - **6.6** `[ ]` New-game mode: start fresh, and the autopilot follows the chosen policy.
 
-**Next:** story **5.5** when asked.
+**Next:** story **5.6** when asked.
 
 Operating model (keep these when you replace this plan): `.cursor/rules/` ship commands (UCPH, CMPH, SWAT), human check, plan-coordinate versioning, long-run harvest (`testing.mdc`), and the chain harness and prefix (`integration-chain.mdc`). Do not delete them to “clean up” a new clone.
 

@@ -8,7 +8,7 @@
 
 ## Summary
 
-**BigAmbitionStratMod** 1.5.4 — Story 5.4 is on `main`. One qualifying street cluster keeps one cloned layout. The family is the staffing role. The larger interior score wins, a tie keeps the later layout, score 0 is not a layout, and a later cluster without a new store keeps the earlier clone. The running game does not copy that layout. One role keeps one HR or headhunter plan. Epic 4 stays closed. F8 still dumps yesterday’s statements and the route CSVs. A day change dumps once and logs `day.rolled`. A current `save.bin` is not read again. Rules come from AgenticTemplate (`upstream`). `origin` is this repo.
+**BigAmbitionStratMod** 1.5.5 — Story 5.5 is on `main`. N red days on the layout street and family keep one close. A red day is profit below zero. The longer current streak wins, a tie keeps the later store, and a green day breaks the streak. Confirm is required, then the toggle. The running game does not close that store. One qualifying street cluster keeps one cloned layout. Epic 4 stays closed. F8 still dumps yesterday’s statements and the route CSVs. A day change dumps once and logs `day.rolled`. A current `save.bin` is not read again. Rules come from AgenticTemplate (`upstream`). `origin` is this repo.
 
 ---
 
@@ -16,7 +16,8 @@
 
 | Branch | Role |
 |--------|------|
-| **`main`** | Integration branch. Last land `29d45c5`, version 1.5.4 |
+| **`main`** | Integration branch. Last land recorded after this CMPH, version 1.5.5 |
+| **`feature/5.5-close`** | Story 5.5. Kept after this CMPH |
 | **`feature/5.4-layout`** | Story 5.4. Kept after this CMPH |
 | **`feature/5.3-staffing`** | Story 5.3. Kept after this CMPH |
 | **`feature/5.2-delivery-plans`** | Story 5.2. Kept after this CMPH |
@@ -42,7 +43,7 @@
 | **`feature/chain-prefix`** | Kept after CMPH (template history) |
 | **`feature/handoff-receiver-framing`** | Kept after CMPH (template history) |
 
-**Last land:** `29d45c5` on `main`. Version 1.5.4. Branch `feature/5.4-layout` kept. Repo: https://github.com/pbuckles22/BigAmbitionStratMod.
+**Last land:** recorded after this CMPH on `main`. Version 1.5.5. Branch `feature/5.5-close` kept. Repo: https://github.com/pbuckles22/BigAmbitionStratMod.
 
 ---
 
@@ -66,7 +67,7 @@
 
 ## Next up (maintainers)
 
-- Story **5.5** when asked. Close after N red days. Confirm dialog first, then a toggle.
+- Story **5.6** when asked. Buy the building under HQ, then under the food warehouse, then on owned streets.
 - Variants: merge upstream when AgenticTemplate skills/rules change
 
 ---

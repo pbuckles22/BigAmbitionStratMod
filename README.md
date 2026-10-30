@@ -6,7 +6,7 @@ Cursor **rules**, **skills**, **handoff protocol**, and **test discipline** for 
 
 **Start with [CONTRIBUTING.md](CONTRIBUTING.md)** — reading order, tracked vs gitignored docs, PR expectations.
 
-**Current work:** [doc/PROJECT_STATUS.md](doc/PROJECT_STATUS.md). Version 1.5.4. A qualifying street cluster keeps one cloned layout. The game does not copy that layout. One role keeps one HR or headhunter plan. Epic 4 is closed. The mod still dumps yesterday’s statements and routes when the in-game day changes.
+**Current work:** [doc/PROJECT_STATUS.md](doc/PROJECT_STATUS.md). Version 1.5.5. N red days on a layout's street and family keep one close. The game does not close that store. A qualifying street cluster keeps one cloned layout. Epic 4 is closed. The mod still dumps yesterday’s statements and routes when the in-game day changes.
 
 ## Quick start
 
