@@ -16,7 +16,7 @@
 
 | Branch | Role |
 |--------|------|
-| **`main`** | Integration branch. Last land `08ba255`, version 1.6.1.2 |
+| **`main`** | Integration branch. Last land `0f09d2e`, version 1.6.1.2 |
 | **`feature/7.3-apply-prices`** | Story 7.3. Kept after this CMPH |
 | **`feature/7.2-redo-logistics`** | Story 7.2. Kept after this CMPH |
 | **`feature/7.1-close-stores`** | Story 7.1. Kept after this CMPH |
@@ -53,7 +53,7 @@
 | **`feature/chain-prefix`** | Kept after CMPH (template history) |
 | **`feature/handoff-receiver-framing`** | Kept after CMPH (template history) |
 
-**Last land:** `08ba255` on `main`. Version 1.6.1.2. Branch `feature/7.2-redo-logistics` kept. Release https://github.com/pbuckles22/BigAmbitionStratMod/releases/tag/1.6.1.2. Repo: https://github.com/pbuckles22/BigAmbitionStratMod.
+**Last land:** `0f09d2e` on `main`. Version 1.6.1.2. Branch `feature/7.3-apply-prices` kept. Release https://github.com/pbuckles22/BigAmbitionStratMod/releases/tag/1.6.1.2. Repo: https://github.com/pbuckles22/BigAmbitionStratMod.
 
 ---
 
