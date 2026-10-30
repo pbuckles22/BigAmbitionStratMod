@@ -16,7 +16,7 @@
 
 | Branch | Role |
 |--------|------|
-| **`main`** | Integration branch. Last land `LANDSHA`, version 1.6.1.2 |
+| **`main`** | Integration branch. Last land `be5f0ad`, version 1.6.1.2 |
 | **`feature/6.5-rent-payback`** | Story 6.5. Kept after this CMPH |
 | **`feature/6.4-logistics-review`** | Story 6.4. Kept after this CMPH |
 | **`feature/6.3-close-score`** | Story 6.3. Kept after this CMPH |
@@ -49,7 +49,7 @@
 | **`feature/chain-prefix`** | Kept after CMPH (template history) |
 | **`feature/handoff-receiver-framing`** | Kept after CMPH (template history) |
 
-**Last land:** `LANDSHA` on `main`. Version 1.6.1.2. Branch `feature/6.5-rent-payback` kept. Release https://github.com/pbuckles22/BigAmbitionStratMod/releases/tag/1.5.6. Repo: https://github.com/pbuckles22/BigAmbitionStratMod.
+**Last land:** `be5f0ad` on `main`. Version 1.6.1.2. Branch `feature/6.5-rent-payback` kept. Release https://github.com/pbuckles22/BigAmbitionStratMod/releases/tag/1.5.6. Repo: https://github.com/pbuckles22/BigAmbitionStratMod.
 
 ---
 
