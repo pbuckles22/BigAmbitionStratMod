@@ -26,7 +26,9 @@ This is the durable home for technical debt across sessions. Handoff notes can m
 (Isolated + workaround + revisit trigger.)
 
 - The Epic 3 header says the mod CSV is diffed against the ledger CSV for the same day. Stories 3.3–3.5 lock the mod dump. The human check compared counts. Revisit if a later epic needs that diff as a test.
-- `Advice.Record` writes `advice.shown`. The running game does not call it. Revisit when a live session must show that line.
+- `Advice.Record` writes `advice.shown`. The running game does not call it. Revisit at story **6.1**, which draws the window and writes that line.
+- `Overlay.Build` returns rows and draws nothing. Revisit at story **6.1**.
+- `Close.Lock` only scores the layout street and family. `Buy.Lock` only runs after a close. Leave both locks. New decisions are **6.3** and **6.5**.
 
 ---
 

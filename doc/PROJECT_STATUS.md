@@ -8,7 +8,7 @@
 
 ## Summary
 
-**BigAmbitionStratMod** 1.5.5 — Story 5.5 is on `main`. N red days on the layout street and family keep one close. A red day is profit below zero. The longer current streak wins, a tie keeps the later store, and a green day breaks the streak. Confirm is required, then the toggle. The running game does not close that store. One qualifying street cluster keeps one cloned layout. Epic 4 stays closed. F8 still dumps yesterday’s statements and the route CSVs. A day change dumps once and logs `day.rolled`. A current `save.bin` is not read again. Rules come from AgenticTemplate (`upstream`). `origin` is this repo.
+**BigAmbitionStratMod** 1.5.6 — Epic 5 is closed. A close keeps one buy: the building under HQ, then under the food warehouse, then on that closed street. The running game does not buy that building. The overlay marks are not drawn. Next is story **6.1**, an F9 advisor window in the city. F8 still dumps yesterday’s statements and the route CSVs. A day change dumps once and logs `day.rolled`. A current `save.bin` is not read again. Rules come from AgenticTemplate (`upstream`). `origin` is this repo.
 
 ---
 
@@ -17,6 +17,7 @@
 | Branch | Role |
 |--------|------|
 | **`main`** | Integration branch. Last land `31fd681`, version 1.5.5 |
+| **`feature/5.6-buy`** | Story 5.6. Human check passed. Landing on this CMPH |
 | **`feature/5.5-close`** | Story 5.5. Kept after this CMPH |
 | **`feature/5.4-layout`** | Story 5.4. Kept after this CMPH |
 | **`feature/5.3-staffing`** | Story 5.3. Kept after this CMPH |
@@ -67,7 +68,7 @@
 
 ## Next up (maintainers)
 
-- Story **5.6** when asked. Buy the building under HQ, then under the food warehouse, then on owned streets.
+- Story **6.1** when asked. Version 1.6.1. F9 draws the advisor window in the city. Rows come from `Overlay.Build` and `Advice.Explain`.
 - Variants: merge upstream when AgenticTemplate skills/rules change
 
 ---

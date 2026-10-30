@@ -9,6 +9,13 @@ This file is intentionally short. Keep only the highest leverage, current risks.
   **Mitigation**: keep `AGENT_HANDOFF.md` + `TEST_PLAN.md` aligned; enforce handoff checklist  
   **Rollback**: revert the merge; restore last known-good tag/commit
 
+- **Risk**: The mod still cannot draw, and the calls that close, buy, or rewrite deliveries are not pinned
+  **Impact**: High
+  **Likelihood**: Med
+  **Trigger**: Story **6.1** or Epic 7 starts before the on-screen check or `doc/requirements/game-api.md`
+  **Mitigation**: **6.1** proves the F9 window. **6.2** records the calls before any button. The Epic 5 locks stay pure
+  **Rollback**: reload the save. Revert the story commit
+
 - **Risk**: Context bloat causes agent drift / incorrect assumptions  
   **Impact**: Med  
   **Likelihood**: High  
