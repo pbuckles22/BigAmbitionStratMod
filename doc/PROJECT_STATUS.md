@@ -8,7 +8,7 @@
 
 ## Summary
 
-**BigAmbitionStratMod** 1.6.1.2 — Story 6.4 passed. A warehouse serves each store for one cargo family. Mixed warehouses and under-supplied stores are flagged. One reassignment moves the later short store onto the single-family warehouse with the larger stock. The running game does not apply that move. F9 still opens a dark advisor window in the city. Next is story **6.5**, where to open next from rent-versus-buy payback. F8 still dumps yesterday’s statements and the route CSVs. A day change dumps once and logs `day.rolled`. A current `save.bin` is not read again. Rules come from AgenticTemplate (`upstream`). `origin` is this repo.
+**BigAmbitionStratMod** 1.6.1.2 — Story 6.5 passed. Payback days are the purchase price divided by the latest daily rent. The shorter payback is the one street to open and the one building to buy. A tie keeps the later building. The running game does not buy that building. F9 still opens a dark advisor window in the city. Next is story **6.6**, an ordered action list with a daily gain for each step. F8 still dumps yesterday’s statements and the route CSVs. A day change dumps once and logs `day.rolled`. A current `save.bin` is not read again. Rules come from AgenticTemplate (`upstream`). `origin` is this repo.
 
 ---
 
@@ -16,7 +16,8 @@
 
 | Branch | Role |
 |--------|------|
-| **`main`** | Integration branch. Last land `c6e34d3`, version 1.6.1.2 |
+| **`main`** | Integration branch. Last land `LANDSHA`, version 1.6.1.2 |
+| **`feature/6.5-rent-payback`** | Story 6.5. Kept after this CMPH |
 | **`feature/6.4-logistics-review`** | Story 6.4. Kept after this CMPH |
 | **`feature/6.3-close-score`** | Story 6.3. Kept after this CMPH |
 | **`feature/6.2-game-api`** | Story 6.2. Kept after this CMPH |
@@ -48,7 +49,7 @@
 | **`feature/chain-prefix`** | Kept after CMPH (template history) |
 | **`feature/handoff-receiver-framing`** | Kept after CMPH (template history) |
 
-**Last land:** `c6e34d3` on `main`. Version 1.6.1.2. Branch `feature/6.4-logistics-review` kept. Release https://github.com/pbuckles22/BigAmbitionStratMod/releases/tag/1.5.6. Repo: https://github.com/pbuckles22/BigAmbitionStratMod.
+**Last land:** `LANDSHA` on `main`. Version 1.6.1.2. Branch `feature/6.5-rent-payback` kept. Release https://github.com/pbuckles22/BigAmbitionStratMod/releases/tag/1.5.6. Repo: https://github.com/pbuckles22/BigAmbitionStratMod.
 
 ---
 
@@ -72,7 +73,7 @@
 
 ## Next up (maintainers)
 
-- Story **6.5** when asked. Where to open next, and which buildings to buy, from rent-versus-buy payback.
+- Story **6.6** when asked. An ordered top-N action list with the estimated daily gain for each step.
 - Variants: merge upstream when AgenticTemplate skills/rules change
 
 ---
