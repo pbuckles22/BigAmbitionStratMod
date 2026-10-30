@@ -8,7 +8,7 @@
 
 ## Summary
 
-**BigAmbitionStratMod** 1.6.1.2 — Epic 6 is closed. The roadmap is an ordered top-N list. The larger daily gain is first. A close gain is the latest loss. An open gain is the latest rent. A tie keeps the later step. The running game does not run that list. F9 still opens a dark advisor window in the city. Next is story **7.1**, close the selected stores. F8 still dumps yesterday’s statements and the route CSVs. A day change dumps once and logs `day.rolled`. A current `save.bin` is not read again. Rules come from AgenticTemplate (`upstream`). `origin` is this repo.
+**BigAmbitionStratMod** 1.6.1.2 — Epic 7 is in progress. A confirmed close shuts one selected store and logs `store.closed`. Each close is separate. An unconfirmed close stays open. An open step is not a close. Reload clears the close. The running game does not call ShutdownBusiness. F9 still opens a dark advisor window in the city. Next is story **7.2**, redo logistics. F8 still dumps yesterday’s statements and the route CSVs. A day change dumps once and logs `day.rolled`. A current `save.bin` is not read again. Rules come from AgenticTemplate (`upstream`). `origin` is this repo.
 
 ---
 
@@ -16,7 +16,8 @@
 
 | Branch | Role |
 |--------|------|
-| **`main`** | Integration branch. Last land `5fb7d45`, version 1.6.1.2 |
+| **`main`** | Integration branch. Last land `SHA`, version 1.6.1.2 |
+| **`feature/7.1-close-stores`** | Story 7.1. Kept after this CMPH |
 | **`feature/6.6-roadmap`** | Story 6.6. Kept after this CMPH |
 | **`feature/6.5-rent-payback`** | Story 6.5. Kept after this CMPH |
 | **`feature/6.4-logistics-review`** | Story 6.4. Kept after this CMPH |
@@ -50,7 +51,7 @@
 | **`feature/chain-prefix`** | Kept after CMPH (template history) |
 | **`feature/handoff-receiver-framing`** | Kept after CMPH (template history) |
 
-**Last land:** `5fb7d45` on `main`. Version 1.6.1.2. Branch `feature/6.6-roadmap` kept. Release https://github.com/pbuckles22/BigAmbitionStratMod/releases/tag/1.6.1.2. Repo: https://github.com/pbuckles22/BigAmbitionStratMod.
+**Last land:** `SHA` on `main`. Version 1.6.1.2. Branch `feature/7.1-close-stores` kept. Release https://github.com/pbuckles22/BigAmbitionStratMod/releases/tag/1.6.1.2. Repo: https://github.com/pbuckles22/BigAmbitionStratMod.
 
 ---
 
@@ -74,7 +75,7 @@
 
 ## Next up (maintainers)
 
-- Story **7.1** when asked. Close the selected stores. Each close is separate, confirmed, and logged. Reload undoes it.
+- Story **7.2** when asked. Redo logistics. Each redo is separate, confirmed, and logged. Reload undoes it.
 - Variants: merge upstream when AgenticTemplate skills/rules change
 
 ---
