@@ -86,7 +86,7 @@ Read-only. This epic draws what **4.2** and **4.3** left as rows. `Close.Lock` a
 Each command is separate, confirmed, logged, and undone by reload.
 
 - **7.1** `[x]` Close the selected stores. One confirmed close shuts that store and logs `store.closed`. Each close is separate. An unconfirmed close, an open step, another number, and a store outside the list stay open. A blank close call stays open. Reload clears the close and leaves the statement file. The running game does not call ShutdownBusiness. Chain: `dll → pin → loaded → csv → routes → day → rank → overlay → advice → prices → plans → staffing → layout → close → buy → panel → api → score → logistics → payback → roadmap → shutdown`. Version 1.6.1.2. Headless.
-- **7.2** `[ ]` Redo logistics.
+- **7.2** `[x]` Redo logistics. One confirmed redo moves that store and logs `logistics.redone`. Each redo is separate. An unconfirmed redo, a different destination, a close street, and a store that is not the move stay put. A review with no move stays put. A blank delivery call stays put. Reload clears the redo and leaves the route file. The running game does not call AddDestination. Chain: `dll → pin → loaded → csv → routes → day → rank → overlay → advice → prices → plans → staffing → layout → close → buy → panel → api → score → logistics → payback → roadmap → shutdown → delivery`. Version 1.6.1.2. Headless. Human check passed.
 - **7.3** `[ ]` Apply prices and staffing.
 - **7.4** `[ ]` Buy a building.
 - **7.5** `[ ]` Clone a layout.
@@ -117,7 +117,7 @@ Not started until Epic 7 works. **8.1–8.3** are one deterministic sim. **8.4�
 - **10.1** `[ ]` Name the win, a net-worth target by a set day.
 - **10.2** `[ ]` Automate a fresh game to that win, within the calls **6.2** recorded.
 
-**Next:** story **7.2** when asked. Redo logistics. Each redo is separate, confirmed, and logged. Reload undoes it. Version stays 1.6.1.2.
+**Next:** story **7.3** when asked. Apply prices and staffing. Each apply is separate, confirmed, and logged. Reload undoes it. Version stays 1.6.1.2.
 
 Operating model (keep these when you replace this plan): `.cursor/rules/` ship commands (UCPH, CMPH, SWAT), human check, plan-coordinate versioning, long-run harvest (`testing.mdc`), and the chain harness and prefix (`integration-chain.mdc`). Do not delete them to “clean up” a new clone.
 

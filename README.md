@@ -6,7 +6,7 @@ Cursor **rules**, **skills**, **handoff protocol**, and **test discipline** for 
 
 **Start with [CONTRIBUTING.md](CONTRIBUTING.md)** — reading order, tracked vs gitignored docs, PR expectations.
 
-**Current work:** [doc/PROJECT_STATUS.md](doc/PROJECT_STATUS.md). Version 1.6.1.2. A confirmed close shuts one selected store and can be cleared by reload. The game does not shut that store during play. Next is redoing logistics, one confirmed move at a time. The mod still dumps yesterday’s statements and routes when the in-game day changes.
+**Current work:** [doc/PROJECT_STATUS.md](doc/PROJECT_STATUS.md). Version 1.6.1.2. A confirmed logistics redo moves one selected store and can be cleared by reload. The game does not rewrite that delivery during play. Next is applying prices and staffing, one confirmed change at a time. The mod still dumps yesterday’s statements and routes when the in-game day changes.
 
 ## Quick start
 
