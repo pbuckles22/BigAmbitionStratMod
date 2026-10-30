@@ -16,8 +16,8 @@
 
 | Branch | Role |
 |--------|------|
-| **`main`** | Integration branch. Last land `31fd681`, version 1.5.5 |
-| **`feature/5.6-buy`** | Story 5.6. Human check passed. Landing on this CMPH |
+| **`main`** | Integration branch. Last land `8837c82`, version 1.5.6 |
+| **`feature/5.6-buy`** | Story 5.6. Kept after this CMPH |
 | **`feature/5.5-close`** | Story 5.5. Kept after this CMPH |
 | **`feature/5.4-layout`** | Story 5.4. Kept after this CMPH |
 | **`feature/5.3-staffing`** | Story 5.3. Kept after this CMPH |
@@ -44,7 +44,7 @@
 | **`feature/chain-prefix`** | Kept after CMPH (template history) |
 | **`feature/handoff-receiver-framing`** | Kept after CMPH (template history) |
 
-**Last land:** `31fd681` on `main`. Version 1.5.5. Branch `feature/5.5-close` kept. Repo: https://github.com/pbuckles22/BigAmbitionStratMod.
+**Last land:** `8837c82` on `main`. Version 1.5.6. Branch `feature/5.6-buy` kept. Release https://github.com/pbuckles22/BigAmbitionStratMod/releases/tag/1.5.6. Repo: https://github.com/pbuckles22/BigAmbitionStratMod.
 
 ---
 
