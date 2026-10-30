@@ -2081,6 +2081,229 @@ public class ModLoadedTests
         Assert.DoesNotContain(pin.DllHash, log);
     }
 
+    [Fact]
+    public void Dll_pin_loaded_csv_routes_day_rank_overlay_advice_prices_plans_staffing_layout_close_buy_panel_api_locks_the_calls()
+    {
+        // Chain: dll → pin → loaded → csv → routes → day → rank → overlay → advice → prices → plans → staffing → layout → close → buy → panel → api
+        var pin = PinDlls();
+        using var dir = new TempLog();
+        var days = ChainDays();
+        var stops = ChainStops();
+        var holds = ChainHolds();
+
+        var loaded = LoadLog.RecordPinned(dir.Path);
+        StatementDump.Write(dir.Path, 1014, days);
+        var routes = RouteDump.Write(dir.Path, stops, holds);
+        var watch = new DayWatch();
+        var armed = watch.Tick(dir.Path, 1013, days, stops, holds);
+        var rolled = watch.Tick(dir.Path, 1014, days, stops, holds);
+        var ranked = Advisor.RankFile(StatementDump.CsvPath(dir.Path));
+        var rows = Overlay.FromRank(
+            ranked,
+            Advisor.WarehouseFamilyMixFile(RouteDump.WarehousesPath(dir.Path)),
+            Array.Empty<StreetCluster>());
+        var shown = Advice.Record(dir.Path, rows);
+        var item = Field(routes, "item");
+        var price = Prices.Lock(
+            item,
+            new[]
+            {
+                new ItemSoldPerPriceEntry(item, 2.75f, 8),
+            });
+        var run = Plans.Lock("W1", holds, stops, price);
+        var staff = Staffing.Lock(
+            run,
+            new[]
+            {
+                new StaffOffer("hr", run.Family, "hr-soda", 40),
+                new StaffOffer("headhunter", run.Family, "hh-soda", 4),
+            });
+        var clusters = Advisor.StreetClusters(
+            new[]
+            {
+                new PortfolioBusiness("Food 1", staff.Role, "ba:street_main", 1),
+                new PortfolioBusiness("Food 2", staff.Role, "ba:street_main", 2),
+                new PortfolioBusiness("Food 3", staff.Role, "ba:street_main", 3),
+            });
+        var clone = Layout.Lock(
+            staff,
+            clusters,
+            new[]
+            {
+                new ChainLayout("ba:street_main", staff.Role, 1, "soda-line", 12, false),
+                new ChainLayout("ba:street_main", staff.Role, 4, "", 0, true),
+            });
+        var closed = Close.Lock(
+            clone,
+            new[]
+            {
+                new LedgerDay(clone.Street, 2, clone.Family, 1011, -10f),
+                new LedgerDay(clone.Street, 2, clone.Family, 1012, -4f),
+                new LedgerDay(clone.Street, 2, clone.Family, 1013, -1f),
+            },
+            3,
+            true,
+            true);
+        var bought = Buy.Lock(
+            closed,
+            new[]
+            {
+                new BuildingLot("hq", "ba:street_hq", 1),
+                new BuildingLot("food", "ba:street_warehouse", 10),
+                new BuildingLot("street", closed.Street, 20),
+            });
+        var panel = Panel.Rows(rows);
+        var api = GameApi.Read(
+            panel,
+            File.ReadAllText(Path.Combine(RepoRoot(), "doc", "requirements", "game-api.md")));
+
+        Assert.Null(armed);
+        Assert.Equal(LoadLog.Line(pin.Build), loaded);
+        Assert.StartsWith("day.rolled version=" + LoadLog.Version + " day=", rolled);
+        Assert.NotEmpty(shown);
+        Assert.Equal("hq", bought.Place);
+        Assert.Equal(pin.ShippedBuild, api.Build);
+        Assert.Equal("Helpers.BusinessHelper.ShutdownBusiness", api.Close);
+        Assert.Equal("BizManPresentation.SendBuyBuildingOffer", api.Buy);
+        Assert.Equal("Buildings.Office.Headquarters.PricingManagerPlan.SetPrice", api.Price);
+        Assert.Equal(
+            "UI.Smartphone.Apps.BizMan.LogisticsManagers.LogisticsManagerPlanUI.AddDestination",
+            api.Delivery);
+    }
+
+    [Fact]
+    public void Dll_pin_loaded_csv_routes_day_rank_overlay_advice_prices_plans_staffing_layout_close_buy_panel_api_locks_the_calls_when_the_buy_is_empty()
+    {
+        // Chain: dll → pin → loaded → csv → routes → day → rank → overlay → advice → prices → plans → staffing → layout → close → buy → panel → api empty
+        var pin = PinDlls();
+        using var dir = new TempLog();
+        var days = ChainDays();
+        var stops = ChainStops();
+        var holds = ChainHolds();
+
+        LoadLog.RecordPinned(dir.Path);
+        StatementDump.Write(dir.Path, 1014, days);
+        var routes = RouteDump.Write(dir.Path, stops, holds);
+        var watch = new DayWatch();
+        Assert.Null(watch.Tick(dir.Path, 1013, days, stops, holds));
+        var rolled = watch.Tick(dir.Path, 1014, days, stops, holds);
+        var ranked = Advisor.RankFile(StatementDump.CsvPath(dir.Path));
+        var rows = Overlay.FromRank(
+            ranked,
+            Advisor.WarehouseFamilyMixFile(RouteDump.WarehousesPath(dir.Path)),
+            Array.Empty<StreetCluster>());
+        Advice.Record(dir.Path, rows);
+        var item = Field(routes, "item");
+        var price = Prices.Lock(
+            item,
+            new[]
+            {
+                new ItemSoldPerPriceEntry(item, 2.75f, 8),
+            });
+        var run = Plans.Lock("W1", holds, stops, price);
+        var staff = Staffing.Lock(
+            run,
+            new[]
+            {
+                new StaffOffer("hr", run.Family, "hr-empty", 0),
+                new StaffOffer("headhunter", "specialty", "hh-gift", 100),
+            });
+        var clusters = Advisor.StreetClusters(
+            new[]
+            {
+                new PortfolioBusiness("Food 1", staff.Role, "ba:street_main", 1),
+                new PortfolioBusiness("Food 2", staff.Role, "ba:street_main", 2),
+            });
+        var clone = Layout.Lock(
+            staff,
+            clusters,
+            new[]
+            {
+                new ChainLayout("ba:street_main", staff.Role, 1, "soda-line", 12, false),
+                new ChainLayout("ba:street_main", staff.Role, 4, "", 0, true),
+            });
+        var closed = Close.Lock(
+            clone,
+            new[]
+            {
+                new LedgerDay("ba:street_main", 2, staff.Role, 1011, -10f),
+                new LedgerDay("ba:street_main", 2, staff.Role, 1012, -4f),
+                new LedgerDay("ba:street_main", 2, staff.Role, 1013, -1f),
+            },
+            3,
+            true,
+            true);
+        var bought = Buy.Lock(
+            closed,
+            new[]
+            {
+                new BuildingLot("hq", "ba:street_hq", 1),
+                new BuildingLot("food", "ba:street_warehouse", 10),
+                new BuildingLot("street", "ba:street_main", 20),
+            });
+        var panel = Panel.Rows(rows);
+        var api = GameApi.Read(
+            panel,
+            File.ReadAllText(Path.Combine(RepoRoot(), "doc", "requirements", "game-api.md")));
+
+        Assert.StartsWith("day.rolled version=" + LoadLog.Version + " day=", rolled);
+        Assert.False(bought.Bought);
+        Assert.Equal("", bought.Place);
+        Assert.Equal(pin.ShippedBuild, api.Build);
+        Assert.Equal("Helpers.BusinessHelper.ShutdownBusiness", api.Close);
+        Assert.Equal("BizManPresentation.SendBuyBuildingOffer", api.Buy);
+        Assert.Equal("Buildings.Office.Headquarters.PricingManagerPlan.SetPrice", api.Price);
+        Assert.Equal(
+            "UI.Smartphone.Apps.BizMan.LogisticsManagers.LogisticsManagerPlanUI.AddDestination",
+            api.Delivery);
+    }
+
+    [Fact]
+    public void Dll_pin_loaded_csv_routes_day_rank_overlay_advice_prices_plans_staffing_layout_close_buy_panel_api_blanks_the_calls_when_the_panel_is_empty()
+    {
+        // Chain: dll → pin → loaded → csv → routes → day → rank → overlay → advice → prices → plans → staffing → layout → close → buy → panel → api blank
+        var pin = PinDlls();
+        using var dir = new TempLog();
+        var days = Array.Empty<FinancialDay>();
+        var stops = Array.Empty<DeliveryStop>();
+        var holds = Array.Empty<WarehouseHold>();
+
+        LoadLog.RecordPinned(dir.Path);
+        StatementDump.Write(dir.Path, 1014, days);
+        var routes = RouteDump.Write(dir.Path, stops, holds);
+        var watch = new DayWatch();
+        Assert.Null(watch.Tick(dir.Path, 1013, days, stops, holds));
+        var rolled = watch.Tick(dir.Path, 1014, days, stops, holds);
+        var ranked = Advisor.RankFile(StatementDump.CsvPath(dir.Path));
+        var rows = Overlay.FromRank(
+            ranked,
+            Advisor.WarehouseFamilyMixFile(RouteDump.WarehousesPath(dir.Path)),
+            Array.Empty<StreetCluster>());
+        Advice.Record(dir.Path, rows);
+        var item = Field(routes, "item");
+        var price = Prices.Lock(item, Array.Empty<ItemSoldPerPriceEntry>());
+        var run = Plans.Lock("W1", holds, stops, price);
+        var staff = Staffing.Lock(run, Array.Empty<StaffOffer>());
+        var clusters = Advisor.StreetClusters(Array.Empty<PortfolioBusiness>());
+        var clone = Layout.Lock(staff, clusters, Array.Empty<ChainLayout>());
+        var closed = Close.Lock(clone, Array.Empty<LedgerDay>(), 3, true, true);
+        var bought = Buy.Lock(closed, Array.Empty<BuildingLot>());
+        var panel = Panel.Rows(rows);
+        var api = GameApi.Read(
+            panel,
+            File.ReadAllText(Path.Combine(RepoRoot(), "doc", "requirements", "game-api.md")));
+
+        Assert.StartsWith("day.rolled version=" + LoadLog.Version + " day=", rolled);
+        Assert.Equal("", bought.Place);
+        Assert.Empty(panel);
+        Assert.Equal("3682", pin.ShippedBuild);
+        Assert.Equal("", api.Build);
+        Assert.Equal("", api.Close);
+        Assert.Equal("", api.Buy);
+        Assert.Equal("", api.Price);
+        Assert.Equal("", api.Delivery);
+    }
+
     private static string Field(string line, string name)
     {
         var key = " " + name + "=";

@@ -8,7 +8,7 @@
 
 ## Summary
 
-**BigAmbitionStratMod** 1.6.1.2 — Story 6.1 passed. F9 opens a dark advisor window in the city. A scroll over it does not zoom the city. The running game does not buy a building. Next is story **6.2**, the build 3682 call note. F8 still dumps yesterday’s statements and the route CSVs. A day change dumps once and logs `day.rolled`. A current `save.bin` is not read again. Rules come from AgenticTemplate (`upstream`). `origin` is this repo.
+**BigAmbitionStratMod** 1.6.1.2 — Story 6.2 passed. The build 3682 calls are recorded in `doc/requirements/game-api.md`. The running game does not call them. F9 still opens a dark advisor window in the city. Next is story **6.3**, an empire-wide close score. F8 still dumps yesterday’s statements and the route CSVs. A day change dumps once and logs `day.rolled`. A current `save.bin` is not read again. Rules come from AgenticTemplate (`upstream`). `origin` is this repo.
 
 ---
 
@@ -17,6 +17,7 @@
 | Branch | Role |
 |--------|------|
 | **`main`** | Integration branch. Last land `95af06b`, version 1.6.1.2 |
+| **`feature/6.2-game-api`** | Story 6.2. Kept after this CMPH |
 | **`feature/6.1-f9-panel`** | Story 6.1. Kept after this CMPH |
 | **`feature/5.6-buy`** | Story 5.6. Kept after this CMPH |
 | **`feature/5.5-close`** | Story 5.5. Kept after this CMPH |
@@ -69,7 +70,7 @@
 
 ## Next up (maintainers)
 
-- Story **6.2** when asked. Record which build 3682 calls close a business, buy a building, set a price, and rewrite a delivery plan. The note is `doc/requirements/game-api.md`.
+- Story **6.3** when asked. Empire-wide close score for every store, with no tie to the layout clone. One explain line per store.
 - Variants: merge upstream when AgenticTemplate skills/rules change
 
 ---

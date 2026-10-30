@@ -73,7 +73,7 @@ Each action is opt-in, logged, and undone by reload. A wrong soak decision becom
 Read-only. This epic draws what **4.2** and **4.3** left as rows. `Close.Lock` and `Buy.Lock` stay as they are.
 
 - **6.1** `[x]` F9 window in the city. Add `UnityEngine.IMGUIModule`, pin its hash, and draw `Overlay.Build` rows with `Advice.Explain` lines from live state. While open, log `advice.shown` and `panel.opened`. The window is a dark panel with light text. A scroll over it does not zoom the city. Human check passed. Chain: `dll → pin → loaded → csv → routes → day → rank → overlay → advice → prices → plans → staffing → layout → close → buy → panel`. Version 1.6.1.2.
-- **6.2** `[ ]` Record which build 3682 calls close a business, buy a building, set a price, and rewrite a delivery plan. The note is `doc/requirements/game-api.md`. Epics 7 and 10 depend on it.
+- **6.2** `[x]` Record which build 3682 calls close a business, buy a building, set a price, and rewrite a delivery plan. The note is `doc/requirements/game-api.md`. Close is `Helpers.BusinessHelper.ShutdownBusiness`. Buy is `BizManPresentation.SendBuyBuildingOffer`. Price is `Buildings.Office.Headquarters.PricingManagerPlan.SetPrice`. Delivery is `UI.Smartphone.Apps.BizMan.LogisticsManagers.LogisticsManagerPlanUI.AddDestination`. The running game does not call them. Chain: `dll → pin → loaded → csv → routes → day → rank → overlay → advice → prices → plans → staffing → layout → close → buy → panel → api`. Version 1.6.1.2.
 - **6.3** `[ ]` Empire-wide close score. Every store, with no tie to the layout clone. Profit after rent, the red-day streak, and the trend. One explain line per store.
 - **6.4** `[ ]` Logistics review. Which warehouse serves which store. Flag mixed families and under-supplied stores. Propose a reassignment.
 - **6.5** `[ ]` Where to open next, and which buildings to buy, from rent-versus-buy payback.
@@ -117,7 +117,7 @@ Not started until Epic 7 works. **8.1–8.3** are one deterministic sim. **8.4�
 - **10.1** `[ ]` Name the win, a net-worth target by a set day.
 - **10.2** `[ ]` Automate a fresh game to that win, within the calls **6.2** recorded.
 
-**Next:** story **6.2** when asked. Record the build 3682 calls in `doc/requirements/game-api.md`. Version stays 1.6.1.2 until that ship.
+**Next:** story **6.3** when asked. Empire-wide close score for every store, with no tie to the layout clone. One explain line per store. Version stays 1.6.1.2.
 
 Operating model (keep these when you replace this plan): `.cursor/rules/` ship commands (UCPH, CMPH, SWAT), human check, plan-coordinate versioning, long-run harvest (`testing.mdc`), and the chain harness and prefix (`integration-chain.mdc`). Do not delete them to “clean up” a new clone.
 

@@ -6,7 +6,7 @@ Cursor **rules**, **skills**, **handoff protocol**, and **test discipline** for 
 
 **Start with [CONTRIBUTING.md](CONTRIBUTING.md)** — reading order, tracked vs gitignored docs, PR expectations.
 
-**Current work:** [doc/PROJECT_STATUS.md](doc/PROJECT_STATUS.md). Version 1.6.1.2. F9 opens a dark advisor window in the city, and a scroll over it does not zoom the city. Next is a note of the build 3682 calls. The mod still dumps yesterday’s statements and routes when the in-game day changes.
+**Current work:** [doc/PROJECT_STATUS.md](doc/PROJECT_STATUS.md). Version 1.6.1.2. The build 3682 calls for close, buy, price, and delivery are recorded. The game does not call them yet. Next is an empire-wide close score. The mod still dumps yesterday’s statements and routes when the in-game day changes.
 
 ## Quick start
 
