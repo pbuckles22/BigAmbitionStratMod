@@ -6,7 +6,7 @@ Cursor **rules**, **skills**, **handoff protocol**, and **test discipline** for 
 
 **Start with [CONTRIBUTING.md](CONTRIBUTING.md)** — reading order, tracked vs gitignored docs, PR expectations.
 
-**Current work:** [doc/PROJECT_STATUS.md](doc/PROJECT_STATUS.md). Version 1.5.1. A retail price is the sold price. The larger amount wins. The game does not set prices. Epic 4 is closed. The mod still dumps yesterday’s statements and routes when the in-game day changes.
+**Current work:** [doc/PROJECT_STATUS.md](doc/PROJECT_STATUS.md). Version 1.5.2. A delivery plan keeps one family per warehouse and one recurring run. The game does not write that plan. A retail price is the sold price. Epic 4 is closed. The mod still dumps yesterday’s statements and routes when the in-game day changes.
 
 ## Quick start
 

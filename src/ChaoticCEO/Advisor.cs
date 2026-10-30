@@ -357,6 +357,11 @@ namespace ChaoticCEO
             return holds;
         }
 
+        public static string? CargoFamily(string item)
+        {
+            return ItemFamily(item);
+        }
+
         private static string? ItemFamily(string item)
         {
             if (string.IsNullOrEmpty(item) || IgnoredCargo.Contains(item))

@@ -2,13 +2,13 @@
 
 **Human-readable current state.** Keep in sync with [AGENT_HANDOFF.md](../AGENT_HANDOFF.md) → *Current state* when milestones ship.
 
-**Last updated:** 2026-10-29
+**Last updated:** 2026-10-30
 
 ---
 
 ## Summary
 
-**BigAmbitionStratMod** 1.5.1 — Story 5.1 is on `main`. A retail price is the sold price from `ItemSoldPerPriceEntry`. The larger amount wins, and a tie keeps the later price. The running game does not set prices. Epic 4 stays closed. Each recommendation has one explain line. Recording it logs `advice.shown`. The running game does not write that line, and the overlay marks are not drawn. F8 still dumps yesterday’s statements and the route CSVs. A day change dumps once and logs `day.rolled`. A warehouse hold is cargo. A current `save.bin` is not read again. Rules come from AgenticTemplate (`upstream`). `origin` is this repo.
+**BigAmbitionStratMod** 1.5.2 — Story 5.2 is on `main`. A delivery plan keeps one family on a warehouse and one recurring run. The larger cargo amount wins, a tie keeps the later family, and a recurring stop beats a one-day contract. The running game does not write that plan. A retail price is the sold price. The larger amount wins, and a tie keeps the later price. The running game does not set prices. Epic 4 stays closed. F8 still dumps yesterday’s statements and the route CSVs. A day change dumps once and logs `day.rolled`. A current `save.bin` is not read again. Rules come from AgenticTemplate (`upstream`). `origin` is this repo.
 
 ---
 
@@ -16,7 +16,8 @@
 
 | Branch | Role |
 |--------|------|
-| **`main`** | Integration branch. Last land `736bdde`, version 1.5.1 |
+| **`main`** | Integration branch. Last land recorded after this CMPH, version 1.5.2 |
+| **`feature/5.2-delivery-plans`** | Story 5.2. Kept after this CMPH |
 | **`feature/5.1-retail-prices`** | Story 5.1. Kept after this CMPH |
 | **`feature/4.3-advice-line`** | Story 4.3. Kept after this CMPH |
 | **`feature/4.2-advisor-overlay`** | Story 4.2. Kept after this CMPH |
@@ -39,7 +40,7 @@
 | **`feature/chain-prefix`** | Kept after CMPH (template history) |
 | **`feature/handoff-receiver-framing`** | Kept after CMPH (template history) |
 
-**Last land:** `736bdde` on `main`. Version 1.5.1. Branch `feature/5.1-retail-prices` kept. Repo: https://github.com/pbuckles22/BigAmbitionStratMod.
+**Last land:** recorded after this CMPH on `main`. Version 1.5.2. Branch `feature/5.2-delivery-plans` kept. Repo: https://github.com/pbuckles22/BigAmbitionStratMod.
 
 ---
 
@@ -63,7 +64,7 @@
 
 ## Next up (maintainers)
 
-- Story **5.2** when asked. Delivery plans: one family per warehouse, recurring runs.
+- Story **5.3** when asked. Staffing via `HrManagerPlan` / `HeadhunterPlan`.
 - Variants: merge upstream when AgenticTemplate skills/rules change
 
 ---
