@@ -6,7 +6,7 @@ Cursor **rules**, **skills**, **handoff protocol**, and **test discipline** for 
 
 **Start with [CONTRIBUTING.md](CONTRIBUTING.md)** — reading order, tracked vs gitignored docs, PR expectations.
 
-**Current work:** [doc/PROJECT_STATUS.md](doc/PROJECT_STATUS.md). Version 1.6.1.2. Rent versus buy picks one street to open and one building to buy. The shorter payback wins. The game does not buy that building yet. Next is an ordered action list with a daily gain for each step. The mod still dumps yesterday’s statements and routes when the in-game day changes.
+**Current work:** [doc/PROJECT_STATUS.md](doc/PROJECT_STATUS.md). Version 1.6.1.2. The advisor keeps an ordered list of what to do next. The larger daily gain comes first. The game does not run that list yet. Next is closing the selected stores, one confirmed close at a time. The mod still dumps yesterday’s statements and routes when the in-game day changes.
 
 ## Quick start
 

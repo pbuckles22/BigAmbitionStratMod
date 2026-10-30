@@ -8,7 +8,7 @@
 
 ## Summary
 
-**BigAmbitionStratMod** 1.6.1.2 — Story 6.5 passed. Payback days are the purchase price divided by the latest daily rent. The shorter payback is the one street to open and the one building to buy. A tie keeps the later building. The running game does not buy that building. F9 still opens a dark advisor window in the city. Next is story **6.6**, an ordered action list with a daily gain for each step. F8 still dumps yesterday’s statements and the route CSVs. A day change dumps once and logs `day.rolled`. A current `save.bin` is not read again. Rules come from AgenticTemplate (`upstream`). `origin` is this repo.
+**BigAmbitionStratMod** 1.6.1.2 — Epic 6 is closed. The roadmap is an ordered top-N list. The larger daily gain is first. A close gain is the latest loss. An open gain is the latest rent. A tie keeps the later step. The running game does not run that list. F9 still opens a dark advisor window in the city. Next is story **7.1**, close the selected stores. F8 still dumps yesterday’s statements and the route CSVs. A day change dumps once and logs `day.rolled`. A current `save.bin` is not read again. Rules come from AgenticTemplate (`upstream`). `origin` is this repo.
 
 ---
 
@@ -16,7 +16,8 @@
 
 | Branch | Role |
 |--------|------|
-| **`main`** | Integration branch. Last land `be5f0ad`, version 1.6.1.2 |
+| **`main`** | Integration branch. Last land `LANDSHA`, version 1.6.1.2 |
+| **`feature/6.6-roadmap`** | Story 6.6. Kept after this CMPH |
 | **`feature/6.5-rent-payback`** | Story 6.5. Kept after this CMPH |
 | **`feature/6.4-logistics-review`** | Story 6.4. Kept after this CMPH |
 | **`feature/6.3-close-score`** | Story 6.3. Kept after this CMPH |
@@ -49,7 +50,7 @@
 | **`feature/chain-prefix`** | Kept after CMPH (template history) |
 | **`feature/handoff-receiver-framing`** | Kept after CMPH (template history) |
 
-**Last land:** `be5f0ad` on `main`. Version 1.6.1.2. Branch `feature/6.5-rent-payback` kept. Release https://github.com/pbuckles22/BigAmbitionStratMod/releases/tag/1.5.6. Repo: https://github.com/pbuckles22/BigAmbitionStratMod.
+**Last land:** `LANDSHA` on `main`. Version 1.6.1.2. Branch `feature/6.6-roadmap` kept. Release https://github.com/pbuckles22/BigAmbitionStratMod/releases/tag/1.6.1.2. Repo: https://github.com/pbuckles22/BigAmbitionStratMod.
 
 ---
 
@@ -73,7 +74,7 @@
 
 ## Next up (maintainers)
 
-- Story **6.6** when asked. An ordered top-N action list with the estimated daily gain for each step.
+- Story **7.1** when asked. Close the selected stores. Each close is separate, confirmed, and logged. Reload undoes it.
 - Variants: merge upstream when AgenticTemplate skills/rules change
 
 ---

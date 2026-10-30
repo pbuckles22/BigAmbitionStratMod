@@ -68,7 +68,7 @@ Each action is opt-in, logged, and undone by reload. A wrong soak decision becom
 
 ## Epic 6 — Visible advisor
 
-**Status:** in progress
+**Status:** complete — 2026-10-30
 
 Read-only. This epic draws what **4.2** and **4.3** left as rows. `Close.Lock` and `Buy.Lock` stay as they are.
 
@@ -77,7 +77,7 @@ Read-only. This epic draws what **4.2** and **4.3** left as rows. `Close.Lock` a
 - **6.3** `[x]` Empire-wide close score. Every store, with no tie to the layout clone. Profit after rent, the red-day streak, and the trend. One explain line per store. The running game does not score a store. Chain: `dll → pin → loaded → csv → routes → day → rank → overlay → advice → prices → plans → staffing → layout → close → buy → panel → api → score`. Version 1.6.1.2.
 - **6.4** `[x]` Logistics review. Which warehouse serves which store. One service per store and cargo family. A recurring stop beats a dated stop. The larger cargo amount wins, a tie keeps the later stop, and amounts of the same family add. Amount 0 is empty. A lamp or a bag is not a family. A mixed warehouse is flagged and is not a move target. An under-supplied store has no positive cargo of that family. One reassignment moves the later short store onto the single-family warehouse with the larger stock. A tie keeps the later warehouse. The close-score line does not choose the store. The running game does not apply the move. Chain: `dll → pin → loaded → csv → routes → day → rank → overlay → advice → prices → plans → staffing → layout → close → buy → panel → api → score → logistics`. Version 1.6.1.2.
 - **6.5** `[x]` Where to open next, and which buildings to buy, from rent-versus-buy payback. Payback days are the purchase price divided by the latest daily rent for that address. The shorter payback is the one street to open and the one building to buy. A tie keeps the later building. A zero or negative price or rent is not a buy. A blank street or a number of 0 is not a buy. A later day supplies the rent, and a later row on that day supplies it. A later zero rent clears an earlier rent. The logistics move does not choose the building. The running game does not buy that building. Chain: `dll → pin → loaded → csv → routes → day → rank → overlay → advice → prices → plans → staffing → layout → close → buy → panel → api → score → logistics → payback`. Version 1.6.1.2. Human check passed.
-- **6.6** `[ ]` Roadmap. An ordered top-N action list with the estimated daily gain for each step.
+- **6.6** `[x]` Roadmap. An ordered top-N action list. The larger daily gain is first. A close step is a scored store whose latest profit is below zero, and the gain is that loss. An open step is the payback building, and the gain is the latest rent. A tie keeps the later step. A repeated score line stays one close. A later day supplies the profit and the rent, and a later row on that day supplies them. A later zero profit clears the close. A later zero rent clears the open. The logistics move is not a step. The running game does not run the list. Chain: `dll → pin → loaded → csv → routes → day → rank → overlay → advice → prices → plans → staffing → layout → close → buy → panel → api → score → logistics → payback → roadmap`. Version 1.6.1.2. Headless.
 
 ## Epic 7 — Execute on the current save
 
@@ -117,7 +117,7 @@ Not started until Epic 7 works. **8.1–8.3** are one deterministic sim. **8.4�
 - **10.1** `[ ]` Name the win, a net-worth target by a set day.
 - **10.2** `[ ]` Automate a fresh game to that win, within the calls **6.2** recorded.
 
-**Next:** story **6.6** when asked. An ordered top-N action list with the estimated daily gain for each step. Version stays 1.6.1.2.
+**Next:** story **7.1** when asked. Close the selected stores. Each close is separate, confirmed, and logged. Reload undoes it. Version stays 1.6.1.2.
 
 Operating model (keep these when you replace this plan): `.cursor/rules/` ship commands (UCPH, CMPH, SWAT), human check, plan-coordinate versioning, long-run harvest (`testing.mdc`), and the chain harness and prefix (`integration-chain.mdc`). Do not delete them to “clean up” a new clone.
 
