@@ -18,6 +18,17 @@ namespace ChaoticCEO
             return line;
         }
 
+        public static bool InCity()
+        {
+            return SaveGameManager.Current != null;
+        }
+
+        public static IReadOnlyList<OverlayRow> OverlayRows()
+        {
+            var current = SaveGameManager.Current;
+            return Overlay.Build(Days(current), Portfolio(current), Holds(current));
+        }
+
         public static string? Roll(DayWatch watch, string localAppData)
         {
             if (watch == null || string.IsNullOrEmpty(localAppData))
@@ -34,7 +45,7 @@ namespace ChaoticCEO
             return watch.Tick(localAppData, current.Day, Days(current), Plans(current), Holds(current));
         }
 
-        private static IReadOnlyList<FinancialDay> Days(GameInstance? current)
+        public static IReadOnlyList<FinancialDay> Days(GameInstance? current)
         {
             if (current == null || current.financialSummaries == null)
             {
@@ -166,7 +177,23 @@ namespace ChaoticCEO
             }
         }
 
-        private static List<WarehouseHold> Holds(GameInstance? current)
+        public static IReadOnlyList<PortfolioBusiness> Portfolio(GameInstance? current)
+        {
+            var rows = new List<PortfolioBusiness>();
+            if (current == null || current.BuildingRegistrations == null)
+            {
+                return rows;
+            }
+
+            foreach (var building in current.BuildingRegistrations)
+            {
+                AddBusiness(rows, building);
+            }
+
+            return rows;
+        }
+
+        public static List<WarehouseHold> Holds(GameInstance? current)
         {
             var rows = new List<WarehouseHold>();
             if (current == null || current.BuildingRegistrations == null)
@@ -180,6 +207,26 @@ namespace ChaoticCEO
             }
 
             return rows;
+        }
+
+        private static void AddBusiness(List<PortfolioBusiness> rows, BuildingRegistration building)
+        {
+            if (building == null)
+            {
+                return;
+            }
+
+            var family = StoreFamily.For(building.businessTypeName);
+            if (family == null || string.IsNullOrEmpty(building.BusinessName) || string.IsNullOrEmpty(building.StreetName))
+            {
+                return;
+            }
+
+            rows.Add(new PortfolioBusiness(
+                building.BusinessName,
+                family,
+                building.StreetName,
+                building.StreetNumber));
         }
 
         private static void AddWarehouse(List<WarehouseHold> rows, BuildingRegistration building)

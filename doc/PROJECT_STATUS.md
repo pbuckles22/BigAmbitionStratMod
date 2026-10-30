@@ -8,7 +8,7 @@
 
 ## Summary
 
-**BigAmbitionStratMod** 1.5.6 — Epic 5 is closed. A close keeps one buy: the building under HQ, then under the food warehouse, then on that closed street. The running game does not buy that building. The overlay marks are not drawn. Next is story **6.1**, an F9 advisor window in the city. F8 still dumps yesterday’s statements and the route CSVs. A day change dumps once and logs `day.rolled`. A current `save.bin` is not read again. Rules come from AgenticTemplate (`upstream`). `origin` is this repo.
+**BigAmbitionStratMod** 1.6.1.2 — Story 6.1 passed. F9 opens a dark advisor window in the city. A scroll over it does not zoom the city. The running game does not buy a building. Next is story **6.2**, the build 3682 call note. F8 still dumps yesterday’s statements and the route CSVs. A day change dumps once and logs `day.rolled`. A current `save.bin` is not read again. Rules come from AgenticTemplate (`upstream`). `origin` is this repo.
 
 ---
 
@@ -17,6 +17,7 @@
 | Branch | Role |
 |--------|------|
 | **`main`** | Integration branch. Last land `8837c82`, version 1.5.6 |
+| **`feature/6.1-f9-panel`** | Story 6.1. Kept after this CMPH |
 | **`feature/5.6-buy`** | Story 5.6. Kept after this CMPH |
 | **`feature/5.5-close`** | Story 5.5. Kept after this CMPH |
 | **`feature/5.4-layout`** | Story 5.4. Kept after this CMPH |
@@ -68,7 +69,7 @@
 
 ## Next up (maintainers)
 
-- Story **6.1** when asked. Version 1.6.1. F9 draws the advisor window in the city. Rows come from `Overlay.Build` and `Advice.Explain`.
+- Story **6.2** when asked. Record which build 3682 calls close a business, buy a building, set a price, and rewrite a delivery plan. The note is `doc/requirements/game-api.md`.
 - Variants: merge upstream when AgenticTemplate skills/rules change
 
 ---

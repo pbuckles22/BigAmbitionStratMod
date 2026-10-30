@@ -39,13 +39,26 @@ namespace ChaoticCEO
                 _hooked = false;
             }
 
+            PanelView.Release();
             return Task.CompletedTask;
         }
 
         private void OnFrame()
         {
             DumpOnHotkey();
+            TogglePanel();
             LiveDump.Roll(_days, _localAppData);
+        }
+
+        private void TogglePanel()
+        {
+            var keyboard = Keyboard.current;
+            if (keyboard == null || !keyboard.f9Key.wasPressedThisFrame)
+            {
+                return;
+            }
+
+            PanelView.Ensure().Press(_localAppData);
         }
 
         private void DumpOnHotkey()

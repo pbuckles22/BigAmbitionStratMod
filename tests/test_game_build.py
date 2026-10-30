@@ -11,6 +11,7 @@ GAME_BUILD_PATH = REPO / "script" / "game_build.py"
 
 BIG_AMBITIONS_DLL = "9427561b81aaab2ada09c22a3c98dd9a4017a65225b389513885bf336852e911"
 MODAPI_DLL = "0ab90c0473684ce43cbe22c4049eb509373ab0d8a80216bf882a07d50c876983"
+IMGUI_DLL = "b9720d33d0709863fcc8b10a4f327e3bbf082486e4b544917393f7ac8a78e460"
 SAMPLE_DLL = "016dd39f8914e64478f2016d0e432b2d7de9194a3ad6354c88bb53e931ca12d9"
 SAMPLE_API = "14c2529eb4498c5d1ffd6915d05bf58a91bdda796af59f41d480d11c099d0479"
 HASH_A = "ca978112ca1bbdcafac231b39a23dc4da786eff8147c4e72b9807785afee48bb"
@@ -37,6 +38,12 @@ def test_GameBuild_locks_the_modapi_hash():
     pins = game_build.read_pin(PIN_PATH.read_text(encoding="utf-8"))
     row = next(item for item in pins if item["name"] == "BigAmbitions.ModAPI.dll")
     assert row["hash"] == MODAPI_DLL
+
+
+def test_GameBuild_locks_the_imgui_hash():
+    pins = game_build.read_pin(PIN_PATH.read_text(encoding="utf-8"))
+    row = next(item for item in pins if item["name"] == "UnityEngine.IMGUIModule.dll")
+    assert row["hash"] == IMGUI_DLL
 
 
 def test_GameBuild_locks_build_3682():
