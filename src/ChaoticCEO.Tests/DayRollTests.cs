@@ -35,13 +35,13 @@ public class DayRollTests
 
         Assert.Null(armed);
         Assert.Null(again);
-        Assert.Equal("day.rolled version=1.5.3 day=1014", rolled);
+        Assert.Equal("day.rolled version=1.5.4 day=1014", rolled);
         Assert.Equal(
             new[]
             {
-                "csv.written version=1.5.3 rows=1 day=1013 street=ba:street_fourthavenue number=28 profit=50687.4805",
-                "routes.written version=1.5.3 routes=1 warehouses=1 warehouse=ba:street_fourthstreet 46 destination=ba:street_firstavenue 38 item=ba:itemname_sodacan day=1016",
-                "day.rolled version=1.5.3 day=1014",
+                "csv.written version=1.5.4 rows=1 day=1013 street=ba:street_fourthavenue number=28 profit=50687.4805",
+                "routes.written version=1.5.4 routes=1 warehouses=1 warehouse=ba:street_fourthstreet 46 destination=ba:street_firstavenue 38 item=ba:itemname_sodacan day=1016",
+                "day.rolled version=1.5.4 day=1014",
             },
             File.ReadAllLines(Path.Combine(dir.Path, "ChaoticCEO", "ceo.log")));
         Assert.Contains("1013,ba:street_fourthavenue,28,", File.ReadAllText(StatementDump.CsvPath(dir.Path)));
@@ -62,11 +62,11 @@ public class DayRollTests
 
         Assert.Null(armed);
         Assert.Null(again);
-        Assert.Equal("day.rolled version=1.5.3 day=1013", rolled);
+        Assert.Equal("day.rolled version=1.5.4 day=1013", rolled);
         var lines = File.ReadAllLines(Path.Combine(dir.Path, "ChaoticCEO", "ceo.log"));
         Assert.Equal(3, lines.Length);
-        Assert.Equal("day.rolled version=1.5.3 day=1013", lines[2]);
-        Assert.StartsWith("csv.written version=1.5.3 rows=1 day=1012 ", lines[0]);
+        Assert.Equal("day.rolled version=1.5.4 day=1013", lines[2]);
+        Assert.StartsWith("csv.written version=1.5.4 rows=1 day=1012 ", lines[0]);
     }
 
     [Fact]
@@ -82,15 +82,15 @@ public class DayRollTests
         var first = watch.Tick(dir.Path, 1014, days, routes, holds);
         var second = watch.Tick(dir.Path, 1015, days, routes, holds);
 
-        Assert.Equal("day.rolled version=1.5.3 day=1014", first);
-        Assert.Equal("day.rolled version=1.5.3 day=1015", second);
+        Assert.Equal("day.rolled version=1.5.4 day=1014", first);
+        Assert.Equal("day.rolled version=1.5.4 day=1015", second);
         var lines = File.ReadAllLines(Path.Combine(dir.Path, "ChaoticCEO", "ceo.log"));
         Assert.Equal(6, lines.Length);
-        Assert.Equal("day.rolled version=1.5.3 day=1014", lines[2]);
+        Assert.Equal("day.rolled version=1.5.4 day=1014", lines[2]);
         Assert.Equal(
-            "csv.written version=1.5.3 rows=1 day=1014 street=ba:street_today number=1 profit=9",
+            "csv.written version=1.5.4 rows=1 day=1014 street=ba:street_today number=1 profit=9",
             lines[3]);
-        Assert.Equal("day.rolled version=1.5.3 day=1015", lines[5]);
+        Assert.Equal("day.rolled version=1.5.4 day=1015", lines[5]);
         Assert.Contains("1014,ba:street_today,1,", File.ReadAllText(StatementDump.CsvPath(dir.Path)));
     }
 

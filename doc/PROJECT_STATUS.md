@@ -8,7 +8,7 @@
 
 ## Summary
 
-**BigAmbitionStratMod** 1.5.3 — Story 5.3 is on `main`. One role keeps one HR or headhunter plan. The role is the warehouse family from the delivery plan. The larger amount wins, a tie keeps the later plan, amount 0 is not a plan, and an unlimited amount beats a finite count. The running game does not write that plan. A delivery plan keeps one family on a warehouse and one recurring run. Epic 4 stays closed. F8 still dumps yesterday’s statements and the route CSVs. A day change dumps once and logs `day.rolled`. A current `save.bin` is not read again. Rules come from AgenticTemplate (`upstream`). `origin` is this repo.
+**BigAmbitionStratMod** 1.5.4 — Story 5.4 is on `main`. One qualifying street cluster keeps one cloned layout. The family is the staffing role. The larger interior score wins, a tie keeps the later layout, score 0 is not a layout, and a later cluster without a new store keeps the earlier clone. The running game does not copy that layout. One role keeps one HR or headhunter plan. Epic 4 stays closed. F8 still dumps yesterday’s statements and the route CSVs. A day change dumps once and logs `day.rolled`. A current `save.bin` is not read again. Rules come from AgenticTemplate (`upstream`). `origin` is this repo.
 
 ---
 
@@ -16,7 +16,8 @@
 
 | Branch | Role |
 |--------|------|
-| **`main`** | Integration branch. Last land `9b3d012`, version 1.5.3 |
+| **`main`** | Integration branch. Last land recorded after this CMPH, version 1.5.4 |
+| **`feature/5.4-layout`** | Story 5.4. Kept after this CMPH |
 | **`feature/5.3-staffing`** | Story 5.3. Kept after this CMPH |
 | **`feature/5.2-delivery-plans`** | Story 5.2. Kept after this CMPH |
 | **`feature/5.1-retail-prices`** | Story 5.1. Kept after this CMPH |
@@ -41,7 +42,7 @@
 | **`feature/chain-prefix`** | Kept after CMPH (template history) |
 | **`feature/handoff-receiver-framing`** | Kept after CMPH (template history) |
 
-**Last land:** `9b3d012` on `main`. Version 1.5.3. Branch `feature/5.3-staffing` kept. Repo: https://github.com/pbuckles22/BigAmbitionStratMod.
+**Last land:** recorded after this CMPH on `main`. Version 1.5.4. Branch `feature/5.4-layout` kept. Repo: https://github.com/pbuckles22/BigAmbitionStratMod.
 
 ---
 
@@ -65,7 +66,7 @@
 
 ## Next up (maintainers)
 
-- Story **5.4** when asked. Clone a chain layout onto a new store when a street cluster qualifies.
+- Story **5.5** when asked. Close after N red days. Confirm dialog first, then a toggle.
 - Variants: merge upstream when AgenticTemplate skills/rules change
 
 ---
