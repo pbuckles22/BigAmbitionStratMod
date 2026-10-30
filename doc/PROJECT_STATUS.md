@@ -8,7 +8,7 @@
 
 ## Summary
 
-**BigAmbitionStratMod** 1.6.1.2 — Story 6.2 passed. The build 3682 calls are recorded in `doc/requirements/game-api.md`. The running game does not call them. F9 still opens a dark advisor window in the city. Next is story **6.3**, an empire-wide close score. F8 still dumps yesterday’s statements and the route CSVs. A day change dumps once and logs `day.rolled`. A current `save.bin` is not read again. Rules come from AgenticTemplate (`upstream`). `origin` is this repo.
+**BigAmbitionStratMod** 1.6.1.2 — Story 6.3 passed. Every store has one close-score line from profit after rent, the red-day streak, and the trend. The layout clone does not choose the store. The running game does not score a store. F9 still opens a dark advisor window in the city. Next is story **6.4**, a logistics review. F8 still dumps yesterday’s statements and the route CSVs. A day change dumps once and logs `day.rolled`. A current `save.bin` is not read again. Rules come from AgenticTemplate (`upstream`). `origin` is this repo.
 
 ---
 
@@ -17,6 +17,7 @@
 | Branch | Role |
 |--------|------|
 | **`main`** | Integration branch. Last land `ece592d`, version 1.6.1.2 |
+| **`feature/6.3-close-score`** | Story 6.3. Kept after this CMPH |
 | **`feature/6.2-game-api`** | Story 6.2. Kept after this CMPH |
 | **`feature/6.1-f9-panel`** | Story 6.1. Kept after this CMPH |
 | **`feature/5.6-buy`** | Story 5.6. Kept after this CMPH |
@@ -70,7 +71,7 @@
 
 ## Next up (maintainers)
 
-- Story **6.3** when asked. Empire-wide close score for every store, with no tie to the layout clone. One explain line per store.
+- Story **6.4** when asked. Logistics review: which warehouse serves which store, mixed families, under-supplied stores, and one reassignment.
 - Variants: merge upstream when AgenticTemplate skills/rules change
 
 ---
