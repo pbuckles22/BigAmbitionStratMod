@@ -8,7 +8,7 @@
 
 ## Summary
 
-**BigAmbitionStratMod** 1.6.1.2 — Story 6.3 passed. Every store has one close-score line from profit after rent, the red-day streak, and the trend. The layout clone does not choose the store. The running game does not score a store. F9 still opens a dark advisor window in the city. Next is story **6.4**, a logistics review. F8 still dumps yesterday’s statements and the route CSVs. A day change dumps once and logs `day.rolled`. A current `save.bin` is not read again. Rules come from AgenticTemplate (`upstream`). `origin` is this repo.
+**BigAmbitionStratMod** 1.6.1.2 — Story 6.4 passed. A warehouse serves each store for one cargo family. Mixed warehouses and under-supplied stores are flagged. One reassignment moves the later short store onto the single-family warehouse with the larger stock. The running game does not apply that move. F9 still opens a dark advisor window in the city. Next is story **6.5**, where to open next from rent-versus-buy payback. F8 still dumps yesterday’s statements and the route CSVs. A day change dumps once and logs `day.rolled`. A current `save.bin` is not read again. Rules come from AgenticTemplate (`upstream`). `origin` is this repo.
 
 ---
 
@@ -16,7 +16,8 @@
 
 | Branch | Role |
 |--------|------|
-| **`main`** | Integration branch. Last land `b9524fe`, version 1.6.1.2 |
+| **`main`** | Integration branch. Last land `LANDSHA`, version 1.6.1.2 |
+| **`feature/6.4-logistics-review`** | Story 6.4. Kept after this CMPH |
 | **`feature/6.3-close-score`** | Story 6.3. Kept after this CMPH |
 | **`feature/6.2-game-api`** | Story 6.2. Kept after this CMPH |
 | **`feature/6.1-f9-panel`** | Story 6.1. Kept after this CMPH |
@@ -47,7 +48,7 @@
 | **`feature/chain-prefix`** | Kept after CMPH (template history) |
 | **`feature/handoff-receiver-framing`** | Kept after CMPH (template history) |
 
-**Last land:** `b9524fe` on `main`. Version 1.6.1.2. Branch `feature/6.3-close-score` kept. Release https://github.com/pbuckles22/BigAmbitionStratMod/releases/tag/1.5.6. Repo: https://github.com/pbuckles22/BigAmbitionStratMod.
+**Last land:** `LANDSHA` on `main`. Version 1.6.1.2. Branch `feature/6.4-logistics-review` kept. Release https://github.com/pbuckles22/BigAmbitionStratMod/releases/tag/1.5.6. Repo: https://github.com/pbuckles22/BigAmbitionStratMod.
 
 ---
 
@@ -71,7 +72,7 @@
 
 ## Next up (maintainers)
 
-- Story **6.4** when asked. Logistics review: which warehouse serves which store, mixed families, under-supplied stores, and one reassignment.
+- Story **6.5** when asked. Where to open next, and which buildings to buy, from rent-versus-buy payback.
 - Variants: merge upstream when AgenticTemplate skills/rules change
 
 ---

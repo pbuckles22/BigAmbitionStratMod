@@ -75,7 +75,7 @@ Read-only. This epic draws what **4.2** and **4.3** left as rows. `Close.Lock` a
 - **6.1** `[x]` F9 window in the city. Add `UnityEngine.IMGUIModule`, pin its hash, and draw `Overlay.Build` rows with `Advice.Explain` lines from live state. While open, log `advice.shown` and `panel.opened`. The window is a dark panel with light text. A scroll over it does not zoom the city. Human check passed. Chain: `dll → pin → loaded → csv → routes → day → rank → overlay → advice → prices → plans → staffing → layout → close → buy → panel`. Version 1.6.1.2.
 - **6.2** `[x]` Record which build 3682 calls close a business, buy a building, set a price, and rewrite a delivery plan. The note is `doc/requirements/game-api.md`. Close is `Helpers.BusinessHelper.ShutdownBusiness`. Buy is `BizManPresentation.SendBuyBuildingOffer`. Price is `Buildings.Office.Headquarters.PricingManagerPlan.SetPrice`. Delivery is `UI.Smartphone.Apps.BizMan.LogisticsManagers.LogisticsManagerPlanUI.AddDestination`. The running game does not call them. Chain: `dll → pin → loaded → csv → routes → day → rank → overlay → advice → prices → plans → staffing → layout → close → buy → panel → api`. Version 1.6.1.2.
 - **6.3** `[x]` Empire-wide close score. Every store, with no tie to the layout clone. Profit after rent, the red-day streak, and the trend. One explain line per store. The running game does not score a store. Chain: `dll → pin → loaded → csv → routes → day → rank → overlay → advice → prices → plans → staffing → layout → close → buy → panel → api → score`. Version 1.6.1.2.
-- **6.4** `[ ]` Logistics review. Which warehouse serves which store. Flag mixed families and under-supplied stores. Propose a reassignment.
+- **6.4** `[x]` Logistics review. Which warehouse serves which store. One service per store and cargo family. A recurring stop beats a dated stop. The larger cargo amount wins, a tie keeps the later stop, and amounts of the same family add. Amount 0 is empty. A lamp or a bag is not a family. A mixed warehouse is flagged and is not a move target. An under-supplied store has no positive cargo of that family. One reassignment moves the later short store onto the single-family warehouse with the larger stock. A tie keeps the later warehouse. The close-score line does not choose the store. The running game does not apply the move. Chain: `dll → pin → loaded → csv → routes → day → rank → overlay → advice → prices → plans → staffing → layout → close → buy → panel → api → score → logistics`. Version 1.6.1.2.
 - **6.5** `[ ]` Where to open next, and which buildings to buy, from rent-versus-buy payback.
 - **6.6** `[ ]` Roadmap. An ordered top-N action list with the estimated daily gain for each step.
 
@@ -117,7 +117,7 @@ Not started until Epic 7 works. **8.1–8.3** are one deterministic sim. **8.4�
 - **10.1** `[ ]` Name the win, a net-worth target by a set day.
 - **10.2** `[ ]` Automate a fresh game to that win, within the calls **6.2** recorded.
 
-**Next:** story **6.4** when asked. Logistics review: which warehouse serves which store, mixed families, under-supplied stores, and one reassignment. Version stays 1.6.1.2.
+**Next:** story **6.5** when asked. Where to open next, and which buildings to buy, from rent-versus-buy payback. Version stays 1.6.1.2.
 
 Operating model (keep these when you replace this plan): `.cursor/rules/` ship commands (UCPH, CMPH, SWAT), human check, plan-coordinate versioning, long-run harvest (`testing.mdc`), and the chain harness and prefix (`integration-chain.mdc`). Do not delete them to “clean up” a new clone.
 

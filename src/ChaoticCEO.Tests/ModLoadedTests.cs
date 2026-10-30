@@ -2528,6 +2528,270 @@ public class ModLoadedTests
             scored[0].Explain);
     }
 
+    [Fact]
+    public void Dll_pin_loaded_csv_routes_day_rank_overlay_advice_prices_plans_staffing_layout_close_buy_panel_api_score_logistics_locks_the_reassignment()
+    {
+        // Chain: dll → pin → loaded → csv → routes → day → rank → overlay → advice → prices → plans → staffing → layout → close → buy → panel → api → score → logistics
+        var pin = PinDlls();
+        using var dir = new TempLog();
+        var canonical = ChainDays()[0].Rows[0];
+        var days = new[]
+        {
+            new FinancialDay(
+                1011,
+                new[]
+                {
+                    new StatementRow("ba:street_side", 9, 0f, 0f, 0f, 4f, 0f, 0f, -10f),
+                }),
+            new FinancialDay(
+                1012,
+                new[]
+                {
+                    new StatementRow("ba:street_side", 9, 0f, 0f, 0f, 4f, 0f, 0f, -20f),
+                }),
+            new FinancialDay(
+                1013,
+                new[]
+                {
+                    canonical,
+                    new StatementRow("ba:street_side", 9, 0f, 0f, 0f, 4f, 0f, 0f, -30f),
+                }),
+        };
+        var stops = new[]
+        {
+            ChainStops()[0],
+            new DeliveryStop(
+                "ba:street_fourthstreet 46",
+                "ba:street_side 9",
+                "ba:itemname_cheapgift",
+                null,
+                ""),
+        };
+        var holds = new[]
+        {
+            ChainHolds()[0],
+            new WarehouseHold("W2", "ba:street_b", 2, "ba:itemname_cheapgift", 20),
+        };
+
+        LoadLog.RecordPinned(dir.Path);
+        StatementDump.Write(dir.Path, 1014, days);
+        var routes = RouteDump.Write(dir.Path, stops, holds);
+        var watch = new DayWatch();
+        Assert.Null(watch.Tick(dir.Path, 1013, days, stops, holds));
+        var rolled = watch.Tick(dir.Path, 1014, days, stops, holds);
+        var ranked = Advisor.RankFile(StatementDump.CsvPath(dir.Path));
+        var rows = Overlay.FromRank(
+            ranked,
+            Advisor.WarehouseFamilyMixFile(RouteDump.WarehousesPath(dir.Path)),
+            Array.Empty<StreetCluster>());
+        Advice.Record(dir.Path, rows);
+        var item = Field(routes, "item");
+        var price = Prices.Lock(
+            item,
+            new[]
+            {
+                new ItemSoldPerPriceEntry(item, 2.75f, 8),
+            });
+        var run = Plans.Lock("W1", holds, stops, price);
+        var staff = Staffing.Lock(
+            run,
+            new[]
+            {
+                new StaffOffer("hr", run.Family, "hr-soda", 40),
+                new StaffOffer("headhunter", run.Family, "hh-soda", 4),
+            });
+        var clusters = Advisor.StreetClusters(
+            new[]
+            {
+                new PortfolioBusiness("Food 1", staff.Role, "ba:street_main", 1),
+                new PortfolioBusiness("Food 2", staff.Role, "ba:street_main", 2),
+                new PortfolioBusiness("Food 3", staff.Role, "ba:street_main", 3),
+            });
+        var clone = Layout.Lock(
+            staff,
+            clusters,
+            new[]
+            {
+                new ChainLayout("ba:street_main", staff.Role, 1, "soda-line", 12, false),
+                new ChainLayout("ba:street_main", staff.Role, 4, "", 0, true),
+            });
+        var closed = Close.Lock(
+            clone,
+            new[]
+            {
+                new LedgerDay(clone.Street, 2, clone.Family, 1011, -10f),
+                new LedgerDay(clone.Street, 2, clone.Family, 1012, -4f),
+                new LedgerDay(clone.Street, 2, clone.Family, 1013, -1f),
+            },
+            3,
+            true,
+            true);
+        var bought = Buy.Lock(
+            closed,
+            new[]
+            {
+                new BuildingLot("hq", "ba:street_hq", 1),
+                new BuildingLot("food", "ba:street_warehouse", 10),
+                new BuildingLot("street", closed.Street, 20),
+            });
+        var panel = Panel.Rows(rows);
+        var api = GameApi.Read(
+            panel,
+            File.ReadAllText(Path.Combine(RepoRoot(), "doc", "requirements", "game-api.md")));
+        var scored = CloseScore.Score(api, days);
+        var review = Logistics.FromRoutes(
+            scored,
+            api,
+            RouteDump.RoutesPath(dir.Path),
+            RouteDump.WarehousesPath(dir.Path));
+
+        Assert.StartsWith("day.rolled version=" + LoadLog.Version + " day=", rolled);
+        Assert.NotEmpty(scored);
+        Assert.True(bought.Bought);
+        Assert.Equal(pin.ShippedBuild, api.Build);
+        Assert.Equal(
+            "UI.Smartphone.Apps.BizMan.LogisticsManagers.LogisticsManagerPlanUI.AddDestination",
+            api.Delivery);
+        Assert.Equal("W1", review.Services[0].Warehouse);
+        Assert.Equal("ba:street_firstavenue 38", review.Services[0].Destination);
+        Assert.Equal("food", review.Services[0].Family);
+        Assert.Equal("ba:street_side 9", review.Move!.Destination);
+        Assert.Equal("W1", review.Move.From);
+        Assert.Equal("W2", review.Move.To);
+        Assert.Equal("specialty", review.Move.Family);
+        Assert.Equal(
+            "Reassign ba:street_side 9. From W1. To W2. Family specialty.",
+            review.Move.Explain);
+        Assert.DoesNotContain("AddDestination", review.Move.Explain);
+    }
+
+    [Fact]
+    public void Dll_pin_loaded_csv_routes_day_rank_overlay_advice_prices_plans_staffing_layout_close_buy_panel_api_score_logistics_keeps_no_reassignment_when_the_route_is_supplied()
+    {
+        // Chain: dll → pin → loaded → csv → routes → day → rank → overlay → advice → prices → plans → staffing → layout → close → buy → panel → api → score → logistics supplied
+        var pin = PinDlls();
+        using var dir = new TempLog();
+        var days = ChainDays();
+        var stops = ChainStops();
+        var holds = ChainHolds();
+
+        LoadLog.RecordPinned(dir.Path);
+        StatementDump.Write(dir.Path, 1014, days);
+        var routes = RouteDump.Write(dir.Path, stops, holds);
+        var watch = new DayWatch();
+        Assert.Null(watch.Tick(dir.Path, 1013, days, stops, holds));
+        var rolled = watch.Tick(dir.Path, 1014, days, stops, holds);
+        var ranked = Advisor.RankFile(StatementDump.CsvPath(dir.Path));
+        var rows = Overlay.FromRank(
+            ranked,
+            Advisor.WarehouseFamilyMixFile(RouteDump.WarehousesPath(dir.Path)),
+            Array.Empty<StreetCluster>());
+        Advice.Record(dir.Path, rows);
+        var item = Field(routes, "item");
+        var price = Prices.Lock(
+            item,
+            new[]
+            {
+                new ItemSoldPerPriceEntry(item, 2.75f, 8),
+            });
+        var run = Plans.Lock("W1", holds, stops, price);
+        var staff = Staffing.Lock(run, Array.Empty<StaffOffer>());
+        var clusters = Advisor.StreetClusters(Array.Empty<PortfolioBusiness>());
+        var clone = Layout.Lock(staff, clusters, Array.Empty<ChainLayout>());
+        var closed = Close.Lock(clone, Array.Empty<LedgerDay>(), 3, true, true);
+        var bought = Buy.Lock(closed, Array.Empty<BuildingLot>());
+        var panel = Panel.Rows(rows);
+        var api = GameApi.Read(
+            panel,
+            File.ReadAllText(Path.Combine(RepoRoot(), "doc", "requirements", "game-api.md")));
+        var scored = CloseScore.Score(api, days);
+        var review = Logistics.FromRoutes(
+            scored,
+            api,
+            RouteDump.RoutesPath(dir.Path),
+            RouteDump.WarehousesPath(dir.Path));
+
+        Assert.StartsWith("day.rolled version=" + LoadLog.Version + " day=", rolled);
+        Assert.NotEmpty(scored);
+        Assert.False(bought.Bought);
+        Assert.Equal(pin.ShippedBuild, api.Build);
+        Assert.Null(review.Move);
+        Assert.Equal("W1", review.Services[0].Warehouse);
+        Assert.Equal("ba:street_firstavenue 38", review.Services[0].Destination);
+        Assert.Equal("food", review.Services[0].Family);
+    }
+
+    [Fact]
+    public void Dll_pin_loaded_csv_routes_day_rank_overlay_advice_prices_plans_staffing_layout_close_buy_panel_api_score_logistics_keeps_no_reassignment_when_the_panel_is_empty()
+    {
+        // Chain: dll → pin → loaded → csv → routes → day → rank → overlay → advice → prices → plans → staffing → layout → close → buy → panel → api → score → logistics empty
+        var pin = PinDlls();
+        using var dir = new TempLog();
+        var days = Array.Empty<FinancialDay>();
+        var stops = new[]
+        {
+            new DeliveryStop(
+                "ba:street_fourthstreet 46",
+                "ba:street_firstavenue 38",
+                "ba:itemname_sodacan",
+                1016,
+                ""),
+            new DeliveryStop(
+                "ba:street_fourthstreet 46",
+                "ba:street_side 9",
+                "ba:itemname_cheapgift",
+                null,
+                ""),
+        };
+        var holds = new[]
+        {
+            new WarehouseHold("W1", "ba:street_fourthstreet", 46, "ba:itemname_sodacan", 45),
+            new WarehouseHold("W2", "ba:street_b", 2, "ba:itemname_cheapgift", 20),
+        };
+
+        LoadLog.RecordPinned(dir.Path);
+        StatementDump.Write(dir.Path, 1014, days);
+        var routes = RouteDump.Write(dir.Path, stops, holds);
+        var watch = new DayWatch();
+        Assert.Null(watch.Tick(dir.Path, 1013, days, stops, holds));
+        var rolled = watch.Tick(dir.Path, 1014, days, stops, holds);
+        var ranked = Advisor.RankFile(StatementDump.CsvPath(dir.Path));
+        var rows = Overlay.FromRank(
+            ranked,
+            Advisor.WarehouseFamilyMixFile(RouteDump.WarehousesPath(dir.Path)),
+            Array.Empty<StreetCluster>());
+        Advice.Record(dir.Path, rows);
+        var item = Field(routes, "item");
+        var price = Prices.Lock(item, Array.Empty<ItemSoldPerPriceEntry>());
+        var run = Plans.Lock("W1", holds, stops, price);
+        var staff = Staffing.Lock(run, Array.Empty<StaffOffer>());
+        var clusters = Advisor.StreetClusters(Array.Empty<PortfolioBusiness>());
+        var clone = Layout.Lock(staff, clusters, Array.Empty<ChainLayout>());
+        var closed = Close.Lock(clone, Array.Empty<LedgerDay>(), 3, true, true);
+        var bought = Buy.Lock(closed, Array.Empty<BuildingLot>());
+        var panel = Panel.Rows(rows);
+        var api = GameApi.Read(
+            panel,
+            File.ReadAllText(Path.Combine(RepoRoot(), "doc", "requirements", "game-api.md")));
+        var scored = CloseScore.Score(api, days);
+        var review = Logistics.FromRoutes(
+            scored,
+            api,
+            RouteDump.RoutesPath(dir.Path),
+            RouteDump.WarehousesPath(dir.Path));
+        var direct = Logistics.Review(new ApiNote(pin.ShippedBuild, "", "", "", ""), stops, holds);
+
+        Assert.StartsWith("day.rolled version=" + LoadLog.Version + " day=", rolled);
+        Assert.Empty(panel);
+        Assert.Empty(scored);
+        Assert.False(bought.Bought);
+        Assert.Equal("", api.Build);
+        Assert.Contains("ba:street_side 9", File.ReadAllText(RouteDump.RoutesPath(dir.Path)));
+        Assert.Equal("W2", direct.Move!.To);
+        Assert.Null(review.Move);
+        Assert.Empty(review.Services);
+    }
+
     private static string Field(string line, string name)
     {
         var key = " " + name + "=";

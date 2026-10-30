@@ -6,7 +6,7 @@ Cursor **rules**, **skills**, **handoff protocol**, and **test discipline** for 
 
 **Start with [CONTRIBUTING.md](CONTRIBUTING.md)** — reading order, tracked vs gitignored docs, PR expectations.
 
-**Current work:** [doc/PROJECT_STATUS.md](doc/PROJECT_STATUS.md). Version 1.6.1.2. Every store has one close-score line. The game does not score a store yet. Next is a logistics review. The mod still dumps yesterday’s statements and routes when the in-game day changes.
+**Current work:** [doc/PROJECT_STATUS.md](doc/PROJECT_STATUS.md). Version 1.6.1.2. A warehouse serves each store for one cargo family, and one reassignment is proposed. The game does not apply that move yet. Next is where to open, from rent-versus-buy payback. The mod still dumps yesterday’s statements and routes when the in-game day changes.
 
 ## Quick start
 
