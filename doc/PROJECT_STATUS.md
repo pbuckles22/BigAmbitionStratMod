@@ -16,7 +16,7 @@
 
 | Branch | Role |
 |--------|------|
-| **`main`** | Integration branch. Last land `SHA`, version 1.6.1.2 |
+| **`main`** | Integration branch. Last land `3777f0a`, version 1.6.1.2 |
 | **`feature/7.1-close-stores`** | Story 7.1. Kept after this CMPH |
 | **`feature/6.6-roadmap`** | Story 6.6. Kept after this CMPH |
 | **`feature/6.5-rent-payback`** | Story 6.5. Kept after this CMPH |
@@ -51,7 +51,7 @@
 | **`feature/chain-prefix`** | Kept after CMPH (template history) |
 | **`feature/handoff-receiver-framing`** | Kept after CMPH (template history) |
 
-**Last land:** `SHA` on `main`. Version 1.6.1.2. Branch `feature/7.1-close-stores` kept. Release https://github.com/pbuckles22/BigAmbitionStratMod/releases/tag/1.6.1.2. Repo: https://github.com/pbuckles22/BigAmbitionStratMod.
+**Last land:** `3777f0a` on `main`. Version 1.6.1.2. Branch `feature/7.1-close-stores` kept. Release https://github.com/pbuckles22/BigAmbitionStratMod/releases/tag/1.6.1.2. Repo: https://github.com/pbuckles22/BigAmbitionStratMod.
 
 ---
 
