@@ -16,7 +16,7 @@
 
 | Branch | Role |
 |--------|------|
-| **`main`** | Integration branch. Last land recorded after this CMPH, version 1.5.2 |
+| **`main`** | Integration branch. Last land `33b2e19`, version 1.5.2 |
 | **`feature/5.2-delivery-plans`** | Story 5.2. Kept after this CMPH |
 | **`feature/5.1-retail-prices`** | Story 5.1. Kept after this CMPH |
 | **`feature/4.3-advice-line`** | Story 4.3. Kept after this CMPH |
@@ -40,7 +40,7 @@
 | **`feature/chain-prefix`** | Kept after CMPH (template history) |
 | **`feature/handoff-receiver-framing`** | Kept after CMPH (template history) |
 
-**Last land:** recorded after this CMPH on `main`. Version 1.5.2. Branch `feature/5.2-delivery-plans` kept. Repo: https://github.com/pbuckles22/BigAmbitionStratMod.
+**Last land:** `33b2e19` on `main`. Version 1.5.2. Branch `feature/5.2-delivery-plans` kept. Repo: https://github.com/pbuckles22/BigAmbitionStratMod.
 
 ---
 
