@@ -5,13 +5,14 @@ namespace ChaoticCEO
 {
     public sealed class ApiNote
     {
-        public ApiNote(string build, string close, string buy, string price, string delivery)
+        public ApiNote(string build, string close, string buy, string price, string delivery, string clone = "")
         {
             Build = build ?? "";
             Close = close ?? "";
             Buy = buy ?? "";
             Price = price ?? "";
             Delivery = delivery ?? "";
+            Clone = clone ?? "";
         }
 
         public string Build { get; }
@@ -23,6 +24,8 @@ namespace ChaoticCEO
         public string Price { get; }
 
         public string Delivery { get; }
+
+        public string Clone { get; }
     }
 
     public static class GameApi
@@ -70,7 +73,8 @@ namespace ChaoticCEO
                 Call(calls, "close"),
                 Call(calls, "buy"),
                 Call(calls, "price"),
-                Call(calls, "delivery"));
+                Call(calls, "delivery"),
+                Call(calls, "clone"));
         }
 
         private static string Call(Dictionary<string, string> calls, string action)

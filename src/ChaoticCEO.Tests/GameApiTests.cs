@@ -5,7 +5,7 @@ namespace ChaoticCEO.Tests;
 public class GameApiTests
 {
     [Fact]
-    public void GameApi_locks_the_four_calls()
+    public void GameApi_locks_the_calls()
     {
         var note = File.ReadAllText(Path.Combine(RepoRoot(), "doc", "requirements", "game-api.md"));
         var api = GameApi.Read(OneRow(), note);
@@ -17,6 +17,13 @@ public class GameApiTests
         Assert.Equal(
             "UI.Smartphone.Apps.BizMan.LogisticsManagers.LogisticsManagerPlanUI.AddDestination",
             api.Delivery);
+        Assert.Equal(
+            "BusinessLayoutSets.BusinessLayoutSetHelper.LoadBusinessLayoutSet",
+            api.Clone);
+        Assert.NotEqual("BusinessLayoutSets.BusinessLayoutSetHelper.SetBusinessLayout", api.Clone);
+        Assert.NotEqual("BuildingManager.ApplyInteriorDesign", api.Clone);
+        Assert.NotEqual("ItemHelper.Command_CloneItem", api.Clone);
+        Assert.NotEqual(api.Buy, api.Clone);
     }
 
     [Fact]
@@ -55,6 +62,7 @@ public class GameApiTests
         Assert.Equal("", api.Buy);
         Assert.Equal("", api.Price);
         Assert.Equal("", api.Delivery);
+        Assert.Equal("", api.Clone);
     }
 
     [Fact]
@@ -111,6 +119,7 @@ public class GameApiTests
         Assert.Equal("", api.Buy);
         Assert.Equal("", api.Price);
         Assert.Equal("", api.Delivery);
+        Assert.Equal("", api.Clone);
     }
 
     private static PanelLine[] OneRow()

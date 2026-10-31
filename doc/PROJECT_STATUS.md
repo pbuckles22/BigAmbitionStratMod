@@ -8,7 +8,7 @@
 
 ## Summary
 
-**BigAmbitionStratMod** 1.6.1.2 — Epic 7 is in progress. A confirmed buy offers one selected building and logs `building.offered`. Each buy is separate. An unconfirmed buy stays unbought. A close step stays unbought. Reload clears the offer and leaves the statement file and the route file. The running game does not call SendBuyBuildingOffer. F9 still opens a dark advisor window in the city. Next is story **7.5**, clone a layout. F8 still dumps yesterday’s statements and the route CSVs. A day change dumps once and logs `day.rolled`. A current `save.bin` is not read again. Rules come from AgenticTemplate (`upstream`). `origin` is this repo.
+**BigAmbitionStratMod** 1.6.1.2 — Epic 7 is in progress. A confirmed copy clones one selected layout and logs `layout.cloned`. Each copy is separate. An unconfirmed copy stays uncopied. A different blueprint stays uncopied. Reload clears the copy and leaves the statement file and the route file. The running game does not call LoadBusinessLayoutSet. F9 still opens a dark advisor window in the city. Next is story **7.6**, run the roadmap in order. F8 still dumps yesterday’s statements and the route CSVs. A day change dumps once and logs `day.rolled`. A current `save.bin` is not read again. Rules come from AgenticTemplate (`upstream`). `origin` is this repo.
 
 ---
 
@@ -17,6 +17,7 @@
 | Branch | Role |
 |--------|------|
 | **`main`** | Integration branch. Last land `0e6160a`, version 1.6.1.2 |
+| **`feature/7.5-clone-layout`** | Story 7.5. Kept after this CMPH |
 | **`feature/7.4-buy-building`** | Story 7.4. Kept after this CMPH |
 | **`feature/7.3-apply-prices`** | Story 7.3. Kept after this CMPH |
 | **`feature/7.2-redo-logistics`** | Story 7.2. Kept after this CMPH |
@@ -78,7 +79,7 @@
 
 ## Next up (maintainers)
 
-- Story **7.5** when asked. Clone a layout. Each clone is separate, confirmed, and logged. Reload undoes it.
+- Story **7.6** when asked. Run the roadmap in order. Each run is separate, confirmed, and logged. Reload undoes it.
 - Variants: merge upstream when AgenticTemplate skills/rules change
 
 ---
