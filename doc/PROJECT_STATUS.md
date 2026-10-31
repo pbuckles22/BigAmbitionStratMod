@@ -16,7 +16,7 @@
 
 | Branch | Role |
 |--------|------|
-| **`main`** | Integration branch. Last land `0e6160a`, version 1.6.1.2 |
+| **`main`** | Integration branch. Last land `7a5a794`, version 1.6.1.2 |
 | **`feature/7.5-clone-layout`** | Story 7.5. Kept after this CMPH |
 | **`feature/7.4-buy-building`** | Story 7.4. Kept after this CMPH |
 | **`feature/7.3-apply-prices`** | Story 7.3. Kept after this CMPH |
@@ -55,7 +55,7 @@
 | **`feature/chain-prefix`** | Kept after CMPH (template history) |
 | **`feature/handoff-receiver-framing`** | Kept after CMPH (template history) |
 
-**Last land:** `0e6160a` on `main`. Version 1.6.1.2. Branch `feature/7.4-buy-building` kept. Release https://github.com/pbuckles22/BigAmbitionStratMod/releases/tag/1.6.1.2. Repo: https://github.com/pbuckles22/BigAmbitionStratMod.
+**Last land:** `7a5a794` on `main`. Version 1.6.1.2. Branch `feature/7.5-clone-layout` kept. Release https://github.com/pbuckles22/BigAmbitionStratMod/releases/tag/1.6.1.2. Repo: https://github.com/pbuckles22/BigAmbitionStratMod.
 
 ---
 
