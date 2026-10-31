@@ -30,6 +30,17 @@ namespace ChaoticCEO
 
     public static class GameApi
     {
+        public static ApiNote Live()
+        {
+            return new ApiNote(
+                LoadLog.PinnedBuild,
+                "Helpers.BusinessHelper.ShutdownBusiness",
+                "BizManPresentation.SendBuyBuildingOffer",
+                "Buildings.Office.Headquarters.PricingManagerPlan.SetPrice",
+                "UI.Smartphone.Apps.BizMan.LogisticsManagers.LogisticsManagerPlanUI.AddDestination",
+                "BusinessLayoutSets.BusinessLayoutSetHelper.LoadBusinessLayoutSet");
+        }
+
         public static ApiNote Read(IReadOnlyList<PanelLine>? panel, string? note)
         {
             if (panel == null || panel.Count == 0)

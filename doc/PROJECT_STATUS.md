@@ -2,13 +2,13 @@
 
 **Human-readable current state.** Keep in sync with [AGENT_HANDOFF.md](../AGENT_HANDOFF.md) → *Current state* when milestones ship.
 
-**Last updated:** 2026-10-30
+**Last updated:** 2026-10-31
 
 ---
 
 ## Summary
 
-**BigAmbitionStratMod** 1.6.1.2 — Epic 7 is in progress. A confirmed copy clones one selected layout and logs `layout.cloned`. Each copy is separate. An unconfirmed copy stays uncopied. A different blueprint stays uncopied. Reload clears the copy and leaves the statement file and the route file. The running game does not call LoadBusinessLayoutSet. F9 still opens a dark advisor window in the city. Next is story **7.6**, run the roadmap in order. F8 still dumps yesterday’s statements and the route CSVs. A day change dumps once and logs `day.rolled`. A current `save.bin` is not read again. Rules come from AgenticTemplate (`upstream`). `origin` is this repo.
+**BigAmbitionStratMod** 1.7.1.2 — Epic 7 is in progress. F9 shows the current roadmap and one logistics move. A boot starts a fresh `ceo.log`. `history.log` keeps one line per roadmap change. Story **7.6** passed. Next is story **7.7** when asked. F8 still dumps yesterday’s statements and the route CSVs. `origin` is this repo.
 
 ---
 
@@ -16,7 +16,8 @@
 
 | Branch | Role |
 |--------|------|
-| **`main`** | Integration branch. Last land `7a5a794`, version 1.6.1.2 |
+| **`main`** | Integration branch. Last land `04a4aa8`, version 1.6.1.2 |
+| **`feature/7.6-roadmap-panel`** | Story 7.6. Kept after this CMPH. Version 1.7.1.2 |
 | **`feature/7.5-clone-layout`** | Story 7.5. Kept after this CMPH |
 | **`feature/7.4-buy-building`** | Story 7.4. Kept after this CMPH |
 | **`feature/7.3-apply-prices`** | Story 7.3. Kept after this CMPH |

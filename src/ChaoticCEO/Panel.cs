@@ -80,6 +80,21 @@ namespace ChaoticCEO
             return overWindow && (scroll != 0f || legacyScroll != 0f);
         }
 
+        public static float HoldWheel(bool open, bool inside, float legacyScroll)
+        {
+            if (!open || !inside || legacyScroll == 0f)
+            {
+                return 0f;
+            }
+
+            return legacyScroll;
+        }
+
+        public static float WheelStep(float legacyScroll)
+        {
+            return legacyScroll * 20f;
+        }
+
         public static IReadOnlyList<PanelLine> Rows(IReadOnlyList<OverlayRow>? overlay)
         {
             var notes = Advice.Explain(overlay ?? Array.Empty<OverlayRow>());
@@ -164,6 +179,28 @@ namespace ChaoticCEO
             }
 
             return Panel.Rows(overlay);
+        }
+
+        public IReadOnlyList<PanelLine> Press(string localAppData, CityBoard? board)
+        {
+            IsOpen = !IsOpen;
+            if (!IsOpen)
+            {
+                return Array.Empty<PanelLine>();
+            }
+
+            Roadshow.Open(localAppData, board);
+            return Roadshow.Lines(board);
+        }
+
+        public IReadOnlyList<PanelLine> Draw(CityBoard? board)
+        {
+            if (!IsOpen)
+            {
+                return Array.Empty<PanelLine>();
+            }
+
+            return Roadshow.Lines(board);
         }
 
         public void Close()

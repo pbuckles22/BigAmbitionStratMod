@@ -6,6 +6,7 @@ using UnityEngine.InputSystem.LowLevel;
 
 namespace ChaoticCEO
 {
+    [DefaultExecutionOrder(-32000)]
     public sealed class PanelView : MonoBehaviour
     {
         private const int WindowId = 0xCE01;
@@ -29,6 +30,8 @@ namespace ChaoticCEO
         private bool _eating;
 
         private bool _pointerInside;
+
+        private float _held;
 
         public static PanelView Ensure()
         {
@@ -65,7 +68,7 @@ namespace ChaoticCEO
                 return;
             }
 
-            _session.Press(localAppData, LiveDump.OverlayRows());
+            _session.Press(localAppData, LiveDump.Board());
         }
 
         private void OnGUI()
@@ -93,7 +96,7 @@ namespace ChaoticCEO
             GUI.color = Color.white;
             GUI.contentColor = Color.white;
             GUI.backgroundColor = Color.white;
-            _draw = Panel.Text(_session.Draw(LiveDump.OverlayRows()));
+            _draw = Panel.Text(_session.Draw(LiveDump.Board()));
             GUI.DrawTexture(_window, _backdrop);
             _window = GUILayout.Window(WindowId, _window, DrawWindow, "ChaoticCEO", _windowStyle);
             var pointer = Event.current == null ? Vector2.zero : Event.current.mousePosition;
@@ -103,9 +106,38 @@ namespace ChaoticCEO
             GUI.backgroundColor = background;
         }
 
+        private void Update()
+        {
+            var held = Panel.HoldWheel(_session.IsOpen, _pointerInside, Input.mouseScrollDelta.y);
+            if (held == 0f)
+            {
+                return;
+            }
+
+            _held += held;
+            Input.ResetInputAxes();
+            var mouse = Mouse.current;
+            if (mouse != null)
+            {
+                InputState.Change(mouse.scroll, Vector2.zero);
+            }
+        }
+
         private void DrawWindow(int id)
         {
             GUI.DrawTexture(new Rect(0f, 0f, _window.width, _window.height), _backdrop);
+            var evt = Event.current;
+            if (evt != null && evt.type == EventType.ScrollWheel && _window.Contains(evt.mousePosition))
+            {
+                evt.Use();
+            }
+
+            if (evt != null && evt.type == EventType.Layout && _held != 0f)
+            {
+                _scroll.y += Panel.WheelStep(_held);
+                _held = 0f;
+            }
+
             _scroll = GUILayout.BeginScrollView(_scroll);
             for (var index = 0; index < _draw.Count; index++)
             {

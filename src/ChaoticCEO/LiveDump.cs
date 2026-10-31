@@ -29,6 +29,22 @@ namespace ChaoticCEO
             return Overlay.Build(Days(current), Portfolio(current), Holds(current));
         }
 
+        public static CityBoard Board()
+        {
+            var current = SaveGameManager.Current;
+            return Roadshow.Compose(
+                Days(current),
+                Plans(current),
+                Holds(current),
+                Asks(current),
+                Portfolio(current));
+        }
+
+        public static IReadOnlyList<BuildingAsk> Asks(GameInstance? current)
+        {
+            return Roadshow.Prices(SaleAsks(current), EstateAsks(current));
+        }
+
         public static string? Roll(DayWatch watch, string localAppData)
         {
             if (watch == null || string.IsNullOrEmpty(localAppData))
@@ -204,6 +220,54 @@ namespace ChaoticCEO
             foreach (var building in current.BuildingRegistrations)
             {
                 AddWarehouse(rows, building);
+            }
+
+            return rows;
+        }
+
+        private static List<BuildingAsk> SaleAsks(GameInstance? current)
+        {
+            var rows = new List<BuildingAsk>();
+            if (current == null || current.buildingsForSale == null)
+            {
+                return rows;
+            }
+
+            foreach (var sale in current.buildingsForSale)
+            {
+                if (sale == null || sale.address == null)
+                {
+                    continue;
+                }
+
+                rows.Add(new BuildingAsk(
+                    sale.address.streetName ?? "",
+                    sale.address.streetNumber,
+                    sale.buildingPrice));
+            }
+
+            return rows;
+        }
+
+        private static List<BuildingAsk> EstateAsks(GameInstance? current)
+        {
+            var rows = new List<BuildingAsk>();
+            if (current == null || current.realEstate == null)
+            {
+                return rows;
+            }
+
+            foreach (var estate in current.realEstate)
+            {
+                if (estate == null || estate.address == null)
+                {
+                    continue;
+                }
+
+                rows.Add(new BuildingAsk(
+                    estate.address.streetName ?? "",
+                    estate.address.streetNumber,
+                    estate.purchasePrice));
             }
 
             return rows;

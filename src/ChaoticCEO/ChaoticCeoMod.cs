@@ -20,7 +20,7 @@ namespace ChaoticCEO
         public Task OnLoadAsync(ModContext context)
         {
             var localAppData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
-            LoadLog.RecordPinned(localAppData);
+            LoadLog.StartSession(localAppData);
             _localAppData = localAppData;
             if (!_hooked)
             {

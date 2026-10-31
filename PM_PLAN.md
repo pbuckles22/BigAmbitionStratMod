@@ -1,16 +1,16 @@
 # PM_PLAN — BigAmbitionStratMod
 
-In-game advisor for one Big Ambitions save, then a new-game guide and autopilot. Version scheme `MAJOR.EPIC.COUNTER`. Current public version **1.6.1.2**. The first ship of a new epic is `1.N.1`. Never go backwards.
+In-game advisor for one Big Ambitions save, then a new-game guide and autopilot. Version scheme `MAJOR.EPIC.COUNTER`. Current public version **1.7.1.2**. The first ship of a new epic is `1.N.1`. Never go backwards.
 
 ## Context
 
-The game is Mono, build **3682**. A mod builds with `dotnet build` against `Big Ambitions_Data\Managed` (`BigAmbitions.dll`, `BigAmbitions.ModAPI.dll`). The pin is `doc/requirements/game-build.md`. Python save tools live in `script/`. The mod, when it exists, lives in `src/`. Evidence for the ledger is `doc/gemini/cache/ledger.log`. The mod writes `%LocalAppData%\ChaoticCEO\ceo.log`. The compile counter is gitignored `build_number.txt`. The mod informational version is `1.6.1.2+N`. The draw reference is `UnityEngine.IMGUIModule`.
+The game is Mono, build **3682**. A mod builds with `dotnet build` against `Big Ambitions_Data\Managed` (`BigAmbitions.dll`, `BigAmbitions.ModAPI.dll`). The pin is `doc/requirements/game-build.md`. Python save tools live in `script/`. The mod, when it exists, lives in `src/`. Evidence for the ledger is `doc/gemini/cache/ledger.log`. The mod writes `%LocalAppData%\ChaoticCEO\ceo.log`. The compile counter is gitignored `build_number.txt`. The mod informational version is `1.7.1.2+N`. The draw reference is `UnityEngine.IMGUIModule`.
 
 Epic 1 closed on 17 businesses and 5865 statement rows. `ba:businesstype_liquorstore` is **food**. Do not relabel it inside a routes story. A warehouse story may add a specialty override only with a new test.
 
 One story per branch. Human check after **2.2**, after **3.3**, and on every story in Epics 5 through 10. Epics 6 through 10 wait until the one before them works. Monte Carlo is only **8.4–8.5**. The story test gate reuses the save index. Rebuild it when the dropzone `.hsg` changes, when `script/Slice-SaveGame.py` changes, or at epic close.
 
-A story that says overlay, panel, button, or in game names what appears on screen. Its human check is that screen or action. `mod.loaded` does not pass it. Dropping the on-screen part takes an explicit OK and an edit here.
+A story that says overlay, panel, button, or in game names what appears on screen. Its human check is that screen or action. `mod.loaded` does not pass it. Dropping the on-screen part takes an explicit OK and an edit here. From Epic 7 on, a story is done in game when F9 shows it, or when the save changes. A headless story has to say so. "The running game does not call X" is not an exit.
 
 ## Epic 1 — Save ledger
 
@@ -68,9 +68,7 @@ Each action is opt-in, logged, and undone by reload. A wrong soak decision becom
 
 ## Epic 6 — Visible advisor
 
-**Status:** complete — 2026-10-30
-
-Read-only. This epic draws what **4.2** and **4.3** left as rows. `Close.Lock` and `Buy.Lock` stay as they are.
+**Status:** complete — 2026-10-30. Decision library. F9 still drew the 4.2 overlay until story **7.6**. `Close.Lock` and `Buy.Lock` stay as they are.
 
 - **6.1** `[x]` F9 window in the city. Add `UnityEngine.IMGUIModule`, pin its hash, and draw `Overlay.Build` rows with `Advice.Explain` lines from live state. While open, log `advice.shown` and `panel.opened`. The window is a dark panel with light text. A scroll over it does not zoom the city. Human check passed. Chain: `dll → pin → loaded → csv → routes → day → rank → overlay → advice → prices → plans → staffing → layout → close → buy → panel`. Version 1.6.1.2.
 - **6.2** `[x]` Record which build 3682 calls close a business, buy a building, set a price, and rewrite a delivery plan. The note is `doc/requirements/game-api.md`. Close is `Helpers.BusinessHelper.ShutdownBusiness`. Buy is `BizManPresentation.SendBuyBuildingOffer`. Price is `Buildings.Office.Headquarters.PricingManagerPlan.SetPrice`. Delivery is `UI.Smartphone.Apps.BizMan.LogisticsManagers.LogisticsManagerPlanUI.AddDestination`. The running game does not call them. Chain: `dll → pin → loaded → csv → routes → day → rank → overlay → advice → prices → plans → staffing → layout → close → buy → panel → api`. Version 1.6.1.2.
@@ -83,20 +81,28 @@ Read-only. This epic draws what **4.2** and **4.3** left as rows. `Close.Lock` a
 
 **Status:** in progress
 
-Each command is separate, confirmed, logged, and undone by reload.
+7.1–7.5 are the headless confirm and record library. None of them calls the game or draws a button. From 7.6 on, the human check is the F9 window or a change on the save.
+
+7.7–7.12 share this exit. The click goes through a confirm step. It calls the build 3682 method from `doc/requirements/game-api.md` on `SaveGameManager.Current`. It writes the existing `Record` line to `ceo.log`. `Confirm` decides which row becomes which call, and a headless test locks that decision. The game call sits behind a thin bridge. Reload undo means loading the last game save. The mod never saves.
 
 - **7.1** `[x]` Close the selected stores. One confirmed close shuts that store and logs `store.closed`. Each close is separate. An unconfirmed close, an open step, another number, and a store outside the list stay open. A blank close call stays open. Reload clears the close and leaves the statement file. The running game does not call ShutdownBusiness. Chain: `dll → pin → loaded → csv → routes → day → rank → overlay → advice → prices → plans → staffing → layout → close → buy → panel → api → score → logistics → payback → roadmap → shutdown`. Version 1.6.1.2. Headless.
 - **7.2** `[x]` Redo logistics. One confirmed redo moves that store and logs `logistics.redone`. Each redo is separate. An unconfirmed redo, a different destination, a close street, and a store that is not the move stay put. A review with no move stays put. A blank delivery call stays put. Reload clears the redo and leaves the route file. The running game does not call AddDestination. Chain: `dll → pin → loaded → csv → routes → day → rank → overlay → advice → prices → plans → staffing → layout → close → buy → panel → api → score → logistics → payback → roadmap → shutdown → delivery`. Version 1.6.1.2. Headless. Human check passed.
 - **7.3** `[x]` Apply prices and staffing. One confirmed price sets that item and logs `price.applied`. One confirmed staff plan keeps that plan and logs `staff.applied`. Each apply is separate. An unconfirmed price, a different item, a zero price, and a blank price call stay unset. An unconfirmed plan, a different plan, an empty plan, and an unknown kind stay unstaffed. A blank price call does not block the staff plan. Reload clears both and leaves the statement file and the route file. The running game does not call SetPrice. Chain: `dll → pin → loaded → csv → routes → day → rank → overlay → advice → prices → plans → staffing → layout → close → buy → panel → api → score → logistics → payback → roadmap → shutdown → delivery → apply`. Version 1.6.1.2. Headless. Human check passed.
 - **7.4** `[x]` Buy a building. One confirmed buy offers that building and logs `building.offered`. Each buy is separate. An unconfirmed buy, a close step, another number, a building outside the list, and a blank buy call stay unbought. A blank price call still offers the building. A close on that address does not block the open. Reload clears the offer and leaves the statement file and the route file. The running game does not call SendBuyBuildingOffer. Chain: `dll → pin → loaded → csv → routes → day → rank → overlay → advice → prices → plans → staffing → layout → close → buy → panel → api → score → logistics → payback → roadmap → shutdown → delivery → apply → offer`. Version 1.6.1.2. Headless. Human check passed.
 - **7.5** `[x]` Clone a layout. One confirmed copy clones that layout and logs `layout.cloned`. Each copy is separate. An unconfirmed copy, a different street, a different blueprint, a blank family, a missing source, a missing destination, and a blank clone call stay uncopied. A buy on that street does not replace the blueprint. A blank buy call still copies the layout. Reload clears the copy and leaves the statement file and the route file. The running game does not call LoadBusinessLayoutSet. Chain: `dll → pin → loaded → csv → routes → day → rank → overlay → advice → prices → plans → staffing → layout → close → buy → panel → api → score → logistics → payback → roadmap → shutdown → delivery → apply → offer → clone`. Version 1.6.1.2. Headless. Human check passed.
-- **7.6** `[ ]` Do it all: run the roadmap in order.
+- **7.6** `[x]` F9 shows the roadmap from live state. `LiveDump.Board` reads statements, routes, warehouse holds, and building prices. A for-sale price keeps the address. An owned `purchasePrice` fills an address that is not for sale. A zero price is dropped. It runs `CloseScore.Score`, then `Logistics.Review`, then `Payback.Decide`, then `Roadmap.Order` with the top 10. The window draws those steps, then the logistics move on its own line. The old overlay stays out of the window. Opening it logs `roadmap.shown` and, the first time that list changes, one `roadmap.changed` line in `history.log`. A later open of the same list does not append history. A boot replaces `ceo.log` with the new `mod.loaded` line and keeps changes in `history.log`, capped at 200 lines. Version 1.7.1.2. Human check passed. Chain: `dll → pin → loaded → csv → routes → day → rank → overlay → advice → prices → plans → staffing → layout → close → buy → panel → api → score → logistics → payback → roadmap → shutdown → delivery → apply → offer → clone → shown`.
+- **7.7** `[ ]` Close button on each close step. It calls `Helpers.BusinessHelper.ShutdownBusiness`. Human check: that store is gone and `store.closed` is in `ceo.log`. Version 1.7.2.
+- **7.8** `[ ]` Redo button on the logistics move. It calls `LogisticsManagerPlanUI.AddDestination`, or a non-UI plan call found in this story and written into `doc/requirements/game-api.md`. Human check: BizMan shows the new warehouse on that store. Version 1.7.3.
+- **7.9** `[ ]` Price button and staff button. Price calls `PricingManagerPlan.SetPrice`. Find the `HrManagerPlan` / `HeadhunterPlan` staff call, record it in `doc/requirements/game-api.md`, and call it. Human check: the item price and the staff plan change in game. Version 1.7.4.
+- **7.10** `[ ]` Buy button on each open step. It calls `BizManPresentation.SendBuyBuildingOffer`. Human check: the offer or the purchase shows in game and `building.offered` is in `ceo.log`. Version 1.7.5.
+- **7.11** `[ ]` Clone button when a cluster qualifies. It calls `BusinessLayoutSetHelper.LoadBusinessLayoutSet`. Human check: the destination store has the source layout. Version 1.7.6.
+- **7.12** `[ ]` Execute all. One confirm runs the roadmap steps in order through the 7.7–7.11 calls. A failed step stops the run and is logged. Log `roadmap.executed` with counts. Human check: every listed step happened in game, in that order. Version 1.7.7.
 
 ## Epic 8 — Strategy engine
 
 **Status:** later
 
-Not started until Epic 7 works. **8.1–8.3** are one deterministic sim. **8.4–8.5** add randomness. The result re-ranks the **6.6** roadmap.
+Not started until **7.12** passes its in-game check. **8.1–8.3** are one deterministic sim. **8.4–8.5** add randomness. The result re-ranks the **7.6** roadmap that F9 shows.
 
 - **8.1** `[ ]` Fit demand and cost curves from the ledger CSVs.
 - **8.2** `[ ]` Day stepper using the Epic 4 library. Same `portfolio.csv` shape.
@@ -108,16 +114,16 @@ Not started until Epic 7 works. **8.1–8.3** are one deterministic sim. **8.4�
 
 **Status:** later
 
-- **9.1** `[ ]` Step-by-step playbook from day, cash, and what you own. Shown in the panel. No ledger history required.
+- **9.1** `[ ]` Step-by-step playbook from day, cash, and what you own. Shown in the panel. No ledger history required. Human check is F9 on a new game.
 
 ## Epic 10 — Watch it win
 
 **Status:** later
 
 - **10.1** `[ ]` Name the win, a net-worth target by a set day.
-- **10.2** `[ ]` Automate a fresh game to that win, within the calls **6.2** recorded.
+- **10.2** `[ ]` Automate a fresh game to that win, through the 7.7–7.11 game calls.
 
-**Next:** story **7.6** when asked. Run the roadmap in order. Each run is separate, confirmed, and logged. Reload undoes it. Version stays 1.6.1.2.
+**Next:** story **7.7** when asked. A close button on each close step calls `Helpers.BusinessHelper.ShutdownBusiness`. Version 1.7.2.
 
 Operating model (keep these when you replace this plan): `.cursor/rules/` ship commands (UCPH, CMPH, SWAT), human check, plan-coordinate versioning, long-run harvest (`testing.mdc`), and the chain harness and prefix (`integration-chain.mdc`). Do not delete them to “clean up” a new clone.
 

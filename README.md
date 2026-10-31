@@ -6,7 +6,7 @@ Cursor **rules**, **skills**, **handoff protocol**, and **test discipline** for 
 
 **Start with [CONTRIBUTING.md](CONTRIBUTING.md)** — reading order, tracked vs gitignored docs, PR expectations.
 
-**Current work:** [doc/PROJECT_STATUS.md](doc/PROJECT_STATUS.md). Version 1.6.1.2. A confirmed layout copy can be cleared by reload. The game does not load that layout during play. Next is running the roadmap in order. The mod still dumps yesterday’s statements and routes when the in-game day changes.
+**Current work:** [doc/PROJECT_STATUS.md](doc/PROJECT_STATUS.md). Version 1.7.1.2. F9 shows the current roadmap. The game does not run those steps yet. The mod still dumps yesterday’s statements and routes when the in-game day changes.
 
 ## Quick start
 

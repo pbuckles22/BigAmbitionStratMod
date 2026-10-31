@@ -24,6 +24,14 @@ public class GameApiTests
         Assert.NotEqual("BuildingManager.ApplyInteriorDesign", api.Clone);
         Assert.NotEqual("ItemHelper.Command_CloneItem", api.Clone);
         Assert.NotEqual(api.Buy, api.Clone);
+
+        var live = GameApi.Live();
+        Assert.Equal(api.Build, live.Build);
+        Assert.Equal(api.Close, live.Close);
+        Assert.Equal(api.Buy, live.Buy);
+        Assert.Equal(api.Price, live.Price);
+        Assert.Equal(api.Delivery, live.Delivery);
+        Assert.Equal(api.Clone, live.Clone);
     }
 
     [Fact]

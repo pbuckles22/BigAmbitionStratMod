@@ -73,6 +73,18 @@ public class PanelTests
     }
 
     [Fact]
+    public void Panel_a_wheel_over_the_open_window_is_held()
+    {
+        Assert.Equal(1f, Panel.HoldWheel(true, true, 1f));
+        Assert.Equal(-2f, Panel.HoldWheel(true, true, -2f));
+        Assert.Equal(0f, Panel.HoldWheel(true, false, 1f));
+        Assert.Equal(0f, Panel.HoldWheel(false, true, 1f));
+        Assert.Equal(0f, Panel.HoldWheel(true, true, 0f));
+        Assert.Equal(20f, Panel.WheelStep(1f));
+        Assert.Equal(-40f, Panel.WheelStep(-2f));
+    }
+
+    [Fact]
     public void Panel_a_second_frame_does_not_log()
     {
         using var dir = new TempLog();
