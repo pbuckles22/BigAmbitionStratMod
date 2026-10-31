@@ -84,6 +84,61 @@ public class RoadshowTests
     }
 
     [Fact]
+    public void Roadshow_a_shut_store_leaves_the_close_list_and_an_unlisted_store_stays()
+    {
+        var days = new[]
+        {
+            new FinancialDay(
+                1013,
+                new[]
+                {
+                    new StatementRow("ba:street_tenthstreet", 13, 0f, 0f, 0f, 0f, 0f, 0f, -100f),
+                    new StatementRow("ba:street_side", 9, 0f, 0f, 0f, 0f, 0f, 0f, -40f),
+                    new StatementRow("ba:street_fourthavenue", 28, 0f, 0f, 0f, 50f, 0f, 0f, 10f),
+                }),
+        };
+        var asks = new[] { new BuildingAsk("ba:street_fourthavenue", 28, 5000d) };
+        var portfolio = new[] { new PortfolioBusiness("Side", "specialty", "ba:street_side", 9) };
+
+        var kept = Roadshow.Compose(
+            days,
+            Array.Empty<DeliveryStop>(),
+            Array.Empty<WarehouseHold>(),
+            asks,
+            portfolio);
+        var board = Roadshow.Compose(
+            days,
+            Array.Empty<DeliveryStop>(),
+            Array.Empty<WarehouseHold>(),
+            asks,
+            portfolio,
+            new[] { new PortfolioBusiness("", "", "ba:street_tenthstreet", 13) });
+
+        Assert.Contains(kept.Steps, step => step.Kind == "close" && step.Street == "ba:street_tenthstreet" && step.Number == 13);
+        Assert.Contains(board.Steps, step => step.Kind == "close" && step.Street == "ba:street_side" && step.Number == 9);
+        Assert.DoesNotContain(board.Steps, step => step.Street == "ba:street_tenthstreet" && step.Number == 13);
+        Assert.Contains(
+            board.Steps,
+            step => step.Kind == "open" && step.Street == "ba:street_fourthavenue" && step.Number == 28);
+    }
+
+    [Fact]
+    public void Roadshow_a_named_building_at_the_same_address_keeps_the_store()
+    {
+        var shut = LiveDump.WithoutABusiness(new[]
+        {
+            ("ba:street_tenthstreet", 13, false),
+            ("ba:street_tenthstreet", 13, true),
+            ("ba:street_side", 9, false),
+            ("", 4, false),
+        });
+
+        Assert.Single(shut);
+        Assert.Equal("ba:street_side", shut[0].Street);
+        Assert.Equal(9, shut[0].Number);
+    }
+
+    [Fact]
     public void Roadshow_a_for_sale_price_keeps_the_address()
     {
         var prices = Roadshow.Prices(
@@ -167,13 +222,13 @@ public class RoadshowTests
         Directory.CreateDirectory(Path.GetDirectoryName(current)!);
         File.WriteAllText(
             current,
-            "advice.shown version=1.7.1.2 tone=red business=Chaotic Gym #2 street=ba:street_firststreet number=35 explain=Close Chaotic Gym #2. Profit 3777.6381."
+            "advice.shown version=1.7.2 tone=red business=Chaotic Gym #2 street=ba:street_firststreet number=35 explain=Close Chaotic Gym #2. Profit 3777.6381."
                 + Environment.NewLine
                 + "roadmap.shown version=1.7.1 steps=10 street=ba:street_tenthstreet number=13 gain=13771.4512 move=1"
                 + Environment.NewLine
-                + "roadmap.shown version=1.7.1.2 steps=10 street=ba:street_tenthstreet number=13 gain=13771.4512 move=1"
+                + "roadmap.shown version=1.7.2 steps=10 street=ba:street_tenthstreet number=13 gain=13771.4512 move=1"
                 + Environment.NewLine
-                + "store.closed version=1.7.1.2 street=ba:street_tenthstreet number=13 call=Helpers.BusinessHelper.ShutdownBusiness"
+                + "store.closed version=1.7.2 street=ba:street_tenthstreet number=13 call=Helpers.BusinessHelper.ShutdownBusiness"
                 + Environment.NewLine);
 
         var loaded = LoadLog.StartSession(dir.Path);
@@ -190,7 +245,7 @@ public class RoadshowTests
         Assert.Contains(
             "roadmap.changed version=1.7.1 steps=10 street=ba:street_tenthstreet number=13 gain=13771.4512 move=1",
             history);
-        Assert.Contains("store.closed version=1.7.1.2 street=ba:street_tenthstreet number=13", history);
+        Assert.Contains("store.closed version=1.7.2 street=ba:street_tenthstreet number=13", history);
         Assert.Equal(1, Count(history, "store.closed"));
     }
 
@@ -203,7 +258,7 @@ public class RoadshowTests
         var lines = new string[LoadLog.HistoryLimit + 1];
         for (var index = 0; index < lines.Length; index++)
         {
-            lines[index] = "store.closed version=1.7.1.2 street=ba:street_s number="
+            lines[index] = "store.closed version=1.7.2 street=ba:street_s number="
                 + (index + 1).ToString()
                 + " call=Helpers.BusinessHelper.ShutdownBusiness";
         }

@@ -13,7 +13,7 @@ dotnet test src/ChaoticCEO.Tests/ChaoticCEO.Tests.csproj -p:GameManaged="C:\Prog
 dotnet build src/ChaoticCEO/ChaoticCEO.csproj -c Release -p:GameManaged="C:\Program Files (x86)\Steam\steamapps\common\Big Ambitions\Big Ambitions_Data\Managed"
 ```
 
-`dotnet test` is the Debug compile. The Release command installs `ChaoticCEO.dll` to ModsLocal. The gitignored counter is `build_number.txt`. The informational version is `1.7.1.2+N`.
+`dotnet test` is the Debug compile. The Release command installs `ChaoticCEO.dll` to ModsLocal. The gitignored counter is `build_number.txt`. The informational version is `1.7.2+N`.
 
 The story gate reuses `doc/gemini/cache/save.bin` and `save-index.sqlite` when both are current for the dropzone `.hsg`. Do not read or scan `save.bin` again while that blob is current. A renamed `.hsg` fails the recorded-name check on its own. Nobody announces the new name.
 
@@ -71,6 +71,20 @@ Use when behavior spans a real runtime (browser, device, network, or native APIs
 7. Version marker: public `1.6.1.2`. The installed dll informational version is `1.6.1.2+N`. The window is a dark panel with light text.
 
 Human PASS 2026-10-30: the F9 window is readable, and scrolling it does not zoom the city. `mod.loaded version=1.6.1.2 build=3682`.
+
+## Story 7.7 human check
+
+1. Restart Big Ambitions so this build loads, then load the empire save. You are in the city, not the main menu. This story puts a Close button on each close step. It does not redo a delivery, change a price, hire, buy a building, or copy a layout.
+2. Press F9. Each close step has a Close button. An open step does not. A logistics line does not.
+3. Click Close on one close step. That button is replaced by a red Confirm and a Cancel. Cancel leaves the store open. Confirm closes it. That row leaves the F9 window. The street sign changes. Reload the last save if you want the store back. The mod does not save.
+4. Open `%LocalAppData%\ChaoticCEO\ceo.log`.
+5. **PASS if** that store is gone from the city and from the F9 window, and `ceo.log` has one `store.closed` line for that street and number. **FAIL if** the store is still open, the row stays on the window, the line is missing, or the log has `store.missed` for that street and number.
+6. Evidence: `store.closed version=1.7.2 street=<that street> number=<that number> call=Helpers.BusinessHelper.ShutdownBusiness`. `store.missed` means the building was not found.
+7. Version marker: public `1.7.2`. The installed dll informational version is `1.7.2+N`.
+
+Chain: `dll → pin → loaded → csv → routes → day → rank → overlay → advice → prices → plans → staffing → layout → close → buy → panel → api → score → logistics → payback → roadmap → shutdown → delivery → apply → offer → clone → shown → closed → gone`.
+
+Human PASS 2026-10-31. F9 opens and closes. Scroll stays in the window. First open `rows=9`, `steps=8`, Ninth Street 4, gain 3162.0491, `move=1`. Cancel left the row. Confirm removed each close row. Eight `store.closed` lines, no `store.missed`. Next open `rows=1`, `steps=0`, `move=1`.
 
 ## Story 7.6 human check
 

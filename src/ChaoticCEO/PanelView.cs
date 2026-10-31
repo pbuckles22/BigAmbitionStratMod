@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.LowLevel;
@@ -19,7 +20,15 @@ namespace ChaoticCEO
 
         private Vector2 _scroll;
 
+        private IReadOnlyList<PanelLine> _lines = Array.Empty<PanelLine>();
+
         private IReadOnlyList<string> _draw = Array.Empty<string>();
+
+        private string _localAppData = "";
+
+        private string _pendingStreet = "";
+
+        private int _pendingNumber;
 
         private Texture2D? _backdrop;
 
@@ -31,20 +40,28 @@ namespace ChaoticCEO
 
         private bool _pointerInside;
 
+        private bool _f9Held;
+
         private float _held;
 
-        public static PanelView Ensure()
+        private int _boardFrame = -1;
+
+        private CityBoard? _board;
+
+        private string _lastFailure = "";
+
+        public static PanelView Ensure(string localAppData)
         {
-            if (_instance != null)
+            if (_instance == null)
             {
-                return _instance;
+                var host = new GameObject("ChaoticCEO.Panel");
+                host.hideFlags = HideFlags.HideAndDontSave;
+                DontDestroyOnLoad(host);
+                _instance = host.AddComponent<PanelView>();
+                _instance.HookScroll();
             }
 
-            var host = new GameObject("ChaoticCEO.Panel");
-            host.hideFlags = HideFlags.HideAndDontSave;
-            DontDestroyOnLoad(host);
-            _instance = host.AddComponent<PanelView>();
-            _instance.HookScroll();
+            _instance._localAppData = localAppData ?? "";
             return _instance;
         }
 
@@ -63,12 +80,20 @@ namespace ChaoticCEO
 
         public void Press(string localAppData)
         {
+            _localAppData = localAppData ?? "";
             if (!LiveDump.InCity())
             {
+                Note("panel.skipped reason=nocurrent");
                 return;
             }
 
-            _session.Press(localAppData, LiveDump.Board());
+            _boardFrame = -1;
+            _session.Press(_localAppData, LiveDump.Board());
+            if (!_session.IsOpen)
+            {
+                _pendingStreet = "";
+                _pendingNumber = 0;
+            }
         }
 
         private void OnGUI()
@@ -78,9 +103,23 @@ namespace ChaoticCEO
                 return;
             }
 
+            try
+            {
+                DrawGui();
+            }
+            catch (Exception ex)
+            {
+                Fail(ex);
+            }
+        }
+
+        private void DrawGui()
+        {
             if (!LiveDump.InCity())
             {
                 _session.Close();
+                _pendingStreet = "";
+                _pendingNumber = 0;
                 return;
             }
 
@@ -96,7 +135,8 @@ namespace ChaoticCEO
             GUI.color = Color.white;
             GUI.contentColor = Color.white;
             GUI.backgroundColor = Color.white;
-            _draw = Panel.Text(_session.Draw(LiveDump.Board()));
+            _lines = _session.Draw(BoardNow());
+            _draw = Panel.Text(_lines);
             GUI.DrawTexture(_window, _backdrop);
             _window = GUILayout.Window(WindowId, _window, DrawWindow, "ChaoticCEO", _windowStyle);
             var pointer = Event.current == null ? Vector2.zero : Event.current.mousePosition;
@@ -108,6 +148,29 @@ namespace ChaoticCEO
 
         private void Update()
         {
+            var f9 = false;
+            try
+            {
+                f9 = F9Held();
+            }
+            catch (Exception ex)
+            {
+                Fail(ex);
+            }
+
+            if (f9 && !_f9Held)
+            {
+                try
+                {
+                    Press(_localAppData);
+                }
+                catch (Exception ex)
+                {
+                    Fail(ex);
+                }
+            }
+
+            _f9Held = f9;
             var held = Panel.HoldWheel(_session.IsOpen, _pointerInside, Input.mouseScrollDelta.y);
             if (held == 0f)
             {
@@ -139,17 +202,124 @@ namespace ChaoticCEO
             }
 
             _scroll = GUILayout.BeginScrollView(_scroll);
+            var lineIndex = 0;
             for (var index = 0; index < _draw.Count; index++)
             {
                 GUILayout.Label(_draw[index], _label);
                 if ((index % 2) == 1)
                 {
+                    if (lineIndex < _lines.Count)
+                    {
+                        DrawClose(_lines[lineIndex]);
+                    }
+
+                    lineIndex++;
                     GUILayout.Space(8f);
                 }
             }
 
             GUILayout.EndScrollView();
             GUI.DragWindow(new Rect(0f, 0f, 10000f, 28f));
+        }
+
+        private void DrawClose(PanelLine line)
+        {
+            if (line == null || line.Tone != "close" || line.Business != "step")
+            {
+                return;
+            }
+
+            var armed = _pendingStreet == line.Street && _pendingNumber == line.Number;
+            var controls = ClosePress.Controls(armed);
+            if (!armed)
+            {
+                if (GUILayout.Button(controls[0]))
+                {
+                    _pendingStreet = line.Street;
+                    _pendingNumber = line.Number;
+                }
+
+                return;
+            }
+
+            GUILayout.BeginHorizontal();
+            var background = GUI.backgroundColor;
+            GUI.backgroundColor = new Color(0.75f, 0.16f, 0.16f);
+            var confirm = GUILayout.Button(controls[0]);
+            GUI.backgroundColor = background;
+            var cancel = GUILayout.Button(controls[1]);
+            GUILayout.EndHorizontal();
+            if (cancel)
+            {
+                _pendingStreet = "";
+                _pendingNumber = 0;
+                return;
+            }
+
+            if (!confirm)
+            {
+                return;
+            }
+
+            ClosePress.Press(
+                _localAppData,
+                GameApi.Live(),
+                BoardNow(),
+                line.Street,
+                line.Number,
+                true);
+            _pendingStreet = "";
+            _pendingNumber = 0;
+        }
+
+        private CityBoard BoardNow()
+        {
+            if (_boardFrame != Time.frameCount || _board == null)
+            {
+                _boardFrame = Time.frameCount;
+                _board = LiveDump.Board();
+            }
+
+            return _board;
+        }
+
+        private static bool F9Held()
+        {
+            var keyboard = Keyboard.current;
+            if (keyboard != null && keyboard.f9Key.isPressed)
+            {
+                return true;
+            }
+
+            return Input.GetKey(KeyCode.F9);
+        }
+
+        private void Fail(Exception ex)
+        {
+            Note("panel.failed " + ex.GetType().Name + " " + OneLine(ex.Message));
+        }
+
+        private void Note(string line)
+        {
+            if (line == _lastFailure || string.IsNullOrEmpty(_localAppData))
+            {
+                return;
+            }
+
+            _lastFailure = line;
+            var path = LoadLog.CeoLogPath(_localAppData);
+            var directory = Path.GetDirectoryName(path);
+            if (!string.IsNullOrEmpty(directory))
+            {
+                Directory.CreateDirectory(directory);
+            }
+
+            File.AppendAllText(path, line + Environment.NewLine);
+        }
+
+        private static string OneLine(string? message)
+        {
+            return (message ?? "").Replace("\r", " ").Replace("\n", " ");
         }
 
         private void HookScroll()

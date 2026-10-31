@@ -8,7 +8,7 @@
 
 ## Summary
 
-**BigAmbitionStratMod** 1.7.1.2 — Epic 7 is in progress. F9 shows the current roadmap and one logistics move. A boot starts a fresh `ceo.log`. `history.log` keeps one line per roadmap change. Story **7.6** passed. Next is story **7.7** when asked. F8 still dumps yesterday’s statements and the route CSVs. `origin` is this repo.
+**BigAmbitionStratMod** 1.7.2 — Epic 7 is in progress. F9 shows the current roadmap and one logistics move. Confirm on a close step shuts that store and drops the row. A boot starts a fresh `ceo.log`. `history.log` keeps one line per roadmap change. Story **7.7** passed. Next is story **7.8** when asked. F8 still dumps yesterday’s statements and the route CSVs. `origin` is this repo.
 
 ---
 
@@ -17,6 +17,7 @@
 | Branch | Role |
 |--------|------|
 | **`main`** | Integration branch. Last land `245963f`, version 1.7.1.2 |
+| **`feature/7.7-close-store`** | Story 7.7. Kept after this CMPH. Version 1.7.2 |
 | **`feature/7.6-roadmap-panel`** | Story 7.6. Kept after this CMPH. Version 1.7.1.2 |
 | **`feature/7.5-clone-layout`** | Story 7.5. Kept after this CMPH |
 | **`feature/7.4-buy-building`** | Story 7.4. Kept after this CMPH |

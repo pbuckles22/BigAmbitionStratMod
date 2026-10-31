@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Reflection;
 using ChaoticCEO;
 
 namespace ChaoticCEO.Tests;
@@ -13,7 +14,7 @@ public class ModLoadedTests
 
         var line = LoadLog.Record(path);
 
-        Assert.Equal("mod.loaded version=1.7.1.2 build=3682", line);
+        Assert.Equal("mod.loaded version=1.7.2 build=3682", line);
         Assert.Equal(line, File.ReadAllText(path).TrimEnd('\r', '\n'));
     }
 
@@ -25,7 +26,7 @@ public class ModLoadedTests
 
         var line = LoadLog.Record(path, "1000");
 
-        Assert.Equal("mod.loaded version=1.7.1.2 build=1000", line);
+        Assert.Equal("mod.loaded version=1.7.2 build=1000", line);
         Assert.DoesNotContain("3682", File.ReadAllText(path));
     }
 
@@ -41,8 +42,8 @@ public class ModLoadedTests
         Assert.Equal(
             new[]
             {
-                "mod.loaded version=1.7.1.2 build=1",
-                "mod.loaded version=1.7.1.2 build=2",
+                "mod.loaded version=1.7.2 build=1",
+                "mod.loaded version=1.7.2 build=2",
             },
             File.ReadAllLines(path));
     }
@@ -65,7 +66,7 @@ public class ModLoadedTests
         var line = LoadLog.RecordPinned(dir.Path);
 
         var path = Path.Combine(dir.Path, "ChaoticCEO", "ceo.log");
-        Assert.Equal("mod.loaded version=1.7.1.2 build=3682", line);
+        Assert.Equal("mod.loaded version=1.7.2 build=3682", line);
         Assert.Equal(line, File.ReadAllText(path).TrimEnd('\r', '\n'));
     }
 
@@ -187,7 +188,7 @@ public class ModLoadedTests
         Assert.Equal(LoadLog.Line(pin.Build), loaded);
         Assert.Contains(loaded, log);
         Assert.Equal(
-            "csv.written version=1.7.1.2 rows=1 day=1013 street=ba:street_fourthavenue number=28 profit=50687.4805",
+            "csv.written version=1.7.2 rows=1 day=1013 street=ba:street_fourthavenue number=28 profit=50687.4805",
             written);
         Assert.Contains(written, log);
         Assert.DoesNotContain(pin.DllHash, log);
@@ -211,7 +212,7 @@ public class ModLoadedTests
         var csv = File.ReadAllText(StatementDump.CsvPath(dir.Path)).Replace("\r\n", "\n");
         Assert.Equal(LoadLog.Line(pin.Build), loaded);
         Assert.StartsWith(loaded, log.TrimStart('\uFEFF'));
-        Assert.Equal("csv.written version=1.7.1.2 rows=0 day=1013 street= number= profit=", written);
+        Assert.Equal("csv.written version=1.7.2 rows=0 day=1013 street= number= profit=", written);
         Assert.Contains(written, log);
         Assert.Equal("day,street,number,sales,goods,wages,rent,marketing,theft,profit\n", csv);
         Assert.DoesNotContain(pin.DllHash, log);
@@ -268,7 +269,7 @@ public class ModLoadedTests
             loaded + "\n" + written + "\n" + routes + "\n",
             log);
         Assert.Equal(
-            "routes.written version=1.7.1.2 routes=1 warehouses=1 warehouse=ba:street_fourthstreet 46 destination=ba:street_firstavenue 38 item=ba:itemname_sodacan day=1016",
+            "routes.written version=1.7.2 routes=1 warehouses=1 warehouse=ba:street_fourthstreet 46 destination=ba:street_firstavenue 38 item=ba:itemname_sodacan day=1016",
             routes);
         Assert.Contains("50687.4805", File.ReadAllText(StatementDump.CsvPath(dir.Path)));
         Assert.Contains("ba:street_firstavenue 38", File.ReadAllText(RouteDump.RoutesPath(dir.Path)));
@@ -311,7 +312,7 @@ public class ModLoadedTests
         Assert.Equal(LoadLog.Line(pin.Build), loaded);
         Assert.Equal(loaded + "\n" + written + "\n" + routes + "\n", log);
         Assert.Equal(
-            "routes.written version=1.7.1.2 routes=0 warehouses=0 warehouse= destination= item= day=",
+            "routes.written version=1.7.2 routes=0 warehouses=0 warehouse= destination= item= day=",
             routes);
         Assert.Contains(written, log);
         Assert.Equal(
@@ -400,7 +401,7 @@ public class ModLoadedTests
         var log = File.ReadAllText(Path.Combine(dir.Path, "ChaoticCEO", "ceo.log")).Replace("\r\n", "\n");
         Assert.Null(armed);
         Assert.Equal(LoadLog.Line(pin.Build), loaded);
-        Assert.Equal("day.rolled version=1.7.1.2 day=1014", rolled);
+        Assert.Equal("day.rolled version=1.7.2 day=1014", rolled);
         Assert.Equal(
             loaded + "\n" + written + "\n" + routes + "\n" + written + "\n" + routes + "\n" + rolled + "\n",
             log);
@@ -427,12 +428,12 @@ public class ModLoadedTests
         var log = File.ReadAllText(Path.Combine(dir.Path, "ChaoticCEO", "ceo.log")).Replace("\r\n", "\n");
         Assert.Null(armed);
         Assert.Equal(LoadLog.Line(pin.Build), loaded);
-        Assert.Equal("day.rolled version=1.7.1.2 day=1014", rolled);
+        Assert.Equal("day.rolled version=1.7.2 day=1014", rolled);
         Assert.Equal(
             loaded + "\n" + written + "\n" + routes + "\n" + written + "\n" + routes + "\n" + rolled + "\n",
             log);
         Assert.Equal(
-            "routes.written version=1.7.1.2 routes=0 warehouses=0 warehouse= destination= item= day=",
+            "routes.written version=1.7.2 routes=0 warehouses=0 warehouse= destination= item= day=",
             routes);
         Assert.Contains("50687.4805", File.ReadAllText(StatementDump.CsvPath(dir.Path)));
         Assert.Equal(
@@ -481,10 +482,10 @@ public class ModLoadedTests
 
         var log = File.ReadAllText(Path.Combine(dir.Path, "ChaoticCEO", "ceo.log")).Replace("\r\n", "\n");
         Assert.Equal(LoadLog.Line(pin.Build), loaded);
-        Assert.Equal("day.rolled version=1.7.1.2 day=1014", rolled);
-        Assert.Equal("day.rolled version=1.7.1.2 day=1015", next);
+        Assert.Equal("day.rolled version=1.7.2 day=1014", rolled);
+        Assert.Equal("day.rolled version=1.7.2 day=1015", next);
         Assert.Contains(loaded + "\n" + written + "\n" + routes + "\n", log);
-        Assert.EndsWith(rolled + "\n" + "csv.written version=1.7.1.2 rows=1 day=1014 street=ba:street_today number=1 profit=9" + "\n" + routes + "\n" + next + "\n", log);
+        Assert.EndsWith(rolled + "\n" + "csv.written version=1.7.2 rows=1 day=1014 street=ba:street_today number=1 profit=9" + "\n" + routes + "\n" + next + "\n", log);
         Assert.Equal(2, log.Split(new[] { "day.rolled" }, StringSplitOptions.None).Length - 1);
         Assert.Contains("1014,ba:street_today,1,", File.ReadAllText(StatementDump.CsvPath(dir.Path)));
         Assert.DoesNotContain(pin.DllHash, log);
@@ -513,9 +514,9 @@ public class ModLoadedTests
         var bottom = ranked[ranked.Count - 1];
         Assert.Null(armed);
         Assert.Equal(LoadLog.Line(pin.Build), loaded);
-        Assert.Equal("day.rolled version=1.7.1.2 day=1014", rolled);
+        Assert.Equal("day.rolled version=1.7.2 day=1014", rolled);
         Assert.Equal(
-            "csv.written version=1.7.1.2 rows=1 day=1013 street=ba:street_fourthavenue number=28 profit=50687.4805",
+            "csv.written version=1.7.2 rows=1 day=1013 street=ba:street_fourthavenue number=28 profit=50687.4805",
             written);
         Assert.Contains("ba:street_firstavenue 38", File.ReadAllText(RouteDump.RoutesPath(dir.Path)));
         Assert.Equal("ba:street_fourthavenue", bottom.Street);
@@ -572,7 +573,7 @@ public class ModLoadedTests
 
         var bottom = ranked[ranked.Count - 1];
         Assert.Equal(LoadLog.Line(pin.Build), loaded);
-        Assert.Equal("day.rolled version=1.7.1.2 day=1014", rolled);
+        Assert.Equal("day.rolled version=1.7.2 day=1014", rolled);
         Assert.Equal(new[] { "ba:street_high", "ba:street_low" }, ranked.Select(row => row.Street));
         Assert.Equal(2, bottom.Number);
         Assert.Equal(-40d, bottom.Profit);
@@ -605,9 +606,9 @@ public class ModLoadedTests
 
         Assert.Null(armed);
         Assert.Equal(LoadLog.Line(pin.Build), loaded);
-        Assert.Equal("day.rolled version=1.7.1.2 day=1014", rolled);
+        Assert.Equal("day.rolled version=1.7.2 day=1014", rolled);
         Assert.Equal(
-            "routes.written version=1.7.1.2 routes=0 warehouses=0 warehouse= destination= item= day=",
+            "routes.written version=1.7.2 routes=0 warehouses=0 warehouse= destination= item= day=",
             routes);
         Assert.Contains("50687.4805", File.ReadAllText(StatementDump.CsvPath(dir.Path)));
         Assert.Equal("ba:street_fourthavenue", ranked[ranked.Count - 1].Street);
@@ -643,9 +644,9 @@ public class ModLoadedTests
         var bottom = ranked[ranked.Count - 1];
         Assert.Null(armed);
         Assert.Equal(LoadLog.Line(pin.Build), loaded);
-        Assert.Equal("day.rolled version=1.7.1.2 day=1014", rolled);
+        Assert.Equal("day.rolled version=1.7.2 day=1014", rolled);
         Assert.Equal(
-            "csv.written version=1.7.1.2 rows=1 day=1013 street=ba:street_fourthavenue number=28 profit=50687.4805",
+            "csv.written version=1.7.2 rows=1 day=1013 street=ba:street_fourthavenue number=28 profit=50687.4805",
             written);
         Assert.Contains("ba:street_firstavenue 38", File.ReadAllText(RouteDump.RoutesPath(dir.Path)));
         Assert.Equal(bottom.Street, red[red.Length - 1].Street);
@@ -699,7 +700,7 @@ public class ModLoadedTests
         var warehouses = File.ReadAllText(RouteDump.WarehousesPath(dir.Path));
         var bottom = ranked[ranked.Count - 1];
         Assert.Equal(LoadLog.Line(pin.Build), loaded);
-        Assert.Equal("day.rolled version=1.7.1.2 day=1014", rolled);
+        Assert.Equal("day.rolled version=1.7.2 day=1014", rolled);
         Assert.Equal(bottom.Street, red[red.Length - 1].Street);
         Assert.Equal(bottom.Number, red[red.Length - 1].Number);
         Assert.Equal(bottom.Profit, red[red.Length - 1].Profit);
@@ -6014,6 +6015,317 @@ public class ModLoadedTests
         Assert.Equal(
             1,
             CountLines(File.ReadAllText(LoadLog.HistoryPath(dir.Path)), "roadmap.changed"));
+    }
+
+    [Fact]
+    public void Dll_pin_loaded_csv_routes_day_rank_overlay_advice_prices_plans_staffing_layout_close_buy_panel_api_score_logistics_payback_roadmap_shutdown_delivery_apply_offer_clone_shown_closed_locks_store_closed()
+    {
+        // Chain: dll → pin → loaded → csv → routes → day → rank → overlay → advice → prices → plans → staffing → layout → close → buy → panel → api → score → logistics → payback → roadmap → shutdown → delivery → apply → offer → clone → shown → closed
+        using var dir = new TempLog();
+        var shown = RunThroughShown(dir);
+        var closeStep = shown.Live.Steps.First(step => step.Kind == "close");
+        var statements = File.ReadAllText(StatementDump.CsvPath(dir.Path));
+        var routes = File.ReadAllText(RouteDump.RoutesPath(dir.Path));
+
+        ResolveGame();
+        var buttons = ClosePress.Buttons(shown.Api, shown.Live);
+        var button = buttons.First(row => row.Street == closeStep.Street && row.Number == closeStep.Number);
+        var shut = ClosePress.Press(dir.Path, shown.Api, shown.Live, button.Street, button.Number, true);
+        var log = File.ReadAllText(LoadLog.CeoLogPath(dir.Path));
+        var shownAt = log.IndexOf("roadmap.shown ", StringComparison.Ordinal);
+        var closedAt = log.IndexOf("store.closed ", StringComparison.Ordinal);
+
+        Assert.Equal("Helpers.BusinessHelper.ShutdownBusiness", shown.Api.Close);
+        Assert.Equal(shown.Api.Close, button.Call);
+        Assert.Equal("Close", button.Label);
+        Assert.Equal(closeStep.Street, shut.Street);
+        Assert.Equal(closeStep.Number, shut.Number);
+        Assert.True(shut.Closed);
+        Assert.Equal(shown.Api.Close, shut.Call);
+        Assert.NotEqual(shown.Live.Steps.First(step => step.Kind == "open").Street, shut.Street);
+        Assert.True(closedAt > shownAt);
+        Assert.Contains(
+            "store.closed version=" + LoadLog.Version
+                + " street=" + closeStep.Street
+                + " number=" + closeStep.Number.ToString()
+                + " call=" + shown.Api.Close,
+            log);
+        Assert.Equal(1, CountLines(log, "store.closed"));
+        Assert.Equal(statements, File.ReadAllText(StatementDump.CsvPath(dir.Path)));
+        Assert.Equal(routes, File.ReadAllText(RouteDump.RoutesPath(dir.Path)));
+    }
+
+    [Fact]
+    public void Dll_pin_loaded_csv_routes_day_rank_overlay_advice_prices_plans_staffing_layout_close_buy_panel_api_score_logistics_payback_roadmap_shutdown_delivery_apply_offer_clone_shown_closed_gone_drops_the_shut_store()
+    {
+        // Chain: dll → pin → loaded → csv → routes → day → rank → overlay → advice → prices → plans → staffing → layout → close → buy → panel → api → score → logistics → payback → roadmap → shutdown → delivery → apply → offer → clone → shown → closed → gone
+        using var dir = new TempLog();
+        var shown = RunThroughShown(dir);
+        var closeStep = shown.Live.Steps.First(step => step.Kind == "close");
+        var openStep = shown.Live.Steps.First(step => step.Kind == "open");
+
+        ResolveGame();
+        var shut = ClosePress.Press(dir.Path, shown.Api, shown.Live, closeStep.Street, closeStep.Number, true);
+        var after = Roadshow.Compose(
+            shown.Days,
+            shown.Stops,
+            shown.Holds,
+            shown.Asks,
+            shown.Portfolio,
+            new[] { new PortfolioBusiness("", "", shut.Street, shut.Number) });
+
+        Assert.True(shut.Closed);
+        Assert.Contains(shown.Live.Steps, step => step.Kind == "close" && step.Street == shut.Street && step.Number == shut.Number);
+        Assert.DoesNotContain(after.Steps, step => step.Kind == "close" && step.Street == shut.Street && step.Number == shut.Number);
+        Assert.Contains(after.Steps, step => step.Kind == "open" && step.Street == openStep.Street && step.Number == openStep.Number);
+    }
+
+    [Fact]
+    public void Dll_pin_loaded_csv_routes_day_rank_overlay_advice_prices_plans_staffing_layout_close_buy_panel_api_score_logistics_payback_roadmap_shutdown_delivery_apply_offer_clone_shown_stayed_leaves_the_open_step_open()
+    {
+        // Chain: dll → pin → loaded → csv → routes → day → rank → overlay → advice → prices → plans → staffing → layout → close → buy → panel → api → score → logistics → payback → roadmap → shutdown → delivery → apply → offer → clone → shown → stayed
+        using var dir = new TempLog();
+        var shown = RunThroughShown(dir);
+        var openStep = shown.Live.Steps.First(step => step.Kind == "open");
+        var statements = File.ReadAllText(StatementDump.CsvPath(dir.Path));
+        var routes = File.ReadAllText(RouteDump.RoutesPath(dir.Path));
+
+        var stayed = ClosePress.Press(
+            dir.Path,
+            shown.Api,
+            shown.Live,
+            openStep.Street,
+            openStep.Number,
+            true);
+        var log = File.ReadAllText(LoadLog.CeoLogPath(dir.Path));
+
+        Assert.Equal("open", openStep.Kind);
+        Assert.DoesNotContain(
+            ClosePress.Buttons(shown.Api, shown.Live),
+            button => button.Street == openStep.Street && button.Number == openStep.Number);
+        Assert.False(stayed.Closed);
+        Assert.Equal("", stayed.Street);
+        Assert.Equal(0, stayed.Number);
+        Assert.Equal("", stayed.Call);
+        Assert.Equal(0, CountLines(log, "store.closed"));
+        Assert.Contains("roadmap.shown ", log);
+        Assert.Equal(statements, File.ReadAllText(StatementDump.CsvPath(dir.Path)));
+        Assert.Equal(routes, File.ReadAllText(RouteDump.RoutesPath(dir.Path)));
+    }
+
+    private static void ResolveGame()
+    {
+        var managed = Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86),
+            "Steam",
+            "steamapps",
+            "common",
+            "Big Ambitions",
+            "Big Ambitions_Data",
+            "Managed");
+        AppDomain.CurrentDomain.AssemblyResolve += (_, args) =>
+        {
+            var file = new AssemblyName(args.Name).Name + ".dll";
+            var path = Path.Combine(managed, file);
+            if (!File.Exists(path))
+            {
+                return null;
+            }
+
+            return Assembly.LoadFrom(path);
+        };
+    }
+
+    private ShownPrefix RunThroughShown(TempLog dir)
+    {
+        var pin = PinDlls();
+        var canonical = ChainDays()[0].Rows[0];
+        var days = new[]
+        {
+            new FinancialDay(
+                1011,
+                new[]
+                {
+                    new StatementRow("ba:street_side", 9, 0f, 0f, 0f, 4f, 0f, 0f, -10f),
+                }),
+            new FinancialDay(
+                1012,
+                new[]
+                {
+                    new StatementRow("ba:street_side", 9, 0f, 0f, 0f, 4f, 0f, 0f, -20f),
+                }),
+            new FinancialDay(
+                1013,
+                new[]
+                {
+                    canonical,
+                    new StatementRow("ba:street_side", 9, 0f, 0f, 0f, 4f, 0f, 0f, -30f),
+                }),
+        };
+        var stops = new[]
+        {
+            ChainStops()[0],
+            new DeliveryStop(
+                "ba:street_fourthstreet 46",
+                "ba:street_side 9",
+                "ba:itemname_cheapgift",
+                null,
+                ""),
+        };
+        var holds = new[]
+        {
+            ChainHolds()[0],
+            new WarehouseHold("W2", "ba:street_b", 2, "ba:itemname_cheapgift", 20),
+        };
+
+        LoadLog.RecordPinned(dir.Path);
+        StatementDump.Write(dir.Path, 1014, days);
+        var routes = RouteDump.Write(dir.Path, stops, holds);
+        var watch = new DayWatch();
+        Assert.Null(watch.Tick(dir.Path, 1013, days, stops, holds));
+        var rolled = watch.Tick(dir.Path, 1014, days, stops, holds);
+        var ranked = Advisor.RankFile(StatementDump.CsvPath(dir.Path));
+        var rows = Overlay.FromRank(
+            ranked,
+            Advisor.WarehouseFamilyMixFile(RouteDump.WarehousesPath(dir.Path)),
+            Array.Empty<StreetCluster>());
+        Advice.Record(dir.Path, rows);
+        var item = Field(routes, "item");
+        var price = Prices.Lock(
+            item,
+            new[]
+            {
+                new ItemSoldPerPriceEntry(item, 2.75f, 8),
+            });
+        var run = Plans.Lock("W1", holds, stops, price);
+        var staff = Staffing.Lock(
+            run,
+            new[]
+            {
+                new StaffOffer("hr", run.Family, "hr-soda", 40),
+                new StaffOffer("headhunter", run.Family, "hh-soda", 4),
+            });
+        var clusters = Advisor.StreetClusters(
+            new[]
+            {
+                new PortfolioBusiness("Food 1", staff.Role, "ba:street_main", 1),
+                new PortfolioBusiness("Food 2", staff.Role, "ba:street_main", 2),
+                new PortfolioBusiness("Food 3", staff.Role, "ba:street_main", 3),
+            });
+        var clone = Layout.Lock(
+            staff,
+            clusters,
+            new[]
+            {
+                new ChainLayout("ba:street_main", staff.Role, 1, "soda-line", 12, false),
+                new ChainLayout("ba:street_main", staff.Role, 4, "", 0, true),
+            });
+        var closed = Close.Lock(
+            clone,
+            new[]
+            {
+                new LedgerDay(clone.Street, 2, clone.Family, 1011, -10f),
+                new LedgerDay(clone.Street, 2, clone.Family, 1012, -4f),
+                new LedgerDay(clone.Street, 2, clone.Family, 1013, -1f),
+            },
+            3,
+            true,
+            true);
+        var bought = Buy.Lock(
+            closed,
+            new[]
+            {
+                new BuildingLot("hq", "ba:street_hq", 1),
+                new BuildingLot("food", "ba:street_warehouse", 10),
+                new BuildingLot("street", closed.Street, 20),
+            });
+        var panel = Panel.Rows(rows);
+        var api = GameApi.Read(
+            panel,
+            File.ReadAllText(Path.Combine(RepoRoot(), "doc", "requirements", "game-api.md")));
+        var scored = CloseScore.Score(api, days);
+        var review = Logistics.FromRoutes(
+            scored,
+            api,
+            RouteDump.RoutesPath(dir.Path),
+            RouteDump.WarehousesPath(dir.Path));
+        var asks = new[]
+        {
+            new BuildingAsk("ba:street_fourthavenue", 28, 10990d),
+            new BuildingAsk("ba:street_side", 9, 4000d),
+            new BuildingAsk(bought.Street, bought.Number, 10d),
+        };
+        var steps = Roadmap.Order(api, scored, review, Payback.FromLedger(
+            review,
+            api,
+            StatementDump.CsvPath(dir.Path),
+            asks), days, 3);
+        var shut = Shutdown.Confirm(api, steps, steps[1].Street, steps[1].Number, true);
+        var redo = Delivery.Confirm(api, review, review.Move!.Destination, true);
+        var priced = Apply.ConfirmPrice(api, price, price.Item, true);
+        var staffed = Apply.ConfirmStaff(api, staff, staff.PlanId, true);
+        Apply.RecordPrice(dir.Path, priced);
+        Apply.RecordStaff(dir.Path, staffed);
+        var offered = Offer.Confirm(api, steps, steps[0].Street, steps[0].Number, true);
+        Offer.Record(dir.Path, offered);
+        var copied = Clone.Confirm(api, clone, clone.Street, clone.Blueprint, true);
+        Clone.Record(dir.Path, copied);
+        var board = new CityBoard(steps, review, rows);
+        var session = new PanelSession();
+        var opened = session.Press(dir.Path, board);
+        session.Draw(board);
+        var portfolio = new[]
+        {
+            new PortfolioBusiness("Side", "specialty", "ba:street_side", 9),
+            new PortfolioBusiness("Fourth", "food", "ba:street_fourthavenue", 28),
+        };
+        var live = Roadshow.Compose(days, stops, holds, asks, portfolio);
+
+        Assert.NotNull(rolled);
+        Assert.True(shut.Closed);
+        Assert.True(redo.Moved);
+        Assert.True(priced.Applied);
+        Assert.True(staffed.Applied);
+        Assert.True(offered.Offered);
+        Assert.True(copied.Copied);
+        Assert.Equal(pin.ShippedBuild, api.Build);
+        Assert.Equal(opened[0].Street, live.Steps[0].Street);
+        return new ShownPrefix(api, live, days, stops, holds, asks, portfolio);
+    }
+
+    private sealed class ShownPrefix
+    {
+        public ShownPrefix(
+            ApiNote api,
+            CityBoard live,
+            IReadOnlyList<FinancialDay> days,
+            IReadOnlyList<DeliveryStop> stops,
+            IReadOnlyList<WarehouseHold> holds,
+            IReadOnlyList<BuildingAsk> asks,
+            IReadOnlyList<PortfolioBusiness> portfolio)
+        {
+            Api = api;
+            Live = live;
+            Days = days;
+            Stops = stops;
+            Holds = holds;
+            Asks = asks;
+            Portfolio = portfolio;
+        }
+
+        public ApiNote Api { get; }
+
+        public CityBoard Live { get; }
+
+        public IReadOnlyList<FinancialDay> Days { get; }
+
+        public IReadOnlyList<DeliveryStop> Stops { get; }
+
+        public IReadOnlyList<WarehouseHold> Holds { get; }
+
+        public IReadOnlyList<BuildingAsk> Asks { get; }
+
+        public IReadOnlyList<PortfolioBusiness> Portfolio { get; }
     }
 
     private static int CountLines(string text, string needle)

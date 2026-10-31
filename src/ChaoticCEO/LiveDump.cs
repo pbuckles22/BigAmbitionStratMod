@@ -37,7 +37,8 @@ namespace ChaoticCEO
                 Plans(current),
                 Holds(current),
                 Asks(current),
-                Portfolio(current));
+                Portfolio(current),
+                Shut(current));
         }
 
         public static IReadOnlyList<BuildingAsk> Asks(GameInstance? current)
@@ -191,6 +192,70 @@ namespace ChaoticCEO
                     routes.Add(new DeliveryStop(warehouse, label, target.itemName, null, ""));
                 }
             }
+        }
+
+        public static IReadOnlyList<PortfolioBusiness> Shut(GameInstance? current)
+        {
+            var rows = new List<PortfolioBusiness>();
+            if (current == null || current.BuildingRegistrations == null)
+            {
+                return rows;
+            }
+
+            var buildings = new List<(string Street, int Number, bool Named)>();
+            foreach (var building in current.BuildingRegistrations)
+            {
+                if (building == null)
+                {
+                    continue;
+                }
+
+                buildings.Add((
+                    building.StreetName ?? "",
+                    building.StreetNumber,
+                    !string.IsNullOrEmpty(building.BusinessName)));
+            }
+
+            return WithoutABusiness(buildings);
+        }
+
+        public static IReadOnlyList<PortfolioBusiness> WithoutABusiness(
+            IReadOnlyList<(string Street, int Number, bool Named)>? buildings)
+        {
+            var rows = new List<PortfolioBusiness>();
+            var named = new Dictionary<(string Street, int Number), bool>();
+            if (buildings != null)
+            {
+                foreach (var building in buildings)
+                {
+                    if (string.IsNullOrEmpty(building.Street) || building.Number <= 0)
+                    {
+                        continue;
+                    }
+
+                    var key = (building.Street, building.Number);
+                    if (!named.ContainsKey(key))
+                    {
+                        named[key] = building.Named;
+                    }
+                    else if (building.Named)
+                    {
+                        named[key] = true;
+                    }
+                }
+            }
+
+            foreach (var pair in named)
+            {
+                if (pair.Value)
+                {
+                    continue;
+                }
+
+                rows.Add(new PortfolioBusiness("", "", pair.Key.Street, pair.Key.Number));
+            }
+
+            return rows;
         }
 
         public static IReadOnlyList<PortfolioBusiness> Portfolio(GameInstance? current)

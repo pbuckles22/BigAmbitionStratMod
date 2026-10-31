@@ -44,7 +44,8 @@ namespace ChaoticCEO
             IReadOnlyList<DeliveryStop>? stops,
             IReadOnlyList<WarehouseHold>? holds,
             IReadOnlyList<BuildingAsk>? asks,
-            IReadOnlyList<PortfolioBusiness>? portfolio)
+            IReadOnlyList<PortfolioBusiness>? portfolio,
+            IReadOnlyList<PortfolioBusiness>? shut = null)
         {
             var ledger = days ?? Array.Empty<FinancialDay>();
             var routes = stops ?? Array.Empty<DeliveryStop>();
@@ -57,7 +58,44 @@ namespace ChaoticCEO
             var review = Logistics.Review(api, routes, stock);
             var payback = Payback.Decide(api, review, ledger, prices);
             var steps = Roadmap.Order(api, scored, review, payback, ledger, Top);
-            return new CityBoard(steps, review, overlay);
+            return new CityBoard(StillTrading(steps, shut), review, overlay);
+        }
+
+        private static IReadOnlyList<RoadStep> StillTrading(
+            IReadOnlyList<RoadStep> steps,
+            IReadOnlyList<PortfolioBusiness>? shut)
+        {
+            var closed = new HashSet<(string Street, int Number)>();
+            if (shut != null)
+            {
+                foreach (var business in shut)
+                {
+                    if (business == null || business.Street.Length == 0 || business.Number <= 0)
+                    {
+                        continue;
+                    }
+
+                    closed.Add((business.Street, business.Number));
+                }
+            }
+
+            var kept = new List<RoadStep>();
+            foreach (var step in steps)
+            {
+                if (step == null)
+                {
+                    continue;
+                }
+
+                if (step.Kind == "close" && closed.Contains((step.Street, step.Number)))
+                {
+                    continue;
+                }
+
+                kept.Add(step);
+            }
+
+            return kept;
         }
 
         public static IReadOnlyList<PanelLine> Lines(CityBoard? board)

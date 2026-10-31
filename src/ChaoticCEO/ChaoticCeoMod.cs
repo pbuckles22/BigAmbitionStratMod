@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using System.Threading.Tasks;
 using BAModAPI;
 using BAModAPI.Services;
@@ -13,6 +14,7 @@ namespace ChaoticCEO
     {
         private readonly DayWatch _days = new DayWatch();
         private bool _hooked;
+        private bool _panelFailed;
         private string _localAppData = "";
 
         public string[] RelativeAssetBundlePaths => Array.Empty<string>();
@@ -46,19 +48,22 @@ namespace ChaoticCEO
         private void OnFrame()
         {
             DumpOnHotkey();
-            TogglePanel();
-            LiveDump.Roll(_days, _localAppData);
-        }
-
-        private void TogglePanel()
-        {
-            var keyboard = Keyboard.current;
-            if (keyboard == null || !keyboard.f9Key.wasPressedThisFrame)
+            if (!_panelFailed)
             {
-                return;
+                try
+                {
+                    PanelView.Ensure(_localAppData);
+                }
+                catch (Exception ex)
+                {
+                    _panelFailed = true;
+                    File.AppendAllText(
+                        LoadLog.CeoLogPath(_localAppData),
+                        "panel.failed " + ex.GetType().Name + " " + ex.Message + Environment.NewLine);
+                }
             }
 
-            PanelView.Ensure().Press(_localAppData);
+            LiveDump.Roll(_days, _localAppData);
         }
 
         private void DumpOnHotkey()
