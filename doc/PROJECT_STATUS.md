@@ -8,7 +8,7 @@
 
 ## Summary
 
-**BigAmbitionStratMod** 1.6.1.2 — Epic 7 is in progress. A confirmed price sets one selected item and logs `price.applied`. A confirmed staff plan keeps that plan and logs `staff.applied`. Each apply is separate. An unconfirmed price stays unset. A different item stays unset. Reload clears both and leaves the statement file and the route file. The running game does not call SetPrice. F9 still opens a dark advisor window in the city. Next is story **7.4**, buy a building. F8 still dumps yesterday’s statements and the route CSVs. A day change dumps once and logs `day.rolled`. A current `save.bin` is not read again. Rules come from AgenticTemplate (`upstream`). `origin` is this repo.
+**BigAmbitionStratMod** 1.6.1.2 — Epic 7 is in progress. A confirmed buy offers one selected building and logs `building.offered`. Each buy is separate. An unconfirmed buy stays unbought. A close step stays unbought. Reload clears the offer and leaves the statement file and the route file. The running game does not call SendBuyBuildingOffer. F9 still opens a dark advisor window in the city. Next is story **7.5**, clone a layout. F8 still dumps yesterday’s statements and the route CSVs. A day change dumps once and logs `day.rolled`. A current `save.bin` is not read again. Rules come from AgenticTemplate (`upstream`). `origin` is this repo.
 
 ---
 
@@ -17,6 +17,7 @@
 | Branch | Role |
 |--------|------|
 | **`main`** | Integration branch. Last land `0f09d2e`, version 1.6.1.2 |
+| **`feature/7.4-buy-building`** | Story 7.4. Kept after this CMPH |
 | **`feature/7.3-apply-prices`** | Story 7.3. Kept after this CMPH |
 | **`feature/7.2-redo-logistics`** | Story 7.2. Kept after this CMPH |
 | **`feature/7.1-close-stores`** | Story 7.1. Kept after this CMPH |
@@ -77,7 +78,7 @@
 
 ## Next up (maintainers)
 
-- Story **7.4** when asked. Buy a building. Each buy is separate, confirmed, and logged. Reload undoes it.
+- Story **7.5** when asked. Clone a layout. Each clone is separate, confirmed, and logged. Reload undoes it.
 - Variants: merge upstream when AgenticTemplate skills/rules change
 
 ---
