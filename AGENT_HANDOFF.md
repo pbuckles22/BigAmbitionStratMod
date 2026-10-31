@@ -139,7 +139,7 @@ When shipping: update **PM_PLAN**, **doc/PROJECT_STATUS.md**, and **Current stat
 ## Current state
 
 - **Product:** Version 1.7.2. F9 shows the current roadmap and one logistics move. Confirm on a close step shuts that store and drops the row. A boot starts a fresh `ceo.log`. `history.log` keeps one line per roadmap change. Ladder: [PM_PLAN.md](PM_PLAN.md).
-- **On:** `origin/main @ 245963f`. `feature/7.6-roadmap-panel` kept. https://github.com/pbuckles22/BigAmbitionStratMod
+- **On:** `origin/main @ db096d4`. `feature/7.7-close-store` kept. https://github.com/pbuckles22/BigAmbitionStratMod
 - **Next:** Story **7.8** when asked. A redo button on the logistics move calls `LogisticsManagerPlanUI.AddDestination`. Version 1.7.3.
 - **Blockers:** none.
 
