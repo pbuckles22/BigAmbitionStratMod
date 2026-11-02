@@ -139,9 +139,9 @@ When shipping: update **PM_PLAN**, **doc/PROJECT_STATUS.md**, and **Current stat
 ## Current state
 
 - **Product:** Version 1.7.3.2. F9 shows the current roadmap and one logistics move. Confirm on a close step shuts that store. Confirm on the logistics move sends that store to the new warehouse. A boot starts a fresh `ceo.log`. `history.log` keeps one line per roadmap change. Ladder: [PM_PLAN.md](PM_PLAN.md).
-- **On:** `feature/7.8-redo-logistics` @ 06e8d78. Not merged. `feature/7.7-close-store` kept. https://github.com/pbuckles22/BigAmbitionStratMod
-- **Next:** Human check for story **7.8**. The headquarters logistics plan for the new warehouse lists that store. Version 1.7.3.2. After that check, finish Epic 7 as **7.13**, **7.9**, **7.10**, **7.11**, **7.12**. Then Epics 11, 12, 13, 9, 8, and 10. Crossing **WinNetWorth** logs `win.reached` once and the autopilot keeps running. **SimHorizonDays** is the Epic 8 window only. Rules: [doc/requirements/strategy.md](doc/requirements/strategy.md).
-- **Blockers:** 7.8 source is uncommitted until the BizMan check passes.
+- **On:** `origin/main` after the 7.8 land. `feature/7.8-redo-logistics` kept. https://github.com/pbuckles22/BigAmbitionStratMod
+- **Next:** Story **7.13** when asked. A warehouse, a headquarters, and an office stay off the close list. A goods store that has not met both waits stays off it too. Then **7.9**, **7.10**, **7.11**, **7.12**. Then Epics 11, 12, 13, 9, 8, and 10. Crossing **WinNetWorth** logs `win.reached` once and the autopilot keeps running. **SimHorizonDays** is the Epic 8 window only. Rules: [doc/requirements/strategy.md](doc/requirements/strategy.md).
+- **Blockers:** This session’s live game closed Fifth Avenue 43, Sixth Avenue 34, and Ninth Street 4. Reload the last save before the 7.13 check. The mod did not save.
 
 ## Run and test
 

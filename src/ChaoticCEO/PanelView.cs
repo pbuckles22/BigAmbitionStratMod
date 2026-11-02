@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -29,6 +30,8 @@ namespace ChaoticCEO
         private string _pendingStreet = "";
 
         private int _pendingNumber;
+
+        private string _pendingRedo = "";
 
         private Texture2D? _backdrop;
 
@@ -93,6 +96,7 @@ namespace ChaoticCEO
             {
                 _pendingStreet = "";
                 _pendingNumber = 0;
+                _pendingRedo = "";
             }
         }
 
@@ -120,6 +124,7 @@ namespace ChaoticCEO
                 _session.Close();
                 _pendingStreet = "";
                 _pendingNumber = 0;
+                _pendingRedo = "";
                 return;
             }
 
@@ -211,6 +216,7 @@ namespace ChaoticCEO
                     if (lineIndex < _lines.Count)
                     {
                         DrawClose(_lines[lineIndex]);
+                        DrawRedo(_lines[lineIndex]);
                     }
 
                     lineIndex++;
@@ -270,6 +276,53 @@ namespace ChaoticCEO
                 true);
             _pendingStreet = "";
             _pendingNumber = 0;
+        }
+
+        private void DrawRedo(PanelLine line)
+        {
+            if (line == null || line.Tone != "move" || line.Business != "logistics")
+            {
+                return;
+            }
+
+            var destination = line.Street + " " + line.Number.ToString(CultureInfo.InvariantCulture);
+            var armed = _pendingRedo == destination;
+            var controls = RedoPress.Controls(armed);
+            if (!armed)
+            {
+                if (GUILayout.Button(controls[0]))
+                {
+                    _pendingRedo = destination;
+                }
+
+                return;
+            }
+
+            GUILayout.BeginHorizontal();
+            var background = GUI.backgroundColor;
+            GUI.backgroundColor = new Color(0.75f, 0.16f, 0.16f);
+            var confirm = GUILayout.Button(controls[0]);
+            GUI.backgroundColor = background;
+            var cancel = GUILayout.Button(controls[1]);
+            GUILayout.EndHorizontal();
+            if (cancel)
+            {
+                _pendingRedo = "";
+                return;
+            }
+
+            if (!confirm)
+            {
+                return;
+            }
+
+            RedoPress.Press(
+                _localAppData,
+                GameApi.Live(),
+                BoardNow(),
+                destination,
+                true);
+            _pendingRedo = "";
         }
 
         private CityBoard BoardNow()

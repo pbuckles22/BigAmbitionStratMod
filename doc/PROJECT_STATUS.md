@@ -8,7 +8,7 @@
 
 ## Summary
 
-**BigAmbitionStratMod** 1.7.3.2 — Epic 7 is in progress. F9 shows the current roadmap and one logistics move. Confirm on a close step shuts that store. Confirm on the logistics move sends that store to the new warehouse. A boot starts a fresh `ceo.log`. `history.log` keeps one line per roadmap change. Story **7.7** passed. Story **7.8** is on `feature/7.8-redo-logistics` and is waiting on the headquarters logistics-plan check. After that check, finish Epic 7 as **7.13**, then **7.9** through **7.12**. Then Epics 11, 12, 13, 9, 8, and 10. Crossing $100M logs `win.reached` once and play continues. Day 365 is the Epic 8 scoring window only. The rules are in [requirements/strategy.md](requirements/strategy.md). F8 still dumps yesterday’s statements and the route CSVs. `origin` is this repo.
+**BigAmbitionStratMod** 1.7.3.2 — Epic 7 is in progress. F9 shows the current roadmap and one logistics move. Confirm on a close step shuts that store. Confirm on the logistics move sends that store to the new warehouse. A boot starts a fresh `ceo.log`. `history.log` keeps one line per roadmap change. Stories **7.7** and **7.8** passed. Next is **7.13**, then **7.9** through **7.12**. Then Epics 11, 12, 13, 9, 8, and 10. Crossing $100M logs `win.reached` once and play continues. Day 365 is the Epic 8 scoring window only. The rules are in [requirements/strategy.md](requirements/strategy.md). F8 still dumps yesterday’s statements and the route CSVs. `origin` is this repo.
 
 ---
 
@@ -17,7 +17,7 @@
 | Branch | Role |
 |--------|------|
 | **`main`** | Integration branch. Last land `db096d4`, version 1.7.2 |
-| **`feature/7.8-redo-logistics`** | Story 7.8. Redo button on the logistics move. Version 1.7.3.2. Not merged. |
+| **`feature/7.8-redo-logistics`** | Story 7.8. Kept after this CMPH. Version 1.7.3.2 |
 | **`feature/7.7-close-store`** | Story 7.7. Kept after this CMPH. Version 1.7.2 |
 | **`feature/7.6-roadmap-panel`** | Story 7.6. Kept after this CMPH. Version 1.7.1.2 |
 | **`feature/7.5-clone-layout`** | Story 7.5. Kept after this CMPH |
@@ -82,7 +82,7 @@
 
 ## Next up (maintainers)
 
-- Story **7.8** human check. BizMan shows the new warehouse on that store. Then **7.13**, **7.9**, **7.10**, **7.11**, **7.12**, then Epics 11, 12, 13, 9, 8, 10.
+- Story **7.13**. A warehouse, a headquarters, and an office stay off the close list. Then **7.9**, **7.10**, **7.11**, **7.12**, then Epics 11, 12, 13, 9, 8, 10.
 - Variants: merge upstream when AgenticTemplate skills/rules change
 
 ---

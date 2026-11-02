@@ -13,7 +13,7 @@ dotnet test src/ChaoticCEO.Tests/ChaoticCEO.Tests.csproj -p:GameManaged="C:\Prog
 dotnet build src/ChaoticCEO/ChaoticCEO.csproj -c Release -p:GameManaged="C:\Program Files (x86)\Steam\steamapps\common\Big Ambitions\Big Ambitions_Data\Managed"
 ```
 
-`dotnet test` is the Debug compile. The Release command installs `ChaoticCEO.dll` to ModsLocal. The gitignored counter is `build_number.txt`. The informational version is `1.7.2+N`.
+`dotnet test` is the Debug compile. The Release command installs `ChaoticCEO.dll` to ModsLocal. The gitignored counter is `build_number.txt`. The informational version is `1.7.3.2+N`.
 
 The story gate reuses `doc/gemini/cache/save.bin` and `save-index.sqlite` when both are current for the dropzone `.hsg`. Do not read or scan `save.bin` again while that blob is current. A renamed `.hsg` fails the recorded-name check on its own. Nobody announces the new name.
 
@@ -85,6 +85,20 @@ Human PASS 2026-10-30: the F9 window is readable, and scrolling it does not zoom
 Chain: `dll → pin → loaded → csv → routes → day → rank → overlay → advice → prices → plans → staffing → layout → close → buy → panel → api → score → logistics → payback → roadmap → shutdown → delivery → apply → offer → clone → shown → closed → gone`.
 
 Human PASS 2026-10-31. F9 opens and closes. Scroll stays in the window. First open `rows=9`, `steps=8`, Ninth Street 4, gain 3162.0491, `move=1`. Cancel left the row. Confirm removed each close row. Eight `store.closed` lines, no `store.missed`. Next open `rows=1`, `steps=0`, `move=1`.
+
+## Story 7.8 human check
+
+1. Restart Big Ambitions so this build loads, then load the empire save. You are in the city, not the main menu. This story puts a Redo button on the logistics move. It does not change a price, hire, buy a building, or copy a layout.
+2. Press F9. The logistics line has a Redo button. A close step still has Close. An open step has neither.
+3. Click Redo. That button is replaced by a red Confirm and a Cancel. Cancel leaves the warehouse as it was. Click Redo again, then Confirm.
+4. Open the headquarters BizMan, Logistics Managers, and the plan for the warehouse named after “To”. That is not the warehouse Drivers tab and not the store’s Deliveries tab. Open `%LocalAppData%\ChaoticCEO\ceo.log`.
+5. **PASS if** that plan lists the store, and `ceo.log` has one `logistics.redone` line for that destination. **FAIL if** the plan does not list the store, the line is missing, or the log has `logistics.missed` for that destination.
+6. Evidence: `logistics.redone version=1.7.3.2 destination=<street number> from=<old warehouse> to=<new warehouse> family=<family> call=UI.Smartphone.Apps.BizMan.LogisticsManagers.LogisticsManagerPlanUI.AddDestination`. `logistics.missed` with `reason=noplan` means the named warehouse building was not found.
+7. Version marker: public `1.7.3.2`. The installed dll informational version is `1.7.3.2+N`. `ceo.log` starts at `mod.loaded version=1.7.3.2 build=3682`.
+
+Chain: `dll → pin → loaded → csv → routes → day → rank → overlay → advice → prices → plans → staffing → layout → close → buy → panel → api → score → logistics → payback → roadmap → shutdown → delivery → apply → offer → clone → shown → closed → gone → redone`.
+
+Human PASS 2026-11-02. `ceo.log` starts at `mod.loaded version=1.7.3.2 build=3682`. One open: `rows=9`, `steps=8`, Ninth Street 4, gain 3162.0491, `move=1`. One `logistics.redone` for Fifth Avenue 36, from First Street 37, to W7, family food. No `logistics.missed`.
 
 ## Story 7.6 human check
 
