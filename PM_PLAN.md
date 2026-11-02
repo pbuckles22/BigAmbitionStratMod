@@ -8,9 +8,9 @@ The game is Mono, build **3682**. A mod builds with `dotnet build` against `Big 
 
 Epic 1 closed on 17 businesses and 5865 statement rows. `ba:businesstype_liquorstore` is **food**. Do not relabel it inside a routes story. A warehouse story may add a specialty override only with a new test.
 
-The end goal is a brand-new game played to the win with no hands on the keyboard. The win is $100M net worth by day 365. The mod acts through game-state and command calls. It does not walk, drive, or hand-cart. The rules and the four stages are in [doc/requirements/strategy.md](doc/requirements/strategy.md). Calls not yet found are listed under *Unverified* in `doc/requirements/game-api.md`, and code does not use them.
+The end goal is a brand-new game played with no hands on the keyboard. Crossing **WinNetWorth** ($100M) logs `win.reached` once, and the autopilot keeps running. **SimHorizonDays** (365) is only the Epic 8 scoring window. The mod acts through game-state and command calls. It does not walk, drive, or hand-cart. The rules and the four stages are in [doc/requirements/strategy.md](doc/requirements/strategy.md). Calls not yet found are listed under *Unverified* in `doc/requirements/game-api.md`, and code does not use them.
 
-Run order: Epic 7, then 11, 12, 13, 8, 9, 10. Epic numbers stay as they are, so 11 through 13 run before 8.
+Run order: finish Epic 7 as **7.8**, **7.13**, **7.9**, **7.10**, **7.11**, **7.12**, then Epics 11, 12, 13, 9, 8, 10. Epic numbers stay as they are.
 
 One story per branch. Human check after **2.2**, after **3.3**, and on every story in Epics 5 through 13. Each epic in the run order waits until the one before it works. Monte Carlo is only **8.4–8.5**. The story test gate reuses the save index. Rebuild it when the dropzone `.hsg` changes, when `script/Slice-SaveGame.py` changes, or at epic close.
 
@@ -85,7 +85,7 @@ Each action is opt-in, logged, and undone by reload. A wrong soak decision becom
 
 **Status:** in progress
 
-7.1–7.5 are the headless confirm and record library. None of them calls the game or draws a button. From 7.6 on, the human check is the F9 window or a change on the save.
+7.1–7.5 are the headless confirm and record library. None of them calls the game or draws a button. From 7.6 on, the human check is the F9 window or a change on the save. Remaining order: **7.8**, **7.13**, **7.9**, **7.10**, **7.11**, **7.12**.
 
 7.7–7.12 share this exit. The click goes through a confirm step. It calls the build 3682 method from `doc/requirements/game-api.md` on `SaveGameManager.Current`. It writes the existing `Record` line to `ceo.log`. `Confirm` decides which row becomes which call, and a headless test locks that decision. The game call sits behind a thin bridge. Reload undo means loading the last game save. The mod never saves.
 
@@ -97,24 +97,24 @@ Each action is opt-in, logged, and undone by reload. A wrong soak decision becom
 - **7.6** `[x]` F9 shows the roadmap from live state. `LiveDump.Board` reads statements, routes, warehouse holds, and building prices. A for-sale price keeps the address. An owned `purchasePrice` fills an address that is not for sale. A zero price is dropped. It runs `CloseScore.Score`, then `Logistics.Review`, then `Payback.Decide`, then `Roadmap.Order` with the top 10. The window draws those steps, then the logistics move on its own line. The old overlay stays out of the window. Opening it logs `roadmap.shown` and, the first time that list changes, one `roadmap.changed` line in `history.log`. A later open of the same list does not append history. A boot replaces `ceo.log` with the new `mod.loaded` line and keeps changes in `history.log`, capped at 200 lines. Version 1.7.1.2. Human check passed. Chain: `dll → pin → loaded → csv → routes → day → rank → overlay → advice → prices → plans → staffing → layout → close → buy → panel → api → score → logistics → payback → roadmap → shutdown → delivery → apply → offer → clone → shown`.
 - **7.7** `[x]` Close button on each close step. Close arms a red Confirm and a Cancel. Cancel leaves the store. Confirm calls `Helpers.BusinessHelper.ShutdownBusiness` on the registration at that street and number that still has a business name, sets `AvailableForRent`, and refreshes the street sign. A building with no business name at that address leaves the close list. An address that is only absent from the family portfolio stays. A found close logs `store.closed`. A live save with no matching building logs `store.missed` and does not log `store.closed`. Reload of the last game save is the undo. The mod never saves. Version 1.7.2. Human check passed. Chain: `dll → pin → loaded → csv → routes → day → rank → overlay → advice → prices → plans → staffing → layout → close → buy → panel → api → score → logistics → payback → roadmap → shutdown → delivery → apply → offer → clone → shown → closed → gone`.
 - **7.8** `[ ]` Redo button on the logistics move. Redo arms a red Confirm and a Cancel. Cancel leaves the move. Confirm moves that store’s `LogisticsManagerPlanDestination` onto the plan whose warehouse business name is the new warehouse, logs `logistics.redone`, and keeps the call `LogisticsManagerPlanUI.AddDestination`. The UI method only appends an empty row, so the redo does not call it. A store that is only on a delivery contract is added to that warehouse’s plan. A loaded save with no plan for the new warehouse creates that plan on the headquarters that already owns a logistics plan, or on the headquarters building, and adds the store. Food items of that family leave the wholesaler contract. `logistics.missed` with `reason=noplan` means the named warehouse building was not found, and that miss does not log `logistics.redone`. Reload of the last game save is the undo. The mod never saves. Human check: BizMan shows the new warehouse on that store. Version 1.7.3.2. Chain: `dll → pin → loaded → csv → routes → day → rank → overlay → advice → prices → plans → staffing → layout → close → buy → panel → api → score → logistics → payback → roadmap → shutdown → delivery → apply → offer → clone → shown → closed → gone → redone`.
-- **7.9** `[ ]` Price button and staff button. Price calls `PricingManagerPlan.SetPrice`. Find the `HrManagerPlan` / `HeadhunterPlan` staff call, record it in `doc/requirements/game-api.md`, and call it. Human check: the item price and the staff plan change in game. Version 1.7.5.
+- **7.9** `[ ]` Price button and staff button. Price calls `PricingManagerPlan.SetPrice`. Find the staff plan write, record it in `doc/requirements/game-api.md`, and call it on `HrManagerPlan` / `HeadhunterPlan`. Human check: the item price and the staff plan change in game. Version 1.7.5.
 - **7.10** `[ ]` Buy button on each open step. It calls `BizManPresentation.SendBuyBuildingOffer`. Human check: the offer or the purchase shows in game and `building.offered` is in `ceo.log`. Version 1.7.6.
 - **7.11** `[ ]` Clone button when a cluster qualifies. It calls `BusinessLayoutSetHelper.LoadBusinessLayoutSet`. Human check: the destination store has the source layout. Version 1.7.7.
 - **7.12** `[ ]` Execute all. One confirm runs the roadmap steps in order through the 7.7–7.11 calls, and it skips any step **7.13** removed. A failed step stops the run and is logged. Log `roadmap.executed` with counts. Human check: every listed step happened in game, in that order. Version 1.7.8.
-- **7.13** `[ ]` Do this before **7.9**. Cost centers and fix before close. A warehouse, a headquarters, and an office are not close steps. Day 1016 shows W4 at Sixth Avenue 34 and W6 at Fifth Avenue 43 as wages with no sales, and this session’s Confirm shut both. A close candidate whose business type is warehouse, headquarters, law, web, graphics, or event planning stays off the list. A goods store with no delivery or no staff is not a close step. A losing goods store that is supplied and staffed still gets Close. Human check: F9 has no Close on W4 or W6, and a losing supplied store still has Close. Version 1.7.4.
+- **7.13** `[ ]` Do this before **7.9**. Cost centers and fix before close. A warehouse, a headquarters, and an office are not close steps. Day 1016 shows W4 at Sixth Avenue 34 and W6 at Fifth Avenue 43 as wages with no sales, and this session’s Confirm shut both. A close candidate whose business type is warehouse, headquarters, law, web, graphics, or event planning stays off the list. A goods store with no delivery or no staff is not a close step. A goods store supplied and staffed for fewer than **FixDays**, or below zero for fewer than **RedDays**, is not a close step. A losing goods store that has met both waits still gets Close. Human check: F9 has no Close on W4 or W6, and a losing supplied store that has met both waits still has Close. Version 1.7.4.
 
 ## Epic 11 — Repair and self-heal the current save
 
 **Status:** later
 
-Starts after **7.13**. This is the gap between one logistics move and a company that runs and keeps itself running. The indexed save (`Recover #1 (Modded).hsg`, day 1016) has 14 warehouses, 28 garage slots, and 21 freight trucks. Seven slots are empty: one each at W7, W8, and W9, and both at W13 and W14. There is no spare freight truck. `logisticsManagerPlans` and `pricingManagerPlans` are empty. One wholesaler contract supplies Fifth Avenue 36. The other 55 goods stores have no delivery. Hired staff still include 11 logistics managers, 55 HR managers, 23 purchasing agents, 14 headhunters, and 21 delivery drivers. W12, W13, and W14 have no shelf stock in the day dump. Rules: `strategy.md` sections 5 through 7 and *Monitoring and self-healing*.
+Starts after **7.12**. This is the gap between one logistics move and a company that runs and keeps itself running. The indexed save (`Recover #1 (Modded).hsg`, day 1016) has 14 warehouses, 28 garage slots, and 21 freight trucks. Seven slots are empty: one each at W7, W8, and W9, and both at W13 and W14. There is no spare freight truck. `logisticsManagerPlans` and `pricingManagerPlans` are empty. One wholesaler contract supplies Fifth Avenue 36. The other 55 goods stores have no delivery. Hired staff still include 11 logistics managers, 55 HR managers, 23 purchasing agents, 14 headhunters, and 21 delivery drivers. W12, W13, and W14 have no shelf stock in the day dump. Rules: `strategy.md` sections 5 through 7 and *Monitoring and self-healing*.
 
-- **11.0** `[ ]` Find and record the calls this epic needs: truck buy, slot assign, hire, plan assign, purchasing plan, and importer order. Each moves from *Unverified* to the table in `game-api.md` with its class and method. Headless. Human check: one manual call per action changes the game, shown in `ceo.log`.
+- **11.0** `[ ]` Find and record the calls this epic needs: truck buy, slot assign, hire, plan assign, purchasing plan, pricing plan create, staff train, importer order, and wholesaler contract drop. Each moves from *Unverified* to the table in `game-api.md` with its class and method. Headless. Human check: one manual call per action changes the game, shown in `ceo.log`.
 - **11.1** `[ ]` Fill the seven empty garage slots. Buy a freight truck into each empty slot and assign a delivery driver. A warehouse with two filled slots stays as it is. Human check: W7, W8, W9, W13, and W14 show no empty slot.
-- **11.2** `[ ]` Connect every goods store. One logistics plan per warehouse, one cargo family, and each of the 56 goods stores is a destination of a warehouse that holds that family. A wholesaler contract remains only for an item no warehouse holds. Human check: the headquarters logistics list shows those stores, and the next route dump has the stops.
-- **11.3** `[ ]` Assign the headquarters plans. One logistics manager, one HR manager, one purchasing agent, and one headhunter are assigned, and a pricing plan exists. The hired roster already has the first four skills. Human check: BizMan shows each plan with a person, and a pricing plan exists.
+- **11.2** `[ ]` Connect every goods store. One logistics plan per warehouse, one cargo family, and each of the 56 goods stores is a destination of a warehouse that holds that family. A wholesaler contract for an item that warehouse holds is dropped. A contract remains only for an item no warehouse holds. Human check: the headquarters logistics list shows those stores, and the next route dump has the stops.
+- **11.3** `[ ]` Assign the headquarters plans. Create the pricing plan, then assign one logistics manager, one HR manager, one purchasing agent, and one headhunter. The hired roster already has the first four skills. Human check: BizMan shows each plan with a person, and a pricing plan exists.
 - **11.4** `[ ]` Restock the warehouses. A warehouse that delivers has a purchasing order for its family. W12, W13, and W14 hold that family. Human check: those three have shelf stock and a refill order.
-- **11.5** `[ ]` Daily audit and self-heal. On `day.rolled`, `Audit.Check` logs one `audit.summary` with the counts in `strategy.md`, and each finding runs its heal through confirm, bridge, and record. The guardrails apply: the heal cap, the spend limit, a pause after 3 failures, dry run, and F10. Before a close or a bulk action, `snapshot.taken` goes to `snapshots.log`. Human check: one day with a planted gap (an unconnected store) heals it, and `audit.summary` shows the count drop.
+- **11.5** `[ ]` Daily audit and self-heal. On `day.rolled`, `Audit.Check` logs one `audit.summary` with the counts in `strategy.md`, and each finding runs its heal through confirm, bridge, and record. The guardrails apply: **HealCap**, **DaySpend**, **HealStrikeMax**, dry run, and F10. Before a close or a bulk action, `snapshot.taken` goes to `snapshots.log`. Human check: one day with a planted gap (an unconnected store) heals it, and `audit.summary` shows the count drop.
 
 ## Epic 12 — Watch it
 
@@ -124,7 +124,7 @@ Starts after Epic **11**. You can see the run without opening the game.
 
 - **12.1** `[ ]` F9 top bar: day, cash, net worth against $100M, yesterday’s profit, stage, autopilot on or off, and speed. Human check: the bar matches BizMan.
 - **12.2** `[ ]` F9 health section: stores supplied, slots filled, plans present, and the last heal. Human check: the counts match the latest `audit.summary`.
-- **12.3** `[ ]` F9 controls: Execute on each step, Execute all, the autopilot toggle, and dry run. F10 stops the autopilot anywhere. Human check: the toggle starts and stops autopilot actions, and F10 stops them.
+- **12.3** `[ ]` F9 controls: Execute on each step, Execute all, the autopilot toggle, and dry run. The toggle and F10 set `Autopilot.Enabled`. F10 clears it from anywhere. The daily loop that reads the flag is story **10.2**. Human check: the toggle and F10 change the on/off state on the bar, and Execute all is the **7.12** button.
 - **12.4** `[ ]` `telemetry.csv` with one row per day: day, cash, net worth, profit, stage, health counts, and actions. `script/Report-Progress.py` writes a progress report from that file. Human check: three days give three rows and a report.
 
 ## Epic 13 — New-game calls
@@ -134,47 +134,49 @@ Starts after Epic **11**. You can see the run without opening the game.
 Starts after Epic **12**. Each story finds and records one family of calls that a brand-new game needs. Each is a human check on a new save. No walking, driving, or hand-carting.
 
 - **13.1** `[ ]` Rent a building. Human check: a new save rents the chosen lot.
-- **13.2** `[ ]` Starter layout and opening hours. A fresh profile has no saved layouts. The mod ships a starter `BusinessLayoutSet` per Stage 1 business type, or builds one through `BusinessLayoutSetHelper`, then loads it. It also sets opening hours. Human check: a new profile with no layouts opens a stocked-ready store.
+- **13.2** `[ ]` Starter layout, opening hours, and store ops. A fresh profile has no saved layouts. The mod ships a starter `BusinessLayoutSet` per Stage 1 business type, or builds one through `BusinessLayoutSetHelper`, then loads it. It sets opening hours and assigns a cleaner, a guard, uniforms, and capacity fixtures. Human check: a new profile with no layouts opens a stocked-ready store whose ops match the rulebook.
 - **13.3** `[ ]` Wholesaler contract. A recurring `DeliveryContract` from a wholesaler to the store. Human check: the next morning the store has stock.
-- **13.4** `[ ]` Hire and loan. Hire a cashier, and take and repay a bank loan. Human check: the cashier works, and the loan balance moves.
-- **13.5** `[ ]` Time advance with player needs. Skip time, with sleep and food before energy, hunger, or happiness reach the floor. Human check: one advanced week with no faint or hospital.
-- **13.6** `[ ]` Marketing campaign start and stop. Human check: the campaign shows and then ends.
-
-## Epic 8 — Strategy engine
-
-**Status:** later
-
-Starts after Epic **13**. **8.1–8.3** are one deterministic sim. **8.4–8.5** add randomness. The result re-ranks the **7.6** roadmap that F9 shows and tunes every named threshold in `strategy.md`.
-
-- **8.1** `[ ]` Fit demand and cost curves from the ledger CSVs.
-- **8.2** `[ ]` Day stepper using the Epic 4 library. Same `portfolio.csv` shape.
-- **8.3** `[ ]` Calibration: a sim from day 1000 lands within tolerance of the real ledger at day 1014.
-- **8.4** `[ ]` Seeded demand, rival, and hiring noise. Distribution of net worth at day 365.
-- **8.5** `[ ]` Compare policies. Keep the best median with an acceptable worst case.
-- **8.6** `[ ]` Stage sim. Run the four stages from day 1 with the starting thresholds. Tune each one. Report whether $100M by day 365 is reached at the median, and the worst case. Each tuned threshold gets a named Tier 1 test. A target that is not reachable comes back to the owner before Epic 10.
+- **13.4** `[ ]` Hire, loan, employee demand, and taxes. Hire a cashier with the **11.0** hire call, take and repay a bank loan, satisfy an employee demand, and pay taxes and back taxes. Human check: the cashier works, the loan balance moves, the demand clears, and the tax due drops.
+- **13.5** `[ ]` Time advance with player needs. Skip time, with sleep and food before energy, hunger, or happiness reach **NeedFloor**. Human check: one advanced week with no faint or hospital.
+- **13.6** `[ ]` Marketing campaign start and stop, and decline a rival takeover. Human check: the campaign shows and then ends, and a takeover offer is declined.
 
 ## Epic 9 — Playbook
 
 **Status:** later
 
-Starts after Epic **8**. The rulebook as a pure library. Each decision has a Tier 1 test and a chain test.
+Starts after Epic **13**. The rulebook as a pure library. Each decision has a Tier 1 test and a chain test. Epic 8 calls this library.
 
-- **9.1** `[ ]` `Stage.Decide` and the stage gates.
+- **9.1** `[ ]` `Stage.Decide(day, cash, goodsStores, suppliedStores, warehouses, emptySlots, plans)` and the stage gates. Stage 4 passes when cash is at least **Stage4Cash**, supplied stores equal goods stores, and empty slots are 0.
 - **9.2** `[ ]` What to open and where (`strategy.md` sections 1 and 2).
 - **9.3** `[ ]` Golden layout and prices (sections 3 and 4).
 - **9.4** `[ ]` Supply by stage, trucks, and warehouses (sections 5 and 6).
 - **9.5** `[ ]` Managers, money, real estate, closing, and running the business (sections 7 through 11).
 - **9.6** `[ ]` F9 shows the next playbook step on a new game. Human check is F9 on a new save.
 
+## Epic 8 — Strategy engine
+
+**Status:** later
+
+Starts after Epic **9**. **8.1–8.3** are one deterministic sim. **8.4–8.5** add randomness inside **SimHorizonDays**. The result re-ranks the **7.6** roadmap that F9 shows and tunes every named threshold in `strategy.md`. **8.6** calls the Epic 9 library.
+
+- **8.1** `[ ]` Fit demand and cost curves from the ledger CSVs.
+- **8.2** `[ ]` Day stepper using the Epic 4 library. Same `portfolio.csv` shape.
+- **8.3** `[ ]` Calibration: a sim from day 1000 lands within tolerance of the real ledger at day 1014.
+- **8.4** `[ ]` Seeded demand, rival, and hiring noise. Distribution of net worth at **SimHorizonDays**.
+- **8.5** `[ ]` Compare policies over **SimHorizonDays**. Keep the best median with an acceptable worst case.
+- **8.6** `[ ]` Stage sim. Call the Epic 9 library. Run the four stages from day 1 over **SimHorizonDays** with the starting thresholds. Tune every named threshold. Report whether **WinNetWorth** is reached at the median by that horizon, and the worst case. Each tuned threshold gets a named Tier 1 test. A target that is not reachable comes back to the owner before Epic 10.
+
 ## Epic 10 — Watch it win
 
 **Status:** later
 
-- **10.1** `[ ]` Lock the win. $100M net worth by day 365, or the number 8.6 returned and the owner approved. `win.reached` is the log line.
-- **10.2** `[ ]` Autopilot loop. Each day: audit, heal, then the stage’s actions through the recorded calls, within the guardrails. Human check: one autopilot day on a new save matches its `telemetry.csv` row.
-- **10.3** `[ ]` Hands-off run from a new save. PASS is `win.reached` in `ceo.log` and the telemetry curve. Every decision the run finds becomes a Tier 1 test before the next run.
+Starts after Epic **8**. Crossing **WinNetWorth** is a milestone. The autopilot keeps compounding in Stage 4.
 
-**Next:** story **7.8** is in this build. Confirm on the logistics move puts that store on the new warehouse’s plan, creating the plan when the warehouse does not have one. Human check: the headquarters logistics plan for that warehouse lists the store. Version 1.7.3.2. After that check, **7.13** stops F9 from closing a warehouse or an unsupplied store. Then Epics 11, 12, 13, 8, 9, and 10, in that order.
+- **10.1** `[ ]` Lock the milestone. Crossing **WinNetWorth**, or the number **8.6** returned and the owner approved, logs `win.reached` once. Later days do not log it again, and the autopilot stays on.
+- **10.2** `[ ]` Autopilot loop. Each day, while `Autopilot.Enabled` is on: audit, heal, the stage’s actions through the recorded calls, then time advance, within the guardrails. The **12.3** toggle and F10 clear the flag. Human check: one autopilot day on a new save matches its `telemetry.csv` row, and a cleared flag skips the next day.
+- **10.3** `[ ]` Hands-off run from a new save. PASS is `win.reached` in `ceo.log` and later telemetry rows that still advance. Every decision the run finds becomes a Tier 1 test before the next run.
+
+**Next:** story **7.8** is in this build. Confirm on the logistics move puts that store on the new warehouse’s plan, creating the plan when the warehouse does not have one. Human check: the headquarters logistics plan for that warehouse lists the store. Version 1.7.3.2. After that check, **7.13**, then **7.9**, **7.10**, **7.11**, and **7.12**. Then Epics 11, 12, 13, 9, 8, and 10.
 
 Operating model (keep these when you replace this plan): `.cursor/rules/` ship commands (UCPH, CMPH, SWAT), human check, plan-coordinate versioning, long-run harvest (`testing.mdc`), and the chain harness and prefix (`integration-chain.mdc`). Do not delete them to “clean up” a new clone.
 

@@ -1,24 +1,26 @@
 # Strategy rulebook
 
-The autopilot plays a brand-new game to the win with no hands on the keyboard. Each rule below is one testable sentence. A rule that names a threshold uses the name in bold. The number after it is the starting value. Epic 8 tunes it, and a tuned value gets a named Tier 1 test before the autopilot uses it.
+The autopilot plays a brand-new game with no hands on the keyboard and keeps running after the milestone. Each rule below is one testable sentence. A rule that names a threshold uses the name in bold. The number after it is the starting value. Epic 8 tunes it, and a tuned value gets a named Tier 1 test before the autopilot uses it.
 
 ## Win and boundary
 
-- **Win:** net worth of **WinNetWorth** = $100,000,000 by **WinDay** = 365 on a brand-new game. Reaching it logs `win.reached` with day and net worth. Changing either number needs the owner’s OK and an edit here.
-- **Boundary:** the mod acts through game-state and command calls only. Those calls rent, load a layout, sign a wholesaler contract, hire, take a loan, set plans, buy, and advance time. It does not walk, drive, or push a hand cart.
+- **Win:** net worth of **WinNetWorth** = $100,000,000. The first crossing logs `win.reached` once, with day and net worth, and the autopilot keeps running. Changing the number needs the owner’s OK and an edit here.
+- **Horizon:** **SimHorizonDays** = 365 is the Epic 8 window for scoring policies. It is not an in-game stop.
+- **Continuous:** After the milestone the autopilot stays in Stage 4, compounding and self-healing, until Autopilot is turned off or F10 is pressed.
+- **Boundary:** the mod acts through game-state and command calls only. Those calls rent, load a layout, sign or drop a wholesaler contract, hire, train, meet a demand, write plans, set store ops, take a loan, pay taxes, buy, decline a takeover, and advance time. It does not walk, drive, or push a hand cart.
 - **Calls:** a call the autopilot uses is listed in [game-api.md](game-api.md) as recorded. An unverified call is a discovery story, not code.
 - **Game updates:** a game build whose Managed DLL hashes differ from [game-build.md](game-build.md) halts the autopilot with `autopilot.halted reason=pin`.
 
 ## Stages
 
-The stage is a pure decision, `Stage.Decide(day, cash, goods stores, warehouses, plans)`. The autopilot never runs a stage’s actions before that stage’s gate passes. A later stage keeps every rule of the earlier ones unless it says otherwise.
+The stage is a pure decision, `Stage.Decide(day, cash, goodsStores, suppliedStores, warehouses, emptySlots, plans)`. The autopilot never runs a stage’s actions before that stage’s gate passes. A later stage keeps every rule of the earlier ones unless it says otherwise. Stage 4 passes when cash is at least **Stage4Cash**, supplied stores equal goods stores, and empty slots are 0. Stage 4 does not end at **WinNetWorth**.
 
 | Stage | Gate in | Supply | Stores and layouts | People and fleet |
 | --- | --- | --- | --- | --- |
 | 1 Bootstrap | New game | Wholesaler `DeliveryContract` to each store | Rent low-rent small lots. Open high-margin goods stores (gift, florist, fast food) from a starter layout | Cashiers hired directly. Loan funds stores 1 to 3 |
 | 2 First HQ and warehouse | Cash at least **Stage2Cash** = $150,000 and at least **Stage2Stores** = 3 goods stores | One single-family warehouse. Stores of that family move from contracts to a logistics plan | Clone the best layout of each type | Rent HQ. Logistics manager, purchasing agent, HR manager, headhunter, pricing plan. Truck 1 and driver 1 |
 | 3 Scale | A warehouse plan is live and at least **Stage3Supplied** = 5 stores are on it | One family per warehouse, two trucks per warehouse | Street clusters. Services and offices when trucks are busy | Fill every garage slot. Managers scale by ratio |
-| 4 Real estate | Cash at least **Stage4Cash** = $2,000,000, every goods store supplied, every slot filled | Same, with rebalancing | Buy buildings by payback | Training to full skill |
+| 4 Real estate | Cash at least **Stage4Cash** = $2,000,000, supplied stores equal goods stores, and empty slots are 0. Stays on after **WinNetWorth** | Same, with rebalancing | Buy buildings by payback | Training to full skill |
 
 ## 1. What business to open
 
@@ -53,7 +55,7 @@ The stage is a pure decision, `Stage.Decide(day, cash, goods stores, warehouses,
 - **Stage 1:** each goods store has a wholesaler contract for its items. Nothing is hand-carted.
 - **Stage 2 on, downstream:** a warehouse supplies every store of its family through one logistics plan with stock targets.
 - **Stage 2 on, upstream:** a purchasing agent orders that family from an importer when warehouse stock falls below **RefillDays** = 7 days of the connected stores’ sales.
-- A wholesaler contract stays only for an item no warehouse holds.
+- A wholesaler contract stays only for an item no warehouse holds. The contract for an item a warehouse holds is dropped (story 11.0).
 - One store and one family have one supplier. A recurring plan stop beats a dated contract (story 6.4).
 
 ## 6. Trucks and warehouses
@@ -66,11 +68,13 @@ The stage is a pure decision, `Stage.Decide(day, cash, goods stores, warehouses,
 ## 7. Managers
 
 - Stage 2 has one logistics manager, one purchasing agent, one HR manager, one headhunter, and one pricing plan.
+- A missing pricing plan is created on the headquarters before a person or a price is assigned to it (story 11.0).
+- Staff plan targets are written through the staff-plan call (story 7.9).
 - After that:
   - one logistics manager and one purchasing agent per warehouse
-  - one HR manager per **HrSpan** employees, read from the game’s HR capacity
+  - one HR manager per **HrSpan** = 25 employees, until the game’s HR capacity read replaces that span
   - one headhunter per **HuntSpan** = 5 open roles
-- A manager capacity is read from the game, not guessed. Until it is recorded, the span is the starting value here.
+- A manager capacity is read from the game, not guessed. Until that read is recorded, **HrSpan** stays 25.
 - A plan without an assigned person counts as missing.
 
 ## 8. Money
@@ -97,11 +101,11 @@ The stage is a pure decision, `Stage.Decide(day, cash, goods stores, warehouses,
 **The player.** During time advance the player sleeps and eats before energy, hunger, or happiness reach **NeedFloor** = 20%.
 
 **Staff.**
-- An employee demand that is unmet for **DemandDays** = 3 days is met or that employee is replaced.
+- An employee demand that is unmet for **DemandDays** = 3 days is met (story 13.4) or that employee is replaced (story 11.0).
 - A sick, retired, quitting, or poached employee is replaced through the headhunter.
-- Training targets full skill.
+- Training targets full skill (story 11.0).
 
-**Store operation.**
+**Store operation.** Story 13.2 assigns the cleaner, the guard, uniforms, and capacity fixtures.
 - A store with dirt spots has a cleaner.
 - A store with theft above **TheftMax** = 1% of sales has a guard.
 - A customer demand the store can meet (for example uniforms) is met.
@@ -110,8 +114,8 @@ The stage is a pure decision, `Stage.Decide(day, cash, goods stores, warehouses,
 
 **Market and money.**
 - A marketing campaign runs when its daily cost is below **MarketingCover** = 50% of the gain it measures.
-- Taxes and back taxes are paid on time.
-- A rival takeover offer is logged and declined unless it beats payback.
+- Taxes and back taxes are paid on time (story 13.4).
+- A rival takeover offer is logged and declined unless it beats payback (story 13.6).
 
 **Saves.** The game’s autosave keeps the run. The mod does not save.
 
@@ -140,14 +144,14 @@ Each count is a pure function with a Tier 1 test.
 **Guardrails:**
 - at most **HealCap** = 10 heal actions a day
 - spending inside **DaySpend**
-- after 3 failed actions in a day, the autopilot pauses with `autopilot.paused reason=failures`
+- after **HealStrikeMax** = 3 failed actions in a day, the autopilot pauses with `autopilot.paused reason=failures`
 - dry-run mode logs the action without calling the game
 - F10 stops the autopilot
 
 **Snapshot.** Before a close or a bulk action, `snapshots.log` gets `snapshot.taken` with the affected rows. Undo is a reload of the last save.
 
 **Watch it:**
-- The F9 top bar shows day, cash, net worth against **WinNetWorth**, yesterday’s profit, stage, autopilot on or off, and speed.
+- The F9 top bar shows day, cash, net worth against **WinNetWorth**, yesterday’s profit, stage, autopilot on or off, and speed. Crossing **WinNetWorth** does not stop the run.
 - The middle shows stores supplied, slots filled, plans present, and the last heal.
 - The bottom shows roadmap steps with Execute, Execute all, and the autopilot toggle.
 - `telemetry.csv` gets one row per day: day, cash, net worth, profit, stage, health counts, and actions. `script/Report-Progress.py` turns that file into the progress report.

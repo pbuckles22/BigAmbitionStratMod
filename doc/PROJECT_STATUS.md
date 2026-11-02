@@ -2,13 +2,13 @@
 
 **Human-readable current state.** Keep in sync with [AGENT_HANDOFF.md](../AGENT_HANDOFF.md) → *Current state* when milestones ship.
 
-**Last updated:** 2026-10-31
+**Last updated:** 2026-11-02
 
 ---
 
 ## Summary
 
-**BigAmbitionStratMod** 1.7.3.2 — Epic 7 is in progress. F9 shows the current roadmap and one logistics move. Confirm on a close step shuts that store. Confirm on the logistics move sends that store to the new warehouse. A boot starts a fresh `ceo.log`. `history.log` keeps one line per roadmap change. Story **7.7** passed. Story **7.8** is on `feature/7.8-redo-logistics` and is waiting on the headquarters logistics-plan check. After that check, **7.13** keeps warehouses and unsupplied stores off the close list. Then Epics 11, 12, 13, 8, 9, and 10 run in that order toward a hands-off $100M by day 365. The rules are in [requirements/strategy.md](requirements/strategy.md). F8 still dumps yesterday’s statements and the route CSVs. `origin` is this repo.
+**BigAmbitionStratMod** 1.7.3.2 — Epic 7 is in progress. F9 shows the current roadmap and one logistics move. Confirm on a close step shuts that store. Confirm on the logistics move sends that store to the new warehouse. A boot starts a fresh `ceo.log`. `history.log` keeps one line per roadmap change. Story **7.7** passed. Story **7.8** is on `feature/7.8-redo-logistics` and is waiting on the headquarters logistics-plan check. After that check, finish Epic 7 as **7.13**, then **7.9** through **7.12**. Then Epics 11, 12, 13, 9, 8, and 10. Crossing $100M logs `win.reached` once and play continues. Day 365 is the Epic 8 scoring window only. The rules are in [requirements/strategy.md](requirements/strategy.md). F8 still dumps yesterday’s statements and the route CSVs. `origin` is this repo.
 
 ---
 
@@ -82,7 +82,7 @@
 
 ## Next up (maintainers)
 
-- Story **7.6** when asked. Run the roadmap in order. Each run is separate, confirmed, and logged. Reload undoes it.
+- Story **7.8** human check. BizMan shows the new warehouse on that store. Then **7.13**, **7.9**, **7.10**, **7.11**, **7.12**, then Epics 11, 12, 13, 9, 8, 10.
 - Variants: merge upstream when AgenticTemplate skills/rules change
 
 ---

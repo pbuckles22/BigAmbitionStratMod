@@ -14,20 +14,28 @@ ShutdownBusiness clears the business. SendBuyBuildingOffer records the purchase.
 
 ## Unverified
 
-The autopilot needs these and build 3682 has not been searched for them. Each is a discovery story (11.0 or Epic 13). A call moves to the table above only after its story records the class and method and a human check shows the change in game. Code does not call a name from this list.
+The autopilot needs these and build 3682 has not been searched for them. Each is a discovery story (7.9, 11.0, or Epic 13). A call moves to the table above only after its story records the class and method and a human check shows the change in game. Code does not call a name from this list.
 
 | action | story | what it must do |
 | --- | --- | --- |
+| staff plan write | 7.9 | Write targets on an `HrManagerPlan` or a `HeadhunterPlan` |
 | truck buy | 11.0 | Buy a freight truck and park it in a warehouse garage slot |
 | slot assign | 11.0 | Put a vehicle and a delivery driver on a `VehicleSlot` |
 | hire | 11.0 | Hire a candidate into a business or a headquarters plan |
 | plan assign | 11.0 | Assign an employee to a logistics, HR, headhunter, or pricing plan |
 | purchasing plan | 11.0 | Make a purchasing agent order a family for a warehouse |
 | importer order | 11.0 | Place or repeat an importer order into a warehouse |
+| pricing plan create | 11.0 | Create a `PricingManagerPlan` on the headquarters before assigning items or staff |
+| wholesaler contract drop | 11.0 | Cancel a store’s `DeliveryContract` for any item a warehouse now supplies |
+| staff train | 11.0 | Enable HR training to full skill on `HrManagerPlan` |
 | rent | 13.1 | Rent a building that is available for rent |
 | starter layout | 13.2 | Load a layout on a fresh profile that has no saved layouts |
 | opening hours | 13.2 | Set a business’s opening hours |
+| store ops | 13.2 | Assign a cleaner, a guard, uniforms, and capacity fixtures |
 | wholesaler contract | 13.3 | Create a recurring `DeliveryContract` from a wholesaler to a store |
 | loan | 13.4 | Take and repay a bank loan |
+| employee demand | 13.4 | Satisfy `jobdemand_*` on hired employees and managers |
+| taxes pay | 13.4 | Pay taxes and back taxes |
 | time advance | 13.5 | Skip time, with sleep and food for the player |
 | marketing | 13.6 | Start and stop a marketing campaign |
+| rival takeover decline | 13.6 | Decline a hostile rival buyout |
