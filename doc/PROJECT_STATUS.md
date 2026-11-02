@@ -8,7 +8,7 @@
 
 ## Summary
 
-**BigAmbitionStratMod** 1.7.2 — Epic 7 is in progress. F9 shows the current roadmap and one logistics move. Confirm on a close step shuts that store and drops the row. A boot starts a fresh `ceo.log`. `history.log` keeps one line per roadmap change. Story **7.7** passed. Next is story **7.8** when asked. F8 still dumps yesterday’s statements and the route CSVs. `origin` is this repo.
+**BigAmbitionStratMod** 1.7.3.2 — Epic 7 is in progress. F9 shows the current roadmap and one logistics move. Confirm on a close step shuts that store. Confirm on the logistics move sends that store to the new warehouse. A boot starts a fresh `ceo.log`. `history.log` keeps one line per roadmap change. Story **7.7** passed. Story **7.8** is on `feature/7.8-redo-logistics` and is waiting on the headquarters logistics-plan check. After that check, **7.13** keeps warehouses and unsupplied stores off the close list. Then Epics 11, 12, 13, 8, 9, and 10 run in that order toward a hands-off $100M by day 365. The rules are in [requirements/strategy.md](requirements/strategy.md). F8 still dumps yesterday’s statements and the route CSVs. `origin` is this repo.
 
 ---
 
@@ -17,6 +17,7 @@
 | Branch | Role |
 |--------|------|
 | **`main`** | Integration branch. Last land `db096d4`, version 1.7.2 |
+| **`feature/7.8-redo-logistics`** | Story 7.8. Redo button on the logistics move. Version 1.7.3.2. Not merged. |
 | **`feature/7.7-close-store`** | Story 7.7. Kept after this CMPH. Version 1.7.2 |
 | **`feature/7.6-roadmap-panel`** | Story 7.6. Kept after this CMPH. Version 1.7.1.2 |
 | **`feature/7.5-clone-layout`** | Story 7.5. Kept after this CMPH |
