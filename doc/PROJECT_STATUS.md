@@ -16,7 +16,7 @@
 
 | Branch | Role |
 |--------|------|
-| **`main`** | Integration branch. Last land `db096d4`, version 1.7.2 |
+| **`main`** | Integration branch. Last land `a3492d1`, version 1.7.3.2 |
 | **`feature/7.8-redo-logistics`** | Story 7.8. Kept after this CMPH. Version 1.7.3.2 |
 | **`feature/7.7-close-store`** | Story 7.7. Kept after this CMPH. Version 1.7.2 |
 | **`feature/7.6-roadmap-panel`** | Story 7.6. Kept after this CMPH. Version 1.7.1.2 |
@@ -58,7 +58,7 @@
 | **`feature/chain-prefix`** | Kept after CMPH (template history) |
 | **`feature/handoff-receiver-framing`** | Kept after CMPH (template history) |
 
-**Last land:** `db096d4` on `main`. Version 1.7.2. Branch `feature/7.7-close-store` kept. Repo: https://github.com/pbuckles22/BigAmbitionStratMod.
+**Last land:** `a3492d1` on `main`. Version 1.7.3.2. Branch `feature/7.8-redo-logistics` kept. Repo: https://github.com/pbuckles22/BigAmbitionStratMod.
 
 ---
 
