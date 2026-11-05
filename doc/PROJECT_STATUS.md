@@ -16,7 +16,7 @@
 
 | Branch | Role |
 |--------|------|
-| **`main`** | Integration branch. Last land recorded after this ship. Version 1.11.4 |
+| **`main`** | Integration branch. Last land `bc28369`, version 1.11.4 |
 | **`feature/11.0-record-calls`** | Story 11.0. Kept after this CMPH. Version 1.11.4 |
 | **`feature/11-needs-held`** | Epic 11 needs hold. Version 1.11.3. Human PASS. Kept after this CMPH. |
 | **`feature/11-forecast-burn`** | Epic 11 live burn and armed connect. Version 1.11.2.1. Human PASS. Kept after this CMPH. |
@@ -62,7 +62,7 @@
 | **`feature/chain-prefix`** | Kept after CMPH (template history) |
 | **`feature/handoff-receiver-framing`** | Kept after CMPH (template history) |
 
-**Last land:** `a3492d1` on `main`. Version 1.7.3.2. Branch `feature/7.8-redo-logistics` kept. Repo: https://github.com/pbuckles22/BigAmbitionStratMod.
+**Last land:** `bc28369` on `main`. Version 1.11.4. Branches `feature/11.0-record-calls`, `feature/11-needs-held`, and `feature/11-forecast-burn` kept. Repo: https://github.com/pbuckles22/BigAmbitionStratMod.
 
 ---
 

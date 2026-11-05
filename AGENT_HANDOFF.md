@@ -139,7 +139,7 @@ When shipping: update **PM_PLAN**, **doc/PROJECT_STATUS.md**, and **Current stat
 ## Current state
 
 - **Product:** Version 1.11.4. The Epic 11 calls are named in `doc/requirements/game-api.md`. A loaded save keeps energy, hunger, and happiness at 100, and a day change still forecasts each item your own stores sell into `routes.csv`. The game's logistics list stays unchanged. 7.13 stays stashed until the night loop connects stores. Ladder: [PM_PLAN.md](PM_PLAN.md). Plan: `forecast_logistics_loop_b527186f.plan.md`.
-- **On:** `main`. Stash `7.13 spare cost centers` on `feature/7.13-spare-cost-centers`. https://github.com/pbuckles22/BigAmbitionStratMod
+- **On:** `main` @ `bc28369`. Stash `7.13 spare cost centers` on `feature/7.13-spare-cost-centers`. https://github.com/pbuckles22/BigAmbitionStratMod
 - **Next:** Story 11.1, fill the empty garage slots, when asked.
 - **Blockers:** Do not pop 7.13. Do not load the day 1021 save. Do not drop Fifth Avenue 36’s contract before the hub holds that item. The connect writes `routes.csv` only. It does not call the game.
 
