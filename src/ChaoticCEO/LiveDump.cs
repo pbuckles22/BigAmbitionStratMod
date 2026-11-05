@@ -111,6 +111,33 @@ namespace ChaoticCEO
             Supply.FromBuilding(needs, burn, store, items, ticks);
         }
 
+        public static void HoldNeeds(NeedsWatch watch, string localAppData)
+        {
+            var current = SaveGameManager.Current;
+            if (watch == null || current == null || current.gameVariables == null)
+            {
+                return;
+            }
+
+            var now = new PlayerNeeds(
+                current.Energy,
+                current.Hunger,
+                current.Happiness,
+                current.gameVariables.disableEnergy,
+                current.gameVariables.disableHappiness);
+            var held = watch.Tick(localAppData, current, current.Day, now);
+            if (held == null)
+            {
+                return;
+            }
+
+            current.gameVariables.disableEnergy = held.EnergyOff;
+            current.gameVariables.disableHappiness = held.HappinessOff;
+            current.Energy = held.Energy;
+            current.Hunger = held.Hunger;
+            current.Happiness = held.Happiness;
+        }
+
         public static string? Roll(DayWatch watch, string localAppData)
         {
             if (watch == null || string.IsNullOrEmpty(localAppData))

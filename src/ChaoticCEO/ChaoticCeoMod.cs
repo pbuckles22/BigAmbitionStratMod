@@ -13,6 +13,7 @@ namespace ChaoticCEO
     public class ChaoticCeoMod : IModBigAmbitions
     {
         private readonly DayWatch _days = new DayWatch();
+        private readonly NeedsWatch _needs = new NeedsWatch();
         private bool _hooked;
         private bool _panelFailed;
         private string _localAppData = "";
@@ -63,6 +64,7 @@ namespace ChaoticCEO
                 }
             }
 
+            LiveDump.HoldNeeds(_needs, _localAppData);
             LiveDump.Roll(_days, _localAppData);
         }
 

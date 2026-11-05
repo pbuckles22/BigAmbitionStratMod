@@ -8,7 +8,7 @@
 
 ## Summary
 
-**BigAmbitionStratMod** 1.11.2.1 — A day change forecasts each item a store sells, with the buffer from that burn, and writes the connect into `routes.csv`. The game save stays unchanged. Fifth Avenue 36 keeps its wholesaler contract until that hub holds the item. The 1.11.1 dry run passed on the day 1014 roll. **7.13** stays stashed. The 1.11.2 check failed on rival stores; 1.11.2.1 passed the human check 2026-11-05. F9 still shows the roadmap. Crossing $100M logs `win.reached` once and play continues. The rules are in [requirements/strategy.md](requirements/strategy.md). `origin` is this repo.
+**BigAmbitionStratMod** 1.11.3 — A loaded save keeps energy, hunger, and happiness at 100, and the game stops draining energy and happiness. A day change still forecasts each item a store sells into `routes.csv`. The game's logistics list stays unchanged. Fifth Avenue 36 keeps its wholesaler contract until that hub holds the item. **7.13** stays stashed. Needs hold passed the human check 2026-11-05. The 1.11.2 check failed on rival stores; 1.11.2.1 passed 2026-11-05. F9 still shows the roadmap. Crossing $100M logs `win.reached` once and play continues. The rules are in [requirements/strategy.md](requirements/strategy.md). `origin` is this repo.
 
 ---
 
@@ -17,6 +17,7 @@
 | Branch | Role |
 |--------|------|
 | **`main`** | Integration branch. Last land `a3492d1`, version 1.7.3.2 |
+| **`feature/11-needs-held`** | Epic 11 needs hold. Version 1.11.3. Human PASS. Not merged. |
 | **`feature/11-forecast-burn`** | Epic 11 live burn and armed connect. Version 1.11.2.1. Human PASS. Not merged. |
 | **`feature/supply-check`** | Epic 11 forecast dry run. Version 1.11.1. Not merged. |
 | **`feature/7.8-redo-logistics`** | Story 7.8. Kept after this CMPH. Version 1.7.3.2 |
