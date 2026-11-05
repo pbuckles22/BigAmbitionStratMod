@@ -118,6 +118,19 @@ namespace ChaoticCEO
             return line;
         }
 
+        public static void WriteRoutes(string localAppData, IReadOnlyList<DeliveryStop> routes)
+        {
+            var plans = routes ?? Array.Empty<DeliveryStop>();
+            var routesPath = RoutesPath(localAppData ?? "");
+            var directory = Path.GetDirectoryName(routesPath);
+            if (!string.IsNullOrEmpty(directory))
+            {
+                Directory.CreateDirectory(directory);
+            }
+
+            File.WriteAllText(routesPath, RoutesCsv(plans));
+        }
+
         private static string RoutesCsv(IReadOnlyList<DeliveryStop> routes)
         {
             var text = new StringBuilder();

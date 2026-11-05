@@ -161,6 +161,34 @@ namespace ChaoticCEO
                 Drivers(current));
         }
 
+        public static void ConnectStores(ConnectWatch watch, string localAppData)
+        {
+            if (watch == null || string.IsNullOrEmpty(localAppData))
+            {
+                return;
+            }
+
+            var current = SaveGameManager.Current;
+            if (current == null)
+            {
+                return;
+            }
+
+            var needs = new List<GoodsNeed>();
+            var sales = new List<DailyUnits>();
+            ReadStores(current, needs, sales);
+            // The lines name AddDestination and Remove. This pause does not call them.
+            watch.Tick(
+                localAppData,
+                current,
+                current.Day,
+                GameApi.Live(),
+                Plans(current),
+                Holds(current),
+                needs,
+                sales);
+        }
+
         private static List<GarageSlot> Garage(GameInstance current)
         {
             var slots = new List<GarageSlot>();

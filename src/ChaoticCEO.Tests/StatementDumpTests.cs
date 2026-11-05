@@ -29,7 +29,7 @@ public class StatementDumpTests
             csv);
         Assert.DoesNotContain("ba:street_today", csv);
         Assert.Equal(
-            "csv.written version=1.11.5 rows=2 day=1013 street=ba:street_fourthavenue number=28 profit=50687.4805",
+            "csv.written version=1.11.6 rows=2 day=1013 street=ba:street_fourthavenue number=28 profit=50687.4805",
             line);
         Assert.Equal(line, File.ReadAllText(Path.Combine(dir.Path, "ChaoticCEO", "ceo.log")).TrimEnd('\r', '\n'));
     }
@@ -46,7 +46,7 @@ public class StatementDumpTests
 
         var csv = File.ReadAllText(StatementDump.CsvPath(dir.Path)).Replace("\r\n", "\n");
         Assert.Equal("day,street,number,sales,goods,wages,rent,marketing,theft,profit\n", csv);
-        Assert.Equal("csv.written version=1.11.5 rows=0 day=1013 street= number= profit=", line);
+        Assert.Equal("csv.written version=1.11.6 rows=0 day=1013 street= number= profit=", line);
         Assert.DoesNotContain("ba:street_today", csv);
     }
 
@@ -63,7 +63,7 @@ public class StatementDumpTests
         var line = StatementDump.Write(dir.Path, 1014, days);
 
         Assert.Equal(
-            "csv.written version=1.11.5 rows=1 day=1013 street=ba:street_fourthavenue number=28 profit=10",
+            "csv.written version=1.11.6 rows=1 day=1013 street=ba:street_fourthavenue number=28 profit=10",
             line);
         Assert.DoesNotContain("ba:street_later", File.ReadAllText(StatementDump.CsvPath(dir.Path)));
     }

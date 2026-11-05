@@ -15,6 +15,7 @@ namespace ChaoticCEO
         private readonly DayWatch _days = new DayWatch();
         private readonly NeedsWatch _needs = new NeedsWatch();
         private readonly SlotWatch _slots = new SlotWatch();
+        private readonly ConnectWatch _stores = new ConnectWatch();
         private bool _hooked;
         private bool _panelFailed;
         private string _localAppData = "";
@@ -69,6 +70,7 @@ namespace ChaoticCEO
             if (LiveDump.Roll(_days, _localAppData) != null)
             {
                 LiveDump.FillSlots(_slots, _localAppData);
+                LiveDump.ConnectStores(_stores, _localAppData);
             }
         }
 
