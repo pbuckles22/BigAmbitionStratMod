@@ -362,6 +362,25 @@ namespace ChaoticCEO
             return ItemFamily(item);
         }
 
+        public static IReadOnlyList<string> Items(string family)
+        {
+            var rows = new List<string>();
+            if (string.IsNullOrEmpty(family))
+            {
+                return rows;
+            }
+
+            foreach (var pair in ItemFamilies)
+            {
+                if (pair.Value == family)
+                {
+                    rows.Add(pair.Key);
+                }
+            }
+
+            return rows;
+        }
+
         private static string? ItemFamily(string item)
         {
             if (string.IsNullOrEmpty(item) || IgnoredCargo.Contains(item))

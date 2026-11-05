@@ -6,7 +6,7 @@ Cursor **rules**, **skills**, **handoff protocol**, and **test discipline** for 
 
 **Start with [CONTRIBUTING.md](CONTRIBUTING.md)** — reading order, tracked vs gitignored docs, PR expectations.
 
-**Current work:** [doc/PROJECT_STATUS.md](doc/PROJECT_STATUS.md). Version 1.7.3.2. F9 shows the current roadmap. Confirm on a close step shuts that store. Confirm on the logistics move sends that store to the new warehouse. Price, staff, buy, and layout stay on the list. The mod still dumps yesterday’s statements and routes when the in-game day changes.
+**Current work:** [doc/PROJECT_STATUS.md](doc/PROJECT_STATUS.md). Version 1.11.1. A new day logs which stores have no delivery plan and does not change the save. F9 still shows the roadmap. Confirm on a close step shuts that store. Confirm on the logistics move sends that store to the new warehouse.
 
 ## Quick start
 

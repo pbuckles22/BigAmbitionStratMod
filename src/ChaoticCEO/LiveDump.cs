@@ -46,6 +46,28 @@ namespace ChaoticCEO
             return Roadshow.Prices(SaleAsks(current), EstateAsks(current));
         }
 
+        public static IReadOnlyList<GoodsNeed> Needs(GameInstance? current)
+        {
+            var needs = new List<GoodsNeed>();
+            if (current == null || current.BuildingRegistrations == null)
+            {
+                return needs;
+            }
+
+            foreach (var building in current.BuildingRegistrations)
+            {
+                if (building == null || string.IsNullOrEmpty(building.StreetName) || building.StreetNumber <= 0)
+                {
+                    continue;
+                }
+
+                var place = building.StreetName + " " + building.StreetNumber.ToString(CultureInfo.InvariantCulture);
+                Supply.Collect(needs, building.businessTypeName, place);
+            }
+
+            return needs;
+        }
+
         public static string? Roll(DayWatch watch, string localAppData)
         {
             if (watch == null || string.IsNullOrEmpty(localAppData))
@@ -59,7 +81,14 @@ namespace ChaoticCEO
                 return null;
             }
 
-            return watch.Tick(localAppData, current.Day, Days(current), Plans(current), Holds(current));
+            return watch.Tick(
+                localAppData,
+                current.Day,
+                Days(current),
+                Plans(current),
+                Holds(current),
+                Needs(current),
+                System.Array.Empty<DailyUnits>());
         }
 
         public static IReadOnlyList<FinancialDay> Days(GameInstance? current)

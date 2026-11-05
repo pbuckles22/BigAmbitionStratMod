@@ -2,13 +2,13 @@
 
 **Human-readable current state.** Keep in sync with [AGENT_HANDOFF.md](../AGENT_HANDOFF.md) → *Current state* when milestones ship.
 
-**Last updated:** 2026-11-02
+**Last updated:** 2026-11-05
 
 ---
 
 ## Summary
 
-**BigAmbitionStratMod** 1.7.3.2 — Epic 7 is in progress. F9 shows the current roadmap and one logistics move. Confirm on a close step shuts that store. Confirm on the logistics move sends that store to the new warehouse. A boot starts a fresh `ceo.log`. `history.log` keeps one line per roadmap change. Stories **7.7** and **7.8** passed. Next is **7.13**, then **7.9** through **7.12**. Then Epics 11, 12, 13, 9, 8, and 10. Crossing $100M logs `win.reached` once and play continues. Day 365 is the Epic 8 scoring window only. The rules are in [requirements/strategy.md](requirements/strategy.md). F8 still dumps yesterday’s statements and the route CSVs. `origin` is this repo.
+**BigAmbitionStratMod** 1.11.1 — A day change logs the supply forecast and leaves the save unchanged. The check passed on the day 1014 roll: Fourth Avenue 28 was `noplan` on W11, and Fifth Avenue 36 kept its wholesaler contract. **7.13** stays stashed. Next is a live unit burn and an armed connect. F9 still shows the roadmap. Crossing $100M logs `win.reached` once and play continues. The rules are in [requirements/strategy.md](requirements/strategy.md). `origin` is this repo.
 
 ---
 
@@ -17,6 +17,7 @@
 | Branch | Role |
 |--------|------|
 | **`main`** | Integration branch. Last land `a3492d1`, version 1.7.3.2 |
+| **`feature/supply-check`** | Epic 11 forecast. Version 1.11.1. Not merged. |
 | **`feature/7.8-redo-logistics`** | Story 7.8. Kept after this CMPH. Version 1.7.3.2 |
 | **`feature/7.7-close-store`** | Story 7.7. Kept after this CMPH. Version 1.7.2 |
 | **`feature/7.6-roadmap-panel`** | Story 7.6. Kept after this CMPH. Version 1.7.1.2 |

@@ -17,7 +17,9 @@ namespace ChaoticCEO
             int day,
             IReadOnlyList<FinancialDay> days,
             IReadOnlyList<DeliveryStop> routes,
-            IReadOnlyList<WarehouseHold> holds)
+            IReadOnlyList<WarehouseHold> holds,
+            IReadOnlyList<GoodsNeed>? needs = null,
+            IReadOnlyList<DailyUnits>? sales = null)
         {
             if (!ShouldDump(seen, day))
             {
@@ -28,6 +30,11 @@ namespace ChaoticCEO
             RouteDump.Write(localAppData, routes, holds);
             var line = Line(day);
             File.AppendAllText(LoadLog.CeoLogPath(localAppData), line + System.Environment.NewLine);
+            if (needs != null)
+            {
+                SupplyNight.Run(localAppData, day, needs, sales, dryRun: true);
+            }
+
             return line;
         }
 
@@ -58,9 +65,11 @@ namespace ChaoticCEO
             int day,
             IReadOnlyList<FinancialDay> days,
             IReadOnlyList<DeliveryStop> routes,
-            IReadOnlyList<WarehouseHold> holds)
+            IReadOnlyList<WarehouseHold> holds,
+            IReadOnlyList<GoodsNeed>? needs = null,
+            IReadOnlyList<DailyUnits>? sales = null)
         {
-            var line = DayRoll.Apply(localAppData, _seen, day, days, routes, holds);
+            var line = DayRoll.Apply(localAppData, _seen, day, days, routes, holds, needs, sales);
             _seen = day;
             return line;
         }

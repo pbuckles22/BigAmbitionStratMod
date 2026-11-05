@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netstandard2.1</TargetFramework>
@@ -6,9 +6,9 @@
     <LangVersion>latest</LangVersion>
     <RootNamespace>ChaoticCEO</RootNamespace>
     <AssemblyName>ChaoticCEO</AssemblyName>
-    <Version>1.7.3.2</Version>
-    <AssemblyVersion>1.7.3.2</AssemblyVersion>
-    <FileVersion>1.7.3.2</FileVersion>
+    <Version>1.11.1</Version>
+    <AssemblyVersion>1.11.1</AssemblyVersion>
+    <FileVersion>1.11.1</FileVersion>
     <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
     <GameManaged Condition="'$(GameManaged)' == ''">C:\Program Files (x86)\Steam\steamapps\common\Big Ambitions\Big Ambitions_Data\Managed</GameManaged>
   </PropertyGroup>
@@ -79,6 +79,8 @@
       <_NeedsBump Condition="Exists('$(TargetPath)') and $([System.IO.File]::GetLastWriteTime('$(MSBuildThisFileDirectory)GameApi.cs').Ticks) &gt; $(_DllTime)">true</_NeedsBump>
       <_NeedsBump Condition="Exists('$(TargetPath)') and $([System.IO.File]::GetLastWriteTime('$(MSBuildThisFileDirectory)CloseScore.cs').Ticks) &gt; $(_DllTime)">true</_NeedsBump>
       <_NeedsBump Condition="Exists('$(TargetPath)') and $([System.IO.File]::GetLastWriteTime('$(MSBuildThisFileDirectory)Logistics.cs').Ticks) &gt; $(_DllTime)">true</_NeedsBump>
+      <_NeedsBump Condition="Exists('$(TargetPath)') and $([System.IO.File]::GetLastWriteTime('$(MSBuildThisFileDirectory)Supply.cs').Ticks) &gt; $(_DllTime)">true</_NeedsBump>
+      <_NeedsBump Condition="Exists('$(TargetPath)') and $([System.IO.File]::GetLastWriteTime('$(MSBuildThisFileDirectory)SupplyNight.cs').Ticks) &gt; $(_DllTime)">true</_NeedsBump>
       <_NeedsBump Condition="Exists('$(TargetPath)') and $([System.IO.File]::GetLastWriteTime('$(MSBuildThisFileDirectory)Payback.cs').Ticks) &gt; $(_DllTime)">true</_NeedsBump>
       <_NeedsBump Condition="Exists('$(TargetPath)') and $([System.IO.File]::GetLastWriteTime('$(MSBuildThisFileDirectory)Roadmap.cs').Ticks) &gt; $(_DllTime)">true</_NeedsBump>
       <_NeedsBump Condition="Exists('$(TargetPath)') and $([System.IO.File]::GetLastWriteTime('$(MSBuildThisFileDirectory)Shutdown.cs').Ticks) &gt; $(_DllTime)">true</_NeedsBump>
