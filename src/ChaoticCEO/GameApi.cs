@@ -5,7 +5,14 @@ namespace ChaoticCEO
 {
     public sealed class ApiNote
     {
-        public ApiNote(string build, string close, string buy, string price, string delivery, string clone = "")
+        public ApiNote(
+            string build,
+            string close,
+            string buy,
+            string price,
+            string delivery,
+            string clone = "",
+            Dictionary<string, string>? recorded = null)
         {
             Build = build ?? "";
             Close = close ?? "";
@@ -13,6 +20,7 @@ namespace ChaoticCEO
             Price = price ?? "";
             Delivery = delivery ?? "";
             Clone = clone ?? "";
+            this.recorded = recorded;
         }
 
         public string Build { get; }
@@ -26,19 +34,61 @@ namespace ChaoticCEO
         public string Delivery { get; }
 
         public string Clone { get; }
+
+        public string Call(string action)
+        {
+            if (action == null || recorded == null || !recorded.TryGetValue(action, out var call) || call == null)
+            {
+                return "";
+            }
+
+            if (!IsRecordedCall(call))
+            {
+                return "";
+            }
+
+            return call;
+        }
+
+        private static bool IsRecordedCall(string call)
+        {
+            return System.Text.RegularExpressions.Regex.IsMatch(
+                call,
+                "^[A-Za-z_][A-Za-z0-9_]*(?:\\.[A-Za-z_][A-Za-z0-9_]*)+$");
+        }
+
+        private readonly Dictionary<string, string>? recorded;
     }
 
     public static class GameApi
     {
         public static ApiNote Live()
         {
+            var recorded = new Dictionary<string, string>
+            {
+                ["close"] = "Helpers.BusinessHelper.ShutdownBusiness",
+                ["buy"] = "BizManPresentation.SendBuyBuildingOffer",
+                ["price"] = "Buildings.Office.Headquarters.PricingManagerPlan.SetPrice",
+                ["delivery"] = "UI.Smartphone.Apps.BizMan.LogisticsManagers.LogisticsManagerPlanUI.AddDestination",
+                ["clone"] = "BusinessLayoutSets.BusinessLayoutSetHelper.LoadBusinessLayoutSet",
+                ["truck buy"] = "Buildings.ContractVehicleForSale.Order",
+                ["slot assign"] = "Entities.VehicleSlot.AssignVehicle",
+                ["hire"] = "Helpers.EmployeeHelper.HireCandidate",
+                ["plan assign"] = "Buildings.Office.Headquarters.HrManagerPlan.AssignEmployee",
+                ["purchasing plan"] = "UI.Smartphone.Apps.BizMan.PurchasingAgent.PurchasingAgentProductCellView.ChangeAssignedWarehouse",
+                ["pricing plan create"] = "UI.Smartphone.Apps.BizMan.PricingManagers.PricingManagersPlanList.AddPlan",
+                ["staff train"] = "Buildings.Office.Headquarters.HrManagerPlan.TrainEmployees",
+                ["importer order"] = "UI.Smartphone.Apps.BizMan.PurchasingAgent.PurchasingAgentPlanUI.StartOrder",
+                ["wholesaler contract drop"] = "Entities.DeliveryContract.Remove",
+            };
             return new ApiNote(
                 LoadLog.PinnedBuild,
-                "Helpers.BusinessHelper.ShutdownBusiness",
-                "BizManPresentation.SendBuyBuildingOffer",
-                "Buildings.Office.Headquarters.PricingManagerPlan.SetPrice",
-                "UI.Smartphone.Apps.BizMan.LogisticsManagers.LogisticsManagerPlanUI.AddDestination",
-                "BusinessLayoutSets.BusinessLayoutSetHelper.LoadBusinessLayoutSet");
+                recorded["close"],
+                recorded["buy"],
+                recorded["price"],
+                recorded["delivery"],
+                recorded["clone"],
+                recorded);
         }
 
         public static ApiNote Read(IReadOnlyList<PanelLine>? panel, string? note)
@@ -85,7 +135,8 @@ namespace ChaoticCEO
                 Call(calls, "buy"),
                 Call(calls, "price"),
                 Call(calls, "delivery"),
-                Call(calls, "clone"));
+                Call(calls, "clone"),
+                calls);
         }
 
         private static string Call(Dictionary<string, string> calls, string action)

@@ -9,25 +9,25 @@ Build 3682.
 | price | Buildings.Office.Headquarters.PricingManagerPlan.SetPrice |
 | delivery | UI.Smartphone.Apps.BizMan.LogisticsManagers.LogisticsManagerPlanUI.AddDestination |
 | clone | BusinessLayoutSets.BusinessLayoutSetHelper.LoadBusinessLayoutSet |
+| truck buy | Buildings.ContractVehicleForSale.Order |
+| slot assign | Entities.VehicleSlot.AssignVehicle |
+| hire | Helpers.EmployeeHelper.HireCandidate |
+| plan assign | Buildings.Office.Headquarters.HrManagerPlan.AssignEmployee |
+| purchasing plan | UI.Smartphone.Apps.BizMan.PurchasingAgent.PurchasingAgentProductCellView.ChangeAssignedWarehouse |
+| pricing plan create | UI.Smartphone.Apps.BizMan.PricingManagers.PricingManagersPlanList.AddPlan |
+| staff train | Buildings.Office.Headquarters.HrManagerPlan.TrainEmployees |
+| importer order | UI.Smartphone.Apps.BizMan.PurchasingAgent.PurchasingAgentPlanUI.StartOrder |
+| wholesaler contract drop | Entities.DeliveryContract.Remove |
 
-ShutdownBusiness clears the business. SendBuyBuildingOffer records the purchase. SetPrice writes retailPrices. AddDestination on the plan screen appends an empty destination to the open plan. The redo button keeps that call. On a loaded save it moves an existing `LogisticsManagerPlanDestination` onto the plan whose warehouse business name is the new warehouse. A store that is only on a delivery contract is added to that plan. If that warehouse has no plan, the redo creates one: the target is that warehouse, and the headquarters is one that already owns a logistics plan, or the headquarters building. Food items of that family leave the wholesaler contract. Then `SaveGameManager.MarkChange`. It does not call the empty append. LoadBusinessLayoutSet loads that layout into the building. SetBusinessLayout does not. ApplyInteriorDesign does not. Command_CloneItem copies the item in hand.
+ShutdownBusiness clears the business. SendBuyBuildingOffer records the purchase. SetPrice writes retailPrices. AddDestination on the plan screen appends an empty destination to the open plan. The redo button keeps that call. On a loaded save it moves an existing `LogisticsManagerPlanDestination` onto the plan whose warehouse business name is the new warehouse. A store that is only on a delivery contract is added to that plan. If that warehouse has no plan, the redo creates one: the target is that warehouse, and the headquarters is one that already owns a logistics plan, or the headquarters building. Food items of that family leave the wholesaler contract. Then `SaveGameManager.MarkChange`. It does not call the empty append. LoadBusinessLayoutSet loads that layout into the building. SetBusinessLayout does not. ApplyInteriorDesign does not. Command_CloneItem copies the item in hand. Order creates a vehicle delivery to a warehouse. Purchase pays and spawns the truck in the world. AssignVehicle writes the vehicle onto the slot. The warehouse driver station writes the driver id from its setup and has no method of its own. HireCandidate moves the candidate onto the save. AssignEmployee writes the HR plan's employee. ChangeLogisticsManager, ChangeHeadhunter, and PricingManagerPlan.AssignEmployee write the other plans. ChangeAssignedWarehouse sets the import product's warehouse. AddPlan on the pricing list constructs the plan and adds it. TrainEmployees raises skill toward the plan's training target. StartOrder marks the import partnership active. Remove drops the delivery contract. EndContract only asks. CancelContract clears the enabled flag.
 
 ## Unverified
 
-The autopilot needs these and build 3682 has not been searched for them. Each is a discovery story (7.9, 11.0, or Epic 13). A call moves to the table above only after its story records the class and method and a human check shows the change in game. Code does not call a name from this list.
+The autopilot needs these and build 3682 has not been searched for them. Each is a discovery story (7.9 or Epic 13). A call moves to the table above only after its story records the class and method and a human check shows the change in game. Code does not call a name from this list.
 
 | action | story | what it must do |
 | --- | --- | --- |
 | staff plan write | 7.9 | Write targets on an `HrManagerPlan` or a `HeadhunterPlan` |
-| truck buy | 11.0 | Buy a freight truck and park it in a warehouse garage slot |
-| slot assign | 11.0 | Put a vehicle and a delivery driver on a `VehicleSlot` |
-| hire | 11.0 | Hire a candidate into a business or a headquarters plan |
-| plan assign | 11.0 | Assign an employee to a logistics, HR, headhunter, or pricing plan |
-| purchasing plan | 11.0 | Make a purchasing agent order a family for a warehouse |
-| importer order | 11.0 | Place or repeat an importer order into a warehouse |
-| pricing plan create | 11.0 | Create a `PricingManagerPlan` on the headquarters before assigning items or staff |
-| wholesaler contract drop | 11.0 | Cancel a store’s `DeliveryContract` for any item a warehouse now supplies |
-| staff train | 11.0 | Enable HR training to full skill on `HrManagerPlan` |
 | rent | 13.1 | Rent a building that is available for rent |
 | starter layout | 13.2 | Load a layout on a fresh profile that has no saved layouts |
 | opening hours | 13.2 | Set a business’s opening hours |

@@ -210,6 +210,94 @@ public class NeedsTests
         Assert.Single(lines, line => line.StartsWith("needs.held "));
     }
 
+    [Fact]
+    public void NeedsHeld_load_day_roll_needs_refill_reads_the_recorded_call()
+    {
+        // Chain: load → day roll → needs refill → recorded call
+        using var dir = new TempNeeds();
+        LoadLog.StartSession(dir.Path);
+        var days = new DayWatch();
+        var needs = new NeedsWatch();
+        var save = new object();
+        var routes = new[] { new DeliveryStop("ba:street_fourthstreet 46", "ba:street_firstavenue 38", "ba:itemname_sodacan", 1016, "") };
+        var holds = new[] { new WarehouseHold("W1", "ba:street_fourthstreet", 46, "ba:itemname_sodacan", 45) };
+        var statements = new[]
+        {
+            new FinancialDay(1015, new[] { new StatementRow("ba:street_fourthavenue", 28, 10f, 1f, 1f, 1f, 0f, 0f, 7f) }),
+        };
+
+        needs.Tick(dir.Path, save, 1015, new PlayerNeeds(37f, 12f, 64f, false, false));
+        days.Tick(dir.Path, 1015, statements, routes, holds);
+        var refill = needs.Tick(dir.Path, save, 1016, new PlayerNeeds(100f, 97f, 100f, true, true));
+        days.Tick(dir.Path, 1016, statements, routes, holds);
+        var api = GameApi.Read(
+            new[] { new PanelLine("red", "Low", "ba:street_fourthstreet", 46, "Close Low.") },
+            File.ReadAllText(Path.Combine(RepoRoot(), "doc", "requirements", "game-api.md")));
+
+        Assert.NotNull(refill);
+        Assert.Equal("Buildings.ContractVehicleForSale.Order", api.Call("truck buy"));
+        Assert.Equal("Entities.VehicleSlot.AssignVehicle", api.Call("slot assign"));
+        Assert.Equal("Helpers.EmployeeHelper.HireCandidate", api.Call("hire"));
+        Assert.Equal("Buildings.Office.Headquarters.HrManagerPlan.AssignEmployee", api.Call("plan assign"));
+        Assert.Equal(
+            "UI.Smartphone.Apps.BizMan.PurchasingAgent.PurchasingAgentProductCellView.ChangeAssignedWarehouse",
+            api.Call("purchasing plan"));
+        Assert.Equal(
+            "UI.Smartphone.Apps.BizMan.PricingManagers.PricingManagersPlanList.AddPlan",
+            api.Call("pricing plan create"));
+        Assert.Equal("Buildings.Office.Headquarters.HrManagerPlan.TrainEmployees", api.Call("staff train"));
+        Assert.Equal(
+            "UI.Smartphone.Apps.BizMan.PurchasingAgent.PurchasingAgentPlanUI.StartOrder",
+            api.Call("importer order"));
+        Assert.Equal("Entities.DeliveryContract.Remove", api.Call("wholesaler contract drop"));
+        Assert.Equal("", api.Call("rent"));
+    }
+
+    [Fact]
+    public void NeedsHeld_load_day_roll_needs_refill_reads_no_call_from_an_empty_panel()
+    {
+        // Chain: load → day roll → needs refill → recorded call empty
+        using var dir = new TempNeeds();
+        LoadLog.StartSession(dir.Path);
+        var days = new DayWatch();
+        var needs = new NeedsWatch();
+        var save = new object();
+        var routes = new[] { new DeliveryStop("ba:street_fourthstreet 46", "ba:street_firstavenue 38", "ba:itemname_sodacan", 1016, "") };
+        var holds = new[] { new WarehouseHold("W1", "ba:street_fourthstreet", 46, "ba:itemname_sodacan", 45) };
+        var statements = new[]
+        {
+            new FinancialDay(1015, new[] { new StatementRow("ba:street_fourthavenue", 28, 10f, 1f, 1f, 1f, 0f, 0f, 7f) }),
+        };
+
+        needs.Tick(dir.Path, save, 1015, new PlayerNeeds(37f, 12f, 64f, false, false));
+        days.Tick(dir.Path, 1015, statements, routes, holds);
+        var refill = needs.Tick(dir.Path, save, 1016, new PlayerNeeds(100f, 97f, 100f, true, true));
+        days.Tick(dir.Path, 1016, statements, routes, holds);
+        var api = GameApi.Read(
+            Array.Empty<PanelLine>(),
+            File.ReadAllText(Path.Combine(RepoRoot(), "doc", "requirements", "game-api.md")));
+
+        Assert.NotNull(refill);
+        Assert.Equal("", api.Call("truck buy"));
+        Assert.Equal("", api.Call("wholesaler contract drop"));
+    }
+
+    private static string RepoRoot()
+    {
+        var dir = new DirectoryInfo(AppContext.BaseDirectory);
+        while (dir != null)
+        {
+            if (File.Exists(Path.Combine(dir.FullName, "script", "game_build.py")))
+            {
+                return dir.FullName;
+            }
+
+            dir = dir.Parent;
+        }
+
+        throw new InvalidOperationException("repo root not found");
+    }
+
     private sealed class TempNeeds : IDisposable
     {
         public TempNeeds()
