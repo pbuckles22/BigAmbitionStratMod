@@ -16,7 +16,7 @@
 
 | Branch | Role |
 |--------|------|
-| **`main`** | Integration branch. Last land `bc28369`, version 1.11.4 |
+| **`main`** | Integration branch. Last land `013329a`, version 1.11.5 |
 | **`feature/11.1-fill-slots`** | Story 11.1. Version 1.11.5. Human PASS 2026-11-05. Kept after this CMPH. |
 | **`feature/11.0-record-calls`** | Story 11.0. Kept after this CMPH. Version 1.11.4 |
 | **`feature/11-needs-held`** | Epic 11 needs hold. Version 1.11.3. Human PASS. Kept after this CMPH. |
@@ -63,7 +63,7 @@
 | **`feature/chain-prefix`** | Kept after CMPH (template history) |
 | **`feature/handoff-receiver-framing`** | Kept after CMPH (template history) |
 
-**Last land:** `bc28369` on `main`. Version 1.11.4. Branches `feature/11.0-record-calls`, `feature/11-needs-held`, and `feature/11-forecast-burn` kept. Repo: https://github.com/pbuckles22/BigAmbitionStratMod.
+**Last land:** `013329a` on `main`. Version 1.11.5. Branches `feature/11.1-fill-slots`, `feature/11.0-record-calls`, `feature/11-needs-held`, and `feature/11-forecast-burn` kept. Repo: https://github.com/pbuckles22/BigAmbitionStratMod.
 
 ---
 
