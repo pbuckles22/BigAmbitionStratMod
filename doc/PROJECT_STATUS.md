@@ -8,7 +8,7 @@
 
 ## Summary
 
-**BigAmbitionStratMod** 1.11.4 — The Epic 11 calls are named in `requirements/game-api.md`. A loaded save keeps energy, hunger, and happiness at 100, and the game stops draining energy and happiness. A day change still forecasts each item a store sells into `routes.csv`. The game's logistics list stays unchanged. Fifth Avenue 36 keeps its wholesaler contract until that hub holds the item. **7.13** stays stashed. Needs hold passed the human check 2026-11-05. The 1.11.2 check failed on rival stores; 1.11.2.1 passed 2026-11-05. F9 still shows the roadmap. Crossing $100M logs `win.reached` once and play continues. The rules are in [requirements/strategy.md](requirements/strategy.md). `origin` is this repo.
+**BigAmbitionStratMod** 1.11.5 — A day change records a freight-truck buy for each empty garage slot and does not order the truck. The Epic 11 calls are named in `requirements/game-api.md`. A loaded save keeps energy, hunger, and happiness at 100, and the game stops draining energy and happiness. A day change still forecasts each item a store sells into `routes.csv`. The game's logistics list stays unchanged. Fifth Avenue 36 keeps its wholesaler contract until that hub holds the item. **7.13** stays stashed. Needs hold passed the human check 2026-11-05. The 1.11.2 check failed on rival stores; 1.11.2.1 passed 2026-11-05. F9 still shows the roadmap. Crossing $100M logs `win.reached` once and play continues. The rules are in [requirements/strategy.md](requirements/strategy.md). `origin` is this repo.
 
 ---
 
@@ -17,6 +17,7 @@
 | Branch | Role |
 |--------|------|
 | **`main`** | Integration branch. Last land `bc28369`, version 1.11.4 |
+| **`feature/11.1-fill-slots`** | Story 11.1. Version 1.11.5. Human PASS 2026-11-05. Kept after this CMPH. |
 | **`feature/11.0-record-calls`** | Story 11.0. Kept after this CMPH. Version 1.11.4 |
 | **`feature/11-needs-held`** | Epic 11 needs hold. Version 1.11.3. Human PASS. Kept after this CMPH. |
 | **`feature/11-forecast-burn`** | Epic 11 live burn and armed connect. Version 1.11.2.1. Human PASS. Kept after this CMPH. |

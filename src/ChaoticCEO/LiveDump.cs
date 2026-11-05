@@ -138,6 +138,111 @@ namespace ChaoticCEO
             current.Happiness = held.Happiness;
         }
 
+        public static void FillSlots(SlotWatch watch, string localAppData)
+        {
+            if (watch == null || string.IsNullOrEmpty(localAppData))
+            {
+                return;
+            }
+
+            var current = SaveGameManager.Current;
+            if (current == null)
+            {
+                return;
+            }
+
+            // The line names Order and AssignVehicle. This pause does not call them.
+            watch.Tick(
+                localAppData,
+                current,
+                current.Day,
+                GameApi.Live(),
+                Garage(current),
+                Drivers(current));
+        }
+
+        private static List<GarageSlot> Garage(GameInstance current)
+        {
+            var slots = new List<GarageSlot>();
+            if (current.BuildingRegistrations == null)
+            {
+                return slots;
+            }
+
+            foreach (var building in current.BuildingRegistrations)
+            {
+                var warehouse = building as Warehouse;
+                if (warehouse == null
+                    || warehouse.businessTypeName != "ba:businesstype_warehouse"
+                    || string.IsNullOrEmpty(warehouse.BusinessName)
+                    || warehouse.vehicleSlots == null)
+                {
+                    continue;
+                }
+
+                var index = 1;
+                foreach (var slot in warehouse.vehicleSlots)
+                {
+                    if (slot != null)
+                    {
+                        var filled = !string.IsNullOrEmpty(slot.vehicleInstanceId);
+                        slots.Add(new GarageSlot(warehouse.BusinessName, index, filled, slot.employeeDriverId ?? ""));
+                    }
+
+                    index++;
+                }
+            }
+
+            return slots;
+        }
+
+        private static List<string> Drivers(GameInstance current)
+        {
+            var taken = new HashSet<string>();
+            if (current.BuildingRegistrations != null)
+            {
+                foreach (var building in current.BuildingRegistrations)
+                {
+                    var warehouse = building as Warehouse;
+                    if (warehouse == null || warehouse.vehicleSlots == null)
+                    {
+                        continue;
+                    }
+
+                    foreach (var slot in warehouse.vehicleSlots)
+                    {
+                        if (slot != null && !string.IsNullOrEmpty(slot.employeeDriverId))
+                        {
+                            taken.Add(slot.employeeDriverId);
+                        }
+                    }
+                }
+            }
+
+            var free = new List<string>();
+            if (current.EmployeeInstances == null)
+            {
+                return free;
+            }
+
+            foreach (var employee in current.EmployeeInstances)
+            {
+                if (employee == null
+                    || employee.IsCandidate
+                    || string.IsNullOrEmpty(employee.id)
+                    || taken.Contains(employee.id)
+                    || !employee.HasSkill(Slots.DriverSkill))
+                {
+                    continue;
+                }
+
+                free.Add(employee.id);
+            }
+
+            free.Sort(System.StringComparer.Ordinal);
+            return free;
+        }
+
         public static string? Roll(DayWatch watch, string localAppData)
         {
             if (watch == null || string.IsNullOrEmpty(localAppData))

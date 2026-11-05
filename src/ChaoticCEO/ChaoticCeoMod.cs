@@ -14,6 +14,7 @@ namespace ChaoticCEO
     {
         private readonly DayWatch _days = new DayWatch();
         private readonly NeedsWatch _needs = new NeedsWatch();
+        private readonly SlotWatch _slots = new SlotWatch();
         private bool _hooked;
         private bool _panelFailed;
         private string _localAppData = "";
@@ -65,7 +66,10 @@ namespace ChaoticCEO
             }
 
             LiveDump.HoldNeeds(_needs, _localAppData);
-            LiveDump.Roll(_days, _localAppData);
+            if (LiveDump.Roll(_days, _localAppData) != null)
+            {
+                LiveDump.FillSlots(_slots, _localAppData);
+            }
         }
 
         private void DumpOnHotkey()

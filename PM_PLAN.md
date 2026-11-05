@@ -1,10 +1,10 @@
 # PM_PLAN — BigAmbitionStratMod
 
-In-game advisor for one Big Ambitions save, then a new-game guide and autopilot. Version scheme `MAJOR.EPIC.COUNTER`. Current public version **1.11.4**. The first ship of a new epic is `1.N.1`. Never go backwards.
+In-game advisor for one Big Ambitions save, then a new-game guide and autopilot. Version scheme `MAJOR.EPIC.COUNTER`. Current public version **1.11.5**. The first ship of a new epic is `1.N.1`. Never go backwards.
 
 ## Context
 
-The game is Mono, build **3682**. A mod builds with `dotnet build` against `Big Ambitions_Data\Managed` (`BigAmbitions.dll`, `BigAmbitions.ModAPI.dll`). The pin is `doc/requirements/game-build.md`. Python save tools live in `script/`. The mod, when it exists, lives in `src/`. Evidence for the ledger is `doc/gemini/cache/ledger.log`. The mod writes `%LocalAppData%\ChaoticCEO\ceo.log`. The compile counter is gitignored `build_number.txt`. The mod informational version is `1.11.4+N`. The draw reference is `UnityEngine.IMGUIModule`.
+The game is Mono, build **3682**. A mod builds with `dotnet build` against `Big Ambitions_Data\Managed` (`BigAmbitions.dll`, `BigAmbitions.ModAPI.dll`). The pin is `doc/requirements/game-build.md`. Python save tools live in `script/`. The mod, when it exists, lives in `src/`. Evidence for the ledger is `doc/gemini/cache/ledger.log`. The mod writes `%LocalAppData%\ChaoticCEO\ceo.log`. The compile counter is gitignored `build_number.txt`. The mod informational version is `1.11.5+N`. The draw reference is `UnityEngine.IMGUIModule`.
 
 Epic 1 closed on 17 businesses and 5865 statement rows. `ba:businesstype_liquorstore` is **food**. Do not relabel it inside a routes story. A warehouse story may add a specialty override only with a new test.
 
@@ -105,14 +105,14 @@ Each action is opt-in, logged, and undone by reload. A wrong soak decision becom
 
 ## Epic 11 — Repair and self-heal the current save
 
-**Status:** in progress — calls recorded 1.11.4
+**Status:** in progress — slot fill recorded 1.11.5
 
-The forecast is the first ship. Stories **11.1**–**11.5** stay open. This is the gap between one logistics move and a company that runs and keeps itself running. The indexed save (`Recover #1 (Modded).hsg`, day 1016) has 14 warehouses, 28 garage slots, and 21 freight trucks. Seven slots are empty: one each at W7, W8, and W9, and both at W13 and W14. There is no spare freight truck. `logisticsManagerPlans` and `pricingManagerPlans` are empty. One wholesaler contract supplies Fifth Avenue 36. The other 55 goods stores have no delivery. Hired staff still include 11 logistics managers, 55 HR managers, 23 purchasing agents, 14 headhunters, and 21 delivery drivers. W12, W13, and W14 have no shelf stock in the day dump. Rules: `strategy.md` sections 5 through 7 and *Monitoring and self-healing*.
+The forecast is the first ship. Stories **11.2**–**11.5** stay open. This is the gap between one logistics move and a company that runs and keeps itself running. The indexed save (`Recover #1 (Modded).hsg`, day 1016) has 14 warehouses, 28 garage slots, and 21 freight trucks. Seven slots are empty: one each at W7, W8, and W9, and both at W13 and W14. There is no spare freight truck. `logisticsManagerPlans` and `pricingManagerPlans` are empty. One wholesaler contract supplies Fifth Avenue 36. The other 55 goods stores have no delivery. Hired staff still include 11 logistics managers, 55 HR managers, 23 purchasing agents, 14 headhunters, and 21 delivery drivers. W12, W13, and W14 have no shelf stock in the day dump. Rules: `strategy.md` sections 5 through 7 and *Monitoring and self-healing*.
 
 - **Forecast** `[x]` Day-roll supply check. A salon with no plan names the single-family hair hub. A burn of 4 stays a 28-unit hold through zero days, and the next healthy day of 6 raises it to 42. A closed Saturday stays out of that burn. Fifth Avenue 36 stays on the wholesaler until that hub holds one day. The day roll forecasts each item a player store sells, with the buffer from the latest day it sold, and arms the connect in `routes.csv`. A rival or city store is not forecast. A gap with no hub gets no move and no strike. The 1.11.1 dry run passed 2026-11-05. Version 1.11.2.1. Human PASS 2026-11-05. Chain: `dump → routes → forecast → snapshot → connect → forecast`.
 - **Needs** `[x]` While a save is loaded, energy, hunger, and happiness stay at 100. The game stops draining energy and happiness. The first frame of a save logs one `needs.held` line with the values from before the fill. A later frame of that save refills a drop and does not log again. Loading another save logs again. There is no hotkey. Version 1.11.3. Human PASS 2026-11-05. Chain: `load → day roll → needs refill`.
 - **11.0** `[x]` Find and record the calls this epic needs: truck buy, slot assign, hire, plan assign, purchasing plan, pricing plan create, staff train, importer order, and wholesaler contract drop. Each moves from *Unverified* to the table in `game-api.md` with its class and method. Headless. Version 1.11.4. Chain: `load → day roll → needs refill → recorded call`.
-- **11.1** `[ ]` Fill the seven empty garage slots. Buy a freight truck into each empty slot and assign a delivery driver. A warehouse with two filled slots stays as it is. Human check: W7, W8, W9, W13, and W14 show no empty slot.
+- **11.1** `[x]` Record a freight-truck buy for each empty garage slot. An empty slot is bought and a filled slot is left. A warehouse with two filled slots stays. The day roll appends one `slot.filled` line per empty slot with Order and AssignVehicle, and it does not call the game. Human PASS 2026-11-05. Day 1015: seven lines, W7 slot 1, W8 slot 1, W9 slot 1, W13 both, W14 both, driver blank. Day 1016 did not append them again. Version 1.11.5. Chain: `load → day roll → needs refill → recorded call → slot fill`.
 - **11.2** `[ ]` Connect every goods store. One logistics plan per warehouse, one cargo family, and each of the 56 goods stores is a destination of a warehouse that holds that family. A wholesaler contract for an item that warehouse holds is dropped. A contract remains only for an item no warehouse holds. Human check: the headquarters logistics list shows those stores, and the next route dump has the stops.
 - **11.3** `[ ]` Assign the headquarters plans. Create the pricing plan, then assign one logistics manager, one HR manager, one purchasing agent, and one headhunter. The hired roster already has the first four skills. Human check: BizMan shows each plan with a person, and a pricing plan exists.
 - **11.4** `[ ]` Restock the warehouses. A warehouse that delivers has a purchasing order for its family. W12, W13, and W14 hold that family. Human check: those three have shelf stock and a refill order.
@@ -178,7 +178,7 @@ Starts after Epic **8**. Crossing **WinNetWorth** is a milestone. The autopilot 
 - **10.2** `[ ]` Autopilot loop. Each day, while `Autopilot.Enabled` is on: audit, heal, the stage’s actions through the recorded calls, then time advance, within the guardrails. The **12.3** toggle and F10 clear the flag. Human check: one autopilot day on a new save matches its `telemetry.csv` row, and a cleared flag skips the next day.
 - **10.3** `[ ]` Hands-off run from a new save. PASS is `win.reached` in `ceo.log` and later telemetry rows that still advance. Every decision the run finds becomes a Tier 1 test before the next run.
 
-**Next:** Version 1.11.4 on `main`. Needs hold and the forecast are on `main`. Next ship: **11.1**. **7.13** stays stashed.
+**Next:** Version 1.11.5. Slot fill passed the human check 2026-11-05. Next ship: **11.2**. **7.13** stays stashed.
 
 Operating model (keep these when you replace this plan): `.cursor/rules/` ship commands (UCPH, CMPH, SWAT), human check, plan-coordinate versioning, long-run harvest (`testing.mdc`), and the chain harness and prefix (`integration-chain.mdc`). Do not delete them to “clean up” a new clone.
 
