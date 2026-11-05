@@ -32,7 +32,7 @@ namespace ChaoticCEO
             File.AppendAllText(LoadLog.CeoLogPath(localAppData), line + System.Environment.NewLine);
             if (needs != null)
             {
-                SupplyNight.Run(localAppData, day, needs, sales, dryRun: true);
+                SupplyNight.Run(localAppData, day, needs, sales, dryRun: false);
             }
 
             return line;

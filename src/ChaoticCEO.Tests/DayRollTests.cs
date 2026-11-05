@@ -35,13 +35,13 @@ public class DayRollTests
 
         Assert.Null(armed);
         Assert.Null(again);
-        Assert.Equal("day.rolled version=1.11.1 day=1014", rolled);
+        Assert.Equal("day.rolled version=1.11.2.1 day=1014", rolled);
         Assert.Equal(
             new[]
             {
-                "csv.written version=1.11.1 rows=1 day=1013 street=ba:street_fourthavenue number=28 profit=50687.4805",
-                "routes.written version=1.11.1 routes=1 warehouses=1 warehouse=ba:street_fourthstreet 46 destination=ba:street_firstavenue 38 item=ba:itemname_sodacan day=1016",
-                "day.rolled version=1.11.1 day=1014",
+                "csv.written version=1.11.2.1 rows=1 day=1013 street=ba:street_fourthavenue number=28 profit=50687.4805",
+                "routes.written version=1.11.2.1 routes=1 warehouses=1 warehouse=ba:street_fourthstreet 46 destination=ba:street_firstavenue 38 item=ba:itemname_sodacan day=1016",
+                "day.rolled version=1.11.2.1 day=1014",
             },
             File.ReadAllLines(Path.Combine(dir.Path, "ChaoticCEO", "ceo.log")));
         Assert.Contains("1013,ba:street_fourthavenue,28,", File.ReadAllText(StatementDump.CsvPath(dir.Path)));
@@ -62,11 +62,11 @@ public class DayRollTests
 
         Assert.Null(armed);
         Assert.Null(again);
-        Assert.Equal("day.rolled version=1.11.1 day=1013", rolled);
+        Assert.Equal("day.rolled version=1.11.2.1 day=1013", rolled);
         var lines = File.ReadAllLines(Path.Combine(dir.Path, "ChaoticCEO", "ceo.log"));
         Assert.Equal(3, lines.Length);
-        Assert.Equal("day.rolled version=1.11.1 day=1013", lines[2]);
-        Assert.StartsWith("csv.written version=1.11.1 rows=1 day=1012 ", lines[0]);
+        Assert.Equal("day.rolled version=1.11.2.1 day=1013", lines[2]);
+        Assert.StartsWith("csv.written version=1.11.2.1 rows=1 day=1012 ", lines[0]);
     }
 
     [Fact]
@@ -82,15 +82,15 @@ public class DayRollTests
         var first = watch.Tick(dir.Path, 1014, days, routes, holds);
         var second = watch.Tick(dir.Path, 1015, days, routes, holds);
 
-        Assert.Equal("day.rolled version=1.11.1 day=1014", first);
-        Assert.Equal("day.rolled version=1.11.1 day=1015", second);
+        Assert.Equal("day.rolled version=1.11.2.1 day=1014", first);
+        Assert.Equal("day.rolled version=1.11.2.1 day=1015", second);
         var lines = File.ReadAllLines(Path.Combine(dir.Path, "ChaoticCEO", "ceo.log"));
         Assert.Equal(6, lines.Length);
-        Assert.Equal("day.rolled version=1.11.1 day=1014", lines[2]);
+        Assert.Equal("day.rolled version=1.11.2.1 day=1014", lines[2]);
         Assert.Equal(
-            "csv.written version=1.11.1 rows=1 day=1014 street=ba:street_today number=1 profit=9",
+            "csv.written version=1.11.2.1 rows=1 day=1014 street=ba:street_today number=1 profit=9",
             lines[3]);
-        Assert.Equal("day.rolled version=1.11.1 day=1015", lines[5]);
+        Assert.Equal("day.rolled version=1.11.2.1 day=1015", lines[5]);
         Assert.Contains("1014,ba:street_today,1,", File.ReadAllText(StatementDump.CsvPath(dir.Path)));
     }
 
@@ -114,7 +114,7 @@ public class DayRollTests
         var rolled = watch.Tick(dir.Path, 1015, Days(1013), Array.Empty<DeliveryStop>(), holds, needs, sales);
         var again = watch.Tick(dir.Path, 1015, Days(1013), Array.Empty<DeliveryStop>(), holds, needs, sales);
 
-        Assert.Equal("day.rolled version=1.11.1 day=1015", rolled);
+        Assert.Equal("day.rolled version=1.11.2.1 day=1015", rolled);
         Assert.Null(again);
         var lines = File.ReadAllLines(Path.Combine(dir.Path, "ChaoticCEO", "ceo.log"));
         var forecasts = 0;
@@ -124,17 +124,17 @@ public class DayRollTests
             {
                 forecasts++;
                 Assert.Equal(
-                    "supply.forecast version=1.11.1 day=1015 store=ba:street_fourthavenue 28 warehouse=W11 item=ba:itemname_haircareproduct reason=noplan buffer=28",
+                    "supply.forecast version=1.11.2.1 day=1015 store=ba:street_fourthavenue 28 warehouse=W11 item=ba:itemname_haircareproduct reason=noplan buffer=28",
                     line);
             }
         }
 
         Assert.Equal(1, forecasts);
-        Assert.Contains("supply.summary version=1.11.1 day=1015 gaps=1", lines);
-        Assert.Contains("supply.move version=1.11.1 day=1015 store=ba:street_fourthavenue 28 warehouse=W11 item=ba:itemname_haircareproduct amount=4 dry=true", lines);
-        Assert.Contains("supply.rechecked version=1.11.1 day=1015 store=ba:street_fourthavenue 28 warehouse=W11 item=ba:itemname_haircareproduct reason=noplan", lines);
-        Assert.Contains("snapshot.taken version=1.11.1", File.ReadAllText(SupplyNight.SnapshotPath(dir.Path)));
-        Assert.DoesNotContain(salon, File.ReadAllText(RouteDump.RoutesPath(dir.Path)));
+        Assert.Contains("supply.summary version=1.11.2.1 day=1015 gaps=1", lines);
+        Assert.Contains("supply.move version=1.11.2.1 day=1015 store=ba:street_fourthavenue 28 warehouse=W11 item=ba:itemname_haircareproduct amount=4 dry=false", lines);
+        Assert.Contains("supply.rechecked version=1.11.2.1 day=1015 store=ba:street_fourthavenue 28 warehouse=W11 item=ba:itemname_haircareproduct reason=short", lines);
+        Assert.Contains("snapshot.taken version=1.11.2.1", File.ReadAllText(SupplyNight.SnapshotPath(dir.Path)));
+        Assert.Contains(salon, File.ReadAllText(RouteDump.RoutesPath(dir.Path)));
     }
 
     [Fact]
@@ -165,14 +165,166 @@ public class DayRollTests
         Assert.Null(watch.Tick(dir.Path, 1014, Days(1013), routes, holds, needs, Array.Empty<DailyUnits>()));
         var rolled = watch.Tick(dir.Path, 1015, Days(1013), routes, holds, needs, Array.Empty<DailyUnits>());
 
-        Assert.Equal("day.rolled version=1.11.1 day=1015", rolled);
+        Assert.Equal("day.rolled version=1.11.2.1 day=1015", rolled);
         var lines = File.ReadAllLines(Path.Combine(dir.Path, "ChaoticCEO", "ceo.log"));
         Assert.Contains(
-            "supply.forecast version=1.11.1 day=1015 store=ba:street_fourthavenue 28 warehouse=W11 item=ba:itemname_haircareproduct reason=noplan buffer=0",
+            "supply.forecast version=1.11.2.1 day=1015 store=ba:street_fourthavenue 28 warehouse=W11 item=ba:itemname_haircareproduct reason=noplan buffer=0",
             lines);
         Assert.DoesNotContain(lines, line => line.StartsWith("supply.forecast ") && line.Contains(fifth));
         Assert.Contains(fifth, File.ReadAllText(RouteDump.RoutesPath(dir.Path)));
-        Assert.DoesNotContain(salon, File.ReadAllText(RouteDump.RoutesPath(dir.Path)));
+        Assert.Contains(salon, File.ReadAllText(RouteDump.RoutesPath(dir.Path)));
+        Assert.Contains(
+            "supply.move version=1.11.2.1 day=1015 store=ba:street_fourthavenue 28 warehouse=W11 item=ba:itemname_haircareproduct amount=1 dry=false",
+            lines);
+    }
+
+    [Fact]
+    public void DayRolled_dump_routes_forecast_snapshot_connect_forecast_arms_the_salon()
+    {
+        // Chain: dump → routes → forecast → snapshot → connect → forecast
+        using var dir = new TempDump();
+        var watch = new DayWatch();
+        var salon = "ba:street_fourthavenue 28";
+        var fifth = "ba:street_fifthavenue 36";
+        var hair = "ba:itemname_haircareproduct";
+        var gift = "ba:itemname_cheapgift";
+        var rival = "ba:street_eighthavenue 3";
+        var clothes = "ba:street_fifthavenue 54";
+        var needs = new List<GoodsNeed>();
+        var burn = new List<DailyUnits>();
+        Supply.FromBuilding(
+            needs,
+            burn,
+            new StoreRecord("Chaotic Clothing #5", true, false, null, "ba:businesstype_clothingstore", clothes),
+            new[]
+            {
+                "ba:itemname_classiccheapfemaleclothing",
+                "ba:itemname_classiccheapmaleclothing",
+                "ba:itemname_moderncheapfemaleclothing",
+            },
+            new[] { new SaleTick("ba:itemname_classiccheapfemaleclothing", 1014, 7) });
+        Supply.FromBuilding(
+            needs,
+            burn,
+            new StoreRecord("Rival Salon", false, false, "rival_4", "ba:businesstype_hairdresser", rival),
+            new[] { hair },
+            new[] { new SaleTick(hair, 1014, 9) });
+        Supply.FromBuilding(
+            needs,
+            burn,
+            new StoreRecord("Chaotic Hair #9", true, false, null, "ba:businesstype_hairdresser", salon),
+            new[] { hair },
+            new[] { new SaleTick(hair, 1014, 4), new SaleTick(hair, 1008, 1) });
+        Supply.FromBuilding(
+            needs,
+            burn,
+            new StoreRecord("Chaotic Gifts #1", false, true, "", "ba:businesstype_giftshop", fifth),
+            new[] { gift },
+            new[] { new SaleTick(gift, 1014, 4) });
+        var routes = new[]
+        {
+            new DeliveryStop("ba:street_firststreet 37", fifth, gift, 1016, ""),
+        };
+        var holds = new[]
+        {
+            new WarehouseHold("W6", "ba:street_fifthavenue", 43, hair, 40),
+            new WarehouseHold("W6", "ba:street_fifthavenue", 43, "ba:itemname_burger", 8),
+            new WarehouseHold("W11", "ba:street_twelfthstreet", 1, hair, 15),
+            new WarehouseHold("W2", "ba:street_gift", 2, gift, 3),
+        };
+
+        Assert.Null(watch.Tick(dir.Path, 1014, Days(1013), routes, holds, needs, burn));
+        var rolled = watch.Tick(dir.Path, 1015, Days(1013), routes, holds, needs, burn);
+
+        Assert.Equal("day.rolled version=" + LoadLog.Version + " day=1015", rolled);
+        var lines = File.ReadAllLines(Path.Combine(dir.Path, "ChaoticCEO", "ceo.log"));
+        Assert.Contains(
+            "supply.forecast version=" + LoadLog.Version + " day=1015 store=ba:street_fourthavenue 28 warehouse=W11 item=ba:itemname_haircareproduct reason=noplan buffer=28",
+            lines);
+        Assert.DoesNotContain(lines, line => line.StartsWith("supply.forecast ") && line.Contains(fifth));
+        Assert.DoesNotContain(lines, line => line.Contains(rival));
+        Assert.Equal(3, lines.Count(line => line.StartsWith("supply.forecast ") && line.Contains(clothes) && line.Contains(" warehouse= ")));
+        Assert.Contains(
+            "supply.move version=" + LoadLog.Version + " day=1015 store=ba:street_fourthavenue 28 warehouse=W11 item=ba:itemname_haircareproduct amount=4 dry=false",
+            lines);
+        Assert.DoesNotContain(lines, line => line.StartsWith("supply.move ") && line.Contains(" warehouse= "));
+        Assert.Contains(
+            "supply.rechecked version=" + LoadLog.Version + " day=1015 store=ba:street_fourthavenue 28 warehouse=W11 item=ba:itemname_haircareproduct reason=short",
+            lines);
+        var written = File.ReadAllText(RouteDump.RoutesPath(dir.Path));
+        Assert.Contains(fifth, written);
+        Assert.Contains(salon, written);
+        Assert.Contains(gift, written);
+        Assert.DoesNotContain(clothes, written);
+        var shot = File.ReadAllText(SupplyNight.SnapshotPath(dir.Path));
+        Assert.Contains("snapshot.taken version=" + LoadLog.Version, shot);
+        Assert.Contains(fifth, shot);
+        Assert.DoesNotContain(salon, shot);
+    }
+
+    [Fact]
+    public void DayRolled_dump_routes_forecast_snapshot_connect_forecast_arms_a_second_salon()
+    {
+        // Chain: dump → routes → forecast → snapshot → connect → forecast
+        using var dir = new TempDump();
+        var watch = new DayWatch();
+        var salon = "ba:street_fourthavenue 28";
+        var other = "ba:street_sixthavenue 12";
+        var fifth = "ba:street_fifthavenue 36";
+        var hair = "ba:itemname_haircareproduct";
+        var gift = "ba:itemname_cheapgift";
+        var needs = new List<GoodsNeed>();
+        var burn = new List<DailyUnits>();
+        Supply.FromStore(
+            needs,
+            burn,
+            "ba:businesstype_hairdresser",
+            salon,
+            new[] { hair },
+            new[] { new SaleTick(hair, 1014, 4) });
+        Supply.FromStore(
+            needs,
+            burn,
+            "ba:businesstype_hairdresser",
+            other,
+            Array.Empty<string>(),
+            new[] { new SaleTick(hair, 1014, 6) });
+        Supply.FromStore(
+            needs,
+            burn,
+            "ba:businesstype_giftshop",
+            fifth,
+            new[] { gift },
+            new[] { new SaleTick(gift, 1014, 4) });
+        var routes = new[]
+        {
+            new DeliveryStop("ba:street_firststreet 37", fifth, gift, 1016, ""),
+        };
+        var holds = new[]
+        {
+            new WarehouseHold("W11", "ba:street_twelfthstreet", 1, hair, 15),
+            new WarehouseHold("W2", "ba:street_gift", 2, gift, 3),
+        };
+
+        Assert.Null(watch.Tick(dir.Path, 1014, Days(1013), routes, holds, needs, burn));
+        var rolled = watch.Tick(dir.Path, 1015, Days(1013), routes, holds, needs, burn);
+
+        Assert.Equal("day.rolled version=" + LoadLog.Version + " day=1015", rolled);
+        var lines = File.ReadAllLines(Path.Combine(dir.Path, "ChaoticCEO", "ceo.log"));
+        Assert.Contains(
+            "supply.forecast version=" + LoadLog.Version + " day=1015 store=ba:street_sixthavenue 12 warehouse=W11 item=ba:itemname_haircareproduct reason=noplan buffer=42",
+            lines);
+        Assert.Contains(
+            "supply.move version=" + LoadLog.Version + " day=1015 store=ba:street_sixthavenue 12 warehouse=W11 item=ba:itemname_haircareproduct amount=6 dry=false",
+            lines);
+        Assert.Contains(
+            "supply.rechecked version=" + LoadLog.Version + " day=1015 store=ba:street_sixthavenue 12 warehouse=W11 item=ba:itemname_haircareproduct reason=short",
+            lines);
+        Assert.Equal(2, lines.Count(line => line.StartsWith("supply.forecast ")));
+        var written = File.ReadAllText(RouteDump.RoutesPath(dir.Path));
+        Assert.Contains(other, written);
+        Assert.Contains(fifth, written);
+        Assert.DoesNotContain(lines, line => line.StartsWith("supply.move ") && line.Contains(fifth));
     }
 
     private static FinancialDay[] Days(int day)

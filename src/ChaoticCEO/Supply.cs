@@ -40,6 +40,53 @@ namespace ChaoticCEO
         public bool Open { get; }
     }
 
+    public sealed class SaleTick
+    {
+        public SaleTick(string item, int day, int units)
+        {
+            Item = item ?? "";
+            Day = day;
+            Units = units;
+        }
+
+        public string Item { get; }
+
+        public int Day { get; }
+
+        public int Units { get; }
+    }
+
+    public sealed class StoreRecord
+    {
+        public StoreRecord(
+            string? businessName,
+            bool rentedByPlayer,
+            bool ownedByPlayer,
+            string? rivalId,
+            string? businessType,
+            string? place)
+        {
+            BusinessName = businessName ?? "";
+            RentedByPlayer = rentedByPlayer;
+            OwnedByPlayer = ownedByPlayer;
+            RivalId = rivalId ?? "";
+            BusinessType = businessType ?? "";
+            Place = place ?? "";
+        }
+
+        public string BusinessName { get; }
+
+        public bool RentedByPlayer { get; }
+
+        public bool OwnedByPlayer { get; }
+
+        public string RivalId { get; }
+
+        public string BusinessType { get; }
+
+        public string Place { get; }
+    }
+
     public sealed class SupplyGap
     {
         public SupplyGap(string store, string warehouse, string item, string reason, int target = 0)
@@ -139,6 +186,96 @@ namespace ChaoticCEO
             return ReadHolds(path);
         }
 
+        public static bool PlayerStore(string? businessName, bool rentedByPlayer, bool ownedByPlayer, string? rivalId)
+        {
+            if (string.IsNullOrEmpty(businessName) || !string.IsNullOrEmpty(rivalId))
+            {
+                return false;
+            }
+
+            return rentedByPlayer || ownedByPlayer;
+        }
+
+        public static void FromBuilding(
+            List<GoodsNeed> needs,
+            List<DailyUnits> burn,
+            StoreRecord? store,
+            IReadOnlyList<string>? items,
+            IReadOnlyList<SaleTick>? ticks)
+        {
+            if (store == null
+                || !PlayerStore(store.BusinessName, store.RentedByPlayer, store.OwnedByPlayer, store.RivalId))
+            {
+                return;
+            }
+
+            FromStore(needs, burn, store.BusinessType, store.Place, items, ticks);
+        }
+
+        public static void FromStore(
+            List<GoodsNeed> needs,
+            List<DailyUnits> burn,
+            string? businessType,
+            string? place,
+            IReadOnlyList<string>? items,
+            IReadOnlyList<SaleTick>? ticks)
+        {
+            if (needs == null || burn == null || string.IsNullOrEmpty(place))
+            {
+                return;
+            }
+
+            var sold = new List<string>();
+            if (items != null)
+            {
+                foreach (var item in items)
+                {
+                    if (Sellable(item) && !sold.Contains(item))
+                    {
+                        sold.Add(item);
+                    }
+                }
+            }
+
+            if (businessType == "ba:businesstype_hairdresser" && !sold.Contains("ba:itemname_haircareproduct"))
+            {
+                sold.Add("ba:itemname_haircareproduct");
+            }
+
+            foreach (var item in sold)
+            {
+                var have = false;
+                foreach (var need in needs)
+                {
+                    if (need != null && need.Store == place && need.Item == item)
+                    {
+                        have = true;
+                        break;
+                    }
+                }
+
+                if (!have)
+                {
+                    needs.Add(new GoodsNeed(place, item));
+                }
+            }
+
+            if (ticks == null)
+            {
+                return;
+            }
+
+            foreach (var tick in ticks)
+            {
+                if (tick == null || tick.Units <= 0 || !sold.Contains(tick.Item))
+                {
+                    continue;
+                }
+
+                burn.Add(new DailyUnits(place, tick.Item, tick.Day, tick.Units));
+            }
+        }
+
         public static void Collect(List<GoodsNeed> needs, string? businessType, string? place)
         {
             if (needs == null || string.IsNullOrEmpty(businessType) || string.IsNullOrEmpty(place))
@@ -231,9 +368,21 @@ namespace ChaoticCEO
             return new Verdict("noplan", "", target);
         }
 
+        private static bool Sellable(string? item)
+        {
+            if (string.IsNullOrEmpty(item) || item == "ba:itemname_haircareproduct")
+            {
+                return item == "ba:itemname_haircareproduct";
+            }
+
+            var family = Advisor.CargoFamily(item);
+            return family == "food" || family == "durables" || family == "specialty";
+        }
+
         private static int Burn(string store, string item, IReadOnlyList<DailyUnits> days)
         {
             var burn = 0;
+            var latest = int.MinValue;
             foreach (var day in days)
             {
                 if (day == null || day.Store != store || day.Item != item || !day.Open || day.Units <= 0)
@@ -241,7 +390,11 @@ namespace ChaoticCEO
                     continue;
                 }
 
-                burn = day.Units;
+                if (day.Day >= latest)
+                {
+                    latest = day.Day;
+                    burn = day.Units;
+                }
             }
 
             return burn;

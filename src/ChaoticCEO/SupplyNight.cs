@@ -20,7 +20,6 @@ namespace ChaoticCEO
     public static class SupplyNight
     {
         public const int HealCap = 10;
-        public const int HealStrikeMax = 3;
 
         public static string SnapshotPath(string localAppData)
         {
@@ -56,28 +55,20 @@ namespace ChaoticCEO
         {
             var stops = new List<DeliveryStop>(Supply.Stops(routesPath));
             var added = 0;
-            var failed = 0;
             var changed = false;
             foreach (var gap in forecast.Unsupplied)
             {
-                if (gap == null || gap.Reason != "noplan")
+                if (gap == null || gap.Reason != "noplan" || gap.Warehouse.Length == 0)
                 {
                     continue;
                 }
 
-                if (added >= HealCap || failed >= HealStrikeMax)
+                if (added >= HealCap)
                 {
                     break;
                 }
 
                 var amount = gap.Target > 0 ? gap.Target / Supply.RefillDays : 1;
-                if (gap.Warehouse.Length == 0)
-                {
-                    failed++;
-                    LogMove(localAppData, day, gap, amount, dryRun);
-                    continue;
-                }
-
                 LogMove(localAppData, day, gap, amount, dryRun);
                 added++;
                 if (dryRun)

@@ -609,6 +609,71 @@ public class SupplyTests
     }
 
     [Fact]
+    public void Supply_only_the_item_the_store_sells_sets_the_buffer_from_that_burn()
+    {
+        var needs = new List<GoodsNeed>();
+        var burn = new List<DailyUnits>();
+        Supply.FromStore(
+            needs,
+            burn,
+            "ba:businesstype_fastfoodrestaurant",
+            First,
+            new[] { Burger, "ba:itemname_paperbag", "ba:itemname_palletshelf" },
+            new[] { new SaleTick(Burger, 1014, 4), new SaleTick(Burger, 1015, 0) });
+        Supply.FromStore(
+            needs,
+            burn,
+            "ba:businesstype_hairdresser",
+            Salon,
+            Array.Empty<string>(),
+            new[] { new SaleTick(Hair, 1014, 6) });
+
+        Assert.Equal(Burger, Assert.Single(needs, need => need.Store == First).Item);
+        Assert.DoesNotContain(needs, need => need.Item == Soda || need.Item == "ba:itemname_paperbag");
+        Assert.Equal(Hair, Assert.Single(needs, need => need.Store == Salon).Item);
+        Assert.Equal(4, Assert.Single(burn, day => day.Store == First).Units);
+        Assert.Equal(6, Assert.Single(burn, day => day.Store == Salon).Units);
+
+        var list = Supply.List(
+            Array.Empty<DeliveryStop>(),
+            HairHub(Hold("W1", "ba:street_food", 1, Burger, 10)),
+            needs,
+            burn);
+        Assert.Equal(28, Assert.Single(list.Unsupplied, gap => gap.Store == First).Target);
+        Assert.Equal(42, Assert.Single(list.Unsupplied, gap => gap.Store == Salon).Target);
+        Assert.Equal(2, list.Unsupplied.Count);
+    }
+
+    [Fact]
+    public void Supply_a_second_salon_keeps_its_own_burn()
+    {
+        var other = "ba:street_sixthavenue 12";
+        var needs = new List<GoodsNeed>();
+        var burn = new List<DailyUnits>();
+        Supply.FromStore(
+            needs,
+            burn,
+            "ba:businesstype_hairdresser",
+            Salon,
+            new[] { Hair },
+            new[] { new SaleTick(Hair, 1014, 4) });
+        Supply.FromStore(
+            needs,
+            burn,
+            "ba:businesstype_hairdresser",
+            other,
+            Array.Empty<string>(),
+            new[] { new SaleTick(Hair, 1014, 6), new SaleTick(Burger, 1014, 9) });
+
+        Assert.Equal(Hair, Assert.Single(needs, need => need.Store == other).Item);
+        Assert.DoesNotContain(needs, need => need.Store == other && need.Item == Burger);
+
+        var list = Supply.List(Array.Empty<DeliveryStop>(), HairHub(), needs, burn);
+        Assert.Equal(28, Assert.Single(list.Unsupplied, gap => gap.Store == Salon).Target);
+        Assert.Equal(42, Assert.Single(list.Unsupplied, gap => gap.Store == other).Target);
+    }
+
+    [Fact]
     public void Supply_dump_routes_forecast_snapshot_connect_forecast_keeps_fifth_wholesale()
     {
         // Chain: dump → routes → forecast → snapshot → connect → forecast
@@ -645,7 +710,7 @@ public class SupplyTests
         Assert.Equal("W11", salon.Warehouse);
         Assert.Equal(Hair, salon.Item);
         var shot = File.ReadAllText(SupplyNight.SnapshotPath(dir.Path));
-        Assert.Contains("snapshot.taken version=1.11.1", shot);
+        Assert.Contains("snapshot.taken version=1.11.2.1", shot);
         Assert.Contains(before, shot);
         Assert.DoesNotContain(Salon, shot);
         var again = Assert.Single(night.Recheck.Unsupplied, gap => gap.Store == Salon);
@@ -686,7 +751,51 @@ public class SupplyTests
     }
 
     [Fact]
-    public void Supply_night_stops_after_three_misses_and_ten_connects()
+    public void Supply_only_a_player_store_enters_the_forecast()
+    {
+        Assert.True(Supply.PlayerStore("Chaotic Hair #9", rentedByPlayer: true, ownedByPlayer: false, rivalId: null));
+        Assert.True(Supply.PlayerStore("Chaotic Clothing #3", rentedByPlayer: false, ownedByPlayer: true, rivalId: ""));
+        Assert.False(Supply.PlayerStore("Rival Salon", rentedByPlayer: false, ownedByPlayer: false, rivalId: "rival_4"));
+        Assert.False(Supply.PlayerStore("Rival In Player Building", rentedByPlayer: false, ownedByPlayer: true, rivalId: "rival_2"));
+        Assert.False(Supply.PlayerStore("City Salon", rentedByPlayer: false, ownedByPlayer: false, rivalId: null));
+        Assert.False(Supply.PlayerStore("", rentedByPlayer: true, ownedByPlayer: false, rivalId: null));
+
+        var needs = new List<GoodsNeed>();
+        var burn = new List<DailyUnits>();
+        Supply.FromBuilding(
+            needs,
+            burn,
+            new StoreRecord("Rival Salon", false, false, "rival_4", "ba:businesstype_hairdresser", Side),
+            new[] { Hair },
+            new[] { new SaleTick(Hair, 1014, 9) });
+        Supply.FromBuilding(
+            needs,
+            burn,
+            new StoreRecord("Chaotic Hair #9", true, false, null, "ba:businesstype_hairdresser", Salon),
+            new[] { Hair },
+            new[] { new SaleTick(Hair, 1014, 4) });
+
+        Assert.Equal(Salon, Assert.Single(needs).Store);
+        Assert.Equal(Salon, Assert.Single(burn).Store);
+    }
+
+    [Fact]
+    public void Supply_burn_picks_the_highest_healthy_day_even_when_unsorted()
+    {
+        var days = new[]
+        {
+            new DailyUnits(Salon, Hair, 1015, 0),
+            new DailyUnits(Salon, Hair, 1014, 788),
+            new DailyUnits(Salon, Hair, 1008, 171),
+        };
+
+        var list = Supply.List(Array.Empty<DeliveryStop>(), HairHub(), new[] { new GoodsNeed(Salon, Hair) }, days);
+
+        Assert.Equal(5516, Assert.Single(list.Unsupplied).Target);
+    }
+
+    [Fact]
+    public void Supply_night_skips_blank_warehouses_without_a_move_or_a_strike()
     {
         using var dir = new TempDump();
         var needs = new List<GoodsNeed>
@@ -694,12 +803,26 @@ public class SupplyTests
             new GoodsNeed("ba:street_a 1", Soda),
             new GoodsNeed("ba:street_b 2", Soda),
             new GoodsNeed("ba:street_c 3", Soda),
+            new GoodsNeed("ba:street_d 4", Soda),
             new GoodsNeed(Salon, Hair),
         };
         RouteDump.Write(dir.Path, Array.Empty<DeliveryStop>(), HairHub());
-        var stopped = SupplyNight.Run(dir.Path, 1014, needs, Days(4), dryRun: false);
-        var salon = Assert.Single(stopped.Recheck.Unsupplied, gap => gap.Store == Salon);
-        Assert.Equal("noplan", salon.Reason);
+
+        var night = SupplyNight.Run(dir.Path, 1014, needs, Days(4), dryRun: false);
+
+        var salon = Assert.Single(night.Recheck.Unsupplied, gap => gap.Store == Salon);
+        Assert.Equal("short", salon.Reason);
+        Assert.Equal(4, night.Recheck.Unsupplied.Count(gap => gap.Item == Soda && gap.Reason == "noplan" && gap.Warehouse.Length == 0));
+        var lines = File.ReadAllLines(Path.Combine(dir.Path, "ChaoticCEO", "ceo.log"));
+        Assert.DoesNotContain(lines, line => line.StartsWith("supply.move ") && line.Contains(" warehouse= "));
+        Assert.Contains(
+            "supply.move version=" + LoadLog.Version + " day=1014 store=ba:street_fourthavenue 28 warehouse=W11 item=ba:itemname_haircareproduct amount=4 dry=false",
+            lines);
+    }
+
+    [Fact]
+    public void Supply_night_stops_at_ten_connects()
+    {
 
         var many = new List<GoodsNeed>();
         var holds = new List<WarehouseHold>();

@@ -46,26 +46,69 @@ namespace ChaoticCEO
             return Roadshow.Prices(SaleAsks(current), EstateAsks(current));
         }
 
-        public static IReadOnlyList<GoodsNeed> Needs(GameInstance? current)
+        private static void ReadStores(GameInstance? current, List<GoodsNeed> needs, List<DailyUnits> burn)
         {
-            var needs = new List<GoodsNeed>();
             if (current == null || current.BuildingRegistrations == null)
             {
-                return needs;
+                return;
             }
 
             foreach (var building in current.BuildingRegistrations)
             {
-                if (building == null || string.IsNullOrEmpty(building.StreetName) || building.StreetNumber <= 0)
-                {
-                    continue;
-                }
+                ReadStore(needs, burn, building);
+            }
+        }
 
-                var place = building.StreetName + " " + building.StreetNumber.ToString(CultureInfo.InvariantCulture);
-                Supply.Collect(needs, building.businessTypeName, place);
+        private static void ReadStore(List<GoodsNeed> needs, List<DailyUnits> burn, BuildingRegistration building)
+        {
+            if (building == null || string.IsNullOrEmpty(building.StreetName) || building.StreetNumber <= 0)
+            {
+                return;
             }
 
-            return needs;
+            var place = building.StreetName + " " + building.StreetNumber.ToString(CultureInfo.InvariantCulture);
+            var items = new List<string>();
+            if (building.retailPrices != null)
+            {
+                foreach (var price in building.retailPrices)
+                {
+                    if (price != null && !string.IsNullOrEmpty(price.itemName))
+                    {
+                        items.Add(price.itemName);
+                    }
+                }
+            }
+
+            var ticks = new List<SaleTick>();
+            if (building.orderHistory != null)
+            {
+                foreach (var entry in building.orderHistory)
+                {
+                    if (entry == null || entry.itemSales == null)
+                    {
+                        continue;
+                    }
+
+                    foreach (var sale in entry.itemSales)
+                    {
+                        if (sale == null || string.IsNullOrEmpty(sale.itemName))
+                        {
+                            continue;
+                        }
+
+                        ticks.Add(new SaleTick(sale.itemName, entry.dayNumber, sale.amountSold));
+                    }
+                }
+            }
+
+            var store = new StoreRecord(
+                building.BusinessName,
+                building.RentedByPlayer,
+                building.BuildingOwnedByPlayer,
+                building.businessOwnerRivalId,
+                building.businessTypeName,
+                place);
+            Supply.FromBuilding(needs, burn, store, items, ticks);
         }
 
         public static string? Roll(DayWatch watch, string localAppData)
@@ -81,14 +124,17 @@ namespace ChaoticCEO
                 return null;
             }
 
+            var needs = new List<GoodsNeed>();
+            var sales = new List<DailyUnits>();
+            ReadStores(current, needs, sales);
             return watch.Tick(
                 localAppData,
                 current.Day,
                 Days(current),
                 Plans(current),
                 Holds(current),
-                Needs(current),
-                System.Array.Empty<DailyUnits>());
+                needs,
+                sales);
         }
 
         public static IReadOnlyList<FinancialDay> Days(GameInstance? current)
