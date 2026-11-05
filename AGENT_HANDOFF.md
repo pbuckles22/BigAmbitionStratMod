@@ -139,7 +139,7 @@ When shipping: update **PM_PLAN**, **doc/PROJECT_STATUS.md**, and **Current stat
 ## Current state
 
 - **Product:** Version 1.11.1. A day change logs the supply forecast and leaves the save unchanged. 7.13 stays stashed until the night loop connects stores. Ladder: [PM_PLAN.md](PM_PLAN.md). Plan: `forecast_logistics_loop_b527186f.plan.md`.
-- **On:** `feature/supply-check`, not merged. Stash `7.13 spare cost centers` on `feature/7.13-spare-cost-centers`. https://github.com/pbuckles22/BigAmbitionStratMod
+- **On:** `feature/supply-check` @ `3f5974a`, not merged. Stash `7.13 spare cost centers` on `feature/7.13-spare-cost-centers`. https://github.com/pbuckles22/BigAmbitionStratMod
 - **Next:** Narrow the live forecast to a real unit burn and the store’s own item, then arm the connect, when asked.
 - **Blockers:** Do not pop 7.13. Do not load the day 1021 save. Do not drop Fifth Avenue 36’s contract before the hub holds that item. Importer order and truck assign are unverified. The live roll had no unit burn, so the buffer was 0.
 
