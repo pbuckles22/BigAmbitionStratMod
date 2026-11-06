@@ -426,10 +426,10 @@ public class ApplyTests
         Assert.Equal(1, Count(File.ReadAllText(LoadLog.CeoLogPath(dir.Path)), "price.applied"));
         Assert.Equal(1, Count(File.ReadAllText(LoadLog.CeoLogPath(dir.Path)), "staff.applied"));
         Assert.Equal(
-            "price.applied version=1.11.6 item=ba:itemname_sodacan price=2.75 call=Buildings.Office.Headquarters.PricingManagerPlan.SetPrice",
+            "price.applied version=1.11.7 item=ba:itemname_sodacan price=2.75 call=Buildings.Office.Headquarters.PricingManagerPlan.SetPrice",
             priceLine);
         Assert.Equal(
-            "staff.applied version=1.11.6 role=food kind=hr plan=hr-soda amount=40",
+            "staff.applied version=1.11.7 role=food kind=hr plan=hr-soda amount=40",
             staffLine);
     }
 

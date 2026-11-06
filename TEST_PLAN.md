@@ -13,7 +13,7 @@ dotnet test src/ChaoticCEO.Tests/ChaoticCEO.Tests.csproj -p:GameManaged="C:\Prog
 dotnet build src/ChaoticCEO/ChaoticCEO.csproj -c Release -p:GameManaged="C:\Program Files (x86)\Steam\steamapps\common\Big Ambitions\Big Ambitions_Data\Managed"
 ```
 
-`dotnet test` is the Debug compile. The Release command installs `ChaoticCEO.dll` to ModsLocal. The gitignored counter is `build_number.txt`. The informational version is `1.11.6+N`.
+`dotnet test` is the Debug compile. The Release command installs `ChaoticCEO.dll` to ModsLocal. The gitignored counter is `build_number.txt`. The informational version is `1.11.7+N`.
 
 The story gate reuses `doc/gemini/cache/save.bin` and `save-index.sqlite` when both are current for the dropzone `.hsg`. Do not read or scan `save.bin` again while that blob is current. A renamed `.hsg` fails the recorded-name check on its own. Nobody announces the new name.
 
@@ -105,6 +105,17 @@ Human PASS 2026-11-05 on 1.11.5. Day 1014 load: energy 70.47, hunger 66.3, happi
 6. Version marker: public `1.11.6`. `ceo.log` starts at `mod.loaded version=1.11.6 build=3682`.
 
 Human PASS 2026-11-05 on 1.11.6. Day 1015: 262 `store.connected` lines. Each `add` is `UI.Smartphone.Apps.BizMan.LogisticsManagers.LogisticsManagerPlanUI.AddDestination`. Each `drop` is blank. 164 forecast gaps with a blank warehouse had no `store.connected` line. Fifth Avenue 36 had no connect line and kept four wholesaler rows. `routes.csv` has 266 rows.
+
+## Plan assign human check
+
+1. Restart Big Ambitions so version 1.11.7 loads. You are in the city on the usual save. Do not load the day 1021 save. This check records a pricing plan when none exists, then records one person for each open headquarters role: logistics, HR, purchasing, and headhunter. It does not call the game. BizMan’s plans stay as they are. Fifth Avenue 36 stays on the wholesaler.
+2. Let one day pass.
+3. Open `%LocalAppData%\ChaoticCEO\ceo.log`. Open BizMan’s headquarters plans.
+4. **PASS if** `mod.loaded` is version 1.11.7, the new day has one `plan.created` line whose `create` is `UI.Smartphone.Apps.BizMan.PricingManagers.PricingManagersPlanList.AddPlan`, each `plan.assigned` line names `assign=Buildings.Office.Headquarters.HrManagerPlan.AssignEmployee` and a different role, a role that already has a person has no line, and the headquarters screens look the same as before the day change. **FAIL if** the new day has no `plan.created` line, a role is listed twice, `assign` is any other call, or a person appears on a plan that was empty.
+5. Evidence: `plan.created` (`create`). `plan.assigned` (`role`, `employee`, `assign`). `plan.summary` with `created=0 assigned=0` is the line when the pricing plan exists and every role already has a person. A later day of that save does not append those lines again.
+6. Version marker: public `1.11.7`. `ceo.log` starts at `mod.loaded version=1.11.7 build=3682`.
+
+Human PASS 2026-11-05 on 1.11.7. Day 1014 load: energy 70.47, hunger 66.3, happiness 100. Day 1015: one `plan.created` (`AddPlan`), `plan.assigned` logistics `Db9eInvmDUm+4AmmCqNhHw==` and headhunter `+m2HNyl0Wku7yH2lq5wf3g==` (`AssignEmployee`). No line for hr or purchasing. Seven `slot.filled`. 262 `store.connected`, each `drop` blank. Day 1016: no second plan, slot, or connect lines. `gaps=426`. Fourth Avenue 28 hair buffer 1169. Morning routes 4, Fifth Avenue 36 kept.
 
 Prior PASS 2026-11-05 was the dry run on 1.11.1. Day rolled 1014 to 1015. Fourth Avenue 28 sales 57847, profit 25010.7891. First forecast: `noplan` on W11, `buffer=0`. `gaps=3836`. Four moves, all `dry=true`. Routes stayed the four Fifth Avenue 36 contract rows.
 

@@ -189,6 +189,113 @@ namespace ChaoticCEO
                 sales);
         }
 
+        public static void AssignPlans(PlanWatch watch, string localAppData)
+        {
+            if (watch == null || string.IsNullOrEmpty(localAppData))
+            {
+                return;
+            }
+
+            var current = SaveGameManager.Current;
+            if (current == null)
+            {
+                return;
+            }
+
+            // The lines name AddPlan and AssignEmployee. This pause does not call them.
+            watch.Tick(
+                localAppData,
+                current,
+                current.Day,
+                GameApi.Live(),
+                PricingPlan(current),
+                Seats(current),
+                Hired(current));
+        }
+
+        private static bool PricingPlan(GameInstance current)
+        {
+            return current.pricingManagerPlans != null && current.pricingManagerPlans.Count > 0;
+        }
+
+        private static List<HqSeat> Seats(GameInstance current)
+        {
+            var seats = new List<HqSeat>();
+            if (current.logisticsManagerPlans != null)
+            {
+                foreach (var plan in current.logisticsManagerPlans)
+                {
+                    AddSeat(seats, "logistics", plan == null ? "" : plan.assignedEmployeeId);
+                }
+            }
+
+            if (current.hrManagerPlans != null)
+            {
+                foreach (var plan in current.hrManagerPlans)
+                {
+                    AddSeat(seats, "hr", plan == null ? "" : plan.assignedEmployeeId);
+                }
+            }
+
+            if (current.headhunterPlans != null)
+            {
+                foreach (var plan in current.headhunterPlans)
+                {
+                    AddSeat(seats, "headhunter", plan == null ? "" : plan.assignedEmployeeId);
+                }
+            }
+
+            if (current.importPartnerships != null)
+            {
+                foreach (var partnership in current.importPartnerships)
+                {
+                    AddSeat(seats, "purchasing", partnership == null ? "" : partnership.employeeInstanceId);
+                }
+            }
+
+            return seats;
+        }
+
+        private static void AddSeat(List<HqSeat> seats, string role, string? employee)
+        {
+            var id = employee ?? "";
+            seats.Add(new HqSeat(role, id.Length > 0, id));
+        }
+
+        private static List<HiredHand> Hired(GameInstance current)
+        {
+            var hired = new List<HiredHand>();
+            if (current.EmployeeInstances == null)
+            {
+                return hired;
+            }
+
+            var skills = new[]
+            {
+                HqPlans.LogisticsSkill,
+                HqPlans.HrSkill,
+                HqPlans.PurchasingSkill,
+                HqPlans.HeadhunterSkill,
+            };
+            foreach (var employee in current.EmployeeInstances)
+            {
+                if (employee == null || string.IsNullOrEmpty(employee.id))
+                {
+                    continue;
+                }
+
+                foreach (var skill in skills)
+                {
+                    if (employee.HasSkill(skill))
+                    {
+                        hired.Add(new HiredHand(employee.id, skill, employee.IsCandidate));
+                    }
+                }
+            }
+
+            return hired;
+        }
+
         private static List<GarageSlot> Garage(GameInstance current)
         {
             var slots = new List<GarageSlot>();
