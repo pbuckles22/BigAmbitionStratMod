@@ -589,6 +589,124 @@ public class AuditTests
         Assert.Contains("Profit 7", line);
     }
 
+    [Fact]
+    public void Audit_load_day_roll_needs_refill_recorded_call_slot_fill_store_connect_plan_assign_restock_sort_overflow_order_audit_bar_health_locks_the_summary_counts()
+    {
+        // Chain: load → day roll → needs refill → recorded call → slot fill → store connect → plan assign → restock → sort → overflow → order → audit → bar → health
+        using var dir = new TempAudit();
+        var save = new object();
+        var prefix = Prefix(dir.Path, save);
+        var guard = LiveGuard();
+        var report = Audit.Check(dir.Path, 1016, prefix.Api, prefix.World, guard, heal => HealFate.Done);
+        var stage = Stage.Read(TopBar.Day(prefix.Rolled), guard.Cash, prefix.World.Needs, report.Stops, prefix.World.Holds, prefix.World.Slots);
+        var bar = TopBar.From(
+            prefix.Rolled,
+            File.ReadAllText(StatementDump.CsvPath(dir.Path)),
+            guard.Cash,
+            0m,
+            stage,
+            guard.Enabled,
+            TopBar.Clock(paused: false, rate: null));
+        var summary = Assert.Single(report.Lines, row => row.StartsWith("audit.summary "));
+        var health = Health.Latest(dir.Path);
+
+        Assert.Contains("Day 1016", bar);
+        Assert.Contains("audit.summary ", summary);
+        Assert.Contains("Stores supplied unconnected=" + Token(summary, "unconnected"), health);
+        Assert.Contains("Slots filled emptySlots=" + Token(summary, "emptySlots"), health);
+        Assert.Contains("Plans present missingPlans=" + Token(summary, "missingPlans"), health);
+        Assert.Contains("Last heal healed=" + Token(summary, "healed"), health);
+        if (Token(summary, "healed") == "0")
+        {
+            Assert.Contains("Last heal healed=0 none", health);
+        }
+        else
+        {
+            var last = report.Lines.Last(row => row.StartsWith("audit.healed "));
+            Assert.Contains(Tail(last), health);
+        }
+    }
+
+    [Fact]
+    public void Audit_load_day_roll_needs_refill_recorded_call_slot_fill_store_connect_plan_assign_restock_sort_overflow_order_audit_bar_health_quiet_day_drops_the_older_heal()
+    {
+        // Chain: load → day roll → needs refill → recorded call → slot fill → store connect → plan assign → restock → sort → overflow → order → audit → bar → health → quiet
+        using var dir = new TempAudit();
+        var save = new object();
+        var prefix = Prefix(dir.Path, save);
+        var guard = LiveGuard();
+        var first = Audit.Check(dir.Path, 1016, prefix.Api, prefix.World, guard, heal => HealFate.Done);
+        var off = new AuditGuard(enabled: false, dryRun: false, cash: 1000m, dailyCost: 10m, truckCost: 1, build: LoadLog.PinnedBuild);
+        var second = Audit.Check(dir.Path, 1017, prefix.Api, prefix.World.WithStops(first.Stops), off, heal => HealFate.Done);
+        var stage = Stage.Read(TopBar.Day(prefix.Rolled), guard.Cash, prefix.World.Needs, first.Stops, prefix.World.Holds, prefix.World.Slots);
+        var bar = TopBar.From(
+            prefix.Rolled,
+            File.ReadAllText(StatementDump.CsvPath(dir.Path)),
+            guard.Cash,
+            0m,
+            stage,
+            guard.Enabled,
+            TopBar.Clock(paused: false, rate: null));
+        var summary = Assert.Single(second.Lines, row => row.StartsWith("audit.summary "));
+        var health = Health.Latest(dir.Path);
+        var frame = TopBar.Frame(bar, new[] { health });
+        var shown = Health.Record(dir.Path, health);
+        var again = Health.Record(dir.Path, health);
+
+        Assert.Equal(bar, frame[0]);
+        Assert.Equal(health, frame[1]);
+        Assert.StartsWith("Stores supplied ", frame[1]);
+        Assert.Contains("healed=0", summary);
+        Assert.Contains("Stores supplied unconnected=" + Token(summary, "unconnected"), health);
+        Assert.Contains("Slots filled emptySlots=" + Token(summary, "emptySlots"), health);
+        Assert.Contains("Plans present missingPlans=" + Token(summary, "missingPlans"), health);
+        Assert.Equal(
+            "Last heal healed=0 none",
+            health.Substring(health.LastIndexOf("Last heal ", StringComparison.Ordinal)));
+        Assert.DoesNotContain("action=", health);
+        Assert.Equal(shown, again);
+        Assert.Equal(health, Health.Latest(dir.Path));
+        Assert.StartsWith("health.shown version=" + LoadLog.Version + " Stores supplied ", shown);
+        var log = File.ReadAllLines(LoadLog.CeoLogPath(dir.Path));
+        Assert.Single(log, row => row.StartsWith("health.shown "));
+    }
+
+    private static string Token(string line, string name)
+    {
+        var token = name + "=";
+        var at = line.IndexOf(token, StringComparison.Ordinal);
+        Assert.True(at >= 0, token);
+        var rest = line.Substring(at + token.Length);
+        var end = 0;
+        while (end < rest.Length && char.IsDigit(rest[end]))
+        {
+            end++;
+        }
+
+        Assert.True(end > 0, token);
+        return rest.Substring(0, end);
+    }
+
+    private static string Tail(string healed)
+    {
+        var at = healed.IndexOf("action=", StringComparison.Ordinal);
+        Assert.True(at >= 0);
+        var tail = healed.Substring(at);
+        var dry = tail.LastIndexOf(" dry=", StringComparison.Ordinal);
+        if (dry >= 0)
+        {
+            tail = tail.Substring(0, dry);
+        }
+
+        var call = tail.LastIndexOf(" call=", StringComparison.Ordinal);
+        if (call >= 0)
+        {
+            tail = tail.Substring(0, call);
+        }
+
+        return tail.Trim();
+    }
+
     private static AuditWorld PlantedStore()
     {
         return new AuditWorld(

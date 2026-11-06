@@ -55,6 +55,8 @@ namespace ChaoticCEO
 
         private string _bar = "";
 
+        private string _health = "";
+
         public static PanelView Ensure(string localAppData)
         {
             if (_instance == null)
@@ -146,6 +148,8 @@ namespace ChaoticCEO
             _draw = Panel.Text(_lines);
             _bar = LiveDump.HudLine();
             TopBar.Record(_localAppData, _bar);
+            _health = Health.Latest(_localAppData);
+            Health.Record(_localAppData, _health);
             GUI.DrawTexture(_window, _backdrop);
             _window = GUILayout.Window(WindowId, _window, DrawWindow, "ChaoticCEO", _windowStyle);
             var pointer = Event.current == null ? Vector2.zero : Event.current.mousePosition;
@@ -213,6 +217,11 @@ namespace ChaoticCEO
             if (_bar.Length > 0)
             {
                 GUILayout.Label(_bar, _label);
+            }
+
+            if (_health.Length > 0)
+            {
+                GUILayout.Label(_health, _label);
             }
 
             _scroll = GUILayout.BeginScrollView(_scroll);

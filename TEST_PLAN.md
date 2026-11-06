@@ -139,6 +139,17 @@ Human PASS 2026-11-06 on 1.11.9. Day 1015: `audit.summary` `unconnected=61 empty
 
 Human PASS 2026-11-06 on 1.12.1. Day 1015: `bar.shown` cash 15874940, net worth 378834400 / 100000000, profit 1544496, stage 2, autopilot on, speed 1. The HUD showed $15.8M and +$1.5M on Sunday (Day 1015). The roadmap stayed under the bar.
 
+## F9 health section human check
+
+1. Restart Big Ambitions so version 1.12.2 loads. You are in the city on the usual save. Do not load the day 1021 save. This check is the health line under the top bar. It does not add Execute buttons or the autopilot toggle.
+2. Let one day roll if today's `ceo.log` has no `audit.summary` yet. Press F9. The ChaoticCEO window opens. The first line is the bar. The next line is the health section. The roadmap stays under that.
+3. Read the latest `audit.summary` in `%LocalAppData%\ChaoticCEO\ceo.log`.
+4. **PASS if** the health line shows `Stores supplied unconnected=`, `Slots filled emptySlots=`, `Plans present missingPlans=`, and `Last heal healed=` with the same four numbers as that summary, and the last heal names the last `audit.healed` action for that summary (or `none` when `healed=0`). **FAIL if** the line is missing, a number disagrees with that summary, an older day's heal is shown when `healed=0`, or the roadmap is gone.
+5. Evidence: one `health.shown` line with that same text. A later frame while the window stays open does not append it again. `audit.summary` (`unconnected`, `emptySlots`, `missingPlans`, `healed`) and the last `audit.healed` (`action`, `store`, `warehouse`, `item`, `role`).
+6. Version marker: public `1.12.2`. `ceo.log` starts at `mod.loaded version=1.12.2 build=3682`.
+
+Human PASS 2026-11-06 on 1.12.2. Day 1016: `health.shown` unconnected=61 emptySlots=7 missingPlans=3 healed=10, last heal connect First Avenue 5 kabob to W7. The latest `audit.summary` matches those four numbers. One `health.shown`. `mod.loaded version=1.12.2 build=3682`. The HUD showed $17.5M and +$1.3M.
+
 ## Warehouse sort and restock human check
 
 1. Restart Big Ambitions so version 1.11.8.1 loads. You are in the city on the usual save. Do not load the day 1021 save. This check records warehouse homes, drains, overflow, and the first import order. It does not call the game. BizMan’s warehouses and purchasing screens stay as they are. Fifth Avenue 36 stays on the wholesaler.

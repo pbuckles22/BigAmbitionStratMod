@@ -6,7 +6,7 @@ Cursor **rules**, **skills**, **handoff protocol**, and **test discipline** for 
 
 **Start with [CONTRIBUTING.md](CONTRIBUTING.md)** — reading order, tracked vs gitignored docs, PR expectations.
 
-**Current work:** [doc/PROJECT_STATUS.md](doc/PROJECT_STATUS.md). Version 1.12.1. F9 shows a top bar with day, cash, net worth against $100M, yesterday’s profit, stage, autopilot, and speed. A day change still audits the save.
+**Current work:** [doc/PROJECT_STATUS.md](doc/PROJECT_STATUS.md). Version 1.12.2. F9 shows the top bar and a health line: stores supplied, slots filled, plans present, and the last heal. A day change still audits the save.
 
 ## Quick start
 

@@ -222,13 +222,13 @@ public class RoadshowTests
         Directory.CreateDirectory(Path.GetDirectoryName(current)!);
         File.WriteAllText(
             current,
-            "advice.shown version=1.12.1 tone=red business=Chaotic Gym #2 street=ba:street_firststreet number=35 explain=Close Chaotic Gym #2. Profit 3777.6381."
+            "advice.shown version=1.12.2 tone=red business=Chaotic Gym #2 street=ba:street_firststreet number=35 explain=Close Chaotic Gym #2. Profit 3777.6381."
                 + Environment.NewLine
                 + "roadmap.shown version=1.7.1 steps=10 street=ba:street_tenthstreet number=13 gain=13771.4512 move=1"
                 + Environment.NewLine
-                + "roadmap.shown version=1.12.1 steps=10 street=ba:street_tenthstreet number=13 gain=13771.4512 move=1"
+                + "roadmap.shown version=1.12.2 steps=10 street=ba:street_tenthstreet number=13 gain=13771.4512 move=1"
                 + Environment.NewLine
-                + "store.closed version=1.12.1 street=ba:street_tenthstreet number=13 call=Helpers.BusinessHelper.ShutdownBusiness"
+                + "store.closed version=1.12.2 street=ba:street_tenthstreet number=13 call=Helpers.BusinessHelper.ShutdownBusiness"
                 + Environment.NewLine);
 
         var loaded = LoadLog.StartSession(dir.Path);
@@ -245,7 +245,7 @@ public class RoadshowTests
         Assert.Contains(
             "roadmap.changed version=1.7.1 steps=10 street=ba:street_tenthstreet number=13 gain=13771.4512 move=1",
             history);
-        Assert.Contains("store.closed version=1.12.1 street=ba:street_tenthstreet number=13", history);
+        Assert.Contains("store.closed version=1.12.2 street=ba:street_tenthstreet number=13", history);
         Assert.Equal(1, Count(history, "store.closed"));
     }
 
@@ -258,7 +258,7 @@ public class RoadshowTests
         var lines = new string[LoadLog.HistoryLimit + 1];
         for (var index = 0; index < lines.Length; index++)
         {
-            lines[index] = "store.closed version=1.12.1 street=ba:street_s number="
+            lines[index] = "store.closed version=1.12.2 street=ba:street_s number="
                 + (index + 1).ToString()
                 + " call=Helpers.BusinessHelper.ShutdownBusiness";
         }
