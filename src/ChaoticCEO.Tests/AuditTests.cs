@@ -671,6 +671,137 @@ public class AuditTests
         Assert.Single(log, row => row.StartsWith("health.shown "));
     }
 
+    [Fact]
+    public void Audit_load_day_roll_needs_refill_recorded_call_slot_fill_store_connect_plan_assign_restock_sort_overflow_order_audit_bar_health_controls_locks_the_toggle_f10_and_execute_all()
+    {
+        // Chain: load → day roll → needs refill → recorded call → slot fill → store connect → plan assign → restock → sort → overflow → order → audit → bar → health → controls
+        using var dir = new TempAudit();
+        var save = new object();
+        var prefix = Prefix(dir.Path, save);
+        var guard = LiveGuard();
+        var report = Audit.Check(dir.Path, 1016, prefix.Api, prefix.World, guard, heal => HealFate.Done);
+        var stage = Stage.Read(TopBar.Day(prefix.Rolled), guard.Cash, prefix.World.Needs, report.Stops, prefix.World.Holds, prefix.World.Slots);
+        Autopilot.Enabled = guard.Enabled;
+        Autopilot.DryRun = guard.DryRun;
+        try
+        {
+            var csv = File.ReadAllText(StatementDump.CsvPath(dir.Path));
+            var bar = TopBar.From(
+                prefix.Rolled,
+                csv,
+                guard.Cash,
+                0m,
+                stage,
+                Autopilot.Enabled,
+                TopBar.Clock(paused: false, rate: null));
+            var summary = Assert.Single(report.Lines, row => row.StartsWith("audit.summary "));
+            var health = Health.Latest(dir.Path);
+            var row = Controls.Row(Autopilot.Enabled, Autopilot.DryRun);
+            var frame = TopBar.Frame(bar, new[] { health, row });
+            var shown = Controls.Record(dir.Path, row);
+            var again = Controls.Record(dir.Path, row);
+            var toggled = Controls.Toggle();
+            var offBar = TopBar.From(
+                prefix.Rolled,
+                csv,
+                guard.Cash,
+                0m,
+                stage,
+                toggled,
+                TopBar.Clock(paused: false, rate: null));
+            var restored = Controls.Toggle();
+            var paused = Controls.Pause();
+            var pausedBar = TopBar.From(
+                prefix.Rolled,
+                csv,
+                guard.Cash,
+                0m,
+                stage,
+                paused,
+                TopBar.Clock(paused: false, rate: null));
+
+            Assert.Contains("day=1016", prefix.Rolled);
+            Assert.Contains("audit.summary ", summary);
+            Assert.Contains("Stores supplied ", health);
+            Assert.Equal(bar, frame[0]);
+            Assert.Equal(health, frame[1]);
+            Assert.Equal(row, frame[2]);
+            Assert.Contains("Autopilot on", bar);
+            Assert.False(toggled);
+            Assert.Contains("Autopilot off", offBar);
+            Assert.DoesNotContain("Autopilot on", offBar);
+            Assert.True(restored);
+            Assert.False(paused);
+            Assert.False(Autopilot.Enabled);
+            Assert.Contains("Autopilot off", pausedBar);
+            Assert.DoesNotContain("Autopilot on", pausedBar);
+            Assert.Equal("Execute all", Controls.ExecuteAll);
+            Assert.Equal("7.12", Controls.ExecuteAllStory);
+            Assert.EndsWith("Execute all", row);
+            Assert.Equal("action=execute-all story=7.12", Controls.PressAll());
+            Assert.Equal(shown, again);
+            Assert.StartsWith("controls.shown version=" + LoadLog.Version + " Autopilot on", shown);
+            Assert.Contains("Execute all", shown);
+            var log = File.ReadAllLines(LoadLog.CeoLogPath(dir.Path));
+            Assert.Single(log, line => line.StartsWith("controls.shown "));
+        }
+        finally
+        {
+            Autopilot.Enabled = true;
+            Autopilot.DryRun = false;
+        }
+    }
+
+    [Fact]
+    public void Audit_load_day_roll_needs_refill_recorded_call_slot_fill_store_connect_plan_assign_restock_sort_overflow_order_audit_bar_health_controls_dry_run_leaves_the_bar_on()
+    {
+        // Chain: load → day roll → needs refill → recorded call → slot fill → store connect → plan assign → restock → sort → overflow → order → audit → bar → health → controls → dry
+        using var dir = new TempAudit();
+        var save = new object();
+        var prefix = Prefix(dir.Path, save);
+        var guard = LiveGuard();
+        var report = Audit.Check(dir.Path, 1016, prefix.Api, prefix.World, guard, heal => HealFate.Done);
+        var stage = Stage.Read(TopBar.Day(prefix.Rolled), guard.Cash, prefix.World.Needs, report.Stops, prefix.World.Holds, prefix.World.Slots);
+        Autopilot.Enabled = guard.Enabled;
+        Autopilot.DryRun = guard.DryRun;
+        try
+        {
+            var csv = File.ReadAllText(StatementDump.CsvPath(dir.Path));
+            var health = Health.Latest(dir.Path);
+            var dry = Controls.Dry();
+            var bar = TopBar.From(
+                prefix.Rolled,
+                csv,
+                guard.Cash,
+                0m,
+                stage,
+                Autopilot.Enabled,
+                TopBar.Clock(paused: false, rate: null));
+            var row = Controls.Row(Autopilot.Enabled, dry);
+            var frame = TopBar.Frame(bar, new[] { health, row });
+
+            Assert.Contains("day=1016", prefix.Rolled);
+            Assert.Contains(report.Lines, line => line.StartsWith("audit.summary "));
+            Assert.Contains("Stores supplied ", health);
+            Assert.True(dry);
+            Assert.True(Autopilot.DryRun);
+            Assert.True(Autopilot.Enabled);
+            Assert.Contains("Autopilot on", bar);
+            Assert.DoesNotContain("Autopilot off", bar);
+            Assert.Contains("Dry run on", row);
+            Assert.EndsWith("Execute all", row);
+            Assert.Equal(bar, frame[0]);
+            Assert.Equal(health, frame[1]);
+            Assert.Equal(row, frame[2]);
+            Assert.Equal("Dry run on", Controls.Buttons(Autopilot.Enabled, Autopilot.DryRun)[1]);
+        }
+        finally
+        {
+            Autopilot.Enabled = true;
+            Autopilot.DryRun = false;
+        }
+    }
+
     private static string Token(string line, string name)
     {
         var token = name + "=";

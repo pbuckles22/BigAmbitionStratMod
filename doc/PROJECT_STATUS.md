@@ -8,7 +8,7 @@
 
 ## Summary
 
-**BigAmbitionStratMod** 1.12.2 — F9 shows the top bar and a health line: stores supplied, slots filled, plans present, and the last heal. Those counts match the latest `audit.summary`. The health check passed 2026-11-06. **7.13** stays stashed. The rules are in [requirements/strategy.md](requirements/strategy.md). `origin` is this repo.
+**BigAmbitionStratMod** 1.12.3 — F9 shows Execute on each roadmap step, Execute all, the autopilot toggle, and dry run. Execute all is the 7.12 button and does not run the steps. The controls check passed 2026-11-06. **7.13** stays stashed. The rules are in [requirements/strategy.md](requirements/strategy.md). `origin` is this repo.
 
 ---
 
@@ -17,6 +17,7 @@
 | Branch | Role |
 |--------|------|
 | **`main`** | Integration branch. Last land `48d14f1`, version 1.12.2 |
+| **`feature/12.3-f9-controls`** | Story 12.3. Version 1.12.3. Human PASS 2026-11-06. Kept after this CMPH. |
 | **`feature/12.2-f9-health`** | Story 12.2. Version 1.12.2. Human PASS 2026-11-06. Kept after this CMPH. |
 | **`feature/12.1-f9-top-bar`** | Story 12.1. Version 1.12.1. Human PASS 2026-11-06. Kept after this CMPH. |
 | **`feature/11.5-daily-audit`** | Story 11.5. Version 1.11.9. Human PASS 2026-11-06. Kept after this CMPH. |
@@ -93,7 +94,7 @@
 
 ## Next up (maintainers)
 
-- Story **7.13**. A warehouse, a headquarters, and an office stay off the close list. Then **7.9**, **7.10**, **7.11**, **7.12**, then Epics 11, 12, 13, 9, 8, 10.
+- Story **12.4**. One telemetry row per day, and a progress report from that file. **7.13** stays stashed.
 - Variants: merge upstream when AgenticTemplate skills/rules change
 
 ---

@@ -1,10 +1,10 @@
 # PM_PLAN — BigAmbitionStratMod
 
-In-game advisor for one Big Ambitions save, then a new-game guide and autopilot. Version scheme `MAJOR.EPIC.COUNTER`. Current public version **1.12.2**. The first ship of a new epic is `1.N.1`. Never go backwards.
+In-game advisor for one Big Ambitions save, then a new-game guide and autopilot. Version scheme `MAJOR.EPIC.COUNTER`. Current public version **1.12.3**. The first ship of a new epic is `1.N.1`. Never go backwards.
 
 ## Context
 
-The game is Mono, build **3682**. A mod builds with `dotnet build` against `Big Ambitions_Data\Managed` (`BigAmbitions.dll`, `BigAmbitions.ModAPI.dll`). The pin is `doc/requirements/game-build.md`. Python save tools live in `script/`. The mod, when it exists, lives in `src/`. Evidence for the ledger is `doc/gemini/cache/ledger.log`. The mod writes `%LocalAppData%\ChaoticCEO\ceo.log`. The compile counter is gitignored `build_number.txt`. The mod informational version is `1.12.2+N`. The draw reference is `UnityEngine.IMGUIModule`.
+The game is Mono, build **3682**. A mod builds with `dotnet build` against `Big Ambitions_Data\Managed` (`BigAmbitions.dll`, `BigAmbitions.ModAPI.dll`). The pin is `doc/requirements/game-build.md`. Python save tools live in `script/`. The mod, when it exists, lives in `src/`. Evidence for the ledger is `doc/gemini/cache/ledger.log`. The mod writes `%LocalAppData%\ChaoticCEO\ceo.log`. The compile counter is gitignored `build_number.txt`. The mod informational version is `1.12.3+N`. The draw reference is `UnityEngine.IMGUIModule`.
 
 Epic 1 closed on 17 businesses and 5865 statement rows. `ba:businesstype_liquorstore` is **food**. Do not relabel it inside a routes story. A warehouse story may add a specialty override only with a new test.
 
@@ -126,7 +126,7 @@ Starts after Epic **11**. You can see the run without opening the game.
 
 - **12.1** `[x]` F9 top bar: day, cash, net worth against $100M, yesterday’s profit, stage, autopilot on or off, and speed. The profit is the income-statement day total. Human PASS 2026-11-06. Day 1015: cash 15874940, net worth 378834400 / 100000000, profit 1544496, stage 2, autopilot on, speed 1. The HUD showed $15.8M and +$1.5M. Version 1.12.1. Chain: `load → day roll → needs refill → recorded call → slot fill → store connect → plan assign → restock → sort → overflow → order → audit → bar`.
 - **12.2** `[x]` F9 health section: stores supplied, slots filled, plans present, and the last heal. Human PASS 2026-11-06. Day 1016: unconnected 61, empty slots 7, missing plans 3, healed 10. Last heal connect First Avenue 5 kabob to W7. One `health.shown`. Cash 17587780, profit 1355454. The HUD showed $17.5M and +$1.3M. Version 1.12.2. Chain: `load → day roll → needs refill → recorded call → slot fill → store connect → plan assign → restock → sort → overflow → order → audit → bar → health`.
-- **12.3** `[ ]` F9 controls: Execute on each step, Execute all, the autopilot toggle, and dry run. The toggle and F10 set `Autopilot.Enabled`. F10 clears it from anywhere. The daily loop that reads the flag is story **10.2**. Human check: the toggle and F10 change the on/off state on the bar, and Execute all is the **7.12** button.
+- **12.3** `[x]` F9 controls: Execute on each step, Execute all, the autopilot toggle, and dry run. The toggle and F10 set `Autopilot.Enabled`. F10 clears it from anywhere. The daily loop that reads the flag is story **10.2**. Execute all is the **7.12** button and does not run the steps. Human PASS 2026-11-06. Day 1016: the bar flipped Autopilot on to off, F10 logged `autopilot.paused reason=f10`, and Execute all logged `controls.pressed action=execute-all story=7.12`. Cash 17568900, net worth 380540500 / 100000000, profit 1345948. Version 1.12.3. Chain: `load → day roll → needs refill → recorded call → slot fill → store connect → plan assign → restock → sort → overflow → order → audit → bar → health → controls`.
 - **12.4** `[ ]` `telemetry.csv` with one row per day: day, cash, net worth, profit, stage, health counts, and actions. `script/Report-Progress.py` writes a progress report from that file. Human check: three days give three rows and a report.
 
 ## Epic 13 — New-game calls

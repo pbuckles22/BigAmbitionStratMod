@@ -150,6 +150,7 @@ namespace ChaoticCEO
             TopBar.Record(_localAppData, _bar);
             _health = Health.Latest(_localAppData);
             Health.Record(_localAppData, _health);
+            Controls.Record(_localAppData, Controls.Row(Autopilot.Enabled, Autopilot.DryRun));
             GUI.DrawTexture(_window, _backdrop);
             _window = GUILayout.Window(WindowId, _window, DrawWindow, "ChaoticCEO", _windowStyle);
             var pointer = Event.current == null ? Vector2.zero : Event.current.mousePosition;
@@ -235,6 +236,7 @@ namespace ChaoticCEO
                     {
                         DrawClose(_lines[lineIndex]);
                         DrawRedo(_lines[lineIndex]);
+                        DrawExecute(_lines[lineIndex]);
                     }
 
                     lineIndex++;
@@ -243,7 +245,49 @@ namespace ChaoticCEO
             }
 
             GUILayout.EndScrollView();
+            DrawWatch();
             GUI.DragWindow(new Rect(0f, 0f, 10000f, 28f));
+        }
+
+        private void DrawWatch()
+        {
+            var captions = Controls.Buttons(Autopilot.Enabled, Autopilot.DryRun);
+            GUILayout.BeginHorizontal();
+            if (GUILayout.Button(captions[0]))
+            {
+                Controls.Toggle();
+            }
+
+            if (GUILayout.Button(captions[1]))
+            {
+                Controls.Dry();
+            }
+
+            if (GUILayout.Button(captions[2]))
+            {
+                Controls.Append(_localAppData, Controls.Pressed(Controls.PressAll()));
+            }
+
+            GUILayout.EndHorizontal();
+        }
+
+        private void DrawExecute(PanelLine line)
+        {
+            if (line == null || line.Business != "step")
+            {
+                return;
+            }
+
+            var buttons = Controls.Execute(new[] { line });
+            if (buttons.Count == 0)
+            {
+                return;
+            }
+
+            if (GUILayout.Button(buttons[0].Label))
+            {
+                Controls.Append(_localAppData, Controls.Pressed(Controls.Press(buttons[0])));
+            }
         }
 
         private void DrawClose(PanelLine line)

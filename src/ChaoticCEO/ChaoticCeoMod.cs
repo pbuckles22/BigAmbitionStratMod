@@ -99,7 +99,7 @@ namespace ChaoticCEO
                 return;
             }
 
-            Autopilot.Enabled = false;
+            Controls.Pause();
             File.AppendAllText(
                 LoadLog.CeoLogPath(_localAppData),
                 "autopilot.paused version=" + LoadLog.Version + " reason=f10" + Environment.NewLine);

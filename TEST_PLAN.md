@@ -150,6 +150,17 @@ Human PASS 2026-11-06 on 1.12.1. Day 1015: `bar.shown` cash 15874940, net worth 
 
 Human PASS 2026-11-06 on 1.12.2. Day 1016: `health.shown` unconnected=61 emptySlots=7 missingPlans=3 healed=10, last heal connect First Avenue 5 kabob to W7. The latest `audit.summary` matches those four numbers. One `health.shown`. `mod.loaded version=1.12.2 build=3682`. The HUD showed $17.5M and +$1.3M.
 
+## F9 controls human check
+
+1. Restart Big Ambitions so version 1.12.3 loads. You are in the city on the usual save. Do not load the day 1021 save. This check is the F9 controls: Execute on each roadmap step, Execute all, the autopilot toggle, and dry run. It does not run the roadmap steps. That run is story 7.12. It does not start the daily autopilot loop. That loop is story 10.2.
+2. Press F9. The first line is the bar. The next line is the health section. Each roadmap step has an Execute button. The bottom row has Autopilot on or off, Dry run on or off, and Execute all.
+3. Click the Autopilot button. Press F10 once, with the window open or closed. Click Execute all.
+4. **PASS if** the bar flips between Autopilot on and Autopilot off when you click the toggle, F10 leaves the bar on Autopilot off, and the bottom button says Execute all. **FAIL if** the bar stays the same, F10 leaves Autopilot on, Execute all is missing, or Execute all closes a store or changes the save.
+5. Evidence: `controls.shown` names Autopilot, Dry run, and Execute all. A later frame with the same row does not append it again. `autopilot.paused reason=f10` after F10. A click on Execute all appends `controls.pressed` `action=execute-all story=7.12`. A click on Execute appends `controls.pressed` `action=execute`.
+6. Version marker: public `1.12.3`. `ceo.log` starts at `mod.loaded version=1.12.3 build=3682`.
+
+Human PASS 2026-11-06 on 1.12.3. Day 1016: the bar flipped Autopilot on to off and back, then `autopilot.paused reason=f10` left it off. `controls.pressed action=execute-all story=7.12`. Dry run then read on while autopilot stayed on. Cash 17568900, net worth 380540500 / 100000000, profit 1345948. No store closed.
+
 ## Warehouse sort and restock human check
 
 1. Restart Big Ambitions so version 1.11.8.1 loads. You are in the city on the usual save. Do not load the day 1021 save. This check records warehouse homes, drains, overflow, and the first import order. It does not call the game. BizMan’s warehouses and purchasing screens stay as they are. Fifth Avenue 36 stays on the wholesaler.
