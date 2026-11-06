@@ -139,7 +139,7 @@ When shipping: update **PM_PLAN**, **doc/PROJECT_STATUS.md**, and **Current stat
 ## Current state
 
 - **Product:** Version 1.11.8.1. A day change records warehouse homes, drains, and one import order per family in `ceo.log`. It does not call the game. Human PASS 2026-11-05. It also records a pricing plan and open headquarters roles, a freight-truck buy for each empty garage slot, and each unplanned goods store on the warehouse that holds its family. A loaded save keeps energy, hunger, and happiness at 100. Fifth Avenue 36 keeps its wholesaler contract until that hub holds the item. 7.13 stays stashed. Ladder: [PM_PLAN.md](PM_PLAN.md).
-- **On:** `feature/11.4-restock-warehouses`. Stash `7.13 spare cost centers` on `feature/7.13-spare-cost-centers`. https://github.com/pbuckles22/BigAmbitionStratMod
+- **On:** `origin/main @ 593d91f`. Stash `7.13 spare cost centers` on `feature/7.13-spare-cost-centers`. https://github.com/pbuckles22/BigAmbitionStratMod
 - **Next:** Story 11.5, daily audit and self-heal, when asked.
 - **Blockers:** Do not pop 7.13. Do not load the day 1021 save. Do not drop Fifth Avenue 36’s contract before the hub holds that item.
 
