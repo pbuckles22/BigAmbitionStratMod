@@ -16,7 +16,7 @@
 
 | Branch | Role |
 |--------|------|
-| **`main`** | Integration branch. Last land is the 1.11.9 audit close. |
+| **`main`** | Integration branch. Last land `5eef458`, version 1.11.9 |
 | **`feature/11.5-daily-audit`** | Story 11.5. Version 1.11.9. Human PASS 2026-11-06. Kept after this CMPH. |
 | **`feature/11.4-restock-warehouses`** | Story 11.4. Version 1.11.8.1. Human PASS 2026-11-05. |
 | **`feature/11.3-assign-plans`** | Story 11.3. Version 1.11.7. Human PASS 2026-11-05. Kept after CMPH. |
@@ -67,7 +67,7 @@
 | **`feature/chain-prefix`** | Kept after CMPH (template history) |
 | **`feature/handoff-receiver-framing`** | Kept after CMPH (template history) |
 
-**Last land:** the 1.11.9 audit close on `main`. Branch `feature/11.5-daily-audit` kept. Repo: https://github.com/pbuckles22/BigAmbitionStratMod.
+**Last land:** `5eef458` on `main`. Version 1.11.9. Branch `feature/11.5-daily-audit` kept. Repo: https://github.com/pbuckles22/BigAmbitionStratMod.
 
 ---
 

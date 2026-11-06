@@ -139,7 +139,7 @@ When shipping: update **PM_PLAN**, **doc/PROJECT_STATUS.md**, and **Current stat
 ## Current state
 
 - **Product:** Version 1.11.9. Epic 11 is closed. A day change audits the save and connects up to 10 unconnected goods stores. Fifth Avenue 36 keeps its wholesaler contract until that hub holds the item. A loaded save keeps energy, hunger, and happiness at 100. 7.13 stays stashed. Ladder: [PM_PLAN.md](PM_PLAN.md).
-- **On:** `origin/main` after the 1.11.9 land. Stash `7.13 spare cost centers` on `feature/7.13-spare-cost-centers`. https://github.com/pbuckles22/BigAmbitionStratMod
+- **On:** `origin/main @ 5eef458`. Stash `7.13 spare cost centers` on `feature/7.13-spare-cost-centers`. https://github.com/pbuckles22/BigAmbitionStratMod
 - **Next:** Story 12.1, the F9 top bar, when asked.
 - **Blockers:** Do not pop 7.13. Do not load the day 1021 save. Do not drop Fifth Avenue 36’s contract before the hub holds that item.
 
