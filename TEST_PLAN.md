@@ -128,6 +128,17 @@ Human PASS 2026-11-05 on 1.11.7. Day 1014 load: energy 70.47, hunger 66.3, happi
 
 Human PASS 2026-11-06 on 1.11.9. Day 1015: `audit.summary` `unconnected=61 emptySlots=7 dry=4 mixed=7 unstaffed=0 missingPlans=3 cashBelowReserve=0 pinMismatch=0 healed=10`. Ten `audit.healed` lines, each `action=connect` `dry=false` and `AddDestination`. Fourth Avenue 28 hair to W11. First Avenue 38 used eight clothing items to W9. First Avenue 5 kabob to W7. Fifth Avenue 36 kept four wholesaler rows. `snapshot.taken version=1.11.9`.
 
+## F9 top bar human check
+
+1. Restart Big Ambitions so version 1.12.1 loads. You are in the city on the usual save. Do not load the day 1021 save. This check is the F9 top bar only. It does not add the health counts, Execute buttons, or the autopilot toggle.
+2. Open BizMan and note the bank cash and yesterday's store profit. Note the personal wealth figure the game uses against $100,000,000. Note the game speed.
+3. Press F9. The ChaoticCEO window opens. The first line is the bar. Press F9 again and it closes.
+4. **PASS if** that line names the day, cash, net worth against 100000000, yesterday's profit, stage, autopilot on, and speed, and cash, net worth, profit, and speed match the figures from step 2. **FAIL if** the bar is missing, a figure disagrees with the game, autopilot reads off without F10, or the roadmap list is gone.
+5. Evidence: one `bar.shown` line in `%LocalAppData%\ChaoticCEO\ceo.log` with the same day, cash, net, goal, profit, stage, autopilot, and speed. A later frame while the window stays open does not append it again.
+6. Version marker: public `1.12.1`. `ceo.log` starts at `mod.loaded version=1.12.1 build=3682`.
+
+Human PASS 2026-11-06 on 1.12.1. Day 1015: `bar.shown` cash 15874940, net worth 378834400 / 100000000, profit 1544496, stage 2, autopilot on, speed 1. The HUD showed $15.8M and +$1.5M on Sunday (Day 1015). The roadmap stayed under the bar.
+
 ## Warehouse sort and restock human check
 
 1. Restart Big Ambitions so version 1.11.8.1 loads. You are in the city on the usual save. Do not load the day 1021 save. This check records warehouse homes, drains, overflow, and the first import order. It does not call the game. BizMan’s warehouses and purchasing screens stay as they are. Fifth Avenue 36 stays on the wholesaler.

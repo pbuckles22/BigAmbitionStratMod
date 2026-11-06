@@ -53,6 +53,8 @@ namespace ChaoticCEO
 
         private string _lastFailure = "";
 
+        private string _bar = "";
+
         public static PanelView Ensure(string localAppData)
         {
             if (_instance == null)
@@ -142,6 +144,8 @@ namespace ChaoticCEO
             GUI.backgroundColor = Color.white;
             _lines = _session.Draw(BoardNow());
             _draw = Panel.Text(_lines);
+            _bar = LiveDump.HudLine();
+            TopBar.Record(_localAppData, _bar);
             GUI.DrawTexture(_window, _backdrop);
             _window = GUILayout.Window(WindowId, _window, DrawWindow, "ChaoticCEO", _windowStyle);
             var pointer = Event.current == null ? Vector2.zero : Event.current.mousePosition;
@@ -204,6 +208,11 @@ namespace ChaoticCEO
             {
                 _scroll.y += Panel.WheelStep(_held);
                 _held = 0f;
+            }
+
+            if (_bar.Length > 0)
+            {
+                GUILayout.Label(_bar, _label);
             }
 
             _scroll = GUILayout.BeginScrollView(_scroll);

@@ -504,6 +504,91 @@ public class AuditTests
         Assert.Single(log, line => line.StartsWith("audit.healed ") && line.Contains(" store=" + Salon + " "));
     }
 
+    [Fact]
+    public void Audit_load_day_roll_needs_refill_recorded_call_slot_fill_store_connect_plan_assign_restock_sort_overflow_order_audit_bar_names_the_run()
+    {
+        // Chain: load → day roll → needs refill → recorded call → slot fill → store connect → plan assign → restock → sort → overflow → order → audit → bar
+        using var dir = new TempAudit();
+        var save = new object();
+        var prefix = Prefix(dir.Path, save);
+        var guard = LiveGuard();
+        var report = Audit.Check(dir.Path, 1016, prefix.Api, prefix.World, guard, heal => HealFate.Done);
+        var stage = Stage.Read(TopBar.Day(prefix.Rolled), guard.Cash, prefix.World.Needs, report.Stops, prefix.World.Holds, prefix.World.Slots);
+        var line = TopBar.From(
+            prefix.Rolled,
+            File.ReadAllText(StatementDump.CsvPath(dir.Path)),
+            guard.Cash,
+            0m,
+            stage,
+            guard.Enabled,
+            TopBar.Clock(paused: false, rate: null));
+
+        Assert.Contains("day=1016", prefix.Rolled);
+        Assert.Contains("audit.summary ", string.Join("\n", report.Lines));
+        Assert.Equal(1, stage);
+        Assert.Equal(
+            "Day 1016  Cash 1000  Net worth 0 / 100000000  Profit 7  Stage 1  Autopilot on  Speed 0",
+            line);
+    }
+
+    [Fact]
+    public void Audit_load_day_roll_needs_refill_recorded_call_slot_fill_store_connect_plan_assign_restock_sort_overflow_order_audit_bar_stays_the_first_line()
+    {
+        // Chain: load → day roll → needs refill → recorded call → slot fill → store connect → plan assign → restock → sort → overflow → order → audit → bar → window
+        using var dir = new TempAudit();
+        var save = new object();
+        var prefix = Prefix(dir.Path, save);
+        var guard = LiveGuard();
+        var report = Audit.Check(dir.Path, 1016, prefix.Api, prefix.World, guard, heal => HealFate.Done);
+        var stage = Stage.Read(TopBar.Day(prefix.Rolled), guard.Cash, prefix.World.Needs, report.Stops, prefix.World.Holds, prefix.World.Slots);
+        var line = TopBar.From(
+            prefix.Rolled,
+            File.ReadAllText(StatementDump.CsvPath(dir.Path)),
+            guard.Cash,
+            0m,
+            stage,
+            guard.Enabled,
+            TopBar.Clock(paused: false, rate: null));
+        var summary = Assert.Single(report.Lines, row => row.StartsWith("audit.summary "));
+        var frame = TopBar.Frame(line, new[] { summary });
+        var shown = TopBar.Record(dir.Path, line);
+        var again = TopBar.Record(dir.Path, line);
+
+        Assert.Equal(line, frame[0]);
+        Assert.Equal(summary, frame[1]);
+        Assert.Equal(shown, again);
+        Assert.StartsWith("bar.shown version=" + LoadLog.Version + " Day 1016", shown);
+        var log = File.ReadAllLines(LoadLog.CeoLogPath(dir.Path));
+        Assert.Single(log, row => row.StartsWith("bar.shown "));
+    }
+
+    [Fact]
+    public void Audit_load_day_roll_needs_refill_recorded_call_slot_fill_store_connect_plan_assign_restock_sort_overflow_order_audit_bar_says_off_when_the_guard_is_off()
+    {
+        // Chain: load → day roll → needs refill → recorded call → slot fill → store connect → plan assign → restock → sort → overflow → order → audit → bar → off
+        using var dir = new TempAudit();
+        var save = new object();
+        var prefix = Prefix(dir.Path, save);
+        var guard = new AuditGuard(enabled: false, dryRun: false, cash: 1000m, dailyCost: 10m, truckCost: 1, build: LoadLog.PinnedBuild);
+        var report = Audit.Check(dir.Path, 1016, prefix.Api, prefix.World, guard, heal => HealFate.Done);
+        var stage = Stage.Read(TopBar.Day(prefix.Rolled), guard.Cash, prefix.World.Needs, report.Stops, prefix.World.Holds, prefix.World.Slots);
+        var line = TopBar.From(
+            prefix.Rolled,
+            File.ReadAllText(StatementDump.CsvPath(dir.Path)),
+            guard.Cash,
+            0m,
+            stage,
+            guard.Enabled,
+            TopBar.Clock(paused: false, rate: null));
+        var summary = Assert.Single(report.Lines, row => row.StartsWith("audit.summary "));
+
+        Assert.Contains("healed=0", summary);
+        Assert.Contains("Autopilot off", line);
+        Assert.DoesNotContain("Autopilot on", line);
+        Assert.Contains("Day 1016", line);
+        Assert.Contains("Profit 7", line);
+    }
+
     private static AuditWorld PlantedStore()
     {
         return new AuditWorld(

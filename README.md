@@ -6,7 +6,7 @@ Cursor **rules**, **skills**, **handoff protocol**, and **test discipline** for 
 
 **Start with [CONTRIBUTING.md](CONTRIBUTING.md)** — reading order, tracked vs gitignored docs, PR expectations.
 
-**Current work:** [doc/PROJECT_STATUS.md](doc/PROJECT_STATUS.md). Version 1.11.9. Epic 11 is closed. A day change connects up to ten unconnected goods stores and writes `audit.summary`. A loaded save keeps energy, hunger, and happiness full. F9 still shows the roadmap.
+**Current work:** [doc/PROJECT_STATUS.md](doc/PROJECT_STATUS.md). Version 1.12.1. F9 shows a top bar with day, cash, net worth against $100M, yesterday’s profit, stage, autopilot, and speed. A day change still audits the save.
 
 ## Quick start
 

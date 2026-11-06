@@ -8,7 +8,7 @@
 
 ## Summary
 
-**BigAmbitionStratMod** 1.11.9 — Epic 11 is closed. A day change audits the save and connects up to ten unconnected goods stores. Fifth Avenue 36 keeps its wholesaler contract until that hub holds the item. A loaded save keeps energy, hunger, and happiness at 100. **7.13** stays stashed. The daily audit passed the human check 2026-11-06. F9 still shows the roadmap. Crossing $100M logs `win.reached` once and play continues. The rules are in [requirements/strategy.md](requirements/strategy.md). `origin` is this repo.
+**BigAmbitionStratMod** 1.12.1 — F9 shows a top bar with day, cash, net worth against $100M, yesterday’s profit, stage, autopilot, and speed. The top-bar check passed 2026-11-06. A day change still audits the save. **7.13** stays stashed. The rules are in [requirements/strategy.md](requirements/strategy.md). `origin` is this repo.
 
 ---
 
@@ -16,7 +16,8 @@
 
 | Branch | Role |
 |--------|------|
-| **`main`** | Integration branch. Last land `5eef458`, version 1.11.9 |
+| **`main`** | Integration branch. Last land pending this CMPH, version 1.12.1 |
+| **`feature/12.1-f9-top-bar`** | Story 12.1. Version 1.12.1. Human PASS 2026-11-06. Kept after this CMPH. |
 | **`feature/11.5-daily-audit`** | Story 11.5. Version 1.11.9. Human PASS 2026-11-06. Kept after this CMPH. |
 | **`feature/11.4-restock-warehouses`** | Story 11.4. Version 1.11.8.1. Human PASS 2026-11-05. |
 | **`feature/11.3-assign-plans`** | Story 11.3. Version 1.11.7. Human PASS 2026-11-05. Kept after CMPH. |

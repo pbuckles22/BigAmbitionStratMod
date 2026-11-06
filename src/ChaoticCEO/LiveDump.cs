@@ -924,6 +924,63 @@ namespace ChaoticCEO
             }
         }
 
+        public static string HudLine()
+        {
+            var current = SaveGameManager.Current;
+            if (current == null)
+            {
+                return TopBar.Line(0, 0m, 0m, 0m, 1, Autopilot.Enabled, 0);
+            }
+
+            var wealth = Helpers.PlayerHelper.GetPersonalWealth();
+            var cash = ToMoney(wealth.cash);
+            var net = ToMoney(wealth.CurrentWealth);
+            var needs = new List<GoodsNeed>();
+            var sales = new List<DailyUnits>();
+            ReadStores(current, needs, sales);
+            var stage = Stage.Read(current.Day, cash, needs, Plans(current), Holds(current), Garage(current));
+            var business = TopBar.Yesterday(Days(current), current.Day);
+            var profit = TopBar.ShownProfit(DayTotal(current, business), business);
+            return TopBar.Line(current.Day, cash, net, profit, stage, Autopilot.Enabled, ReadSpeed());
+        }
+
+        private static decimal DayTotal(GameInstance current, decimal business)
+        {
+            if (current.financialSummaries == null)
+            {
+                return business;
+            }
+
+            foreach (var summary in current.financialSummaries)
+            {
+                if (summary != null && summary.dayNumber == current.Day - 1)
+                {
+                    return ToMoney(summary.totalProfit);
+                }
+            }
+
+            return business;
+        }
+
+        private static int ReadSpeed()
+        {
+            var clock = UnityEngine.Object.FindObjectOfType<GameSpeedController>();
+            if (clock == null)
+            {
+                return TopBar.Clock(paused: false, rate: null);
+            }
+
+            var now = clock.playerGameSpeed;
+            var paused = clock.Paused || now.paused;
+            int? rate = paused ? null : System.Convert.ToInt32(now.speed);
+            return TopBar.Clock(paused, rate);
+        }
+
+        private static decimal ToMoney(object value)
+        {
+            return System.Convert.ToDecimal(value, CultureInfo.InvariantCulture);
+        }
+
         private static string Place(Address address)
         {
             if (address == null)
