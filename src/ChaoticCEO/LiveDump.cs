@@ -330,6 +330,62 @@ namespace ChaoticCEO
                 overflow.Claims);
         }
 
+        public static void AuditDay(string localAppData)
+        {
+            if (string.IsNullOrEmpty(localAppData))
+            {
+                return;
+            }
+
+            var current = SaveGameManager.Current;
+            if (current == null)
+            {
+                return;
+            }
+
+            var needs = new List<GoodsNeed>();
+            var sales = new List<DailyUnits>();
+            ReadStores(current, needs, sales);
+            var shelves = new Dictionary<string, int>();
+            var holds = Holds(current, shelves);
+            var plans = Plans(current);
+            var ordered = OrderedWarehouses(current, holds);
+            var arranged = Restock.Arrange(holds, shelves);
+            var demanded = Restock.WithBurn(arranged.Homes, plans, sales, ordered);
+            var overflow = Restock.Overflow(demanded, null);
+            var world = new AuditWorld(
+                plans,
+                holds,
+                needs,
+                sales,
+                Garage(current),
+                Drivers(current),
+                overflow.Homes,
+                PricingPlan(current),
+                Seats(current),
+                Hired(current),
+                new string[0],
+                new string[0]);
+            var guard = new AuditGuard(
+                Autopilot.Enabled,
+                Autopilot.DryRun,
+                cash: 0m,
+                dailyCost: 0m,
+                truckCost: 0,
+                LoadLog.PinnedBuild);
+            Audit.Check(localAppData, current.Day, GameApi.Live(), world, guard, LiveHeal);
+        }
+
+        private static HealFate LiveHeal(AuditHeal heal)
+        {
+            if (heal == null || heal.Kind != "connect")
+            {
+                return HealFate.Skip;
+            }
+
+            return AuditBridge.Live(heal) ? HealFate.Done : HealFate.Failed;
+        }
+
         private static HashSet<string> OrderedWarehouses(GameInstance current, IReadOnlyList<WarehouseHold> holds)
         {
             var byPlace = new Dictionary<string, string>();

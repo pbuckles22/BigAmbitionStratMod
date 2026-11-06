@@ -2,13 +2,13 @@
 
 **Human-readable current state.** Keep in sync with [AGENT_HANDOFF.md](../AGENT_HANDOFF.md) → *Current state* when milestones ship.
 
-**Last updated:** 2026-11-05
+**Last updated:** 2026-11-06
 
 ---
 
 ## Summary
 
-**BigAmbitionStratMod** 1.11.8.1 — A day change records warehouse homes, drains, overflow, and the first import order. It does not call the game. It also records a pricing plan and open headquarters roles, each unplanned goods store on the warehouse that holds its family, and a freight-truck buy for each empty garage slot. Fifth Avenue 36 keeps its wholesaler contract until that hub holds the item. A loaded save keeps energy, hunger, and happiness at 100. A day change still forecasts each item a store sells into `routes.csv`. The game's logistics list stays unchanged. **7.13** stays stashed. Warehouse sort passed the human check 2026-11-05. F9 still shows the roadmap. Crossing $100M logs `win.reached` once and play continues. The rules are in [requirements/strategy.md](requirements/strategy.md). `origin` is this repo.
+**BigAmbitionStratMod** 1.11.9 — Epic 11 is closed. A day change audits the save and connects up to ten unconnected goods stores. Fifth Avenue 36 keeps its wholesaler contract until that hub holds the item. A loaded save keeps energy, hunger, and happiness at 100. **7.13** stays stashed. The daily audit passed the human check 2026-11-06. F9 still shows the roadmap. Crossing $100M logs `win.reached` once and play continues. The rules are in [requirements/strategy.md](requirements/strategy.md). `origin` is this repo.
 
 ---
 
@@ -16,7 +16,8 @@
 
 | Branch | Role |
 |--------|------|
-| **`main`** | Integration branch. Last land `593d91f`, version 1.11.8.1 |
+| **`main`** | Integration branch. Last land is the 1.11.9 audit close. |
+| **`feature/11.5-daily-audit`** | Story 11.5. Version 1.11.9. Human PASS 2026-11-06. Kept after this CMPH. |
 | **`feature/11.4-restock-warehouses`** | Story 11.4. Version 1.11.8.1. Human PASS 2026-11-05. |
 | **`feature/11.3-assign-plans`** | Story 11.3. Version 1.11.7. Human PASS 2026-11-05. Kept after CMPH. |
 | **`feature/11.2-connect-stores`** | Story 11.2. Version 1.11.6. Human PASS 2026-11-05. Kept after this CMPH. |
@@ -66,7 +67,7 @@
 | **`feature/chain-prefix`** | Kept after CMPH (template history) |
 | **`feature/handoff-receiver-framing`** | Kept after CMPH (template history) |
 
-**Last land:** `593d91f` on `main`. Version 1.11.8.1. Branch `feature/11.4-restock-warehouses` kept. Repo: https://github.com/pbuckles22/BigAmbitionStratMod.
+**Last land:** the 1.11.9 audit close on `main`. Branch `feature/11.5-daily-audit` kept. Repo: https://github.com/pbuckles22/BigAmbitionStratMod.
 
 ---
 

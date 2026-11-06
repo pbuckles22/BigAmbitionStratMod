@@ -6,7 +6,7 @@ Cursor **rules**, **skills**, **handoff protocol**, and **test discipline** for 
 
 **Start with [CONTRIBUTING.md](CONTRIBUTING.md)** — reading order, tracked vs gitignored docs, PR expectations.
 
-**Current work:** [doc/PROJECT_STATUS.md](doc/PROJECT_STATUS.md). Version 1.11.6. A new day records a freight-truck buy for each empty garage slot, and records each unplanned goods store on the warehouse that holds its family. It does not order the truck or call the game. A loaded save keeps energy, hunger, and happiness full. A new day forecasts the items each store sells and writes those connects into `routes.csv`. The game's logistics list stays unchanged. F9 still shows the roadmap. Confirm on a close step shuts that store. Confirm on the logistics move sends that store to the new warehouse.
+**Current work:** [doc/PROJECT_STATUS.md](doc/PROJECT_STATUS.md). Version 1.11.9. Epic 11 is closed. A day change connects up to ten unconnected goods stores and writes `audit.summary`. A loaded save keeps energy, hunger, and happiness full. F9 still shows the roadmap.
 
 ## Quick start
 

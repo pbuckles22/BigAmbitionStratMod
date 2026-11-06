@@ -13,7 +13,7 @@ dotnet test src/ChaoticCEO.Tests/ChaoticCEO.Tests.csproj -p:GameManaged="C:\Prog
 dotnet build src/ChaoticCEO/ChaoticCEO.csproj -c Release -p:GameManaged="C:\Program Files (x86)\Steam\steamapps\common\Big Ambitions\Big Ambitions_Data\Managed"
 ```
 
-`dotnet test` is the Debug compile. The Release command installs `ChaoticCEO.dll` to ModsLocal. The gitignored counter is `build_number.txt`. The informational version is `1.11.8.1+N`.
+`dotnet test` is the Debug compile. The Release command installs `ChaoticCEO.dll` to ModsLocal. The gitignored counter is `build_number.txt`. The informational version is `1.11.9+N`.
 
 The story gate reuses `doc/gemini/cache/save.bin` and `save-index.sqlite` when both are current for the dropzone `.hsg`. Do not read or scan `save.bin` again while that blob is current. A renamed `.hsg` fails the recorded-name check on its own. Nobody announces the new name.
 
@@ -116,6 +116,17 @@ Human PASS 2026-11-05 on 1.11.6. Day 1015: 262 `store.connected` lines. Each `ad
 6. Version marker: public `1.11.7`. `ceo.log` starts at `mod.loaded version=1.11.7 build=3682`.
 
 Human PASS 2026-11-05 on 1.11.7. Day 1014 load: energy 70.47, hunger 66.3, happiness 100. Day 1015: one `plan.created` (`AddPlan`), `plan.assigned` logistics `Db9eInvmDUm+4AmmCqNhHw==` and headhunter `+m2HNyl0Wku7yH2lq5wf3g==` (`AssignEmployee`). No line for hr or purchasing. Seven `slot.filled`. 262 `store.connected`, each `drop` blank. Day 1016: no second plan, slot, or connect lines. `gaps=426`. Fourth Avenue 28 hair buffer 1169. Morning routes 4, Fifth Avenue 36 kept.
+
+## Daily audit human check
+
+1. Restart Big Ambitions so version 1.11.9 loads. You are in the city on the usual save. Do not load the day 1021 save. This check connects up to 10 unconnected goods stores on the warehouse that holds the family. It does not buy a truck or place an import order. Fifth Avenue 36 stays on the wholesaler. Pressing F10 stops later days from healing.
+2. Let one day pass.
+3. Open `%LocalAppData%\ChaoticCEO\ceo.log` and `%LocalAppData%\ChaoticCEO\snapshots.log`. In BizMan, open a store named on an `audit.healed` line.
+4. **PASS if** `mod.loaded` is version 1.11.9, the new day has one `audit.summary` whose `healed` is from 1 to 10 and whose `unconnected` does not include a store named on that day's `audit.healed` lines, at least one `audit.healed` line is `action=connect` `dry=false` and its `call` is `AddDestination`, that store is a destination on its warehouse plan, and Fifth Avenue 36 still has its wholesaler rows. **FAIL if** the new day has no `audit.summary`, `healed=0`, the connect `call` is not `AddDestination`, `dry=true`, a truck was bought, an import order was placed, or Fifth Avenue 36 lost the wholesaler contract.
+5. Evidence: `audit.summary` (`unconnected`, `emptySlots`, `dry`, `mixed`, `unstaffed`, `missingPlans`, `cashBelowReserve`, `pinMismatch`, `healed`). `audit.healed` (`action`, `store`, `warehouse`, `item`, `call`, `dry`). `snapshot.taken` in `snapshots.log` before those heals. `autopilot.paused reason=failures` if three connects fail. `autopilot.paused reason=f10` if F10 was pressed. `autopilot.halted reason=pin` if the build pin does not match.
+6. Version marker: public `1.11.9`. `ceo.log` starts at `mod.loaded version=1.11.9 build=3682`.
+
+Human PASS 2026-11-06 on 1.11.9. Day 1015: `audit.summary` `unconnected=61 emptySlots=7 dry=4 mixed=7 unstaffed=0 missingPlans=3 cashBelowReserve=0 pinMismatch=0 healed=10`. Ten `audit.healed` lines, each `action=connect` `dry=false` and `AddDestination`. Fourth Avenue 28 hair to W11. First Avenue 38 used eight clothing items to W9. First Avenue 5 kabob to W7. Fifth Avenue 36 kept four wholesaler rows. `snapshot.taken version=1.11.9`.
 
 ## Warehouse sort and restock human check
 

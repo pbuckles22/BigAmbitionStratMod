@@ -68,6 +68,7 @@ namespace ChaoticCEO
                 }
             }
 
+            StopOnHotkey();
             LiveDump.HoldNeeds(_needs, _localAppData);
             if (LiveDump.Roll(_days, _localAppData) != null)
             {
@@ -75,6 +76,7 @@ namespace ChaoticCEO
                 LiveDump.ConnectStores(_stores, _localAppData);
                 LiveDump.AssignPlans(_plans, _localAppData);
                 LiveDump.RestockWarehouses(_restock, _localAppData);
+                LiveDump.AuditDay(_localAppData);
             }
         }
 
@@ -87,6 +89,20 @@ namespace ChaoticCEO
             }
 
             LiveDump.Dump(_localAppData);
+        }
+
+        private void StopOnHotkey()
+        {
+            var keyboard = Keyboard.current;
+            if (keyboard == null || !keyboard.f10Key.wasPressedThisFrame || !Autopilot.Enabled)
+            {
+                return;
+            }
+
+            Autopilot.Enabled = false;
+            File.AppendAllText(
+                LoadLog.CeoLogPath(_localAppData),
+                "autopilot.paused version=" + LoadLog.Version + " reason=f10" + Environment.NewLine);
         }
     }
 }
