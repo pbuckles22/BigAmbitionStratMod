@@ -139,7 +139,7 @@ When shipping: update **PM_PLAN**, **doc/PROJECT_STATUS.md**, and **Current stat
 ## Current state
 
 - **Product:** Version 1.12.1. F9 shows a top bar with day, cash, net worth against $100M, yesterday’s profit, stage, autopilot, and speed. A day change still audits the save. 7.13 stays stashed. Ladder: [PM_PLAN.md](PM_PLAN.md).
-- **On:** `origin/main` after this land. Stash `7.13 spare cost centers` on `feature/7.13-spare-cost-centers`. https://github.com/pbuckles22/BigAmbitionStratMod
+- **On:** `origin/main @ 5dcdbe7`. Stash `7.13 spare cost centers` on `feature/7.13-spare-cost-centers`. https://github.com/pbuckles22/BigAmbitionStratMod
 - **Next:** Story 12.2, the F9 health section, when asked.
 - **Blockers:** Do not pop 7.13. Do not load the day 1021 save. Do not drop Fifth Avenue 36’s contract before the hub holds that item.
 

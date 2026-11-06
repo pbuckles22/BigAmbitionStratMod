@@ -16,7 +16,7 @@
 
 | Branch | Role |
 |--------|------|
-| **`main`** | Integration branch. Last land pending this CMPH, version 1.12.1 |
+| **`main`** | Integration branch. Last land `5dcdbe7`, version 1.12.1 |
 | **`feature/12.1-f9-top-bar`** | Story 12.1. Version 1.12.1. Human PASS 2026-11-06. Kept after this CMPH. |
 | **`feature/11.5-daily-audit`** | Story 11.5. Version 1.11.9. Human PASS 2026-11-06. Kept after this CMPH. |
 | **`feature/11.4-restock-warehouses`** | Story 11.4. Version 1.11.8.1. Human PASS 2026-11-05. |
