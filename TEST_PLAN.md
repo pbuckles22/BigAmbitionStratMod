@@ -13,7 +13,7 @@ dotnet test src/ChaoticCEO.Tests/ChaoticCEO.Tests.csproj -p:GameManaged="C:\Prog
 dotnet build src/ChaoticCEO/ChaoticCEO.csproj -c Release -p:GameManaged="C:\Program Files (x86)\Steam\steamapps\common\Big Ambitions\Big Ambitions_Data\Managed"
 ```
 
-`dotnet test` is the Debug compile. The Release command installs `ChaoticCEO.dll` to ModsLocal. The gitignored counter is `build_number.txt`. The informational version is `1.11.7+N`.
+`dotnet test` is the Debug compile. The Release command installs `ChaoticCEO.dll` to ModsLocal. The gitignored counter is `build_number.txt`. The informational version is `1.11.8.1+N`.
 
 The story gate reuses `doc/gemini/cache/save.bin` and `save-index.sqlite` when both are current for the dropzone `.hsg`. Do not read or scan `save.bin` again while that blob is current. A renamed `.hsg` fails the recorded-name check on its own. Nobody announces the new name.
 
@@ -116,6 +116,17 @@ Human PASS 2026-11-05 on 1.11.6. Day 1015: 262 `store.connected` lines. Each `ad
 6. Version marker: public `1.11.7`. `ceo.log` starts at `mod.loaded version=1.11.7 build=3682`.
 
 Human PASS 2026-11-05 on 1.11.7. Day 1014 load: energy 70.47, hunger 66.3, happiness 100. Day 1015: one `plan.created` (`AddPlan`), `plan.assigned` logistics `Db9eInvmDUm+4AmmCqNhHw==` and headhunter `+m2HNyl0Wku7yH2lq5wf3g==` (`AssignEmployee`). No line for hr or purchasing. Seven `slot.filled`. 262 `store.connected`, each `drop` blank. Day 1016: no second plan, slot, or connect lines. `gaps=426`. Fourth Avenue 28 hair buffer 1169. Morning routes 4, Fifth Avenue 36 kept.
+
+## Warehouse sort and restock human check
+
+1. Restart Big Ambitions so version 1.11.8.1 loads. You are in the city on the usual save. Do not load the day 1021 save. This check records warehouse homes, drains, overflow, and the first import order. It does not call the game. BizMan’s warehouses and purchasing screens stay as they are. Fifth Avenue 36 stays on the wholesaler.
+2. Let one day pass.
+3. Open `%LocalAppData%\ChaoticCEO\ceo.log`.
+4. **PASS if** `mod.loaded` is version 1.11.8.1, the new day has one `warehouse.drain` for specialty from W9 to W12 whose `assign` is `ChangeAssignedWarehouse`, a `restock.ordered` for W12 specialty with a positive `amount` whose `assign` and `start` are `ChangeAssignedWarehouse` and `StartOrder`, no `warehouse.overflow` unless a home already has an order and is still short, and the warehouses and purchasing screens look the same as before the day change. **FAIL if** the new day has no `warehouse.drain`, a drain or order names any other call, W13 or W14 is claimed without the overflow trigger, or a warehouse or order changes in the game.
+5. Evidence: `warehouse.drain` (`family`, `from`, `to`, `amount`, `assign`). `warehouse.overflow` (`family`, `home`, `second`, `reason`) when present. `restock.ordered` (`warehouse`, `family`, `amount`, `assign`, `start`). A later day of that save does not append those lines again.
+6. Version marker: public `1.11.8.1`. `ceo.log` starts at `mod.loaded version=1.11.8.1 build=3682`.
+
+Human PASS 2026-11-05 on 1.11.8.1. Day 1015: 10 `warehouse.drain` lines, each `assign` is `ChangeAssignedWarehouse`. Specialty to W12: W3 58, W5 40, W8 166, W9 226, W10 72. Durables to W9: W2 37, W3 134, W8 19. Service to W11: W3 14, W6 87. Four `restock.ordered` lines, each `start` is `StartOrder`: W5 food 542550, W9 durables 80956, W11 service 25297, W12 specialty 32382. No `warehouse.overflow`. `gaps=426`. Fifth Avenue 36 stayed the wholesaler destination. The log ends on day 1015.
 
 Prior PASS 2026-11-05 was the dry run on 1.11.1. Day rolled 1014 to 1015. Fourth Avenue 28 sales 57847, profit 25010.7891. First forecast: `noplan` on W11, `buffer=0`. `gaps=3836`. Four moves, all `dry=true`. Routes stayed the four Fifth Avenue 36 contract rows.
 

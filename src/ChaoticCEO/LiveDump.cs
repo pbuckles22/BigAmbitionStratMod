@@ -296,6 +296,88 @@ namespace ChaoticCEO
             return hired;
         }
 
+        public static void RestockWarehouses(RestockWatch watch, string localAppData)
+        {
+            if (watch == null || string.IsNullOrEmpty(localAppData))
+            {
+                return;
+            }
+
+            var current = SaveGameManager.Current;
+            if (current == null)
+            {
+                return;
+            }
+
+            var sales = new List<DailyUnits>();
+            ReadStores(current, new List<GoodsNeed>(), sales);
+            var shelves = new Dictionary<string, int>();
+            var holds = Holds(current, shelves);
+            var plans = Plans(current);
+            var ordered = OrderedWarehouses(current, holds);
+            var arranged = Restock.Arrange(holds, shelves);
+            var demanded = Restock.WithBurn(arranged.Homes, plans, sales, ordered);
+            // Truck loads are not read yet. Overflow only trips on ordered-and-short until that read exists.
+            var overflow = Restock.Overflow(demanded, null);
+            // The lines name the drain, overflow, and order. This pause does not call the game.
+            watch.Tick(
+                localAppData,
+                current,
+                current.Day,
+                GameApi.Live(),
+                overflow.Homes,
+                arranged.Drains,
+                overflow.Claims);
+        }
+
+        private static HashSet<string> OrderedWarehouses(GameInstance current, IReadOnlyList<WarehouseHold> holds)
+        {
+            var byPlace = new Dictionary<string, string>();
+            foreach (var hold in holds)
+            {
+                if (hold == null || hold.Warehouse.Length == 0)
+                {
+                    continue;
+                }
+
+                var place = hold.Street + " " + hold.Number.ToString(CultureInfo.InvariantCulture);
+                if (!byPlace.ContainsKey(place))
+                {
+                    byPlace[place] = hold.Warehouse;
+                }
+            }
+
+            var ordered = new HashSet<string>();
+            if (current.importPartnerships == null)
+            {
+                return ordered;
+            }
+
+            foreach (var partnership in current.importPartnerships)
+            {
+                if (partnership == null || partnership.products == null)
+                {
+                    continue;
+                }
+
+                foreach (var product in partnership.products)
+                {
+                    if (product == null || product.assignedWarehouse == null)
+                    {
+                        continue;
+                    }
+
+                    var place = Place(product.assignedWarehouse);
+                    if (byPlace.TryGetValue(place, out var warehouse))
+                    {
+                        ordered.Add(warehouse);
+                    }
+                }
+            }
+
+            return ordered;
+        }
+
         private static List<GarageSlot> Garage(GameInstance current)
         {
             var slots = new List<GarageSlot>();
@@ -616,7 +698,7 @@ namespace ChaoticCEO
             return rows;
         }
 
-        public static List<WarehouseHold> Holds(GameInstance? current)
+        public static List<WarehouseHold> Holds(GameInstance? current, Dictionary<string, int>? shelves = null)
         {
             var rows = new List<WarehouseHold>();
             if (current == null || current.BuildingRegistrations == null)
@@ -626,7 +708,7 @@ namespace ChaoticCEO
 
             foreach (var building in current.BuildingRegistrations)
             {
-                AddWarehouse(rows, building);
+                AddWarehouse(rows, building, shelves);
             }
 
             return rows;
@@ -700,7 +782,10 @@ namespace ChaoticCEO
                 building.StreetNumber));
         }
 
-        private static void AddWarehouse(List<WarehouseHold> rows, BuildingRegistration building)
+        private static void AddWarehouse(
+            List<WarehouseHold> rows,
+            BuildingRegistration building,
+            Dictionary<string, int>? shelves)
         {
             if (building == null || building.businessTypeName != "ba:businesstype_warehouse")
             {
@@ -722,6 +807,15 @@ namespace ChaoticCEO
             foreach (var item in building.itemInstances.Values)
             {
                 CollectCargo(item, placed, cargo);
+            }
+
+            if (shelves != null)
+            {
+                var count = RouteDump.PlacedShelves(placed);
+                if (count > 0)
+                {
+                    shelves[building.BusinessName] = count;
+                }
             }
 
             rows.AddRange(RouteDump.CountHolds(

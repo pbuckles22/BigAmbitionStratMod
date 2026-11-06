@@ -18,6 +18,34 @@ public class SupplyTests
     private const string Wholesaler = "ba:street_firststreet 37";
 
     [Fact]
+    public void Supply_a_mixed_warehouse_is_the_hub_for_its_majority_family_and_not_for_the_smaller_one()
+    {
+        var holds = new[]
+        {
+            Hold("W1", "ba:street_fourthstreet", 46, Soda, 10),
+            Hold("W1", "ba:street_fourthstreet", 46, "ba:itemname_smartphone1", 3),
+        };
+
+        var food = Supply.List(
+            Array.Empty<DeliveryStop>(),
+            holds,
+            new[] { new GoodsNeed(Side, Soda) },
+            Array.Empty<DailyUnits>());
+        var durables = Supply.List(
+            Array.Empty<DeliveryStop>(),
+            holds,
+            new[] { new GoodsNeed(Side, "ba:itemname_smartphone1") },
+            Array.Empty<DailyUnits>());
+
+        var foodGap = Assert.Single(food.Unsupplied);
+        Assert.Equal("noplan", foodGap.Reason);
+        Assert.Equal("W1", foodGap.Warehouse);
+        var durablesGap = Assert.Single(durables.Unsupplied);
+        Assert.Equal("noplan", durablesGap.Reason);
+        Assert.Equal("", durablesGap.Warehouse);
+    }
+
+    [Fact]
     public void Supply_no_plan_names_the_warehouse()
     {
         var list = Supply.List(
@@ -710,7 +738,7 @@ public class SupplyTests
         Assert.Equal("W11", salon.Warehouse);
         Assert.Equal(Hair, salon.Item);
         var shot = File.ReadAllText(SupplyNight.SnapshotPath(dir.Path));
-        Assert.Contains("snapshot.taken version=1.11.7", shot);
+        Assert.Contains("snapshot.taken version=1.11.8.1", shot);
         Assert.Contains(before, shot);
         Assert.DoesNotContain(Salon, shot);
         var again = Assert.Single(night.Recheck.Unsupplied, gap => gap.Store == Salon);

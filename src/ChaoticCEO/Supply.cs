@@ -418,7 +418,7 @@ namespace ChaoticCEO
                 return null;
             }
 
-            var families = new Dictionary<string, HashSet<string>>();
+            var familyAmounts = new Dictionary<string, Dictionary<string, int>>();
             var amounts = new Dictionary<string, int>();
             var order = new List<string>();
             foreach (var hold in holds)
@@ -429,7 +429,7 @@ namespace ChaoticCEO
                 }
 
                 var cargo = Advisor.CargoFamily(hold.Item);
-                if (string.IsNullOrEmpty(cargo))
+                if (string.IsNullOrEmpty(cargo) || cargo == "unknown")
                 {
                     continue;
                 }
@@ -437,23 +437,24 @@ namespace ChaoticCEO
                 var name = hold.Warehouse.Length > 0
                     ? hold.Warehouse
                     : hold.Street + " " + hold.Number.ToString(CultureInfo.InvariantCulture);
-                if (!families.TryGetValue(name, out var set))
+                if (!familyAmounts.TryGetValue(name, out var set))
                 {
-                    set = new HashSet<string>();
-                    families[name] = set;
+                    set = new Dictionary<string, int>();
+                    familyAmounts[name] = set;
                     order.Add(name);
                 }
 
-                set.Add(cargo);
+                set[cargo] = set.TryGetValue(cargo, out var have) ? have + hold.Amount : hold.Amount;
                 if (hold.Item != item)
                 {
                     continue;
                 }
 
-                amounts[name] = amounts.TryGetValue(name, out var have) ? have + hold.Amount : hold.Amount;
+                amounts[name] = amounts.TryGetValue(name, out var itemHave) ? itemHave + hold.Amount : hold.Amount;
             }
 
             HubPick? best = null;
+            var bestPure = false;
             foreach (var name in order)
             {
                 if (!amounts.TryGetValue(name, out var amount) || amount <= 0)
@@ -461,18 +462,76 @@ namespace ChaoticCEO
                     continue;
                 }
 
-                if (families[name].Count != 1 || !families[name].Contains(family))
+                var cargo = familyAmounts[name];
+                if (!IsMajorityFamily(cargo, family))
                 {
                     continue;
                 }
 
-                if (best == null || amount >= best.Amount)
+                var pure = cargo.Count == 1;
+                if (best == null
+                    || (pure && !bestPure)
+                    || (pure == bestPure && amount >= best.Amount))
                 {
                     best = new HubPick(name, amount);
+                    bestPure = pure;
                 }
             }
 
             return best;
+        }
+
+        private static bool IsMajorityFamily(Dictionary<string, int> cargo, string family)
+        {
+            if (!cargo.TryGetValue(family, out var mine) || mine <= 0)
+            {
+                return false;
+            }
+
+            foreach (var pair in cargo)
+            {
+                if (pair.Key == family)
+                {
+                    continue;
+                }
+
+                if (pair.Value > mine)
+                {
+                    return false;
+                }
+
+                if (pair.Value == mine && FamilyRank(pair.Key) < FamilyRank(family))
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        private static int FamilyRank(string family)
+        {
+            if (family == "food")
+            {
+                return 0;
+            }
+
+            if (family == "durables")
+            {
+                return 1;
+            }
+
+            if (family == "specialty")
+            {
+                return 2;
+            }
+
+            if (family == "service")
+            {
+                return 3;
+            }
+
+            return 4;
         }
 
         private static bool Covers(

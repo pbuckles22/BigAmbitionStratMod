@@ -54,7 +54,8 @@ The stage is a pure decision, `Stage.Decide(day, cash, goodsStores, suppliedStor
 
 - **Stage 1:** each goods store has a wholesaler contract for its items. Nothing is hand-carted.
 - **Stage 2 on, downstream:** a warehouse supplies every store of its family through one logistics plan with stock targets.
-- **Stage 2 on, upstream:** a purchasing agent orders that family from an importer when warehouse stock falls below **RefillDays** = 7 days of the connected stores’ sales.
+- **Stage 2 on, upstream:** a purchasing agent orders that family from an importer when warehouse stock falls below **RefillDays** = 7 days of the sales that home will serve.
+- The first order of a new home uses the sales of that family’s stores that still sit on a wholesaler. After those stores connect, later orders use their connected burn.
 - A wholesaler contract stays only for an item no warehouse holds. The contract for an item a warehouse holds is dropped (story 11.0).
 - One store and one family have one supplier. A recurring plan stop beats a dated contract (story 6.4).
 
@@ -62,8 +63,10 @@ The stage is a pure decision, `Stage.Decide(day, cash, goodsStores, suppliedStor
 
 - Every warehouse has two garage slots. Each delivering warehouse has a freight truck and a driver in both.
 - An empty slot on a delivering warehouse is the first spend after the cash reserve.
-- A warehouse holds one family. A mixed warehouse moves its smaller family to that family’s warehouse.
-- Open a new warehouse for a family when the empire enters that family. Also open one when both of its trucks carry more than **TruckBusy** of their cargo, or when a connected store is short.
+- A warehouse holds one family. Grow one family at a time. A second family stays on the wholesaler until a warehouse the player already owns can be its home.
+- A mixed warehouse keeps its largest family. The smaller family’s new imports go to that family’s home. Its stores route to that home. The mixed warehouse sells the leftover down and gets no more orders for that family. There is no call that moves boxes between warehouses.
+- A family that already has stock and no home takes the next empty warehouse that has pallet shelves. A building with no pallet shelves is not a home. An empty warehouse with nothing to receive stays empty.
+- Open a new warehouse for a family when the empire enters that family. A family already on a home gets a second warehouse of that family only when both of its trucks carry more than **TruckBusy** = 85% of their cargo, or when that home already has an import order and is still under **RefillDays** of stock. A normal refill dip, where the home has no order yet, does not claim a second warehouse.
 
 ## 7. Managers
 

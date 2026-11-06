@@ -17,6 +17,7 @@ namespace ChaoticCEO
         private readonly SlotWatch _slots = new SlotWatch();
         private readonly ConnectWatch _stores = new ConnectWatch();
         private readonly PlanWatch _plans = new PlanWatch();
+        private readonly RestockWatch _restock = new RestockWatch();
         private bool _hooked;
         private bool _panelFailed;
         private string _localAppData = "";
@@ -73,6 +74,7 @@ namespace ChaoticCEO
                 LiveDump.FillSlots(_slots, _localAppData);
                 LiveDump.ConnectStores(_stores, _localAppData);
                 LiveDump.AssignPlans(_plans, _localAppData);
+                LiveDump.RestockWarehouses(_restock, _localAppData);
             }
         }
 

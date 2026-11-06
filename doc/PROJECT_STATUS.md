@@ -8,7 +8,7 @@
 
 ## Summary
 
-**BigAmbitionStratMod** 1.11.7 — A day change records a pricing plan when none exists, and one hired person for each open headquarters role. It does not call the game. It also records each unplanned goods store on the warehouse that holds its family, and a freight-truck buy for each empty garage slot. Fifth Avenue 36 keeps its wholesaler contract until that hub holds the item. A loaded save keeps energy, hunger, and happiness at 100. A day change still forecasts each item a store sells into `routes.csv`. The game's logistics list stays unchanged. **7.13** stays stashed. Plan assign passed the human check 2026-11-05. Store connect passed the human check 2026-11-05. Needs hold passed the human check 2026-11-05. F9 still shows the roadmap. Crossing $100M logs `win.reached` once and play continues. The rules are in [requirements/strategy.md](requirements/strategy.md). `origin` is this repo.
+**BigAmbitionStratMod** 1.11.8.1 — A day change records warehouse homes, drains, overflow, and the first import order. It does not call the game. It also records a pricing plan and open headquarters roles, each unplanned goods store on the warehouse that holds its family, and a freight-truck buy for each empty garage slot. Fifth Avenue 36 keeps its wholesaler contract until that hub holds the item. A loaded save keeps energy, hunger, and happiness at 100. A day change still forecasts each item a store sells into `routes.csv`. The game's logistics list stays unchanged. **7.13** stays stashed. Warehouse sort passed the human check 2026-11-05. F9 still shows the roadmap. Crossing $100M logs `win.reached` once and play continues. The rules are in [requirements/strategy.md](requirements/strategy.md). `origin` is this repo.
 
 ---
 
@@ -16,8 +16,9 @@
 
 | Branch | Role |
 |--------|------|
-| **`main`** | Integration branch. Last land `ebd07c7`, version 1.11.7 |
-| **`feature/11.3-assign-plans`** | Story 11.3. Version 1.11.7. Human PASS 2026-11-05. Kept after this CMPH. |
+| **`main`** | Integration branch. Last land `1c6e1c7`, version 1.11.7 |
+| **`feature/11.4-restock-warehouses`** | Story 11.4. Version 1.11.8.1. Human PASS 2026-11-05. |
+| **`feature/11.3-assign-plans`** | Story 11.3. Version 1.11.7. Human PASS 2026-11-05. Kept after CMPH. |
 | **`feature/11.2-connect-stores`** | Story 11.2. Version 1.11.6. Human PASS 2026-11-05. Kept after this CMPH. |
 | **`feature/11.1-fill-slots`** | Story 11.1. Version 1.11.5. Human PASS 2026-11-05. Kept after this CMPH. |
 | **`feature/11.0-record-calls`** | Story 11.0. Kept after this CMPH. Version 1.11.4 |

@@ -97,6 +97,25 @@ namespace ChaoticCEO
             return rows;
         }
 
+        public static int PlacedShelves(IReadOnlyList<string>? placed)
+        {
+            var count = 0;
+            if (placed == null)
+            {
+                return count;
+            }
+
+            foreach (var item in placed)
+            {
+                if (item == "ba:itemname_palletshelf")
+                {
+                    count++;
+                }
+            }
+
+            return count;
+        }
+
         public static string Write(
             string localAppData,
             IReadOnlyList<DeliveryStop> routes,
