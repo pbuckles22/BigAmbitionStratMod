@@ -16,7 +16,7 @@
 
 | Branch | Role |
 |--------|------|
-| **`main`** | Integration branch. Last land pending this CMPH, version 1.11.7 |
+| **`main`** | Integration branch. Last land `ebd07c7`, version 1.11.7 |
 | **`feature/11.3-assign-plans`** | Story 11.3. Version 1.11.7. Human PASS 2026-11-05. Kept after this CMPH. |
 | **`feature/11.2-connect-stores`** | Story 11.2. Version 1.11.6. Human PASS 2026-11-05. Kept after this CMPH. |
 | **`feature/11.1-fill-slots`** | Story 11.1. Version 1.11.5. Human PASS 2026-11-05. Kept after this CMPH. |
@@ -65,7 +65,7 @@
 | **`feature/chain-prefix`** | Kept after CMPH (template history) |
 | **`feature/handoff-receiver-framing`** | Kept after CMPH (template history) |
 
-**Last land:** `22eec12` on `main`. Version 1.11.6. Branches `feature/11.2-connect-stores`, `feature/11.1-fill-slots`, `feature/11.0-record-calls`, `feature/11-needs-held`, and `feature/11-forecast-burn` kept. Repo: https://github.com/pbuckles22/BigAmbitionStratMod.
+**Last land:** `ebd07c7` on `main`. Version 1.11.7. Branch `feature/11.3-assign-plans` kept. Repo: https://github.com/pbuckles22/BigAmbitionStratMod.
 
 ---
 

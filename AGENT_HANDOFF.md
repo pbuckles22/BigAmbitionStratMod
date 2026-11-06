@@ -139,7 +139,7 @@ When shipping: update **PM_PLAN**, **doc/PROJECT_STATUS.md**, and **Current stat
 ## Current state
 
 - **Product:** Version 1.11.7. A day change records a pricing plan when none exists, and records one hired person for each open headquarters role, in `ceo.log`. It does not call the game. It also records a freight-truck buy for each empty garage slot, and records each unplanned goods store on the warehouse that holds its family. A loaded save keeps energy, hunger, and happiness at 100, and a day change still forecasts each item your own stores sell into `routes.csv`. The game's logistics list stays unchanged. Fifth Avenue 36 keeps its wholesaler contract until that hub holds the item. 7.13 stays stashed. Ladder: [PM_PLAN.md](PM_PLAN.md). Plan: `forecast_logistics_loop_b527186f.plan.md`.
-- **On:** `feature/11.3-assign-plans`, not merged. Stash `7.13 spare cost centers` on `feature/7.13-spare-cost-centers`. https://github.com/pbuckles22/BigAmbitionStratMod
+- **On:** `main` @ `ebd07c7`. Stash `7.13 spare cost centers` on `feature/7.13-spare-cost-centers`. https://github.com/pbuckles22/BigAmbitionStratMod
 - **Next:** Story 11.4, restock the warehouses, when asked.
 - **Blockers:** Do not pop 7.13. Do not load the day 1021 save. Do not drop Fifth Avenue 36’s contract before the hub holds that item.
 
