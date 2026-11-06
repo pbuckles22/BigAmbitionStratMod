@@ -16,7 +16,7 @@
 
 | Branch | Role |
 |--------|------|
-| **`main`** | Integration branch. Last land recorded in the 12.2 handoff commit, version 1.12.2 |
+| **`main`** | Integration branch. Last land `48d14f1`, version 1.12.2 |
 | **`feature/12.2-f9-health`** | Story 12.2. Version 1.12.2. Human PASS 2026-11-06. Kept after this CMPH. |
 | **`feature/12.1-f9-top-bar`** | Story 12.1. Version 1.12.1. Human PASS 2026-11-06. Kept after this CMPH. |
 | **`feature/11.5-daily-audit`** | Story 11.5. Version 1.11.9. Human PASS 2026-11-06. Kept after this CMPH. |
@@ -69,7 +69,7 @@
 | **`feature/chain-prefix`** | Kept after CMPH (template history) |
 | **`feature/handoff-receiver-framing`** | Kept after CMPH (template history) |
 
-**Last land:** `5eef458` on `main`. Version 1.11.9. Branch `feature/11.5-daily-audit` kept. Repo: https://github.com/pbuckles22/BigAmbitionStratMod.
+**Last land:** `48d14f1` on `main`. Version 1.12.2. Branch `feature/12.2-f9-health` kept. Repo: https://github.com/pbuckles22/BigAmbitionStratMod.
 
 ---
 
