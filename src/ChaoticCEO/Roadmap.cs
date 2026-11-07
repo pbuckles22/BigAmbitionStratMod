@@ -94,7 +94,7 @@ namespace ChaoticCEO
                     continue;
                 }
 
-                candidates.Add(new Candidate(index[key], "close", key.Street, key.Number, -row.Profit));
+                candidates.Add(new Candidate(index[key], "close", key.Street, key.Number, row.Profit));
             }
 
             if (payback.Bought
@@ -128,13 +128,23 @@ namespace ChaoticCEO
 
         private static int LargerGainThenLater(Candidate left, Candidate right)
         {
-            var gain = right.Gain.CompareTo(left.Gain);
+            var gain = Rank(right).CompareTo(Rank(left));
             if (gain != 0)
             {
                 return gain;
             }
 
             return right.Index.CompareTo(left.Index);
+        }
+
+        private static double Rank(Candidate candidate)
+        {
+            if (candidate.Kind == "close")
+            {
+                return -candidate.Gain;
+            }
+
+            return candidate.Gain;
         }
 
         private static Dictionary<(string Street, int Number), (int Day, int Sequence, double Profit, double Rent)> LatestRows(

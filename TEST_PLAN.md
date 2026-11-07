@@ -161,6 +161,14 @@ Human PASS 2026-11-06 on 1.12.2. Day 1016: `health.shown` unconnected=61 emptySl
 
 Human PASS 2026-11-06 on 1.12.3. Day 1016: the bar flipped Autopilot on to off and back, then `autopilot.paused reason=f10` left it off. `controls.pressed action=execute-all story=7.12`. Dry run then read on while autopilot stayed on. Cash 17568900, net worth 380540500 / 100000000, profit 1345948. No store closed.
 
+## F9 daily gain sign
+
+1. Restart Big Ambitions so version 1.12.3.1 loads. You are in the city on the usual save. Do not load the day 1021 save. This check is the number after Daily gain on each roadmap step. It does not change which rows are listed.
+2. Press F9. Read a Close line and, if one is on screen, an Open line.
+3. **PASS if** a Close line shows `Daily gain` with a minus, and an Open line shows `Daily gain` as the number with no plus. **FAIL if** a Close line shows a positive Daily gain, or an Open line starts that number with a plus.
+4. Evidence: `roadmap.shown` `gain=` for a close that leads the list is negative. Second Avenue 10 on day 1015 is `gain=-52733.9531` when it is the first step.
+5. Version marker: public `1.12.3.1`. `ceo.log` starts at `mod.loaded version=1.12.3.1 build=3682`.
+
 ## Warehouse sort and restock human check
 
 1. Restart Big Ambitions so version 1.11.8.1 loads. You are in the city on the usual save. Do not load the day 1021 save. This check records warehouse homes, drains, overflow, and the first import order. It does not call the game. BizMan’s warehouses and purchasing screens stay as they are. Fifth Avenue 36 stays on the wholesaler.

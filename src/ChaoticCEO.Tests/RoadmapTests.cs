@@ -5,6 +5,35 @@ namespace ChaoticCEO.Tests;
 public class RoadmapTests
 {
     [Fact]
+    public void Roadmap_a_negative_profit_keeps_its_minus_and_a_rent_stays_plain()
+    {
+        var steps = Roadmap.Order(
+            Api(),
+            Lines("ba:street_side", 9, "ba:street_fourthavenue", 28),
+            Quiet(),
+            new RentPayback("ba:street_fourthavenue", 28, 10d, true),
+            new[]
+            {
+                Day(
+                    1013,
+                    Row("ba:street_fourthavenue", 28, 1099f, 100f),
+                    Row("ba:street_side", 9, 4f, -5000f)),
+            },
+            3);
+
+        Assert.Equal("close", steps[0].Kind);
+        Assert.Equal(-5000d, steps[0].DailyGain);
+        Assert.Equal("Close ba:street_side 9. Daily gain -5000.", steps[0].Explain);
+        Assert.DoesNotContain("Daily gain 5000", steps[0].Explain);
+        Assert.Equal("open", steps[1].Kind);
+        Assert.Equal(1099d, steps[1].DailyGain);
+        Assert.Equal(
+            "Open ba:street_fourthavenue. Buy ba:street_fourthavenue 28. Daily gain 1099.",
+            steps[1].Explain);
+        Assert.DoesNotContain("Daily gain +", steps[1].Explain);
+    }
+
+    [Fact]
     public void Roadmap_the_larger_daily_gain_is_first_and_the_open_gain_is_the_rent()
     {
         var payback = new RentPayback("ba:street_fourthavenue", 28, 1d, true);
@@ -34,8 +63,8 @@ public class RoadmapTests
         Assert.Equal("close", steps[1].Kind);
         Assert.Equal("ba:street_side", steps[1].Street);
         Assert.Equal(9, steps[1].Number);
-        Assert.Equal(30d, steps[1].DailyGain);
-        Assert.Equal("Close ba:street_side 9. Daily gain 30.", steps[1].Explain);
+        Assert.Equal(-30d, steps[1].DailyGain);
+        Assert.Equal("Close ba:street_side 9. Daily gain -30.", steps[1].Explain);
         Assert.DoesNotContain("SendBuyBuildingOffer", steps[0].Explain);
         Assert.DoesNotContain("ShutdownBusiness", steps[0].Explain);
         Assert.DoesNotContain("SetPrice", steps[0].Explain);
@@ -62,7 +91,7 @@ public class RoadmapTests
         Assert.Equal("close", steps[0].Kind);
         Assert.Equal("ba:street_side", steps[0].Street);
         Assert.Equal(9, steps[0].Number);
-        Assert.Equal(5000d, steps[0].DailyGain);
+        Assert.Equal(-5000d, steps[0].DailyGain);
         Assert.Equal("open", steps[1].Kind);
         Assert.Equal(1099d, steps[1].DailyGain);
         Assert.NotEqual("ba:street_fourthavenue", steps[0].Street);
@@ -90,7 +119,7 @@ public class RoadmapTests
         Assert.Equal(30d, steps[0].DailyGain);
         Assert.Equal("close", steps[1].Kind);
         Assert.Equal("ba:street_side", steps[1].Street);
-        Assert.Equal(30d, steps[1].DailyGain);
+        Assert.Equal(-30d, steps[1].DailyGain);
     }
 
     [Fact]
@@ -114,7 +143,7 @@ public class RoadmapTests
         Assert.Equal("close", steps[0].Kind);
         Assert.Equal("ba:street_late", steps[0].Street);
         Assert.Equal(2, steps[0].Number);
-        Assert.Equal(10d, steps[0].DailyGain);
+        Assert.Equal(-10d, steps[0].DailyGain);
         Assert.Equal("ba:street_early", steps[1].Street);
     }
 
@@ -139,7 +168,7 @@ public class RoadmapTests
         Assert.Equal(2, steps.Count);
         Assert.Equal("close", steps[0].Kind);
         Assert.Equal("ba:street_big", steps[0].Street);
-        Assert.Equal(50d, steps[0].DailyGain);
+        Assert.Equal(-50d, steps[0].DailyGain);
         Assert.Equal("open", steps[1].Kind);
         Assert.Equal("ba:street_mid", steps[1].Street);
         Assert.Equal(30d, steps[1].DailyGain);
@@ -185,8 +214,9 @@ public class RoadmapTests
             3);
 
         Assert.Equal(40d, steps[0].DailyGain);
-        Assert.Equal(2.5d, steps[1].DailyGain);
-        Assert.Equal("Close ba:street_main 4. Daily gain 2.5.", steps[1].Explain);
+        Assert.Equal(-2.5d, steps[1].DailyGain);
+        Assert.Equal("Close ba:street_main 4. Daily gain -2.5.", steps[1].Explain);
+        Assert.DoesNotContain("Daily gain 2.5", steps[1].Explain);
         Assert.Equal("Open ba:street_open. Buy ba:street_open 8. Daily gain 40.", steps[0].Explain);
     }
 
@@ -213,7 +243,7 @@ public class RoadmapTests
 
         Assert.Equal(7d, steps[0].DailyGain);
         Assert.Equal("open", steps[0].Kind);
-        Assert.Equal(5d, steps[1].DailyGain);
+        Assert.Equal(-5d, steps[1].DailyGain);
         Assert.Equal("close", steps[1].Kind);
     }
 
@@ -237,7 +267,7 @@ public class RoadmapTests
             3);
 
         Assert.Equal("close", steps[0].Kind);
-        Assert.Equal(40d, steps[0].DailyGain);
+        Assert.Equal(-40d, steps[0].DailyGain);
         Assert.Equal("open", steps[1].Kind);
         Assert.Equal(9d, steps[1].DailyGain);
     }
@@ -285,7 +315,7 @@ public class RoadmapTests
 
         Assert.Single(steps);
         Assert.Equal("close", steps[0].Kind);
-        Assert.Equal(15d, steps[0].DailyGain);
+        Assert.Equal(-15d, steps[0].DailyGain);
     }
 
     [Fact]
@@ -325,7 +355,7 @@ public class RoadmapTests
 
         Assert.Single(steps);
         Assert.Equal("close", steps[0].Kind);
-        Assert.Equal(30d, steps[0].DailyGain);
+        Assert.Equal(-30d, steps[0].DailyGain);
     }
 
     [Fact]
@@ -474,7 +504,7 @@ public class RoadmapTests
         Assert.Equal("close", steps[0].Kind);
         Assert.Equal("ba:street_late", steps[0].Street);
         Assert.Equal(2, steps[0].Number);
-        Assert.Equal(10d, steps[0].DailyGain);
+        Assert.Equal(-10d, steps[0].DailyGain);
         Assert.Equal("ba:street_early", steps[1].Street);
         Assert.Equal(1, steps[1].Number);
     }

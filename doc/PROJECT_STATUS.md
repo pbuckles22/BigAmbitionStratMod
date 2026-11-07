@@ -8,7 +8,7 @@
 
 ## Summary
 
-**BigAmbitionStratMod** 1.12.3 — F9 shows Execute on each roadmap step, Execute all, the autopilot toggle, and dry run. Execute all is the 7.12 button and does not run the steps. The controls check passed 2026-11-06. **7.13** stays stashed. The rules are in [requirements/strategy.md](requirements/strategy.md). `origin` is this repo.
+**BigAmbitionStratMod** 1.12.3.1 — A close step's daily gain is that day's profit. A loss keeps the minus, and a non-negative figure stays the plain number. The sign check passed 2026-11-06. **7.13** stays stashed. The rules are in [requirements/strategy.md](requirements/strategy.md). `origin` is this repo.
 
 ---
 
@@ -17,6 +17,7 @@
 | Branch | Role |
 |--------|------|
 | **`main`** | Integration branch. Last land `bbbb485`, version 1.12.3 |
+| **`fix/daily-gain-sign`** | Daily gain sign. Version 1.12.3.1. Human PASS 2026-11-06. Kept after this CMPH. |
 | **`feature/12.3-f9-controls`** | Story 12.3. Version 1.12.3. Human PASS 2026-11-06. Kept after this CMPH. |
 | **`feature/12.2-f9-health`** | Story 12.2. Version 1.12.2. Human PASS 2026-11-06. Kept after this CMPH. |
 | **`feature/12.1-f9-top-bar`** | Story 12.1. Version 1.12.1. Human PASS 2026-11-06. Kept after this CMPH. |
