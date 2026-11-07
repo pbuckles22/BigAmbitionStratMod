@@ -250,7 +250,7 @@ public class NeedsTests
             "UI.Smartphone.Apps.BizMan.PurchasingAgent.PurchasingAgentPlanUI.StartOrder",
             api.Call("importer order"));
         Assert.Equal("Entities.DeliveryContract.Remove", api.Call("wholesaler contract drop"));
-        Assert.Equal("", api.Call("rent"));
+        Assert.Equal("Buildings.BuildingCommands.Command_RentBuilding", api.Call("rent"));
     }
 
     [Fact]

@@ -901,6 +901,91 @@ public class AuditTests
         }
     }
 
+    [Fact]
+    public void Audit_load_day_roll_needs_refill_recorded_call_slot_fill_store_connect_plan_assign_restock_sort_overflow_order_audit_bar_health_controls_telemetry_rent_locks_the_cheaper_lot()
+    {
+        // Chain: load → day roll → needs refill → recorded call → slot fill → store connect → plan assign → restock → sort → overflow → order → audit → bar → health → controls → telemetry → rent
+        using var dir = new TempAudit();
+        var save = new object();
+        var prefix = Prefix(dir.Path, save);
+        var guard = LiveGuard();
+        var world = prefix.World;
+        Autopilot.Enabled = guard.Enabled;
+        Autopilot.DryRun = guard.DryRun;
+        try
+        {
+            var shot = WatchDay(dir.Path, ref world, guard, prefix.Api, prefix.Rolled, 1016, 10m, null);
+            var chosen = Rent.Choose(
+                new[]
+                {
+                    new RentLot("ba:street_high", 2, 80m),
+                    new RentLot("ba:street_low", 9, 40m),
+                },
+                guard.Cash,
+                anyRented: false,
+                prefix.Api);
+            var written = Rent.Record(dir.Path, chosen, TopBar.Day(prefix.Rolled));
+            var again = Rent.Record(dir.Path, chosen, TopBar.Day(prefix.Rolled));
+
+            Assert.Contains("day=1016", prefix.Rolled);
+            Assert.Contains("telemetry.written ", shot.Written);
+            Assert.True(chosen.Rented);
+            Assert.Equal("ba:street_low", chosen.Street);
+            Assert.Equal(9, chosen.Number);
+            Assert.Equal("Buildings.BuildingCommands.Command_RentBuilding", prefix.Api.Call("rent"));
+            Assert.Equal(prefix.Api.Call("rent"), chosen.Call);
+            Assert.Equal(
+                "building.rented version=" + LoadLog.Version
+                    + " day=1016 street=ba:street_low number=9 call=" + prefix.Api.Call("rent"),
+                written);
+            Assert.Equal(written, again);
+            Assert.Equal(1, File.ReadAllLines(LoadLog.CeoLogPath(dir.Path)).Count(line => line.StartsWith("building.rented ")));
+        }
+        finally
+        {
+            Autopilot.Enabled = true;
+            Autopilot.DryRun = false;
+        }
+    }
+
+    [Fact]
+    public void Audit_load_day_roll_needs_refill_recorded_call_slot_fill_store_connect_plan_assign_restock_sort_overflow_order_audit_bar_health_controls_telemetry_rent_skips_a_save_that_already_rents()
+    {
+        // Chain: load → day roll → needs refill → recorded call → slot fill → store connect → plan assign → restock → sort → overflow → order → audit → bar → health → controls → telemetry → rent → kept
+        using var dir = new TempAudit();
+        var save = new object();
+        var prefix = Prefix(dir.Path, save);
+        var guard = LiveGuard();
+        var world = prefix.World;
+        Autopilot.Enabled = guard.Enabled;
+        Autopilot.DryRun = guard.DryRun;
+        try
+        {
+            var shot = WatchDay(dir.Path, ref world, guard, prefix.Api, prefix.Rolled, 1016, 10m, null);
+            var chosen = Rent.Choose(
+                new[] { new RentLot("ba:street_low", 9, 40m) },
+                guard.Cash,
+                anyRented: true,
+                prefix.Api);
+            var written = Rent.Record(dir.Path, chosen, TopBar.Day(shot.Rolled));
+
+            Assert.Contains("day=1016", prefix.Rolled);
+            Assert.Contains("telemetry.written ", shot.Written);
+            Assert.False(chosen.Rented);
+            Assert.Equal("", chosen.Street);
+            Assert.Equal(0, chosen.Number);
+            Assert.Equal("", written);
+            Assert.DoesNotContain(
+                File.ReadAllLines(LoadLog.CeoLogPath(dir.Path)),
+                line => line.StartsWith("building.rented "));
+        }
+        finally
+        {
+            Autopilot.Enabled = true;
+            Autopilot.DryRun = false;
+        }
+    }
+
     private static DayShot WatchDay(
         string path,
         ref AuditWorld world,

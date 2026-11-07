@@ -1,10 +1,10 @@
 # PM_PLAN — BigAmbitionStratMod
 
-In-game advisor for one Big Ambitions save, then a new-game guide and autopilot. Version scheme `MAJOR.EPIC.COUNTER`. Current public version **1.12.4**. The first ship of a new epic is `1.N.1`. Never go backwards.
+In-game advisor for one Big Ambitions save, then a new-game guide and autopilot. Version scheme `MAJOR.EPIC.COUNTER`. Current public version **1.13.1**. The first ship of a new epic is `1.N.1`. Never go backwards.
 
 ## Context
 
-The game is Mono, build **3682**. A mod builds with `dotnet build` against `Big Ambitions_Data\Managed` (`BigAmbitions.dll`, `BigAmbitions.ModAPI.dll`). The pin is `doc/requirements/game-build.md`. Python save tools live in `script/`. The mod, when it exists, lives in `src/`. Evidence for the ledger is `doc/gemini/cache/ledger.log`. The mod writes `%LocalAppData%\ChaoticCEO\ceo.log`. The compile counter is gitignored `build_number.txt`. The mod informational version is `1.12.4+N`. The draw reference is `UnityEngine.IMGUIModule`.
+The game is Mono, build **3682**. A mod builds with `dotnet build` against `Big Ambitions_Data\Managed` (`BigAmbitions.dll`, `BigAmbitions.ModAPI.dll`). The pin is `doc/requirements/game-build.md`. Python save tools live in `script/`. The mod, when it exists, lives in `src/`. Evidence for the ledger is `doc/gemini/cache/ledger.log`. The mod writes `%LocalAppData%\ChaoticCEO\ceo.log`. The compile counter is gitignored `build_number.txt`. The mod informational version is `1.13.1+N`. The draw reference is `UnityEngine.IMGUIModule`.
 
 Epic 1 closed on 17 businesses and 5865 statement rows. `ba:businesstype_liquorstore` is **food**. Do not relabel it inside a routes story. A warehouse story may add a specialty override only with a new test.
 
@@ -131,11 +131,11 @@ Starts after Epic **11**. You can see the run without opening the game.
 
 ## Epic 13 — New-game calls
 
-**Status:** later
+**Status:** in progress
 
 Starts after Epic **12**. Each story finds and records one family of calls that a brand-new game needs. Each is a human check on a new save. No walking, driving, or hand-carting.
 
-- **13.1** `[ ]` Rent a building. Human check: a new save rents the chosen lot.
+- **13.1** `[x]` Rent a building. The cheapest available lot that cash can cover wins. A tie keeps the later lot. A lot with a blank street, a number below 1, or a rent above cash is not a choice. A save that already has a named business is skipped. Human PASS 2026-11-07. New game day 1 rented 26 7th Avenue (`ba:street_seventhavenue` 26) with `Buildings.BuildingCommands.Command_RentBuilding`. The day 1014 save logged `building.skipped reason=rented`. Version 1.13.1. Chain: `load → day roll → needs refill → recorded call → slot fill → store connect → plan assign → restock → sort → overflow → order → audit → bar → health → controls → telemetry → rent`.
 - **13.2** `[ ]` Starter layout, opening hours, and store ops. A fresh profile has no saved layouts. The mod ships a starter `BusinessLayoutSet` per Stage 1 business type, or builds one through `BusinessLayoutSetHelper`, then loads it. It sets opening hours and assigns a cleaner, a guard, uniforms, and capacity fixtures. Human check: a new profile with no layouts opens a stocked-ready store whose ops match the rulebook.
 - **13.3** `[ ]` Wholesaler contract. A recurring `DeliveryContract` from a wholesaler to the store. Human check: the next morning the store has stock.
 - **13.4** `[ ]` Hire, loan, employee demand, and taxes. Hire a cashier with the **11.0** hire call, take and repay a bank loan, satisfy an employee demand, and pay taxes and back taxes. Human check: the cashier works, the loan balance moves, the demand clears, and the tax due drops.

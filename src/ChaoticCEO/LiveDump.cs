@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
 using BigAmbitions.Items;
 using Entities;
 
@@ -374,6 +375,91 @@ namespace ChaoticCEO
                 truckCost: 0,
                 LoadLog.PinnedBuild);
             Audit.Check(localAppData, current.Day, GameApi.Live(), world, guard, LiveHeal);
+        }
+
+        public static string? TryRent(RentWatch watch, string localAppData)
+        {
+            if (watch == null || string.IsNullOrEmpty(localAppData) || !InCity())
+            {
+                return null;
+            }
+
+            var current = SaveGameManager.Current;
+            if (current == null || !watch.Due(current))
+            {
+                return null;
+            }
+
+            if (PlayerRents(current))
+            {
+                watch.Mark(current);
+                var skipped = "building.skipped version=" + LoadLog.Version
+                    + " day=" + current.Day.ToString(CultureInfo.InvariantCulture)
+                    + " reason=rented";
+                File.AppendAllText(LoadLog.CeoLogPath(localAppData), skipped + System.Environment.NewLine);
+                return skipped;
+            }
+
+            var wealth = Helpers.PlayerHelper.GetPersonalWealth();
+            var chosen = Rent.Choose(OpenLots(current), ToMoney(wealth.cash), anyRented: false, GameApi.Live());
+            if (!chosen.Rented)
+            {
+                return null;
+            }
+
+            watch.Mark(current);
+            if (!RentBridge.Live(chosen))
+            {
+                return Rent.Miss(localAppData, chosen, current.Day);
+            }
+
+            return Rent.Record(localAppData, chosen, current.Day);
+        }
+
+        private static bool PlayerRents(GameInstance current)
+        {
+            if (current.BuildingRegistrations == null)
+            {
+                return false;
+            }
+
+            foreach (var building in current.BuildingRegistrations)
+            {
+                var registration = building as BuildingRegistration;
+                if (registration != null
+                    && registration.RentedByPlayer
+                    && !string.IsNullOrEmpty(registration.BusinessName))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        private static List<RentLot> OpenLots(GameInstance current)
+        {
+            var lots = new List<RentLot>();
+            if (current.BuildingRegistrations == null)
+            {
+                return lots;
+            }
+
+            foreach (var building in current.BuildingRegistrations)
+            {
+                var registration = building as BuildingRegistration;
+                if (registration == null || !registration.AvailableForRent || registration.RentedByPlayer)
+                {
+                    continue;
+                }
+
+                lots.Add(new RentLot(
+                    registration.StreetName ?? "",
+                    registration.StreetNumber,
+                    ToMoney(registration.RentPerDay)));
+            }
+
+            return lots;
         }
 
         public static void WriteTelemetry(string localAppData)

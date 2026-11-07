@@ -18,6 +18,7 @@ namespace ChaoticCEO
         private readonly ConnectWatch _stores = new ConnectWatch();
         private readonly PlanWatch _plans = new PlanWatch();
         private readonly RestockWatch _restock = new RestockWatch();
+        private readonly RentWatch _rents = new RentWatch();
         private bool _hooked;
         private bool _panelFailed;
         private string _localAppData = "";
@@ -70,6 +71,7 @@ namespace ChaoticCEO
 
             StopOnHotkey();
             LiveDump.HoldNeeds(_needs, _localAppData);
+            LiveDump.TryRent(_rents, _localAppData);
             if (LiveDump.Roll(_days, _localAppData) != null)
             {
                 LiveDump.FillSlots(_slots, _localAppData);

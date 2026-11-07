@@ -208,13 +208,13 @@ public class GameApiTests
     }
 
     [Fact]
-    public void GameApi_an_unverified_neighbor_is_not_a_call()
+    public void GameApi_an_unverified_neighbor_stays_blank_and_rent_is_recorded()
     {
         var note = File.ReadAllText(Path.Combine(RepoRoot(), "doc", "requirements", "game-api.md"));
         var api = GameApi.Read(OneRow(), note);
 
         Assert.Equal("", api.Call("staff plan write"));
-        Assert.Equal("", api.Call("rent"));
+        Assert.Equal("Buildings.BuildingCommands.Command_RentBuilding", api.Call("rent"));
         Assert.Equal("", api.Call("wholesaler contract"));
     }
 

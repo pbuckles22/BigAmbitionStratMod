@@ -6,7 +6,7 @@ Cursor **rules**, **skills**, **handoff protocol**, and **test discipline** for 
 
 **Start with [CONTRIBUTING.md](CONTRIBUTING.md)** — reading order, tracked vs gitignored docs, PR expectations.
 
-**Current work:** [doc/PROJECT_STATUS.md](doc/PROJECT_STATUS.md). Version 1.12.4. Each day writes one telemetry row, and the progress report reads that file.
+**Current work:** [doc/PROJECT_STATUS.md](doc/PROJECT_STATUS.md). Version 1.13.1. A new game rents the cheapest available lot.
 
 ## Quick start
 

@@ -6,9 +6,9 @@
     <LangVersion>latest</LangVersion>
     <RootNamespace>ChaoticCEO</RootNamespace>
     <AssemblyName>ChaoticCEO</AssemblyName>
-    <Version>1.12.4</Version>
-    <AssemblyVersion>1.12.4</AssemblyVersion>
-    <FileVersion>1.12.4</FileVersion>
+    <Version>1.13.1</Version>
+    <AssemblyVersion>1.13.1</AssemblyVersion>
+    <FileVersion>1.13.1</FileVersion>
     <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
     <GameManaged Condition="'$(GameManaged)' == ''">C:\Program Files (x86)\Steam\steamapps\common\Big Ambitions\Big Ambitions_Data\Managed</GameManaged>
   </PropertyGroup>
@@ -102,6 +102,8 @@
       <_NeedsBump Condition="Exists('$(TargetPath)') and $([System.IO.File]::GetLastWriteTime('$(MSBuildThisFileDirectory)Health.cs').Ticks) &gt; $(_DllTime)">true</_NeedsBump>
       <_NeedsBump Condition="Exists('$(TargetPath)') and $([System.IO.File]::GetLastWriteTime('$(MSBuildThisFileDirectory)Controls.cs').Ticks) &gt; $(_DllTime)">true</_NeedsBump>
       <_NeedsBump Condition="Exists('$(TargetPath)') and $([System.IO.File]::GetLastWriteTime('$(MSBuildThisFileDirectory)Telemetry.cs').Ticks) &gt; $(_DllTime)">true</_NeedsBump>
+      <_NeedsBump Condition="Exists('$(TargetPath)') and $([System.IO.File]::GetLastWriteTime('$(MSBuildThisFileDirectory)Rent.cs').Ticks) &gt; $(_DllTime)">true</_NeedsBump>
+      <_NeedsBump Condition="Exists('$(TargetPath)') and $([System.IO.File]::GetLastWriteTime('$(MSBuildThisFileDirectory)RentBridge.cs').Ticks) &gt; $(_DllTime)">true</_NeedsBump>
       <_NeedsBump Condition="Exists('$(TargetPath)') and $([System.IO.File]::GetLastWriteTime('$(MSBuildProjectFullPath)').Ticks) &gt; $(_DllTime)">true</_NeedsBump>
     </PropertyGroup>
     <Copy SourceFiles="$(_NumberSeed)" DestinationFiles="$(_NumberFile)" Condition="!Exists('$(_NumberFile)')" />

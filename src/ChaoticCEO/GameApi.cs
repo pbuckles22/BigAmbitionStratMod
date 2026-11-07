@@ -80,6 +80,7 @@ namespace ChaoticCEO
                 ["staff train"] = "Buildings.Office.Headquarters.HrManagerPlan.TrainEmployees",
                 ["importer order"] = "UI.Smartphone.Apps.BizMan.PurchasingAgent.PurchasingAgentPlanUI.StartOrder",
                 ["wholesaler contract drop"] = "Entities.DeliveryContract.Remove",
+                ["rent"] = "Buildings.BuildingCommands.Command_RentBuilding",
             };
             return new ApiNote(
                 LoadLog.PinnedBuild,
