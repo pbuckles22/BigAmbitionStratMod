@@ -376,6 +376,20 @@ namespace ChaoticCEO
             Audit.Check(localAppData, current.Day, GameApi.Live(), world, guard, LiveHeal);
         }
 
+        public static void WriteTelemetry(string localAppData)
+        {
+            if (string.IsNullOrEmpty(localAppData) || !InCity())
+            {
+                return;
+            }
+
+            Telemetry.Record(
+                localAppData,
+                HudLine(),
+                Health.Latest(localAppData),
+                Controls.Row(Autopilot.Enabled, Autopilot.DryRun));
+        }
+
         private static HealFate LiveHeal(AuditHeal heal)
         {
             if (heal == null || heal.Kind != "connect")

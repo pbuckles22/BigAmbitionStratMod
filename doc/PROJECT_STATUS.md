@@ -2,13 +2,13 @@
 
 **Human-readable current state.** Keep in sync with [AGENT_HANDOFF.md](../AGENT_HANDOFF.md) → *Current state* when milestones ship.
 
-**Last updated:** 2026-11-06
+**Last updated:** 2026-11-07
 
 ---
 
 ## Summary
 
-**BigAmbitionStratMod** 1.12.3.1 — A close step's daily gain is that day's profit. A loss keeps the minus, and a non-negative figure stays the plain number. The sign check passed 2026-11-06. **7.13** stays stashed. The rules are in [requirements/strategy.md](requirements/strategy.md). `origin` is this repo.
+**BigAmbitionStratMod** 1.12.4 — Epic 12 is complete. Each day writes one telemetry row, and the progress report reads that file. Days 1015–1017 passed 2026-11-07. **7.13** stays stashed. The rules are in [requirements/strategy.md](requirements/strategy.md). `origin` is this repo.
 
 ---
 
@@ -16,7 +16,8 @@
 
 | Branch | Role |
 |--------|------|
-| **`main`** | Integration branch. Last land `9152c03`, version 1.12.3.1 |
+| **`main`** | Integration branch. Last land `9152c03`, version 1.12.4 |
+| **`feature/12.4-telemetry`** | Story 12.4. Version 1.12.4. Human PASS 2026-11-07. Kept after this CMPH. |
 | **`fix/daily-gain-sign`** | Daily gain sign. Version 1.12.3.1. Human PASS 2026-11-06. Kept after this CMPH. |
 | **`feature/12.3-f9-controls`** | Story 12.3. Version 1.12.3. Human PASS 2026-11-06. Kept after this CMPH. |
 | **`feature/12.2-f9-health`** | Story 12.2. Version 1.12.2. Human PASS 2026-11-06. Kept after this CMPH. |
@@ -95,7 +96,7 @@
 
 ## Next up (maintainers)
 
-- Story **12.4**. One telemetry row per day, and a progress report from that file. **7.13** stays stashed.
+- Story **13.1**. Rent a building on a new save. **7.13** stays stashed. Epic 12 closed 2026-11-07.
 - Variants: merge upstream when AgenticTemplate skills/rules change
 
 ---

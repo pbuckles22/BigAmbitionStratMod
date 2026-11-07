@@ -1,3 +1,4 @@
+using System.Globalization;
 using ChaoticCEO;
 
 namespace ChaoticCEO.Tests;
@@ -800,6 +801,213 @@ public class AuditTests
             Autopilot.Enabled = true;
             Autopilot.DryRun = false;
         }
+    }
+
+    [Fact]
+    public void Audit_load_day_roll_needs_refill_recorded_call_slot_fill_store_connect_plan_assign_restock_sort_overflow_order_audit_bar_health_controls_telemetry_locks_three_days_as_three_rows()
+    {
+        // Chain: load → day roll → needs refill → recorded call → slot fill → store connect → plan assign → restock → sort → overflow → order → audit → bar → health → controls → telemetry
+        using var dir = new TempAudit();
+        var save = new object();
+        var prefix = Prefix(dir.Path, save);
+        var guard = LiveGuard();
+        var world = prefix.World;
+        Autopilot.Enabled = guard.Enabled;
+        Autopilot.DryRun = guard.DryRun;
+        try
+        {
+            var first = WatchDay(dir.Path, ref world, guard, prefix.Api, prefix.Rolled, 1016, 10m, null);
+            var second = WatchDay(dir.Path, ref world, guard, prefix.Api, first.Rolled, 1017, 20m, 1016);
+            var third = WatchDay(dir.Path, ref world, guard, prefix.Api, second.Rolled, 1018, 30m, 1017);
+            var lines = File.ReadAllLines(Telemetry.CsvPath(dir.Path));
+            var rows = new[] { lines[1].Split(','), lines[2].Split(','), lines[3].Split(',') };
+            var shots = new[] { first, second, third };
+
+            Assert.Contains("day=1016", prefix.Rolled);
+            Assert.Equal(4, lines.Length);
+            Assert.Equal(new[] { "1016", "1017", "1018" }, rows.Select(cells => cells[0]).ToArray());
+            Assert.Equal(new[] { "10", "20", "30" }, rows.Select(cells => cells[2]).ToArray());
+            for (var index = 0; index < shots.Length; index++)
+            {
+                Assert.Equal(Between(shots[index].Bar, "Day "), rows[index][0]);
+                Assert.Equal(Between(shots[index].Bar, "Cash "), rows[index][1]);
+                Assert.Equal(Net(shots[index].Bar), rows[index][2]);
+                Assert.Equal(Between(shots[index].Bar, "Profit "), rows[index][3]);
+                Assert.Equal(Between(shots[index].Bar, "Stage "), rows[index][4]);
+                Assert.Equal(Token(shots[index].Health, "unconnected"), rows[index][5]);
+                Assert.Equal(Token(shots[index].Health, "emptySlots"), rows[index][6]);
+                Assert.Equal(Token(shots[index].Health, "missingPlans"), rows[index][10]);
+                Assert.Equal(Token(shots[index].Health, "healed"), rows[index][13]);
+                var summary = shots[index].Report.Lines.Last(line => line.StartsWith("audit.summary ", StringComparison.Ordinal));
+                Assert.Equal(Token(summary, "dry"), rows[index][7]);
+                Assert.Equal(Token(summary, "pinMismatch"), rows[index][12]);
+                Assert.Equal(JoinedActions(shots[index].Report.Lines), rows[index][14]);
+                Assert.Contains("day=" + rows[index][0], shots[index].Written);
+                Assert.Contains("rows=" + (index + 1).ToString(), shots[index].Written);
+                Assert.Contains("autopilot=on", shots[index].Written);
+                Assert.Contains("dry=off", shots[index].Written);
+            }
+
+            Assert.Equal(3, File.ReadAllLines(LoadLog.CeoLogPath(dir.Path)).Count(line => line.StartsWith("telemetry.written ")));
+        }
+        finally
+        {
+            Autopilot.Enabled = true;
+            Autopilot.DryRun = false;
+        }
+    }
+
+    [Fact]
+    public void Audit_load_day_roll_needs_refill_recorded_call_slot_fill_store_connect_plan_assign_restock_sort_overflow_order_audit_bar_health_controls_telemetry_same_day_stays_one_row()
+    {
+        // Chain: load → day roll → needs refill → recorded call → slot fill → store connect → plan assign → restock → sort → overflow → order → audit → bar → health → controls → telemetry → same day
+        using var dir = new TempAudit();
+        var save = new object();
+        var prefix = Prefix(dir.Path, save);
+        var guard = LiveGuard();
+        var world = prefix.World;
+        Autopilot.Enabled = guard.Enabled;
+        Autopilot.DryRun = guard.DryRun;
+        try
+        {
+            var first = WatchDay(dir.Path, ref world, guard, prefix.Api, prefix.Rolled, 1016, 10m, null);
+            var second = WatchDay(dir.Path, ref world, guard, prefix.Api, first.Rolled, 1017, 20m, 1016);
+            var third = WatchDay(dir.Path, ref world, guard, prefix.Api, second.Rolled, 1018, 30m, 1017);
+            var kept = File.ReadAllLines(Telemetry.CsvPath(dir.Path))[1];
+            var againBar = TopBar.Line(
+                int.Parse(Between(third.Bar, "Day "), CultureInfo.InvariantCulture),
+                decimal.Parse(Between(third.Bar, "Cash "), CultureInfo.InvariantCulture),
+                99m,
+                decimal.Parse(Between(third.Bar, "Profit "), CultureInfo.InvariantCulture),
+                int.Parse(Between(third.Bar, "Stage "), CultureInfo.InvariantCulture),
+                Autopilot.Enabled,
+                TopBar.Clock(paused: false, rate: null));
+            var again = Telemetry.Record(dir.Path, againBar, third.Health, third.Controls);
+            var lines = File.ReadAllLines(Telemetry.CsvPath(dir.Path));
+
+            Assert.Contains("day=1016", prefix.Rolled);
+            Assert.Equal("", again);
+            Assert.Equal(4, lines.Length);
+            Assert.Equal(kept, lines[1]);
+            Assert.Equal("99", lines[3].Split(',')[2]);
+            Assert.Equal("1018", lines[3].Split(',')[0]);
+            Assert.Equal(JoinedActions(first.Report.Lines), lines[1].Split(',')[14]);
+            Assert.Equal(3, File.ReadAllLines(LoadLog.CeoLogPath(dir.Path)).Count(line => line.StartsWith("telemetry.written ")));
+        }
+        finally
+        {
+            Autopilot.Enabled = true;
+            Autopilot.DryRun = false;
+        }
+    }
+
+    private static DayShot WatchDay(
+        string path,
+        ref AuditWorld world,
+        AuditGuard guard,
+        ApiNote api,
+        string rolled,
+        int day,
+        decimal net,
+        int? seen)
+    {
+        if (seen.HasValue)
+        {
+            rolled = DayRoll.Apply(
+                path,
+                seen,
+                day,
+                new[]
+                {
+                    new FinancialDay(1015, new[] { new StatementRow("ba:street_fourthavenue", 28, 10f, 1f, 1f, 1f, 0f, 0f, 7f) }),
+                },
+                world.Stops,
+                world.Holds,
+                world.Needs,
+                Array.Empty<DailyUnits>()) ?? throw new InvalidOperationException("day roll missing");
+        }
+
+        var report = Audit.Check(path, day, api, world, guard, heal => HealFate.Done);
+        var stage = Stage.Read(TopBar.Day(rolled), guard.Cash, world.Needs, report.Stops, world.Holds, world.Slots);
+        var bar = TopBar.From(
+            rolled,
+            File.ReadAllText(StatementDump.CsvPath(path)),
+            guard.Cash,
+            net,
+            stage,
+            Autopilot.Enabled,
+            TopBar.Clock(paused: false, rate: null));
+        var health = Health.Latest(path);
+        var controls = Controls.Row(Autopilot.Enabled, Autopilot.DryRun);
+        var written = Telemetry.Record(path, bar, health, controls);
+        world = world.WithStops(report.Stops);
+        return new DayShot(written, bar, health, controls, report, rolled);
+    }
+
+    private static string Between(string text, string label)
+    {
+        var at = text.IndexOf(label, StringComparison.Ordinal);
+        Assert.True(at >= 0, label);
+        var rest = text.Substring(at + label.Length);
+        var stop = rest.IndexOf("  ", StringComparison.Ordinal);
+        return stop < 0 ? rest.Trim() : rest.Substring(0, stop).Trim();
+    }
+
+    private static string Net(string bar)
+    {
+        var worth = Between(bar, "Net worth ");
+        var slash = worth.IndexOf(" / ", StringComparison.Ordinal);
+        Assert.True(slash > 0);
+        return worth.Substring(0, slash);
+    }
+
+    private static string JoinedActions(IReadOnlyList<string> lines)
+    {
+        var names = new List<string>();
+        foreach (var line in lines)
+        {
+            if (!line.StartsWith("audit.healed ", StringComparison.Ordinal))
+            {
+                continue;
+            }
+
+            var at = line.IndexOf("action=", StringComparison.Ordinal);
+            if (at < 0)
+            {
+                continue;
+            }
+
+            var rest = line.Substring(at + "action=".Length);
+            var end = rest.IndexOf(' ');
+            names.Add(end < 0 ? rest : rest.Substring(0, end));
+        }
+
+        return string.Join("|", names);
+    }
+
+    private sealed class DayShot
+    {
+        public DayShot(string written, string bar, string health, string controls, AuditReport report, string rolled)
+        {
+            Written = written;
+            Bar = bar;
+            Health = health;
+            Controls = controls;
+            Report = report;
+            Rolled = rolled;
+        }
+
+        public string Written { get; }
+
+        public string Bar { get; }
+
+        public string Health { get; }
+
+        public string Controls { get; }
+
+        public AuditReport Report { get; }
+
+        public string Rolled { get; }
     }
 
     private static string Token(string line, string name)

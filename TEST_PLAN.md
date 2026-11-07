@@ -169,6 +169,17 @@ Human PASS 2026-11-06 on 1.12.3. Day 1016: the bar flipped Autopilot on to off a
 4. Evidence: `roadmap.shown` `gain=` for a close that leads the list is negative. Second Avenue 10 on day 1015 is `gain=-52733.9531` when it is the first step.
 5. Version marker: public `1.12.3.1`. `ceo.log` starts at `mod.loaded version=1.12.3.1 build=3682`.
 
+## Daily telemetry human check
+
+1. Restart Big Ambitions so version 1.12.4 loads. You are in the city on the usual save. Do not load the day 1021 save. This check is one `telemetry.csv` row per day, and the progress report from that file. It does not change the F9 window.
+2. Let three days pass.
+3. Open `%LocalAppData%\ChaoticCEO\telemetry.csv`. From the repo root run `python script/Report-Progress.py`. Open `%LocalAppData%\ChaoticCEO\progress.md`.
+4. **PASS if** those three days are three rows, the report's latest day is the third day, and a negative profit in a row stays a minus in the report. **FAIL if** a day is missing, a day is listed twice, or the report says no days.
+5. Evidence: one `telemetry.written` line per new day (`day`, `rows`, `actions`). `progress.written` (`days`, `latest`, `profit`) in `ceo.log`.
+6. Version marker: public `1.12.4`. `ceo.log` starts at `mod.loaded version=1.12.4 build=3682`.
+
+Human PASS 2026-11-07 on 1.12.4. Days 1015, 1016, and 1017: one row each, `telemetry.written` rows 1 then 2 then 3. Day 1017 matches `audit.summary`: unconnected 61, empty slots 7, dry 4, mixed 7, missing plans 3, healed 10. Cash 18228400, net worth 381213200, profit 464167. `progress.written days=3 latest=1017 profit=464167`. No day was repeated. `mod.loaded version=1.12.4 build=3682`.
+
 ## Warehouse sort and restock human check
 
 1. Restart Big Ambitions so version 1.11.8.1 loads. You are in the city on the usual save. Do not load the day 1021 save. This check records warehouse homes, drains, overflow, and the first import order. It does not call the game. BizMan’s warehouses and purchasing screens stay as they are. Fifth Avenue 36 stays on the wholesaler.

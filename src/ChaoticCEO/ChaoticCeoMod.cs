@@ -77,6 +77,7 @@ namespace ChaoticCEO
                 LiveDump.AssignPlans(_plans, _localAppData);
                 LiveDump.RestockWarehouses(_restock, _localAppData);
                 LiveDump.AuditDay(_localAppData);
+                LiveDump.WriteTelemetry(_localAppData);
             }
         }
 
