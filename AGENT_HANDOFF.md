@@ -139,7 +139,7 @@ When shipping: update **PM_PLAN**, **doc/PROJECT_STATUS.md**, and **Current stat
 ## Current state
 
 - **Product:** Version 1.12.4. Epic 12 is complete. Each day writes one telemetry row, and `script/Report-Progress.py` writes the progress report. 7.13 stays stashed. Ladder: [PM_PLAN.md](PM_PLAN.md).
-- **On:** `origin/main @ 9152c03`. Stash `7.13 spare cost centers` on `feature/7.13-spare-cost-centers`. https://github.com/pbuckles22/BigAmbitionStratMod
+- **On:** `origin/main @ 3a88d9e`. Stash `7.13 spare cost centers` on `feature/7.13-spare-cost-centers`. https://github.com/pbuckles22/BigAmbitionStratMod
 - **Next:** Story 13.1, rent a building, when asked.
 - **Blockers:** Do not pop 7.13. Do not load the day 1021 save. Do not drop Fifth Avenue 36’s contract before the hub holds that item.
 
