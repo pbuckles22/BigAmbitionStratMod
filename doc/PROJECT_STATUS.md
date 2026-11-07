@@ -16,7 +16,7 @@
 
 | Branch | Role |
 |--------|------|
-| **`main`** | Integration branch. Last land `bbbb485`, version 1.12.3 |
+| **`main`** | Integration branch. Last land `9152c03`, version 1.12.3.1 |
 | **`fix/daily-gain-sign`** | Daily gain sign. Version 1.12.3.1. Human PASS 2026-11-06. Kept after this CMPH. |
 | **`feature/12.3-f9-controls`** | Story 12.3. Version 1.12.3. Human PASS 2026-11-06. Kept after this CMPH. |
 | **`feature/12.2-f9-health`** | Story 12.2. Version 1.12.2. Human PASS 2026-11-06. Kept after this CMPH. |
@@ -71,7 +71,7 @@
 | **`feature/chain-prefix`** | Kept after CMPH (template history) |
 | **`feature/handoff-receiver-framing`** | Kept after CMPH (template history) |
 
-**Last land:** `bbbb485` on `main`. Version 1.12.3. Branch `feature/12.3-f9-controls` kept. Repo: https://github.com/pbuckles22/BigAmbitionStratMod.
+**Last land:** `9152c03` on `main`. Version 1.12.3.1. Branch `fix/daily-gain-sign` kept. Repo: https://github.com/pbuckles22/BigAmbitionStratMod.
 
 ---
 
