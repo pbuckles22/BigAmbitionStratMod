@@ -16,7 +16,7 @@
 
 | Branch | Role |
 |--------|------|
-| **`main`** | Integration branch. Last land `7ffdda8`, version 1.13.1 |
+| **`main`** | Integration branch. Last land `e1851c7`, version 1.13.2 |
 | **`feature/13.2-starter-layout`** | Story 13.2 layout and hours. Version 1.13.2. Human PASS 2026-11-07. Kept after this CMPH. |
 | **`feature/13.1-rent-building`** | Story 13.1. Version 1.13.1. Human PASS 2026-11-07. Kept after this CMPH. |
 | **`feature/12.4-telemetry`** | Story 12.4. Version 1.12.4. Human PASS 2026-11-07. Kept after this CMPH. |
@@ -74,7 +74,7 @@
 | **`feature/chain-prefix`** | Kept after CMPH (template history) |
 | **`feature/handoff-receiver-framing`** | Kept after CMPH (template history) |
 
-**Last land:** `7ffdda8` on `main`. Version 1.13.1. Branch `feature/13.1-rent-building` kept. Repo: https://github.com/pbuckles22/BigAmbitionStratMod.
+**Last land:** `e1851c7` on `main`. Version 1.13.2. Branch `feature/13.2-starter-layout` kept. Repo: https://github.com/pbuckles22/BigAmbitionStratMod.
 
 ---
 
