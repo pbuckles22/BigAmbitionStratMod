@@ -8,7 +8,7 @@
 
 ## Summary
 
-**BigAmbitionStratMod** 1.13.1 — A new game rents the cheapest available lot. Day 1 rented 26 7th Avenue on 2026-11-07. A save that already has a named business is skipped. **7.13** stays stashed. The rules are in [requirements/strategy.md](requirements/strategy.md). `origin` is this repo.
+**BigAmbitionStratMod** 1.13.2 — A new game rents the cheapest available lot and loads the stage-1 starter layout. Day 1 loaded Starter Gift at 20 7th Avenue on 2026-11-07. A save that already has a named business is skipped. Cleaner, guard, and uniforms are still open. **7.13** stays stashed. The rules are in [requirements/strategy.md](requirements/strategy.md). `origin` is this repo.
 
 ---
 
@@ -17,6 +17,7 @@
 | Branch | Role |
 |--------|------|
 | **`main`** | Integration branch. Last land `7ffdda8`, version 1.13.1 |
+| **`feature/13.2-starter-layout`** | Story 13.2 layout and hours. Version 1.13.2. Human PASS 2026-11-07. Kept after this CMPH. |
 | **`feature/13.1-rent-building`** | Story 13.1. Version 1.13.1. Human PASS 2026-11-07. Kept after this CMPH. |
 | **`feature/12.4-telemetry`** | Story 12.4. Version 1.12.4. Human PASS 2026-11-07. Kept after this CMPH. |
 | **`fix/daily-gain-sign`** | Daily gain sign. Version 1.12.3.1. Human PASS 2026-11-06. Kept after this CMPH. |
@@ -97,7 +98,7 @@
 
 ## Next up (maintainers)
 
-- Story **13.2**. Starter layout, opening hours, and store ops on a new profile. **7.13** stays stashed.
+- Story **13.2** store ops. Cleaner, guard, and uniforms on the starter store. **7.13** stays stashed.
 - Variants: merge upstream when AgenticTemplate skills/rules change
 
 ---

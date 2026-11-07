@@ -191,6 +191,17 @@ Human PASS 2026-11-07 on 1.12.4. Days 1015, 1016, and 1017: one row each, `telem
 
 Human PASS 2026-11-07 on 1.13.1. New game day 1: one `building.rented` for `ba:street_seventhavenue` number 26, call `Buildings.BuildingCommands.Command_RentBuilding`. The player was inside 26 7th Avenue. The day 1014 save in the same session logged `building.skipped reason=rented` and was not rented. `mod.loaded version=1.13.1 build=3682`.
 
+## Starter layout human check
+
+1. Restart Big Ambitions so version 1.13.2 loads. Start a new game and reach the city. Do not load the usual save and do not load the day 1021 save. This check rents one lot, names it, and loads one starter layout. It does not hire a cleaner or a guard, set uniforms, or sign a wholesaler. It does not change an existing empire.
+2. Wait until you are inside the rented building.
+3. Open `%LocalAppData%\ChaoticCEO\ceo.log`. Look at the business name and the furniture.
+4. **PASS if** the business is Starter Gift, Starter Florist, or Starter Kabob, the hours are 8 to 16, and one `layout.loaded` line names that type, that layout, and `BusinessLayoutSets.BusinessLayoutSetHelper.LoadBusinessLayoutSet`. On a small lot the line is the gift shop `GiftShopWholesalers`. **FAIL if** the building stays empty, a second layout loads, or the usual save gains a store.
+5. Evidence: one `layout.loaded` line (`day`, `street`, `number`, `type`, `layout`, `open`, `call`) after `building.rented` for the same street and number. A later frame does not append it again. A save that already has a named business appends `layout.skipped reason=open` and does not append `layout.loaded`.
+6. Version marker: public `1.13.2`. `ceo.log` starts at `mod.loaded version=1.13.2 build=3682`.
+
+Human PASS 2026-11-07 on 1.13.2. New game day 1: one `building.rented` for `ba:street_seventhavenue` number 20, then one `layout.loaded` for the same street and number, type `ba:businesstype_giftshop`, layout `GiftShopWholesalers`, `open=8-16`, call `BusinessLayoutSets.BusinessLayoutSetHelper.LoadBusinessLayoutSet`. The player was inside Starter Gift at 20 7th Avenue. The room had the gift-shop furniture. Cash on screen was $15.0K at 09:15. No second layout line. `mod.loaded version=1.13.2 build=3682`.
+
 ## Warehouse sort and restock human check
 
 1. Restart Big Ambitions so version 1.11.8.1 loads. You are in the city on the usual save. Do not load the day 1021 save. This check records warehouse homes, drains, overflow, and the first import order. It does not call the game. BizMan’s warehouses and purchasing screens stay as they are. Fifth Avenue 36 stays on the wholesaler.

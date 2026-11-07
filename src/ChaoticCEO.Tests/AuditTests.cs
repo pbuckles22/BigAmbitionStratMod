@@ -986,6 +986,103 @@ public class AuditTests
         }
     }
 
+    [Fact]
+    public void Audit_load_day_roll_needs_refill_recorded_call_slot_fill_store_connect_plan_assign_restock_sort_overflow_order_audit_bar_health_controls_telemetry_rent_layout_locks_the_gift_shop()
+    {
+        // Chain: load → day roll → needs refill → recorded call → slot fill → store connect → plan assign → restock → sort → overflow → order → audit → bar → health → controls → telemetry → rent → layout
+        using var dir = new TempAudit();
+        var save = new object();
+        var prefix = Prefix(dir.Path, save);
+        var guard = LiveGuard();
+        var world = prefix.World;
+        Autopilot.Enabled = guard.Enabled;
+        Autopilot.DryRun = guard.DryRun;
+        try
+        {
+            var shot = WatchDay(dir.Path, ref world, guard, prefix.Api, prefix.Rolled, 1016, 10m, null);
+            var rented = Rent.Choose(
+                new[]
+                {
+                    new RentLot("ba:street_high", 2, 80m),
+                    new RentLot("ba:street_low", 9, 40m),
+                },
+                guard.Cash,
+                anyRented: false,
+                prefix.Api);
+            var rentLine = Rent.Record(dir.Path, rented, TopBar.Day(prefix.Rolled));
+            var chosen = Starter.Choose(Starter.StageOne(), alreadyOpen: false, prefix.Api);
+            var written = Starter.Record(dir.Path, chosen, rented, TopBar.Day(shot.Rolled));
+            var again = Starter.Record(dir.Path, chosen, rented, TopBar.Day(shot.Rolled));
+
+            Assert.Contains("day=1016", prefix.Rolled);
+            Assert.Contains("telemetry.written ", shot.Written);
+            Assert.Contains("building.rented ", rentLine);
+            Assert.Equal("ba:street_low", rented.Street);
+            Assert.Equal(9, rented.Number);
+            Assert.True(chosen.Loaded);
+            Assert.Equal("ba:businesstype_giftshop", chosen.BusinessType);
+            Assert.Equal("GiftShopWholesalers", chosen.Layout);
+            Assert.Equal("BusinessLayoutSets.BusinessLayoutSetHelper.LoadBusinessLayoutSet", prefix.Api.Call("clone"));
+            Assert.Equal(prefix.Api.Call("clone"), chosen.Call);
+            Assert.Equal(
+                "layout.loaded version=" + LoadLog.Version
+                    + " day=1016 street=ba:street_low number=9 type=ba:businesstype_giftshop layout=GiftShopWholesalers open=8-16 call="
+                    + prefix.Api.Call("clone"),
+                written);
+            Assert.Equal(written, again);
+            Assert.Equal(1, File.ReadAllLines(LoadLog.CeoLogPath(dir.Path)).Count(line => line.StartsWith("layout.loaded ")));
+        }
+        finally
+        {
+            Autopilot.Enabled = true;
+            Autopilot.DryRun = false;
+        }
+    }
+
+    [Fact]
+    public void Audit_load_day_roll_needs_refill_recorded_call_slot_fill_store_connect_plan_assign_restock_sort_overflow_order_audit_bar_health_controls_telemetry_rent_layout_skips_a_store_that_is_already_open()
+    {
+        // Chain: load → day roll → needs refill → recorded call → slot fill → store connect → plan assign → restock → sort → overflow → order → audit → bar → health → controls → telemetry → rent → layout → kept
+        using var dir = new TempAudit();
+        var save = new object();
+        var prefix = Prefix(dir.Path, save);
+        var guard = LiveGuard();
+        var world = prefix.World;
+        Autopilot.Enabled = guard.Enabled;
+        Autopilot.DryRun = guard.DryRun;
+        try
+        {
+            var shot = WatchDay(dir.Path, ref world, guard, prefix.Api, prefix.Rolled, 1016, 10m, null);
+            var rented = Rent.Choose(
+                new[] { new RentLot("ba:street_low", 9, 40m) },
+                guard.Cash,
+                anyRented: true,
+                prefix.Api);
+            var rentLine = Rent.Record(dir.Path, rented, TopBar.Day(shot.Rolled));
+            var chosen = Starter.Choose(
+                new[] { new StarterOffer("ba:businesstype_giftshop", "GiftShopWholesalers", 40m) },
+                alreadyOpen: true,
+                prefix.Api);
+            var written = Starter.Record(dir.Path, chosen, rented, TopBar.Day(shot.Rolled));
+
+            Assert.Contains("day=1016", prefix.Rolled);
+            Assert.Contains("telemetry.written ", shot.Written);
+            Assert.Equal("", rentLine);
+            Assert.False(rented.Rented);
+            Assert.False(chosen.Loaded);
+            Assert.Equal("", chosen.BusinessType);
+            Assert.Equal("", written);
+            Assert.DoesNotContain(
+                File.ReadAllLines(LoadLog.CeoLogPath(dir.Path)),
+                line => line.StartsWith("layout.loaded "));
+        }
+        finally
+        {
+            Autopilot.Enabled = true;
+            Autopilot.DryRun = false;
+        }
+    }
+
     private static DayShot WatchDay(
         string path,
         ref AuditWorld world,

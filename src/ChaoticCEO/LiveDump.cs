@@ -416,6 +416,130 @@ namespace ChaoticCEO
             return Rent.Record(localAppData, chosen, current.Day);
         }
 
+        public static string? TryLayout(StarterWatch watch, string localAppData)
+        {
+            if (watch == null || string.IsNullOrEmpty(localAppData) || !InCity())
+            {
+                return null;
+            }
+
+            var current = SaveGameManager.Current;
+            if (current == null || !watch.Due(current))
+            {
+                return null;
+            }
+
+            if (PlayerRents(current))
+            {
+                watch.Mark(current);
+                return Starter.Skip(localAppData, current.Day);
+            }
+
+            if (!LastRent(localAppData, out var street, out var number))
+            {
+                return null;
+            }
+
+            var registration = FindLot(current, street, number);
+            if (registration == null || !StarterBridge.Inside(new BuildingRent(street, number, true, "")))
+            {
+                return null;
+            }
+
+            var rented = new BuildingRent(street, number, true, GameApi.Live().Call("clone"));
+            StarterPick chosen;
+            try
+            {
+                chosen = Starter.Choose(StarterBridge.Offers(registration), alreadyOpen: false, GameApi.Live());
+            }
+            catch (System.Exception)
+            {
+                watch.Mark(current);
+                return Starter.Miss(localAppData, Starter.Choose(null, false, null), rented, current.Day);
+            }
+
+            if (!chosen.Loaded)
+            {
+                watch.Mark(current);
+                return Starter.Miss(localAppData, chosen, rented, current.Day);
+            }
+
+            watch.Mark(current);
+            if (!StarterBridge.Live(registration, chosen))
+            {
+                return Starter.Miss(localAppData, chosen, rented, current.Day);
+            }
+
+            return Starter.Record(localAppData, chosen, rented, current.Day);
+        }
+
+        private static bool LastRent(string localAppData, out string street, out int number)
+        {
+            street = "";
+            number = 0;
+            var path = LoadLog.CeoLogPath(localAppData);
+            if (!File.Exists(path))
+            {
+                return false;
+            }
+
+            var found = false;
+            foreach (var line in File.ReadAllLines(path))
+            {
+                if (!line.StartsWith("building.rented ", System.StringComparison.Ordinal))
+                {
+                    continue;
+                }
+
+                var streetAt = line.IndexOf(" street=", System.StringComparison.Ordinal);
+                var numberAt = line.IndexOf(" number=", System.StringComparison.Ordinal);
+                if (streetAt < 0 || numberAt <= streetAt)
+                {
+                    continue;
+                }
+
+                var parsedStreet = line.Substring(streetAt + " street=".Length, numberAt - (streetAt + " street=".Length));
+                var rest = line.Substring(numberAt + " number=".Length);
+                var stop = rest.IndexOf(' ');
+                var token = stop < 0 ? rest : rest.Substring(0, stop);
+                if (parsedStreet.Length == 0
+                    || !int.TryParse(token, NumberStyles.Integer, CultureInfo.InvariantCulture, out var parsedNumber)
+                    || parsedNumber <= 0)
+                {
+                    continue;
+                }
+
+                street = parsedStreet;
+                number = parsedNumber;
+                found = true;
+            }
+
+            return found;
+        }
+
+        private static BuildingRegistration? FindLot(GameInstance current, string street, int number)
+        {
+            if (current.BuildingRegistrations == null)
+            {
+                return null;
+            }
+
+            foreach (var building in current.BuildingRegistrations)
+            {
+                var registration = building as BuildingRegistration;
+                if (registration != null
+                    && registration.StreetName == street
+                    && registration.StreetNumber == number
+                    && registration.RentedByPlayer
+                    && string.IsNullOrEmpty(registration.BusinessName))
+                {
+                    return registration;
+                }
+            }
+
+            return null;
+        }
+
         private static bool PlayerRents(GameInstance current)
         {
             if (current.BuildingRegistrations == null)
