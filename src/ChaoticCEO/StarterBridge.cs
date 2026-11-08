@@ -2,7 +2,6 @@ using System.Collections.Generic;
 using BigAmbitions.DayNightCycle;
 using Blueprints;
 using BusinessLayoutSets;
-using Helpers;
 
 namespace ChaoticCEO
 {
@@ -63,14 +62,6 @@ namespace ChaoticCEO
                 }
 
                 BusinessLayoutSetHelper.LoadBusinessLayoutSet(pick.Layout);
-                try
-                {
-                    BusinessHelper.UpdateCustomerCapacity(registration);
-                }
-                catch (System.Exception)
-                {
-                }
-
                 return true;
             }
             catch (System.Exception)

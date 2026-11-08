@@ -233,6 +233,7 @@ public class GameApiTests
         Assert.Equal(
             "UI.Smartphone.Apps.BizMan.RealEstateSettings.CancelForSale",
             api.Call("rival takeover decline"));
+        Assert.Equal("Helpers.BusinessHelper.UpdateCustomerCapacity", api.Call("capacity fixtures"));
         var live = GameApi.Live();
         Assert.Equal(api.Call("cashier"), live.Call("cashier"));
         Assert.Equal(api.Call("loan"), live.Call("loan"));
@@ -246,6 +247,7 @@ public class GameApiTests
         Assert.Equal(api.Call("marketing start"), live.Call("marketing start"));
         Assert.Equal(api.Call("marketing stop"), live.Call("marketing stop"));
         Assert.Equal(api.Call("rival takeover decline"), live.Call("rival takeover decline"));
+        Assert.Equal(api.Call("capacity fixtures"), live.Call("capacity fixtures"));
     }
 
     [Fact]
