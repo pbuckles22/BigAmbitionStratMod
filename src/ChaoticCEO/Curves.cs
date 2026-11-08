@@ -91,7 +91,12 @@ namespace ChaoticCEO
 
         public static IReadOnlyList<StoreCurve> FitFile(string? statementsCsv)
         {
-            return Fit(ReadDays(statementsCsv));
+            return Fit(ReadFile(statementsCsv));
+        }
+
+        public static IReadOnlyList<FinancialDay> ReadFile(string? statementsCsv)
+        {
+            return ReadDays(statementsCsv);
         }
 
         public static StatementRow Project(StoreCurve? curve)
