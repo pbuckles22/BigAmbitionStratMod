@@ -26,6 +26,7 @@ namespace ChaoticCEO
         private readonly BankLoanWatch _loans = new BankLoanWatch();
         private readonly StaffDemandWatch _demands = new StaffDemandWatch();
         private readonly TaxBillWatch _taxes = new TaxBillWatch();
+        private readonly TimeAdvanceWatch _time = new TimeAdvanceWatch();
         private bool _hooked;
         private bool _panelFailed;
         private string _localAppData = "";
@@ -86,6 +87,7 @@ namespace ChaoticCEO
             LiveDump.TryLoan(_loans, _localAppData);
             LiveDump.TryDemand(_demands, _localAppData);
             LiveDump.TryTax(_taxes, _localAppData);
+            LiveDump.TryTime(_time, _localAppData);
             if (LiveDump.Roll(_days, _localAppData) != null)
             {
                 LiveDump.FillSlots(_slots, _localAppData);

@@ -91,6 +91,9 @@ namespace ChaoticCEO
                 ["employee demand"] = "Entities.EmployeeInstance.GiveBonus",
                 ["taxes pay"] = "Helpers.TaxHelper.PayCurrentTaxes",
                 ["taxes back"] = "Helpers.TaxHelper.PayBackTaxes",
+                ["time advance"] = "Timemachine.TimeMachine.SkipTime",
+                ["sleep"] = "BedController.PerformActivity",
+                ["food"] = "ItemHelper.TryToConsume",
             };
             return new ApiNote(
                 LoadLog.PinnedBuild,
