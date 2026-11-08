@@ -16,7 +16,7 @@
 
 | Branch | Role |
 |--------|------|
-| **`main`** | Integration branch. Last land TBD, version 1.13.7 |
+| **`main`** | Integration branch. Last land `22bd8b9`, version 1.13.7 |
 | **`feature/13.6-marketing-rival`** | Story 13.6 marketing start/stop and rival decline. Version 1.13.7. Human PASS 2026-11-08. Kept after this CMPH. |
 | **`feature/13.5-time-advance`** | Story 13.5 time advance with player needs. Version 1.13.6. Human PASS 2026-11-08. Kept after CMPH. |
 | **`feature/13.4-hire-loan-taxes`** | Story 13.4 hire, loan, demand, taxes. Version 1.13.5. Human PASS 2026-11-08. Kept after CMPH. |
