@@ -80,6 +80,7 @@ namespace ChaoticCEO
                 ["staff train"] = "Buildings.Office.Headquarters.HrManagerPlan.TrainEmployees",
                 ["importer order"] = "UI.Smartphone.Apps.BizMan.PurchasingAgent.PurchasingAgentPlanUI.StartOrder",
                 ["wholesaler contract drop"] = "Entities.DeliveryContract.Remove",
+                ["wholesaler contract"] = "Dialogs.WholesaleStoreManagerDialog.StartContract",
                 ["rent"] = "Buildings.BuildingCommands.Command_RentBuilding",
                 ["cleaner"] = "CleaningStationController.AssignEmployee",
                 ["guard"] = "Controllers.SecurityGuardLockerController.AssignEmployee",

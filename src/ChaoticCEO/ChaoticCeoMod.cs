@@ -21,6 +21,7 @@ namespace ChaoticCEO
         private readonly RentWatch _rents = new RentWatch();
         private readonly StarterWatch _layouts = new StarterWatch();
         private readonly StoreOpsWatch _ops = new StoreOpsWatch();
+        private readonly WholesalerWatch _contracts = new WholesalerWatch();
         private bool _hooked;
         private bool _panelFailed;
         private string _localAppData = "";
@@ -76,6 +77,7 @@ namespace ChaoticCEO
             LiveDump.TryRent(_rents, _localAppData);
             LiveDump.TryLayout(_layouts, _localAppData);
             LiveDump.TryOps(_ops, _localAppData);
+            LiveDump.TryWholesaler(_contracts, _localAppData);
             if (LiveDump.Roll(_days, _localAppData) != null)
             {
                 LiveDump.FillSlots(_slots, _localAppData);

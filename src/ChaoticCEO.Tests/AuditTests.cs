@@ -1590,6 +1590,117 @@ public class AuditTests
         }
     }
 
+    [Fact]
+    public void Audit_load_day_roll_needs_refill_recorded_call_slot_fill_store_connect_plan_assign_restock_sort_overflow_order_audit_bar_health_controls_telemetry_rent_layout_ops_wholesaler_locks_the_contract()
+    {
+        // Chain: load → day roll → needs refill → recorded call → slot fill → store connect → plan assign → restock → sort → overflow → order → audit → bar → health → controls → telemetry → rent → layout → ops → wholesaler
+        using var dir = new TempAudit();
+        var save = new object();
+        var prefix = Prefix(dir.Path, save);
+        var guard = LiveGuard();
+        var world = prefix.World;
+        Autopilot.Enabled = guard.Enabled;
+        Autopilot.DryRun = guard.DryRun;
+        try
+        {
+            var shot = WatchDay(dir.Path, ref world, guard, prefix.Api, prefix.Rolled, 1016, 10m, null);
+            var rented = Rent.Choose(
+                new[]
+                {
+                    new RentLot("ba:street_high", 2, 80m),
+                    new RentLot("ba:street_low", 9, 40m),
+                },
+                guard.Cash,
+                anyRented: false,
+                prefix.Api);
+            var rentLine = Rent.Record(dir.Path, rented, TopBar.Day(prefix.Rolled));
+            var chosen = Starter.Choose(Starter.StageOne(), alreadyOpen: false, prefix.Api);
+            var layoutLine = Starter.Record(dir.Path, chosen, rented, TopBar.Day(shot.Rolled));
+            var assigned = StoreOps.Assign(chosen, StoreOps.Opening(), StoreFixtures.GiftShopWholesalers(), prefix.Api);
+            var opsLine = StoreOps.Record(dir.Path, assigned, rented, TopBar.Day(shot.Rolled));
+            var signed = Wholesaler.Sign(rented, chosen, Wholesaler.StageOne(), alreadySigned: false, prefix.Api);
+            var written = Wholesaler.Record(dir.Path, signed, TopBar.Day(shot.Rolled));
+            var again = Wholesaler.Record(dir.Path, signed, TopBar.Day(shot.Rolled));
+
+            Assert.Contains("day=1016", prefix.Rolled);
+            Assert.Contains("telemetry.written ", shot.Written);
+            Assert.Contains("building.rented ", rentLine);
+            Assert.Contains("layout.loaded ", layoutLine);
+            Assert.Contains("ops.assigned ", opsLine);
+            Assert.Equal("ba:street_low", rented.Street);
+            Assert.Equal(9, rented.Number);
+            Assert.Equal("GiftShopWholesalers", chosen.Layout);
+            Assert.Equal("Cleaner", assigned.Cleaner);
+            Assert.True(signed.Signed);
+            Assert.Equal("ba:street_firststreet 37", signed.Wholesale);
+            Assert.Equal("ba:street_low", signed.Street);
+            Assert.Equal(9, signed.Number);
+            Assert.Equal("Dialogs.WholesaleStoreManagerDialog.StartContract", prefix.Api.Call("wholesaler contract"));
+            Assert.Equal(prefix.Api.Call("wholesaler contract"), signed.Call);
+            Assert.Equal(
+                "contract.signed version=" + LoadLog.Version
+                    + " day=1016 street=ba:street_low number=9 wholesale=ba:street_firststreet 37 call="
+                    + prefix.Api.Call("wholesaler contract"),
+                written);
+            Assert.Equal(written, again);
+            Assert.Equal(1, File.ReadAllLines(LoadLog.CeoLogPath(dir.Path)).Count(line => line.StartsWith("contract.signed ")));
+        }
+        finally
+        {
+            Autopilot.Enabled = true;
+            Autopilot.DryRun = false;
+        }
+    }
+
+    [Fact]
+    public void Audit_load_day_roll_needs_refill_recorded_call_slot_fill_store_connect_plan_assign_restock_sort_overflow_order_audit_bar_health_controls_telemetry_rent_layout_ops_wholesaler_skips_a_store_that_already_has_a_contract()
+    {
+        // Chain: load → day roll → needs refill → recorded call → slot fill → store connect → plan assign → restock → sort → overflow → order → audit → bar → health → controls → telemetry → rent → layout → ops → wholesaler → kept
+        using var dir = new TempAudit();
+        var save = new object();
+        var prefix = Prefix(dir.Path, save);
+        var guard = LiveGuard();
+        var world = prefix.World;
+        Autopilot.Enabled = guard.Enabled;
+        Autopilot.DryRun = guard.DryRun;
+        try
+        {
+            var shot = WatchDay(dir.Path, ref world, guard, prefix.Api, prefix.Rolled, 1016, 10m, null);
+            var rented = Rent.Choose(
+                new[] { new RentLot("ba:street_low", 9, 40m) },
+                guard.Cash,
+                anyRented: false,
+                prefix.Api);
+            var rentLine = Rent.Record(dir.Path, rented, TopBar.Day(prefix.Rolled));
+            var chosen = Starter.Choose(Starter.StageOne(), alreadyOpen: false, prefix.Api);
+            var layoutLine = Starter.Record(dir.Path, chosen, rented, TopBar.Day(shot.Rolled));
+            var assigned = StoreOps.Assign(chosen, StoreOps.Opening(), StoreFixtures.GiftShopWholesalers(), prefix.Api);
+            var opsLine = StoreOps.Record(dir.Path, assigned, rented, TopBar.Day(shot.Rolled));
+            var signed = Wholesaler.Sign(rented, chosen, Wholesaler.StageOne(), alreadySigned: true, prefix.Api);
+            var written = Wholesaler.Record(dir.Path, signed, TopBar.Day(shot.Rolled));
+
+            Assert.Contains("day=1016", prefix.Rolled);
+            Assert.Contains("telemetry.written ", shot.Written);
+            Assert.Contains("building.rented ", rentLine);
+            Assert.Contains("layout.loaded ", layoutLine);
+            Assert.Contains("ops.assigned ", opsLine);
+            Assert.Equal("ba:street_low", rented.Street);
+            Assert.Equal(9, rented.Number);
+            Assert.False(signed.Signed);
+            Assert.Equal("", signed.Wholesale);
+            Assert.Equal("", signed.Call);
+            Assert.Equal("", written);
+            Assert.DoesNotContain(
+                File.ReadAllLines(LoadLog.CeoLogPath(dir.Path)),
+                line => line.StartsWith("contract.signed "));
+        }
+        finally
+        {
+            Autopilot.Enabled = true;
+            Autopilot.DryRun = false;
+        }
+    }
+
     private static DayShot WatchDay(
         string path,
         ref AuditWorld world,

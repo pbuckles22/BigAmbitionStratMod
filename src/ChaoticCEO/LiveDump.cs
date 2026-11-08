@@ -577,6 +577,110 @@ namespace ChaoticCEO
             return StoreOps.Record(localAppData, assigned, rented, current.Day);
         }
 
+        public static string? TryWholesaler(WholesalerWatch watch, string localAppData)
+        {
+            if (watch == null || string.IsNullOrEmpty(localAppData) || !InCity())
+            {
+                return null;
+            }
+
+            var current = SaveGameManager.Current;
+            if (current == null || !watch.Due(current))
+            {
+                return null;
+            }
+
+            if (!LastOps(localAppData, out var street, out var number, out var skipped))
+            {
+                return null;
+            }
+
+            if (skipped)
+            {
+                watch.Mark(current);
+                return null;
+            }
+
+            var registration = FindRented(current, street, number);
+            if (registration == null)
+            {
+                return null;
+            }
+
+            var rented = new BuildingRent(street, number, true, "");
+            var chosen = Starter.Choose(Starter.StageOne(), alreadyOpen: false, GameApi.Live());
+            var already = WholesalerBridge.HasContract(street, number);
+            var signed = Wholesaler.Sign(rented, chosen, Wholesaler.StageOne(), already, GameApi.Live());
+            if (!signed.Signed)
+            {
+                watch.Mark(current);
+                return "";
+            }
+
+            watch.Mark(current);
+            if (!WholesalerBridge.Live(signed, chosen.BusinessType))
+            {
+                return Wholesaler.Miss(localAppData, signed, current.Day);
+            }
+
+            return Wholesaler.Record(localAppData, signed, current.Day);
+        }
+
+        private static bool LastOps(string localAppData, out string street, out int number, out bool skipped)
+        {
+            street = "";
+            number = 0;
+            skipped = false;
+            var path = LoadLog.CeoLogPath(localAppData);
+            if (!File.Exists(path))
+            {
+                return false;
+            }
+
+            var found = false;
+            foreach (var line in File.ReadAllLines(path))
+            {
+                if (line.StartsWith("ops.skipped ", System.StringComparison.Ordinal))
+                {
+                    street = "";
+                    number = 0;
+                    skipped = true;
+                    found = true;
+                    continue;
+                }
+
+                if (!line.StartsWith("ops.assigned ", System.StringComparison.Ordinal))
+                {
+                    continue;
+                }
+
+                var streetAt = line.IndexOf(" street=", System.StringComparison.Ordinal);
+                var numberAt = line.IndexOf(" number=", System.StringComparison.Ordinal);
+                if (streetAt < 0 || numberAt <= streetAt)
+                {
+                    continue;
+                }
+
+                var parsedStreet = line.Substring(streetAt + " street=".Length, numberAt - (streetAt + " street=".Length));
+                var rest = line.Substring(numberAt + " number=".Length);
+                var stop = rest.IndexOf(' ');
+                var token = stop < 0 ? rest : rest.Substring(0, stop);
+                if (parsedStreet.Length == 0
+                    || !int.TryParse(token, NumberStyles.Integer, CultureInfo.InvariantCulture, out var parsedNumber)
+                    || parsedNumber <= 0)
+                {
+                    continue;
+                }
+
+                street = parsedStreet;
+                number = parsedNumber;
+                skipped = false;
+                found = true;
+            }
+
+            return found;
+        }
+
         private static bool LastLayout(string localAppData, out string street, out int number, out bool skipped)
         {
             street = "";

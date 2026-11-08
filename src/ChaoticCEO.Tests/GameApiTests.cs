@@ -215,7 +215,7 @@ public class GameApiTests
 
         Assert.Equal("", api.Call("staff plan write"));
         Assert.Equal("Buildings.BuildingCommands.Command_RentBuilding", api.Call("rent"));
-        Assert.Equal("", api.Call("wholesaler contract"));
+        Assert.Equal("Dialogs.WholesaleStoreManagerDialog.StartContract", api.Call("wholesaler contract"));
     }
 
     [Fact]

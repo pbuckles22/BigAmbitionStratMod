@@ -213,6 +213,17 @@ Human PASS 2026-11-07 on 1.13.2. New game day 1: one `building.rented` for `ba:s
 
 Human PASS 2026-11-07 on 1.13.3.8 for the cleaner block: day 1 at 26 7th Avenue, one `ops.cleaner ... placed=true`, employee `MS4xJhJS10KNikV4k41zg==`. Uniforms deferred (`ops.missed reason=nolocker` on that build; opening no longer demands them on 1.13.3.9).
 
+## Wholesaler contract human check
+
+1. Restart Big Ambitions so version 1.13.4 loads. Start a new game and reach the city. Do not load the usual save and do not load the day 1021 save. This check rents one lot, loads one starter layout, places one cleaner, and signs a recurring wholesaler `DeliveryContract` for the starter gift shop. It does not hire a cashier. Capacity fixtures are not part of this check.
+2. Wait until you are inside the starter store, then wait about fifteen seconds so ops and the contract can run. Skip time to the next morning (sleep or the day change) and walk back into the store.
+3. Open `%LocalAppData%\ChaoticCEO\ceo.log`. Look at store shelves for gift stock.
+4. **PASS if** one `contract.signed` line names the same street and number as `layout.loaded`, `wholesale=ba:street_firststreet 37`, and `call=Dialogs.WholesaleStoreManagerDialog.StartContract`, and the next morning the store has gift stock on the shelves. **FAIL if** no `contract.signed`, a second contract line, `contract.missed`, or the shelves are empty the next morning.
+5. Evidence: after `ops.assigned` (or `ops.cleaner`), one `contract.signed` (`day`, `street`, `number`, `wholesale`, `call`). A later frame does not append it again.
+6. Version marker: public `1.13.4`. `ceo.log` starts at `mod.loaded version=1.13.4 build=3682`.
+
+Human PASS 2026-11-07 on 1.13.4 for the contract log: day 1 at 26 7th Avenue, one `contract.signed` with `wholesale=ba:street_firststreet 37` and `call=Dialogs.WholesaleStoreManagerDialog.StartContract` after `ops.assigned`. Next-morning shelf stock waived.
+
 ## Warehouse sort and restock human check
 
 1. Restart Big Ambitions so version 1.11.8.1 loads. You are in the city on the usual save. Do not load the day 1021 save. This check records warehouse homes, drains, overflow, and the first import order. It does not call the game. BizMan’s warehouses and purchasing screens stay as they are. Fifth Avenue 36 stays on the wholesaler.
