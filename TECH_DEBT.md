@@ -33,6 +33,7 @@ This is the durable home for technical debt across sessions. Handoff notes can m
 - `CapacityBridge.AlreadyMatched` is untested on the production path; tests plant `alreadyMatched` instead. `TryCapacity` retries every frame with no evidence when `Live` fails. Revisit when capacity miss diagnosis hurts.
 - `Stage.Decide` treats `suppliedStores == goodsStores` as true when both are 0, so cash ≥ **Stage4Cash** with zero stores and zero empty slots returns Stage 4 (locked in `StageTests`). Revisit before **10.2** if a brand-new or fully liquidated save should stay Stage 1 Bootstrap.
 - Staff plan write (**7.9**) is still *Unverified* in `game-api.md`, and cost-center / FixDays / RedDays close filters (**7.13**) are stashed. Finish **7.13** + **7.9**, or fold **7.13**’s pure filter into **9.5**, before the live **10.2** Autopilot loop.
+- `LiveDump.NextPlaybook` only feeds open, money, and run into `Playbook.Decide` (other picks stay `None()`). Enough for a new-game F9 step. Revisit when Epic **8** or **10.2** needs managers/supply/close on the live board.
 
 ---
 

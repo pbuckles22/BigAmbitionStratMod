@@ -299,6 +299,21 @@ Human version smoke (install changed; F9 playbook step is **9.6**):
 
 Human PASS 2026-11-08 on 1.14.5. `mod.loaded version=1.14.5 build=3682`. New-game continued through day 8 with marketing stop and takeover decline on 1.14.5.
 
+## Story 9.6 — F9 playbook next step (headless + F9 on a new save)
+
+Tier 1: `PlaybookTests` locks need-floor over open, open over where/layout/money, managers over money, close over run staff and real estate, trucks over warehouses, blank board → none, `Playbook.Line` kinds, and one `playbook.shown` per step. Chain `… → managers → money → playbook` locks open as the step when growth is live; chain Stage 1 with idle growth locks the loan. Command: the Tier 1 `dotnet test` suite above.
+
+Human check (F9 on a new save):
+
+1. Restart Big Ambitions so version 1.14.6 loads. Start a **new game** and reach the city. Do not load the day 1021 save.
+2. Press **F9**. Look at the panel line under the health section. Open `%LocalAppData%\ChaoticCEO\ceo.log`.
+3. Do: (1) confirm the top bar and health still draw, (2) read the Next line, (3) check `ceo.log` for one `playbook.shown` line.
+4. **PASS if** F9 shows a `Next …` line (on a fresh new game usually `Next open ba:businesstype_giftshop`), `ceo.log` starts with `mod.loaded version=1.14.6 build=3682`, and one `playbook.shown` names that kind and detail. **FAIL if** no Next line, still `1.14.5`, or no `playbook.shown`.
+5. Evidence: `playbook.shown version=1.14.6 kind=… detail=…`. A later frame with the same step does not append another line.
+6. Version marker: public `1.14.6`.
+
+Human PASS 2026-11-08 on 1.14.6. New-game day 8 at 22 7th Avenue: F9 showed `Next open ba:businesstype_giftshop`; `mod.loaded version=1.14.6 build=3682`; one `playbook.shown kind=open detail=ba:businesstype_giftshop`.
+
 ## Wholesaler contract human check
 
 1. Restart Big Ambitions so version 1.13.4 loads. Start a new game and reach the city. Do not load the usual save and do not load the day 1021 save. This check rents one lot, loads one starter layout, places one cleaner, and signs a recurring wholesaler `DeliveryContract` for the starter gift shop. It does not hire a cashier. Capacity fixtures are not part of this check.

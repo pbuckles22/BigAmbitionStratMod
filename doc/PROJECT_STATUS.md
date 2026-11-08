@@ -8,7 +8,7 @@
 
 ## Summary
 
-**BigAmbitionStratMod** 1.14.5 — Epic 9 playbook: `Managers.Decide` / `Money.Decide` / `RealEstate.Decide` / `Close.Decide` / `Run.Decide` lock strategy §7–11 after supply. Story **9.6** (F9 playbook step) is next. Epic 13 new-game calls are complete. Public **EPIC** is the phase counter (`1.14` for Epic 9 after `1.13`). **7.13** stays stashed until before **10.2**. The rules are in [requirements/strategy.md](requirements/strategy.md). `origin` is this repo.
+**BigAmbitionStratMod** 1.14.6 — Epic 9 playbook complete: F9 shows `Playbook.Decide` next step on a new game. Next is Epic **8**. Public **EPIC** is the phase counter (`1.14` for Epic 9 after `1.13`). **7.13** stays stashed until before **10.2**. The rules are in [requirements/strategy.md](requirements/strategy.md). `origin` is this repo.
 
 ---
 
@@ -16,7 +16,8 @@
 
 | Branch | Role |
 |--------|------|
-| **`main`** | Integration branch. Last land `131966f`, version 1.14.5. Story 9.5 landed. |
+| **`main`** | Integration branch. Last land `PLACEHOLDER`, version 1.14.6. Epic 9 closed. |
+| **`feature/9.6-playbook-f9`** | Story 9.6 F9 playbook next step. Version 1.14.6. Human PASS 2026-11-08. Kept after CMPH. |
 | **`feature/9.5-managers-money`** | Story 9.5 managers, money, real estate, close, run. Version 1.14.5. Human PASS 2026-11-08. Kept after CMPH. |
 | **`feature/9.4-supply-trucks`** | Story 9.4 supply, trucks, warehouses. Version 1.14.4. Human PASS 2026-11-08. Kept after CMPH. |
 | **`feature/9.3-layout-prices`** | Story 9.3 golden layout and prices. Version 1.14.3. Human PASS 2026-11-08. Kept after CMPH. |

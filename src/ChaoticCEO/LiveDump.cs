@@ -1942,6 +1942,90 @@ namespace ChaoticCEO
             return TopBar.Line(current.Day, cash, net, profit, stage, Autopilot.Enabled, ReadSpeed());
         }
 
+        public static PlaybookStep NextPlaybook()
+        {
+            var current = SaveGameManager.Current;
+            if (current == null)
+            {
+                return PlaybookStep.None();
+            }
+
+            var wealth = Helpers.PlayerHelper.GetPersonalWealth();
+            var cash = ToMoney(wealth.cash);
+            var needs = new List<GoodsNeed>();
+            var sales = new List<DailyUnits>();
+            ReadStores(current, needs, sales);
+            var plans = Plans(current);
+            var holds = Holds(current);
+            var slots = Garage(current);
+            var stage = Stage.Read(current.Day, cash, needs, plans, holds, slots);
+            var open = Open.Decide(stage, StarterOpens(), truckLoadFraction: 0m);
+            var business = TopBar.Yesterday(Days(current), current.Day);
+            var profit = TopBar.ShownProfit(DayTotal(current, business), business);
+            var money = Money.Decide(
+                stage,
+                cash,
+                dailyCost: 0m,
+                projectedDailyProfit: profit > 0m ? profit : open.Chosen ? 40m : 0m,
+                offers: BankLoanBridge.Offers(profit > 0m ? profit : 40m),
+                loan: null,
+                bestPaybackRate: 0m);
+            var run = Run.Decide(
+                new RunFacts(
+                    current.Energy,
+                    current.Hunger,
+                    current.Happiness,
+                    unmetDemandDays: 0,
+                    employeeState: "",
+                    hasDirt: false,
+                    theft: 0m,
+                    sales: 0m,
+                    unmetCustomerDemand: false,
+                    marketingCost: 0m,
+                    marketingGain: 0m,
+                    taxDue: 0m,
+                    takeoverOffer: 0m,
+                    takeoverDailyProfit: 0m));
+            return Playbook.Decide(
+                open,
+                SitePick.None(),
+                LayoutPick.None(),
+                PricePick.None(),
+                SupplyPick.None(),
+                TruckPick.None(),
+                WarehousePick.None(),
+                ManagerPick.None(),
+                money,
+                EstatePick.None(),
+                ClosePick.None(),
+                run);
+        }
+
+        private static IReadOnlyList<OpenCandidate> StarterOpens()
+        {
+            var rows = new List<OpenCandidate>();
+            foreach (var offer in Starter.StageOne())
+            {
+                if (offer == null || offer.BusinessType.Length == 0)
+                {
+                    continue;
+                }
+
+                var family = StoreFamily.For(offer.BusinessType) ?? "";
+                rows.Add(
+                    new OpenCandidate(
+                        offer.BusinessType,
+                        "goods",
+                        offer.DailyProfit,
+                        wholesalerSells: true,
+                        family,
+                        ownedOfFamily: 0,
+                        familyHasWarehouse: false));
+            }
+
+            return rows;
+        }
+
         private static decimal DayTotal(GameInstance current, decimal business)
         {
             if (current.financialSummaries == null)
