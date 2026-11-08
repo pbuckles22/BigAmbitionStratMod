@@ -16,7 +16,7 @@
 
 | Branch | Role |
 |--------|------|
-| **`main`** | Integration branch. Last land TBD, version 1.14.4. Story 9.4 landed. |
+| **`main`** | Integration branch. Last land `7643ed1`, version 1.14.4. Story 9.4 landed. |
 | **`feature/9.4-supply-trucks`** | Story 9.4 supply, trucks, warehouses. Version 1.14.4. Human PASS 2026-11-08. Kept after CMPH. |
 | **`feature/9.3-layout-prices`** | Story 9.3 golden layout and prices. Version 1.14.3. Human PASS 2026-11-08. Kept after CMPH. |
 | **`feature/9.2-open-where`** | Story 9.2 Open/Where locks. Version 1.14.2. Human PASS 2026-11-08. Kept after CMPH. |
