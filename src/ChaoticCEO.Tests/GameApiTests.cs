@@ -223,6 +223,9 @@ public class GameApiTests
         Assert.Equal("Entities.EmployeeInstance.GiveBonus", api.Call("employee demand"));
         Assert.Equal("Helpers.TaxHelper.PayCurrentTaxes", api.Call("taxes pay"));
         Assert.Equal("Helpers.TaxHelper.PayBackTaxes", api.Call("taxes back"));
+        Assert.Equal("Timemachine.TimeMachine.SkipTime", api.Call("time advance"));
+        Assert.Equal("BedController.PerformActivity", api.Call("sleep"));
+        Assert.Equal("ItemHelper.TryToConsume", api.Call("food"));
         var live = GameApi.Live();
         Assert.Equal(api.Call("cashier"), live.Call("cashier"));
         Assert.Equal(api.Call("loan"), live.Call("loan"));
@@ -230,6 +233,9 @@ public class GameApiTests
         Assert.Equal(api.Call("employee demand"), live.Call("employee demand"));
         Assert.Equal(api.Call("taxes pay"), live.Call("taxes pay"));
         Assert.Equal(api.Call("taxes back"), live.Call("taxes back"));
+        Assert.Equal(api.Call("time advance"), live.Call("time advance"));
+        Assert.Equal(api.Call("sleep"), live.Call("sleep"));
+        Assert.Equal(api.Call("food"), live.Call("food"));
     }
 
     [Fact]

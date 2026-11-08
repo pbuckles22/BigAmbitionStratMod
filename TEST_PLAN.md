@@ -235,6 +235,17 @@ Human PASS 2026-11-07 on 1.13.4 for the contract log: day 1 at 26 7th Avenue, on
 
 Human PASS 2026-11-08 on 1.13.5. Day 1 at 15 7th Avenue: one `hire.cashier` with `role=Cashier`, `skill=ba:skill_customerservice`, `type=SelfServiceEmployee`, `call=Helpers.EmployeeHelper.HireCandidate`, `stationCall=Controllers.CashRegisterController.AssignEmployee` after `contract.signed`, and one `loan.taken` with `amount=500`, `dailyPayment=5`, `call=Dialogs.BankDialog.LoanRequest`. Cash on screen was $15.5K. No `hire.missed`. `demand.cleared` and `tax.paid` were not due on that new save.
 
+## Time advance with player needs human check
+
+1. Restart Big Ambitions so version 1.13.6 loads. Start a new game and reach the city. Do not load the usual save and do not load the day 1021 save. This check rents, loads the starter layout, places one cleaner, signs a wholesaler contract, hires a cashier, takes a cover-fit bank loan, then advances time one day at a time for a week. Sleep and food run when energy, hunger, or happiness are at or below NeedFloor (20).
+2. Wait until `loan.taken` is in the log, then stay in the city while the week advances. Do not faint and do not go to the hospital.
+3. Open `%LocalAppData%\ChaoticCEO\ceo.log`. Note the in-game day when the week finishes.
+4. **PASS if** seven `time.advanced` lines each name `span=1d` and `call=Timemachine.TimeMachine.SkipTime` after `loan.taken`, the in-game day is about a week later, and you never fainted or went to the hospital. **FAIL if** fewer than seven advance lines, a faint or hospital trip, or `time.advanced` appears before `loan.taken`.
+5. Evidence: `time.advanced` (`day`, `span`, `call`). Optional `time.cared` (`sleep`, `food`, `sleepCall`, `foodCall`) when a need was at or below the floor. A later frame does not append a given advance line again.
+6. Version marker: public `1.13.6`. `ceo.log` starts at `mod.loaded version=1.13.6 build=3682`.
+
+Human PASS 2026-11-08 on 1.13.6. Day 1 at 26 7th Avenue: `loan.taken` (`amount=500`, `call=Dialogs.BankDialog.LoanRequest`), then seven `time.advanced` lines (`span=1d`, `call=Timemachine.TimeMachine.SkipTime`) on days 1–7, `day.rolled` through day 8. Screen day 8 at 12:19 AM, cash $15.3K, no faint or hospital. No `time.cared` (needs stayed above NeedFloor).
+
 ## Warehouse sort and restock human check
 
 1. Restart Big Ambitions so version 1.11.8.1 loads. You are in the city on the usual save. Do not load the day 1021 save. This check records warehouse homes, drains, overflow, and the first import order. It does not call the game. BizMan’s warehouses and purchasing screens stay as they are. Fifth Avenue 36 stays on the wholesaler.

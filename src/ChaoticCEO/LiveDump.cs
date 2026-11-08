@@ -801,6 +801,81 @@ namespace ChaoticCEO
             return TaxBill.Record(localAppData, paid, current.Day);
         }
 
+        public static string? TryTime(TimeAdvanceWatch watch, string localAppData)
+        {
+            if (watch == null || string.IsNullOrEmpty(localAppData) || !InCity())
+            {
+                return null;
+            }
+
+            var current = SaveGameManager.Current;
+            if (current == null || !watch.Due(current) || watch.Finished(current))
+            {
+                return null;
+            }
+
+            if (!HasLoan(localAppData))
+            {
+                return null;
+            }
+
+            if (watch.Waiting(current.Day))
+            {
+                return null;
+            }
+
+            if (watch.Arrive(current.Day))
+            {
+                if (watch.Completed >= TimeAdvance.WeekDays)
+                {
+                    watch.Mark(current);
+                }
+
+                return "";
+            }
+
+            var needs = TimeAdvanceBridge.Read();
+            if (TimeAdvance.BelowFloor(needs))
+            {
+                var care = TimeAdvance.Care(needs, GameApi.Live());
+                if (!care.Due || !TimeAdvanceBridge.Care(care))
+                {
+                    return null;
+                }
+
+                return TimeAdvance.RecordCare(localAppData, care, current.Day);
+            }
+
+            var advanced = TimeAdvance.Skip(needs, alreadyAdvanced: false, GameApi.Live());
+            if (!advanced.Advanced || !TimeAdvanceBridge.Skip(advanced))
+            {
+                watch.Mark(current);
+                return "";
+            }
+
+            watch.WaitFor(current.Day + 1);
+            return TimeAdvance.RecordSkip(localAppData, advanced, current.Day);
+        }
+
+        private static bool HasLoan(string localAppData)
+        {
+            var path = LoadLog.CeoLogPath(localAppData);
+            if (!File.Exists(path))
+            {
+                return false;
+            }
+
+            foreach (var line in File.ReadAllLines(path))
+            {
+                if (line.StartsWith("loan.taken ", System.StringComparison.Ordinal))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
         private static bool LastContract(string localAppData, out string street, out int number, out bool skipped)
         {
             return LastNamed(localAppData, "contract.signed ", out street, out number, out skipped);
