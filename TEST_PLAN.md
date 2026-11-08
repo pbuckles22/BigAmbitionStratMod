@@ -239,6 +239,21 @@ Human version smoke (install changed; no stage UI yet — that is **9.6**):
 
 Human PASS 2026-11-08 on 1.14.1. `mod.loaded version=1.14.1 build=3682`. New-game day 1 at 26 7th Avenue ran the Epic 13 chain through `takeover.declined` on day 8.
 
+## Story 9.2 — Open and Where (headless + version smoke)
+
+Tier 1: `OpenTests` locks profit winner, later-type ties, Stage 1 wholesaler starters, **TruckBusy** service/office switch, Stage 3+ warehouse-for-second-store, and blanks. `WhereTests` locks **ClusterMin**, traffic/rent, later-building ties, cash-reserve exclusion, and the cost-equals-room edge. Chain `… → takeover → stage → open → where` locks Stage 1 gift shop onto the rented cluster street; chain `… → stage → open → where` with truck busy locks Stage 2 law firm onto the service cluster. Command: the Tier 1 `dotnet test` suite above.
+
+Human version smoke (install changed; no open/where UI yet — that is **9.6**):
+
+1. Restart Big Ambitions so version 1.14.2 loads. Any save or a new game is fine.
+2. Open `%LocalAppData%\ChaoticCEO\ceo.log`.
+3. Do nothing else for this check.
+4. **PASS if** the first line is `mod.loaded version=1.14.2 build=3682`. **FAIL if** the version is still 1.14.1 or missing.
+5. Evidence: that `mod.loaded` line.
+6. Version marker: public `1.14.2`.
+
+Human PASS 2026-11-08 on 1.14.2. `mod.loaded version=1.14.2 build=3682`. New-game day 1 at 22 7th Avenue continued the Epic 13 chain through layout and ops.
+
 ## Wholesaler contract human check
 
 1. Restart Big Ambitions so version 1.13.4 loads. Start a new game and reach the city. Do not load the usual save and do not load the day 1021 save. This check rents one lot, loads one starter layout, places one cleaner, and signs a recurring wholesaler `DeliveryContract` for the starter gift shop. It does not hire a cashier. Capacity fixtures are not part of this check.

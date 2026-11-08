@@ -25,6 +25,8 @@ namespace ChaoticCEO
             { "ba:businesstype_furniturestore", "durables" },
             { "ba:businesstype_cardealership", "durables" },
             { "ba:businesstype_florist", "specialty" },
+            { "ba:businesstype_giftshop", "specialty" },
+            { "ba:businesstype_graphicsdesignagency", "office" },
             { "ba:businesstype_hairdresser", "service" },
             { "ba:businesstype_gym", "service" },
             { "ba:businesstype_nightclub", "service" },
