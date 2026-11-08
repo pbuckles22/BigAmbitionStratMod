@@ -2049,6 +2049,178 @@ public class AuditTests
     }
 
     [Fact]
+    public void Audit_load_day_roll_needs_refill_recorded_call_slot_fill_store_connect_plan_assign_restock_sort_overflow_order_audit_bar_health_controls_telemetry_rent_layout_ops_wholesaler_hire_loan_demand_tax_time_marketing_locks_the_campaign()
+    {
+        // Chain: load → day roll → needs refill → recorded call → slot fill → store connect → plan assign → restock → sort → overflow → order → audit → bar → health → controls → telemetry → rent → layout → ops → wholesaler → hire → loan → demand → tax → time → marketing
+        using var dir = new TempAudit();
+        var save = new object();
+        var prefix = Prefix(dir.Path, save);
+        var guard = LiveGuard();
+        var world = prefix.World;
+        Autopilot.Enabled = guard.Enabled;
+        Autopilot.DryRun = guard.DryRun;
+        try
+        {
+            var shot = WatchDay(dir.Path, ref world, guard, prefix.Api, prefix.Rolled, 1016, 10m, null);
+            var rented = Rent.Choose(
+                new[] { new RentLot("ba:street_low", 9, 40m) },
+                guard.Cash,
+                anyRented: false,
+                prefix.Api);
+            var rentLine = Rent.Record(dir.Path, rented, TopBar.Day(prefix.Rolled));
+            var chosen = Starter.Choose(Starter.StageOne(), alreadyOpen: false, prefix.Api);
+            var layoutLine = Starter.Record(dir.Path, chosen, rented, TopBar.Day(shot.Rolled));
+            var assigned = StoreOps.Assign(chosen, StoreOps.Opening(), StoreFixtures.GiftShopWholesalers(), prefix.Api);
+            var opsLine = StoreOps.Record(dir.Path, assigned, rented, TopBar.Day(shot.Rolled));
+            var signed = Wholesaler.Sign(rented, chosen, Wholesaler.StageOne(), alreadySigned: false, prefix.Api);
+            var contractLine = Wholesaler.Record(dir.Path, signed, TopBar.Day(shot.Rolled));
+            var hired = Cashier.Hire(rented, chosen, signed, alreadyHired: false, prefix.Api);
+            var hireLine = Cashier.Record(dir.Path, hired, TopBar.Day(shot.Rolled));
+            var taken = BankLoan.Take(
+                projectedDailyProfit: 200m,
+                offers: new[] { new LoanOffer(2000m, 100) },
+                alreadyBorrowed: false,
+                prefix.Api);
+            var loanLine = BankLoan.RecordTake(dir.Path, taken, TopBar.Day(shot.Rolled));
+            var cleared = StaffDemand.Clear(
+                unmetDays: StaffDemand.DemandDays,
+                demandName: "ba:jobdemand_healthinsurance",
+                employeeId: "emp-1",
+                prefix.Api);
+            var demandLine = StaffDemand.Record(dir.Path, cleared, TopBar.Day(shot.Rolled));
+            var paid = TaxBill.Pay(currentDue: 55m, backDue: 12m, prefix.Api);
+            var taxLine = TaxBill.Record(dir.Path, paid, TopBar.Day(shot.Rolled));
+            var advanced = TimeAdvance.Skip(Needs.Hold(), alreadyAdvanced: false, prefix.Api);
+            var timeLine = TimeAdvance.RecordSkip(dir.Path, advanced, TopBar.Day(shot.Rolled));
+            var started = Marketing.Start(
+                dailyCost: 100m,
+                gain: 300m,
+                alreadyActive: false,
+                street: rented.Street,
+                number: rented.Number,
+                type: Marketing.StarterType,
+                prefix.Api);
+            var marketingLine = Marketing.RecordStart(dir.Path, started, TopBar.Day(shot.Rolled));
+
+            Assert.Contains("day=1016", prefix.Rolled);
+            Assert.Contains("telemetry.written ", shot.Written);
+            Assert.Contains("building.rented ", rentLine);
+            Assert.Contains("layout.loaded ", layoutLine);
+            Assert.Contains("ops.assigned ", opsLine);
+            Assert.Contains("contract.signed ", contractLine);
+            Assert.Contains("hire.cashier ", hireLine);
+            Assert.Contains("loan.taken ", loanLine);
+            Assert.Contains("demand.cleared ", demandLine);
+            Assert.Contains("tax.paid ", taxLine);
+            Assert.True(advanced.Advanced);
+            Assert.Equal(prefix.Api.Call("time advance"), advanced.Call);
+            Assert.Contains("time.advanced ", timeLine);
+            Assert.True(started.Started);
+            Assert.Equal(prefix.Api.Call("marketing start"), started.Call);
+            Assert.Equal(rented.Street, started.Street);
+            Assert.Equal(rented.Number, started.Number);
+            Assert.Contains("marketing.started ", marketingLine);
+            Assert.Equal(1, File.ReadAllLines(LoadLog.CeoLogPath(dir.Path)).Count(line => line.StartsWith("marketing.started ")));
+        }
+        finally
+        {
+            Autopilot.Enabled = true;
+            Autopilot.DryRun = false;
+        }
+    }
+
+    [Fact]
+    public void Audit_load_day_roll_needs_refill_recorded_call_slot_fill_store_connect_plan_assign_restock_sort_overflow_order_audit_bar_health_controls_telemetry_rent_layout_ops_wholesaler_hire_loan_demand_tax_time_marketing_stops_then_declines_a_weak_takeover()
+    {
+        // Chain: load → day roll → needs refill → recorded call → slot fill → store connect → plan assign → restock → sort → overflow → order → audit → bar → health → controls → telemetry → rent → layout → ops → wholesaler → hire → loan → demand → tax → time → marketing → stop → takeover
+        using var dir = new TempAudit();
+        var save = new object();
+        var prefix = Prefix(dir.Path, save);
+        var guard = LiveGuard();
+        var world = prefix.World;
+        Autopilot.Enabled = guard.Enabled;
+        Autopilot.DryRun = guard.DryRun;
+        try
+        {
+            var shot = WatchDay(dir.Path, ref world, guard, prefix.Api, prefix.Rolled, 1016, 10m, null);
+            var rented = Rent.Choose(
+                new[] { new RentLot("ba:street_low", 9, 40m) },
+                guard.Cash,
+                anyRented: false,
+                prefix.Api);
+            Rent.Record(dir.Path, rented, TopBar.Day(prefix.Rolled));
+            var chosen = Starter.Choose(Starter.StageOne(), alreadyOpen: false, prefix.Api);
+            Starter.Record(dir.Path, chosen, rented, TopBar.Day(shot.Rolled));
+            var assigned = StoreOps.Assign(chosen, StoreOps.Opening(), StoreFixtures.GiftShopWholesalers(), prefix.Api);
+            StoreOps.Record(dir.Path, assigned, rented, TopBar.Day(shot.Rolled));
+            var signed = Wholesaler.Sign(rented, chosen, Wholesaler.StageOne(), alreadySigned: false, prefix.Api);
+            Wholesaler.Record(dir.Path, signed, TopBar.Day(shot.Rolled));
+            var hired = Cashier.Hire(rented, chosen, signed, alreadyHired: false, prefix.Api);
+            Cashier.Record(dir.Path, hired, TopBar.Day(shot.Rolled));
+            var taken = BankLoan.Take(
+                projectedDailyProfit: 200m,
+                offers: new[] { new LoanOffer(2000m, 100) },
+                alreadyBorrowed: false,
+                prefix.Api);
+            BankLoan.RecordTake(dir.Path, taken, TopBar.Day(shot.Rolled));
+            var cleared = StaffDemand.Clear(
+                unmetDays: StaffDemand.DemandDays,
+                demandName: "ba:jobdemand_healthinsurance",
+                employeeId: "emp-1",
+                prefix.Api);
+            StaffDemand.Record(dir.Path, cleared, TopBar.Day(shot.Rolled));
+            var paid = TaxBill.Pay(currentDue: 10m, backDue: 0m, prefix.Api);
+            TaxBill.Record(dir.Path, paid, TopBar.Day(shot.Rolled));
+            var advanced = TimeAdvance.Skip(Needs.Hold(), alreadyAdvanced: false, prefix.Api);
+            TimeAdvance.RecordSkip(dir.Path, advanced, TopBar.Day(shot.Rolled));
+            var started = Marketing.Start(
+                dailyCost: 100m,
+                gain: 300m,
+                alreadyActive: false,
+                street: rented.Street,
+                number: rented.Number,
+                type: Marketing.StarterType,
+                prefix.Api);
+            var startLine = Marketing.RecordStart(dir.Path, started, TopBar.Day(shot.Rolled));
+            var stopped = Marketing.Stop(
+                alreadyActive: started.Started,
+                street: rented.Street,
+                number: rented.Number,
+                prefix.Api);
+            var stopLine = Marketing.RecordStop(dir.Path, stopped, TopBar.Day(shot.Rolled));
+            var declined = RivalTakeover.Decline(
+                offerPrice: 1000m,
+                dailyProfit: 10m,
+                street: rented.Street,
+                number: rented.Number,
+                alreadyDeclined: false,
+                prefix.Api);
+            var takeoverLine = RivalTakeover.Record(dir.Path, declined, TopBar.Day(shot.Rolled));
+
+            Assert.Contains("telemetry.written ", shot.Written);
+            Assert.True(hired.Hired);
+            Assert.True(taken.Taken);
+            Assert.True(advanced.Advanced);
+            Assert.True(started.Started);
+            Assert.Contains("marketing.started ", startLine);
+            Assert.True(stopped.Stopped);
+            Assert.Equal(prefix.Api.Call("marketing stop"), stopped.Call);
+            Assert.Contains("marketing.stopped ", stopLine);
+            Assert.True(declined.Declined);
+            Assert.Equal(prefix.Api.Call("rival takeover decline"), declined.Call);
+            Assert.Contains("takeover.declined ", takeoverLine);
+            Assert.Equal(1, File.ReadAllLines(LoadLog.CeoLogPath(dir.Path)).Count(line => line.StartsWith("marketing.started ")));
+            Assert.Equal(1, File.ReadAllLines(LoadLog.CeoLogPath(dir.Path)).Count(line => line.StartsWith("marketing.stopped ")));
+            Assert.Equal(1, File.ReadAllLines(LoadLog.CeoLogPath(dir.Path)).Count(line => line.StartsWith("takeover.declined ")));
+        }
+        finally
+        {
+            Autopilot.Enabled = true;
+            Autopilot.DryRun = false;
+        }
+    }
+
+    [Fact]
     public void Audit_load_day_roll_needs_refill_recorded_call_slot_fill_store_connect_plan_assign_restock_sort_overflow_order_audit_bar_health_controls_telemetry_rent_layout_ops_wholesaler_hire_skips_a_second_cashier()
     {
         // Chain: load → day roll → needs refill → recorded call → slot fill → store connect → plan assign → restock → sort → overflow → order → audit → bar → health → controls → telemetry → rent → layout → ops → wholesaler → hire → kept

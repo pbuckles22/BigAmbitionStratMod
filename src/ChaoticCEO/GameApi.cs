@@ -94,6 +94,9 @@ namespace ChaoticCEO
                 ["time advance"] = "Timemachine.TimeMachine.SkipTime",
                 ["sleep"] = "BedController.PerformActivity",
                 ["food"] = "ItemHelper.TryToConsume",
+                ["marketing start"] = "Dialogs.MarketingAgencyDialog.OnMarketingSettingsSet",
+                ["marketing stop"] = "UI.Smartphone.Apps.BizMan.BizManMarketing.CancelAllCampaignsFromAgency",
+                ["rival takeover decline"] = "UI.Smartphone.Apps.BizMan.RealEstateSettings.CancelForSale",
             };
             return new ApiNote(
                 LoadLog.PinnedBuild,

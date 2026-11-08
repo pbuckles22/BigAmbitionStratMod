@@ -226,6 +226,13 @@ public class GameApiTests
         Assert.Equal("Timemachine.TimeMachine.SkipTime", api.Call("time advance"));
         Assert.Equal("BedController.PerformActivity", api.Call("sleep"));
         Assert.Equal("ItemHelper.TryToConsume", api.Call("food"));
+        Assert.Equal("Dialogs.MarketingAgencyDialog.OnMarketingSettingsSet", api.Call("marketing start"));
+        Assert.Equal(
+            "UI.Smartphone.Apps.BizMan.BizManMarketing.CancelAllCampaignsFromAgency",
+            api.Call("marketing stop"));
+        Assert.Equal(
+            "UI.Smartphone.Apps.BizMan.RealEstateSettings.CancelForSale",
+            api.Call("rival takeover decline"));
         var live = GameApi.Live();
         Assert.Equal(api.Call("cashier"), live.Call("cashier"));
         Assert.Equal(api.Call("loan"), live.Call("loan"));
@@ -236,6 +243,9 @@ public class GameApiTests
         Assert.Equal(api.Call("time advance"), live.Call("time advance"));
         Assert.Equal(api.Call("sleep"), live.Call("sleep"));
         Assert.Equal(api.Call("food"), live.Call("food"));
+        Assert.Equal(api.Call("marketing start"), live.Call("marketing start"));
+        Assert.Equal(api.Call("marketing stop"), live.Call("marketing stop"));
+        Assert.Equal(api.Call("rival takeover decline"), live.Call("rival takeover decline"));
     }
 
     [Fact]

@@ -27,6 +27,8 @@ namespace ChaoticCEO
         private readonly StaffDemandWatch _demands = new StaffDemandWatch();
         private readonly TaxBillWatch _taxes = new TaxBillWatch();
         private readonly TimeAdvanceWatch _time = new TimeAdvanceWatch();
+        private readonly MarketingWatch _marketing = new MarketingWatch();
+        private readonly RivalTakeoverWatch _takeovers = new RivalTakeoverWatch();
         private bool _hooked;
         private bool _panelFailed;
         private string _localAppData = "";
@@ -88,6 +90,8 @@ namespace ChaoticCEO
             LiveDump.TryDemand(_demands, _localAppData);
             LiveDump.TryTax(_taxes, _localAppData);
             LiveDump.TryTime(_time, _localAppData);
+            LiveDump.TryMarketing(_marketing, _time, _localAppData);
+            LiveDump.TryTakeover(_marketing, _takeovers, _localAppData);
             if (LiveDump.Roll(_days, _localAppData) != null)
             {
                 LiveDump.FillSlots(_slots, _localAppData);

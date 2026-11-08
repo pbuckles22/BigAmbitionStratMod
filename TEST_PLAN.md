@@ -246,6 +246,17 @@ Human PASS 2026-11-08 on 1.13.5. Day 1 at 15 7th Avenue: one `hire.cashier` with
 
 Human PASS 2026-11-08 on 1.13.6. Day 1 at 26 7th Avenue: `loan.taken` (`amount=500`, `call=Dialogs.BankDialog.LoanRequest`), then seven `time.advanced` lines (`span=1d`, `call=Timemachine.TimeMachine.SkipTime`) on days 1–7, `day.rolled` through day 8. Screen day 8 at 12:19 AM, cash $15.3K, no faint or hospital. No `time.cared` (needs stayed above NeedFloor).
 
+## Marketing and rival decline human check
+
+1. Restart Big Ambitions so version 1.13.7 loads. Start a new game and reach the city. Do not load the usual save and do not load the day 1021 save. This check rents, loads the starter layout, places one cleaner, signs a wholesaler contract, hires a cashier, takes a cover-fit bank loan, advances time one day at a time for a week, starts a SmallInternet marketing campaign, stops it after the week, and declines a weak rival takeover offer.
+2. Wait until `loan.taken` is in the log, then stay in the city through the week. Open BizMan → Marketing on the starter store while the campaign is active, then again after it ends.
+3. Open `%LocalAppData%\ChaoticCEO\ceo.log`.
+4. **PASS if** one `marketing.started` line names `type=SmallInternet` and `call=Dialogs.MarketingAgencyDialog.OnMarketingSettingsSet` after `loan.taken`, one `marketing.stopped` line names `call=UI.Smartphone.Apps.BizMan.BizManMarketing.CancelAllCampaignsFromAgency` after the week of `time.advanced`, BizMan showed the campaign then cleared it, and one `takeover.declined` line names `call=UI.Smartphone.Apps.BizMan.RealEstateSettings.CancelForSale`. **FAIL if** no start line, no stop line, the campaign never appears or never clears, or no decline line.
+5. Evidence: `marketing.started` (`day`, `street`, `number`, `type`, `dailyCost`, `call`), `marketing.stopped` (`day`, `street`, `number`, `call`), `takeover.declined` (`day`, `street`, `number`, `offer`, `dailyProfit`, `call`). A later frame does not append those lines again.
+6. Version marker: public `1.13.7`. `ceo.log` starts at `mod.loaded version=1.13.7 build=3682`.
+
+Human PASS 2026-11-08 on 1.13.7. Day 1 at 15 7th Avenue: `marketing.started` (`type=SmallInternet`, `dailyCost=100`, `call=Dialogs.MarketingAgencyDialog.OnMarketingSettingsSet`) after `loan.taken`, seven `time.advanced` (`span=1d`), then on day 8 `marketing.stopped` (`call=UI.Smartphone.Apps.BizMan.BizManMarketing.CancelAllCampaignsFromAgency`) and `takeover.declined` (`offer=1000`, `dailyProfit=10`, `call=UI.Smartphone.Apps.BizMan.RealEstateSettings.CancelForSale`). Screen day 8 Monday 12:43 AM, cash $14.6K; BizMan Marketing showed no active campaigns after the stop.
+
 ## Warehouse sort and restock human check
 
 1. Restart Big Ambitions so version 1.11.8.1 loads. You are in the city on the usual save. Do not load the day 1021 save. This check records warehouse homes, drains, overflow, and the first import order. It does not call the game. BizMan’s warehouses and purchasing screens stay as they are. Fifth Avenue 36 stays on the wholesaler.

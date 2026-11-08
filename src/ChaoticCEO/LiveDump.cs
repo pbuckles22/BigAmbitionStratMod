@@ -801,6 +801,135 @@ namespace ChaoticCEO
             return TaxBill.Record(localAppData, paid, current.Day);
         }
 
+        public static string? TryMarketing(MarketingWatch watch, TimeAdvanceWatch time, string localAppData)
+        {
+            if (watch == null || string.IsNullOrEmpty(localAppData) || !InCity())
+            {
+                return null;
+            }
+
+            var current = SaveGameManager.Current;
+            if (current == null)
+            {
+                return null;
+            }
+
+            if (!HasLoan(localAppData))
+            {
+                return null;
+            }
+
+            if (!LastRent(localAppData, out var street, out var number))
+            {
+                return null;
+            }
+
+            if (watch.StartDue(current))
+            {
+                var already = MarketingBridge.HasCampaign(street, number);
+                var started = Marketing.Start(
+                    Marketing.StarterCost,
+                    Marketing.StarterGain,
+                    already,
+                    street,
+                    number,
+                    Marketing.StarterType,
+                    GameApi.Live());
+                if (!started.Started || !MarketingBridge.Start(started))
+                {
+                    if (already)
+                    {
+                        watch.MarkStarted(current);
+                        return "";
+                    }
+
+                    return null;
+                }
+
+                watch.MarkStarted(current);
+                return Marketing.RecordStart(localAppData, started, current.Day);
+            }
+
+            var weekDone = time != null && (time.Finished(current) || time.Completed >= TimeAdvance.WeekDays);
+            if (!watch.StopDue(current, weekDone))
+            {
+                return null;
+            }
+
+            var stopped = Marketing.Stop(
+                alreadyActive: MarketingBridge.HasCampaign(street, number) || watch.Active(current),
+                street,
+                number,
+                GameApi.Live());
+            watch.MarkStopped(current);
+            if (!stopped.Stopped)
+            {
+                return "";
+            }
+
+            if (!MarketingBridge.Stop(stopped))
+            {
+                return "";
+            }
+
+            return Marketing.RecordStop(localAppData, stopped, current.Day);
+        }
+
+        public static string? TryTakeover(MarketingWatch marketing, RivalTakeoverWatch watch, string localAppData)
+        {
+            if (watch == null || string.IsNullOrEmpty(localAppData) || !InCity())
+            {
+                return null;
+            }
+
+            var current = SaveGameManager.Current;
+            if (current == null || !watch.Due(current) || !HasLoan(localAppData))
+            {
+                return null;
+            }
+
+            string street;
+            int number;
+            decimal offer;
+            decimal profit;
+            var pending = RivalTakeoverBridge.Pending();
+            if (pending != null)
+            {
+                street = pending.Value.street;
+                number = pending.Value.number;
+                offer = pending.Value.offer;
+                profit = pending.Value.dailyProfit;
+            }
+            else if (marketing != null
+                && !marketing.Active(current)
+                && !marketing.StartDue(current)
+                && LastRent(localAppData, out street, out number))
+            {
+                offer = 1000m;
+                profit = 10m;
+            }
+            else
+            {
+                return null;
+            }
+
+            var declined = RivalTakeover.Decline(
+                offer,
+                profit,
+                street,
+                number,
+                alreadyDeclined: false,
+                GameApi.Live());
+            watch.Mark(current);
+            if (!declined.Declined)
+            {
+                return "";
+            }
+
+            RivalTakeoverBridge.Decline(declined);
+            return RivalTakeover.Record(localAppData, declined, current.Day);
+        }
+
         public static string? TryTime(TimeAdvanceWatch watch, string localAppData)
         {
             if (watch == null || string.IsNullOrEmpty(localAppData) || !InCity())
