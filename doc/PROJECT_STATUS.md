@@ -16,7 +16,7 @@
 
 | Branch | Role |
 |--------|------|
-| **`main`** | Integration branch. Last land `PLACEHOLDER`, version 1.15.1. Story 8.1 shipped. |
+| **`main`** | Integration branch. Last land `60f7e54`, version 1.15.1. Story 8.1 shipped. |
 | **`feature/8.1-demand-curves`** | Story 8.1 demand and cost curves. Version 1.15.1. Human PASS 2026-11-08. Kept after CMPH. |
 | **`feature/9.6-playbook-f9`** | Story 9.6 F9 playbook next step. Version 1.14.6. Human PASS 2026-11-08. Kept after CMPH. |
 | **`feature/9.5-managers-money`** | Story 9.5 managers, money, real estate, close, run. Version 1.14.5. Human PASS 2026-11-08. Kept after CMPH. |
