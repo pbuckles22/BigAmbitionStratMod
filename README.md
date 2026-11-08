@@ -6,7 +6,7 @@ Cursor **rules**, **skills**, **handoff protocol**, and **test discipline** for 
 
 **Start with [CONTRIBUTING.md](CONTRIBUTING.md)** — reading order, tracked vs gitignored docs, PR expectations.
 
-**Current work:** [doc/PROJECT_STATUS.md](doc/PROJECT_STATUS.md). Version 1.13.3.9. A new game rents the cheapest lot, loads a starter layout, and assigns a cleaner and uniforms.
+**Current work:** [doc/PROJECT_STATUS.md](doc/PROJECT_STATUS.md). Version 1.13.8. Epic 13 new-game calls are complete; next is playbook story 9.1 when asked.
 
 ## Quick start
 

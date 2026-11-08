@@ -16,8 +16,8 @@
 
 | Branch | Role |
 |--------|------|
-| **`main`** | Integration branch. Last land pending 1.13.8 CMPH |
-| **`feature/13.2-capacity-fixtures`** | Capacity fixtures (13.2 remainder). Version 1.13.8. Human PASS 2026-11-08. Kept after this CMPH. |
+| **`main`** | Integration branch. Last land `a674385`, version 1.13.8. Epic 13 closed. |
+| **`feature/13.2-capacity-fixtures`** | Capacity fixtures (13.2 remainder). Version 1.13.8. Human PASS 2026-11-08. Kept after CMPH. |
 | **`feature/13.6-marketing-rival`** | Story 13.6 marketing start/stop and rival decline. Version 1.13.7. Human PASS 2026-11-08. Kept after CMPH. |
 | **`feature/13.5-time-advance`** | Story 13.5 time advance with player needs. Version 1.13.6. Human PASS 2026-11-08. Kept after CMPH. |
 | **`feature/13.4-hire-loan-taxes`** | Story 13.4 hire, loan, demand, taxes. Version 1.13.5. Human PASS 2026-11-08. Kept after CMPH. |
