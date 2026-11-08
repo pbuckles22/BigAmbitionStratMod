@@ -16,7 +16,7 @@
 
 | Branch | Role |
 |--------|------|
-| **`main`** | Integration branch. Last land `e85e08b`, version 1.13.3.9 |
+| **`main`** | Integration branch. Last land `1406dfd`, version 1.13.3.9 |
 | **`feature/13.2-store-ops`** | Story 13.2 store ops (cleaner). Version 1.13.3.9. Human PASS 2026-11-07. Kept after this CMPH. |
 | **`feature/13.2-starter-layout`** | Story 13.2 layout and hours. Version 1.13.2. Human PASS 2026-11-07. Kept after this CMPH. |
 | **`feature/13.1-rent-building`** | Story 13.1. Version 1.13.1. Human PASS 2026-11-07. Kept after this CMPH. |
@@ -75,7 +75,7 @@
 | **`feature/chain-prefix`** | Kept after CMPH (template history) |
 | **`feature/handoff-receiver-framing`** | Kept after CMPH (template history) |
 
-**Last land:** `e85e08b` on `main`. Version 1.13.3.9. Branch `feature/13.2-store-ops` kept. Repo: https://github.com/pbuckles22/BigAmbitionStratMod.
+**Last land:** `1406dfd` on `main`. Version 1.13.3.9. Branch `feature/13.2-store-ops` kept. Repo: https://github.com/pbuckles22/BigAmbitionStratMod.
 
 ---
 
