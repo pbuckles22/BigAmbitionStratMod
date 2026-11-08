@@ -16,7 +16,7 @@
 
 | Branch | Role |
 |--------|------|
-| **`main`** | Integration branch. Last land `PENDING`, version 1.13.4 |
+| **`main`** | Integration branch. Last land `ecdb230`, version 1.13.4 |
 | **`feature/13.3-wholesaler-contract`** | Story 13.3 wholesaler contract. Version 1.13.4. Human PASS 2026-11-07 (shelf stock waived). Kept after this CMPH. |
 | **`feature/13.2-store-ops`** | Story 13.2 store ops (cleaner). Version 1.13.3.9. Human PASS 2026-11-07. Kept after CMPH. |
 | **`feature/13.2-starter-layout`** | Story 13.2 layout and hours. Version 1.13.2. Human PASS 2026-11-07. Kept after this CMPH. |
