@@ -139,7 +139,7 @@ When shipping: update **PM_PLAN**, **doc/PROJECT_STATUS.md**, and **Current stat
 ## Current state
 
 - **Product:** Version 1.14.1. Stage.Decide locks the four stage gates (higher wins; day unused). Epic 9 playbook in progress. 7.13 stays stashed until before 10.2. Ladder: [PM_PLAN.md](PM_PLAN.md).
-- **On:** `origin/main` (updated this CMPH). Stash `7.13 spare cost centers` on `feature/7.13-spare-cost-centers`. https://github.com/pbuckles22/BigAmbitionStratMod
+- **On:** `origin/main @ 4f569cc`. Stash `7.13 spare cost centers` on `feature/7.13-spare-cost-centers`. https://github.com/pbuckles22/BigAmbitionStratMod
 - **Next:** Story **9.2** when asked.
 - **Blockers:** Do not pop 7.13. Do not load the day 1021 save. Do not continue a save that already says Starter Gift. Do not drop Fifth Avenue 36’s contract before the hub holds that item.
 

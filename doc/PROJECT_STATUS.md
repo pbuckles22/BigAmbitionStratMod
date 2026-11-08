@@ -16,7 +16,7 @@
 
 | Branch | Role |
 |--------|------|
-| **`main`** | Integration branch. Version 1.14.1. Story 9.1 landed. |
+| **`main`** | Integration branch. Last land `4f569cc`, version 1.14.1. Story 9.1 landed. |
 | **`feature/9.1-stage-decide`** | Story 9.1 Stage.Decide locks. Version 1.14.1. Human PASS 2026-11-08. Kept after CMPH. |
 | **`feature/13.2-capacity-fixtures`** | Capacity fixtures (13.2 remainder). Version 1.13.8. Human PASS 2026-11-08. Kept after CMPH. |
 | **`feature/13.6-marketing-rival`** | Story 13.6 marketing start/stop and rival decline. Version 1.13.7. Human PASS 2026-11-08. Kept after CMPH. |
