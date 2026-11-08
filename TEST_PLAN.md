@@ -13,7 +13,7 @@ dotnet test src/ChaoticCEO.Tests/ChaoticCEO.Tests.csproj -p:GameManaged="C:\Prog
 dotnet build src/ChaoticCEO/ChaoticCEO.csproj -c Release -p:GameManaged="C:\Program Files (x86)\Steam\steamapps\common\Big Ambitions\Big Ambitions_Data\Managed"
 ```
 
-`dotnet test` is the Debug compile. The Release command installs `ChaoticCEO.dll` to ModsLocal. The gitignored counter is `build_number.txt`. The informational version is `1.11.9+N`.
+`dotnet test` is the Debug compile. The Release command installs `ChaoticCEO.dll` to ModsLocal. The gitignored counter is `build_number.txt`. The informational version is `1.13.8+N`.
 
 The story gate reuses `doc/gemini/cache/save.bin` and `save-index.sqlite` when both are current for the dropzone `.hsg`. Do not read or scan `save.bin` again while that blob is current. A renamed `.hsg` fails the recorded-name check on its own. Nobody announces the new name.
 
@@ -212,6 +212,17 @@ Human PASS 2026-11-07 on 1.13.2. New game day 1: one `building.rented` for `ba:s
 6. Version marker: public `1.13.3.9`. `ceo.log` starts at `mod.loaded version=1.13.3.9 build=3682`.
 
 Human PASS 2026-11-07 on 1.13.3.8 for the cleaner block: day 1 at 26 7th Avenue, one `ops.cleaner ... placed=true`, employee `MS4xJhJS10KNikV4k41zg==`. Uniforms deferred (`ops.missed reason=nolocker` on that build; opening no longer demands them on 1.13.3.9).
+
+## Capacity fixtures human check
+
+1. Restart Big Ambitions so version 1.13.8 loads. Start a new game and reach the city. Do not load the usual save and do not load the day 1021 save. This check rents one lot, loads one starter layout, places one cleaner, and matches customer capacity to that layout. It does not require a wholesaler, cashier, loan, or marketing.
+2. Wait until you are inside the starter store, then wait about fifteen seconds so ops and capacity can run.
+3. Open `%LocalAppData%\ChaoticCEO\ceo.log`. Open the store’s customer-capacity panel (or BizMan Insight) and note the capacity number.
+4. **PASS if** one `capacity.matched` line names the same street and number as `layout.loaded` and `ops.assigned`, `call=Helpers.BusinessHelper.UpdateCustomerCapacity`, and the store’s customer capacity is greater than zero. **FAIL if** no `capacity.matched`, a second capacity line, or capacity stays at zero with fixtures already placed.
+5. Evidence: after `ops.assigned` (or `ops.cleaner`), one `capacity.matched` (`day`, `street`, `number`, `call`). A later frame does not append it again.
+6. Version marker: public `1.13.8`. `ceo.log` starts at `mod.loaded version=1.13.8 build=3682`.
+
+Human PASS 2026-11-08 on 1.13.8. Day 1 at 26 7th Avenue: one `capacity.matched` with `call=Helpers.BusinessHelper.UpdateCustomerCapacity` after `ops.assigned` on the same street and number as `layout.loaded`. No second capacity line.
 
 ## Wholesaler contract human check
 

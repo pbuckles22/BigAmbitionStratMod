@@ -577,6 +577,55 @@ namespace ChaoticCEO
             return StoreOps.Record(localAppData, assigned, rented, current.Day);
         }
 
+        public static string? TryCapacity(CapacityWatch watch, string localAppData)
+        {
+            if (watch == null || string.IsNullOrEmpty(localAppData) || !InCity())
+            {
+                return null;
+            }
+
+            var current = SaveGameManager.Current;
+            if (current == null || !watch.Due(current))
+            {
+                return null;
+            }
+
+            if (!LastOps(localAppData, out var street, out var number, out var skipped))
+            {
+                return null;
+            }
+
+            if (skipped)
+            {
+                watch.Mark(current);
+                return null;
+            }
+
+            var registration = FindRented(current, street, number);
+            if (registration == null)
+            {
+                return null;
+            }
+
+            var rented = new BuildingRent(street, number, true, "");
+            var chosen = Starter.Choose(Starter.StageOne(), alreadyOpen: false, GameApi.Live());
+            var already = CapacityBridge.AlreadyMatched(localAppData, street, number);
+            var matched = Capacity.Match(rented, chosen, already, GameApi.Live());
+            if (!matched.Matched)
+            {
+                watch.Mark(current);
+                return "";
+            }
+
+            if (!CapacityBridge.Live(registration, matched))
+            {
+                return null;
+            }
+
+            watch.Mark(current);
+            return Capacity.Record(localAppData, matched, current.Day);
+        }
+
         public static string? TryWholesaler(WholesalerWatch watch, string localAppData)
         {
             if (watch == null || string.IsNullOrEmpty(localAppData) || !InCity())

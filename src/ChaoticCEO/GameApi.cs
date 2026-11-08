@@ -97,6 +97,7 @@ namespace ChaoticCEO
                 ["marketing start"] = "Dialogs.MarketingAgencyDialog.OnMarketingSettingsSet",
                 ["marketing stop"] = "UI.Smartphone.Apps.BizMan.BizManMarketing.CancelAllCampaignsFromAgency",
                 ["rival takeover decline"] = "UI.Smartphone.Apps.BizMan.RealEstateSettings.CancelForSale",
+                ["capacity fixtures"] = "Helpers.BusinessHelper.UpdateCustomerCapacity",
             };
             return new ApiNote(
                 LoadLog.PinnedBuild,

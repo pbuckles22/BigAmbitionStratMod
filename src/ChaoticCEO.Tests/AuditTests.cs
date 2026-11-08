@@ -1146,6 +1146,113 @@ public class AuditTests
     }
 
     [Fact]
+    public void Audit_load_day_roll_needs_refill_recorded_call_slot_fill_store_connect_plan_assign_restock_sort_overflow_order_audit_bar_health_controls_telemetry_rent_layout_ops_capacity_locks_the_update()
+    {
+        // Chain: load → day roll → needs refill → recorded call → slot fill → store connect → plan assign → restock → sort → overflow → order → audit → bar → health → controls → telemetry → rent → layout → ops → capacity
+        using var dir = new TempAudit();
+        var save = new object();
+        var prefix = Prefix(dir.Path, save);
+        var guard = LiveGuard();
+        var world = prefix.World;
+        Autopilot.Enabled = guard.Enabled;
+        Autopilot.DryRun = guard.DryRun;
+        try
+        {
+            var shot = WatchDay(dir.Path, ref world, guard, prefix.Api, prefix.Rolled, 1016, 10m, null);
+            var rented = Rent.Choose(
+                new[]
+                {
+                    new RentLot("ba:street_high", 2, 80m),
+                    new RentLot("ba:street_low", 9, 40m),
+                },
+                guard.Cash,
+                anyRented: false,
+                prefix.Api);
+            var rentLine = Rent.Record(dir.Path, rented, TopBar.Day(prefix.Rolled));
+            var chosen = Starter.Choose(Starter.StageOne(), alreadyOpen: false, prefix.Api);
+            var layoutLine = Starter.Record(dir.Path, chosen, rented, TopBar.Day(shot.Rolled));
+            var assigned = StoreOps.Assign(chosen, StoreOps.Opening(), StoreFixtures.GiftShopWholesalers(), prefix.Api);
+            var opsLine = StoreOps.Record(dir.Path, assigned, rented, TopBar.Day(shot.Rolled));
+            var matched = Capacity.Match(rented, chosen, alreadyMatched: false, prefix.Api);
+            var capacityLine = Capacity.Record(dir.Path, matched, TopBar.Day(shot.Rolled));
+
+            Assert.Contains("day=1016", prefix.Rolled);
+            Assert.Contains("telemetry.written ", shot.Written);
+            Assert.Contains("building.rented ", rentLine);
+            Assert.Contains("layout.loaded ", layoutLine);
+            Assert.Contains("ops.assigned ", opsLine);
+            Assert.True(assigned.Assigned);
+            Assert.Equal("Cleaner", assigned.Cleaner);
+            Assert.Equal("", assigned.Guard);
+            Assert.True(matched.Matched);
+            Assert.Equal(prefix.Api.Call("capacity fixtures"), matched.Call);
+            Assert.Equal("Helpers.BusinessHelper.UpdateCustomerCapacity", matched.Call);
+            Assert.Equal(rented.Street, matched.Street);
+            Assert.Equal(rented.Number, matched.Number);
+            Assert.Equal(
+                "capacity.matched version=" + LoadLog.Version
+                    + " day=1016 street=" + rented.Street
+                    + " number=" + rented.Number.ToString(System.Globalization.CultureInfo.InvariantCulture)
+                    + " call=" + matched.Call,
+                capacityLine);
+            Assert.Equal(1, File.ReadAllLines(LoadLog.CeoLogPath(dir.Path)).Count(line => line.StartsWith("capacity.matched ")));
+        }
+        finally
+        {
+            Autopilot.Enabled = true;
+            Autopilot.DryRun = false;
+        }
+    }
+
+    [Fact]
+    public void Audit_load_day_roll_needs_refill_recorded_call_slot_fill_store_connect_plan_assign_restock_sort_overflow_order_audit_bar_health_controls_telemetry_rent_layout_ops_capacity_skips_a_second_match()
+    {
+        // Chain: load → day roll → needs refill → recorded call → slot fill → store connect → plan assign → restock → sort → overflow → order → audit → bar → health → controls → telemetry → rent → layout → ops → capacity → kept
+        using var dir = new TempAudit();
+        var save = new object();
+        var prefix = Prefix(dir.Path, save);
+        var guard = LiveGuard();
+        var world = prefix.World;
+        Autopilot.Enabled = guard.Enabled;
+        Autopilot.DryRun = guard.DryRun;
+        try
+        {
+            var shot = WatchDay(dir.Path, ref world, guard, prefix.Api, prefix.Rolled, 1016, 10m, null);
+            var rented = Rent.Choose(
+                new[] { new RentLot("ba:street_low", 9, 40m) },
+                guard.Cash,
+                anyRented: false,
+                prefix.Api);
+            var rentLine = Rent.Record(dir.Path, rented, TopBar.Day(prefix.Rolled));
+            var chosen = Starter.Choose(Starter.StageOne(), alreadyOpen: false, prefix.Api);
+            var layoutLine = Starter.Record(dir.Path, chosen, rented, TopBar.Day(shot.Rolled));
+            var assigned = StoreOps.Assign(chosen, StoreOps.Opening(), StoreFixtures.GiftShopWholesalers(), prefix.Api);
+            var opsLine = StoreOps.Record(dir.Path, assigned, rented, TopBar.Day(shot.Rolled));
+            var first = Capacity.Match(rented, chosen, alreadyMatched: false, prefix.Api);
+            var firstLine = Capacity.Record(dir.Path, first, TopBar.Day(shot.Rolled));
+            var again = Capacity.Match(rented, chosen, alreadyMatched: true, prefix.Api);
+            var written = Capacity.Record(dir.Path, again, TopBar.Day(shot.Rolled));
+
+            Assert.Contains("day=1016", prefix.Rolled);
+            Assert.Contains("telemetry.written ", shot.Written);
+            Assert.Contains("building.rented ", rentLine);
+            Assert.Contains("layout.loaded ", layoutLine);
+            Assert.Contains("ops.assigned ", opsLine);
+            Assert.True(first.Matched);
+            Assert.Contains("capacity.matched ", firstLine);
+            Assert.False(again.Matched);
+            Assert.Equal("", again.Call);
+            Assert.Equal("", written);
+            Assert.Equal(1, File.ReadAllLines(LoadLog.CeoLogPath(dir.Path)).Count(line => line.StartsWith("capacity.matched ")));
+        }
+        finally
+        {
+            Autopilot.Enabled = true;
+            Autopilot.DryRun = false;
+        }
+    }
+
+    [Fact]
     public void Audit_load_day_roll_needs_refill_recorded_call_slot_fill_store_connect_plan_assign_restock_sort_overflow_order_audit_bar_health_controls_telemetry_rent_layout_ops_a_gift_shop_without_a_guard_locker_keeps_the_guard_off()
     {
         // Chain: load → day roll → needs refill → recorded call → slot fill → store connect → plan assign → restock → sort → overflow → order → audit → bar → health → controls → telemetry → rent → layout → ops → wholesaler
