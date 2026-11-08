@@ -1,10 +1,10 @@
 # PM_PLAN — BigAmbitionStratMod
 
-In-game advisor for one Big Ambitions save, then a new-game guide and autopilot. Version scheme `MAJOR.EPIC.COUNTER`. Current public version **1.13.2**. The first ship of a new epic is `1.N.1`. Never go backwards.
+In-game advisor for one Big Ambitions save, then a new-game guide and autopilot. Version scheme `MAJOR.EPIC.COUNTER`. Current public version **1.13.3.9**. The first ship of a new epic is `1.N.1`. Never go backwards.
 
 ## Context
 
-The game is Mono, build **3682**. A mod builds with `dotnet build` against `Big Ambitions_Data\Managed` (`BigAmbitions.dll`, `BigAmbitions.ModAPI.dll`). The pin is `doc/requirements/game-build.md`. Python save tools live in `script/`. The mod, when it exists, lives in `src/`. Evidence for the ledger is `doc/gemini/cache/ledger.log`. The mod writes `%LocalAppData%\ChaoticCEO\ceo.log`. The compile counter is gitignored `build_number.txt`. The mod informational version is `1.13.2+N`. The draw reference is `UnityEngine.IMGUIModule`.
+The game is Mono, build **3682**. A mod builds with `dotnet build` against `Big Ambitions_Data\Managed` (`BigAmbitions.dll`, `BigAmbitions.ModAPI.dll`). The pin is `doc/requirements/game-build.md`. Python save tools live in `script/`. The mod, when it exists, lives in `src/`. Evidence for the ledger is `doc/gemini/cache/ledger.log`. The mod writes `%LocalAppData%\ChaoticCEO\ceo.log`. The compile counter is gitignored `build_number.txt`. The mod informational version is `1.13.3.9+N`. The draw reference is `UnityEngine.IMGUIModule`.
 
 Epic 1 closed on 17 businesses and 5865 statement rows. `ba:businesstype_liquorstore` is **food**. Do not relabel it inside a routes story. A warehouse story may add a specialty override only with a new test.
 
@@ -136,7 +136,7 @@ Starts after Epic **11**. You can see the run without opening the game.
 Starts after Epic **12**. Each story finds and records one family of calls that a brand-new game needs. Each is a human check on a new save. No walking, driving, or hand-carting.
 
 - **13.1** `[x]` Rent a building. The cheapest available lot that cash can cover wins. A tie keeps the later lot. A lot with a blank street, a number below 1, or a rent above cash is not a choice. A save that already has a named business is skipped. Human PASS 2026-11-07. New game day 1 rented 26 7th Avenue (`ba:street_seventhavenue` 26) with `Buildings.BuildingCommands.Command_RentBuilding`. The day 1014 save logged `building.skipped reason=rented`. Version 1.13.1. Chain: `load → day roll → needs refill → recorded call → slot fill → store connect → plan assign → restock → sort → overflow → order → audit → bar → health → controls → telemetry → rent`.
-- **13.2** `[ ]` Starter layout, opening hours, and store ops. Layout and hours: Human PASS 2026-11-07. New game day 1 loaded `GiftShopWholesalers` on 20 7th Avenue (`ba:street_seventhavenue` 20) as Starter Gift, open 8–16, call `BusinessLayoutSets.BusinessLayoutSetHelper.LoadBusinessLayoutSet`. Version 1.13.2. Chain: `load → day roll → needs refill → recorded call → slot fill → store connect → plan assign → restock → sort → overflow → order → audit → bar → health → controls → telemetry → rent → layout`. Still open: a cleaner, a guard, uniforms, and capacity fixtures. Human check for the rest: the store’s ops match the rulebook.
+- **13.2** `[x]` Starter layout, opening hours, and store ops. Layout and hours: Human PASS 2026-11-07. New game day 1 loaded `GiftShopWholesalers` on 20 7th Avenue (`ba:street_seventhavenue` 20) as Starter Gift, open 8–16, call `BusinessLayoutSets.BusinessLayoutSetHelper.LoadBusinessLayoutSet`. Layout version 1.13.2. Store ops: Human PASS 2026-11-07 on 1.13.3.9. Day 1 at 26 7th Avenue logged one `ops.cleaner` with `placed=true` (`employee=MS4xJhJS10KNikV4k41zg==`, `CleanerEmployee`). Opening assigns the cleaner only; uniforms stay off until a later story needs them. GiftShopWholesalers has no guard locker, so the guard stays off. Version 1.13.3.9. Chain: `load → day roll → needs refill → recorded call → slot fill → store connect → plan assign → restock → sort → overflow → order → audit → bar → health → controls → telemetry → rent → layout → ops → person → type → cleaner`. Capacity fixtures are still open.
 - **13.3** `[ ]` Wholesaler contract. A recurring `DeliveryContract` from a wholesaler to the store. Human check: the next morning the store has stock.
 - **13.4** `[ ]` Hire, loan, employee demand, and taxes. Hire a cashier with the **11.0** hire call, take and repay a bank loan, satisfy an employee demand, and pay taxes and back taxes. Human check: the cashier works, the loan balance moves, the demand clears, and the tax due drops.
 - **13.5** `[ ]` Time advance with player needs. Skip time, with sleep and food before energy, hunger, or happiness reach **NeedFloor**. Human check: one advanced week with no faint or hospital.
@@ -178,7 +178,7 @@ Starts after Epic **8**. Crossing **WinNetWorth** is a milestone. The autopilot 
 - **10.2** `[ ]` Autopilot loop. Each day, while `Autopilot.Enabled` is on: audit, heal, the stage’s actions through the recorded calls, then time advance, within the guardrails. The **12.3** toggle and F10 clear the flag. Human check: one autopilot day on a new save matches its `telemetry.csv` row, and a cleared flag skips the next day.
 - **10.3** `[ ]` Hands-off run from a new save. PASS is `win.reached` in `ceo.log` and later telemetry rows that still advance. Every decision the run finds becomes a Tier 1 test before the next run.
 
-**Next:** Epic 11 closed 2026-11-06 at version 1.11.9. Next ship: **12.1** when asked. **7.13** stays stashed.
+**Next:** Story **13.2** closed 2026-11-07 at version 1.13.3.9. Next ship: **13.3** wholesaler contract when asked. **7.13** stays stashed.
 
 Operating model (keep these when you replace this plan): `.cursor/rules/` ship commands (UCPH, CMPH, SWAT), human check, plan-coordinate versioning, long-run harvest (`testing.mdc`), and the chain harness and prefix (`integration-chain.mdc`). Do not delete them to “clean up” a new clone.
 

@@ -6,7 +6,7 @@ namespace ChaoticCEO
 {
     public static class LoadLog
     {
-        public const string Version = "1.13.2";
+        public const string Version = "1.13.3.9";
         public const string PinnedBuild = "3682";
         public const string ModId = "ChaoticCEO";
         public const int HistoryLimit = 200;
@@ -96,7 +96,8 @@ namespace ChaoticCEO
                     || raw.StartsWith("building.offered ", StringComparison.Ordinal)
                     || raw.StartsWith("building.rented ", StringComparison.Ordinal)
                     || raw.StartsWith("layout.loaded ", StringComparison.Ordinal)
-                    || raw.StartsWith("layout.cloned ", StringComparison.Ordinal))
+                    || raw.StartsWith("layout.cloned ", StringComparison.Ordinal)
+                    || raw.StartsWith("ops.assigned ", StringComparison.Ordinal))
                 {
                     kept.Add(raw);
                     continue;

@@ -6,9 +6,9 @@
     <LangVersion>latest</LangVersion>
     <RootNamespace>ChaoticCEO</RootNamespace>
     <AssemblyName>ChaoticCEO</AssemblyName>
-    <Version>1.13.2</Version>
-    <AssemblyVersion>1.13.2</AssemblyVersion>
-    <FileVersion>1.13.2</FileVersion>
+    <Version>1.13.3.9</Version>
+    <AssemblyVersion>1.13.3.9</AssemblyVersion>
+    <FileVersion>1.13.3.9</FileVersion>
     <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
     <GameManaged Condition="'$(GameManaged)' == ''">C:\Program Files (x86)\Steam\steamapps\common\Big Ambitions\Big Ambitions_Data\Managed</GameManaged>
   </PropertyGroup>
@@ -28,6 +28,10 @@
     </Reference>
     <Reference Include="BigAmbitions.Items">
       <HintPath>$(GameManaged)\BigAmbitions.Items.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="BigAmbitions.Characters">
+      <HintPath>$(GameManaged)\BigAmbitions.Characters.dll</HintPath>
       <Private>false</Private>
     </Reference>
     <Reference Include="DayNightCycle">
@@ -110,6 +114,8 @@
       <_NeedsBump Condition="Exists('$(TargetPath)') and $([System.IO.File]::GetLastWriteTime('$(MSBuildThisFileDirectory)RentBridge.cs').Ticks) &gt; $(_DllTime)">true</_NeedsBump>
       <_NeedsBump Condition="Exists('$(TargetPath)') and $([System.IO.File]::GetLastWriteTime('$(MSBuildThisFileDirectory)Starter.cs').Ticks) &gt; $(_DllTime)">true</_NeedsBump>
       <_NeedsBump Condition="Exists('$(TargetPath)') and $([System.IO.File]::GetLastWriteTime('$(MSBuildThisFileDirectory)StarterBridge.cs').Ticks) &gt; $(_DllTime)">true</_NeedsBump>
+      <_NeedsBump Condition="Exists('$(TargetPath)') and $([System.IO.File]::GetLastWriteTime('$(MSBuildThisFileDirectory)StoreOps.cs').Ticks) &gt; $(_DllTime)">true</_NeedsBump>
+      <_NeedsBump Condition="Exists('$(TargetPath)') and $([System.IO.File]::GetLastWriteTime('$(MSBuildThisFileDirectory)StoreOpsBridge.cs').Ticks) &gt; $(_DllTime)">true</_NeedsBump>
       <_NeedsBump Condition="Exists('$(TargetPath)') and $([System.IO.File]::GetLastWriteTime('$(MSBuildProjectFullPath)').Ticks) &gt; $(_DllTime)">true</_NeedsBump>
     </PropertyGroup>
     <Copy SourceFiles="$(_NumberSeed)" DestinationFiles="$(_NumberFile)" Condition="!Exists('$(_NumberFile)')" />

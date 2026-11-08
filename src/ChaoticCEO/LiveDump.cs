@@ -473,6 +473,187 @@ namespace ChaoticCEO
             return Starter.Record(localAppData, chosen, rented, current.Day);
         }
 
+        public static string? TryOps(StoreOpsWatch watch, string localAppData)
+        {
+            if (watch == null || string.IsNullOrEmpty(localAppData) || !InCity())
+            {
+                return null;
+            }
+
+            var current = SaveGameManager.Current;
+            if (current != null && watch.VerifyDue())
+            {
+                var kept = FindRented(current, watch.VerifyStreet, watch.VerifyNumber);
+                var shift = false;
+                var person = false;
+                var type = "";
+                var uniform = "";
+                if (kept != null)
+                {
+                    StoreOpsBridge.Verify(kept, out shift, out person, out type, out uniform);
+                }
+
+                return StoreOps.Verify(
+                    localAppData,
+                    watch.VerifyPick,
+                    new BuildingRent(watch.VerifyStreet, watch.VerifyNumber, true, ""),
+                    watch.VerifyDay,
+                    shift,
+                    person,
+                    type,
+                    uniform);
+            }
+
+            if (current == null || !watch.Due(current))
+            {
+                return null;
+            }
+
+            if (!LastLayout(localAppData, out var street, out var number, out var skipped))
+            {
+                return null;
+            }
+
+            if (skipped)
+            {
+                watch.Mark(current);
+                return StoreOps.Skip(localAppData, current.Day);
+            }
+
+            var registration = FindRented(current, street, number);
+            if (registration == null)
+            {
+                return null;
+            }
+
+            var rented = new BuildingRent(street, number, true, "");
+            if (!StoreOpsBridge.HasItems(registration))
+            {
+                watch.Note();
+                if (watch.Waiting())
+                {
+                    return null;
+                }
+
+                watch.Mark(current);
+                return StoreOps.Miss(localAppData, StoreOps.Assign(null, null, null), rented, current.Day, "noitems");
+            }
+
+            var chosen = Starter.Choose(Starter.StageOne(), alreadyOpen: false, GameApi.Live());
+            var assigned = StoreOps.Assign(
+                chosen,
+                StoreOps.Opening(),
+                StoreOpsBridge.Fixtures(registration),
+                GameApi.Live());
+            if (!assigned.Assigned)
+            {
+                watch.Mark(current);
+                return StoreOps.Miss(localAppData, assigned, rented, current.Day, "empty");
+            }
+
+            var live = StoreOpsBridge.Live(registration, assigned, out var reason, out var placed);
+            StoreOps.CleanerLine(localAppData, rented, current.Day, placed);
+            if (!live)
+            {
+                if (StoreOps.Retry(reason))
+                {
+                    watch.Note();
+                    if (watch.Waiting())
+                    {
+                        return null;
+                    }
+                }
+
+                watch.Mark(current);
+                return StoreOps.Miss(localAppData, assigned, rented, current.Day, reason);
+            }
+
+            watch.Mark(current);
+            if (assigned.Cleaner.Length > 0)
+            {
+                watch.Arm(street, number, current.Day, StoreOps.VerifyFrames, assigned);
+            }
+
+            return StoreOps.Record(localAppData, assigned, rented, current.Day);
+        }
+
+        private static bool LastLayout(string localAppData, out string street, out int number, out bool skipped)
+        {
+            street = "";
+            number = 0;
+            skipped = false;
+            var path = LoadLog.CeoLogPath(localAppData);
+            if (!File.Exists(path))
+            {
+                return false;
+            }
+
+            var found = false;
+            foreach (var line in File.ReadAllLines(path))
+            {
+                if (line.StartsWith("layout.skipped ", System.StringComparison.Ordinal))
+                {
+                    street = "";
+                    number = 0;
+                    skipped = true;
+                    found = true;
+                    continue;
+                }
+
+                if (!line.StartsWith("layout.loaded ", System.StringComparison.Ordinal))
+                {
+                    continue;
+                }
+
+                var streetAt = line.IndexOf(" street=", System.StringComparison.Ordinal);
+                var numberAt = line.IndexOf(" number=", System.StringComparison.Ordinal);
+                if (streetAt < 0 || numberAt <= streetAt)
+                {
+                    continue;
+                }
+
+                var parsedStreet = line.Substring(streetAt + " street=".Length, numberAt - (streetAt + " street=".Length));
+                var rest = line.Substring(numberAt + " number=".Length);
+                var stop = rest.IndexOf(' ');
+                var token = stop < 0 ? rest : rest.Substring(0, stop);
+                if (parsedStreet.Length == 0
+                    || !int.TryParse(token, NumberStyles.Integer, CultureInfo.InvariantCulture, out var parsedNumber)
+                    || parsedNumber <= 0)
+                {
+                    continue;
+                }
+
+                street = parsedStreet;
+                number = parsedNumber;
+                skipped = false;
+                found = true;
+            }
+
+            return found;
+        }
+
+        private static BuildingRegistration? FindRented(GameInstance current, string street, int number)
+        {
+            if (current.BuildingRegistrations == null)
+            {
+                return null;
+            }
+
+            foreach (var building in current.BuildingRegistrations)
+            {
+                var registration = building as BuildingRegistration;
+                if (registration != null
+                    && registration.StreetName == street
+                    && registration.StreetNumber == number
+                    && registration.RentedByPlayer)
+                {
+                    return registration;
+                }
+            }
+
+            return null;
+        }
+
         private static bool LastRent(string localAppData, out string street, out int number)
         {
             street = "";

@@ -202,6 +202,17 @@ Human PASS 2026-11-07 on 1.13.1. New game day 1: one `building.rented` for `ba:s
 
 Human PASS 2026-11-07 on 1.13.2. New game day 1: one `building.rented` for `ba:street_seventhavenue` number 20, then one `layout.loaded` for the same street and number, type `ba:businesstype_giftshop`, layout `GiftShopWholesalers`, `open=8-16`, call `BusinessLayoutSets.BusinessLayoutSetHelper.LoadBusinessLayoutSet`. The player was inside Starter Gift at 20 7th Avenue. The room had the gift-shop furniture. Cash on screen was $15.0K at 09:15. No second layout line. `mod.loaded version=1.13.2 build=3682`.
 
+## Store ops human check
+
+1. Restart Big Ambitions so version 1.13.3.9 loads. Start a new game and reach the city. Do not load the usual save and do not load the day 1021 save. This check rents one lot, loads one starter layout, and places one cleaner. Opening leaves uniforms off. The gift-shop layout has no guard locker, so this check does not assign a guard. It does not sign a wholesaler. Capacity fixtures are not part of this check.
+2. Wait until you are inside the starter store, then wait about fifteen seconds.
+3. Open `%LocalAppData%\ChaoticCEO\ceo.log`. Count mop people in the store.
+4. **PASS if** one `ops.cleaner` line says `placed=true` on the same street and number as `layout.loaded`, one `ops.assigned` line names `cleaner=Cleaner`, `guard=` empty, and `uniforms=false`, and the store shows exactly one cleaner. **FAIL if** `ops.missed`, no `ops.cleaner`, two or more mop people, or a guard is named. The missing-employee alert stays until a cashier is hired (13.4) and does not fail this check. Uniforms are deferred.
+5. Evidence: `ops.cleaner` (`employee`, `name`, `station`, `shift`, `person`, `type`, `placed`) then `ops.assigned` (`cleaner`, `guard`, `uniforms=false`, `cleanerCall`). `cleanerCall` is `CleaningStationController.AssignEmployee`. About 300 frames later, one `ops.verified` line (`shift`, `person`, `type`, `uniform`, `kept`).
+6. Version marker: public `1.13.3.9`. `ceo.log` starts at `mod.loaded version=1.13.3.9 build=3682`.
+
+Human PASS 2026-11-07 on 1.13.3.8 for the cleaner block: day 1 at 26 7th Avenue, one `ops.cleaner ... placed=true`, employee `MS4xJhJS10KNikV4k41zg==`. Uniforms deferred (`ops.missed reason=nolocker` on that build; opening no longer demands them on 1.13.3.9).
+
 ## Warehouse sort and restock human check
 
 1. Restart Big Ambitions so version 1.11.8.1 loads. You are in the city on the usual save. Do not load the day 1021 save. This check records warehouse homes, drains, overflow, and the first import order. It does not call the game. BizMan’s warehouses and purchasing screens stay as they are. Fifth Avenue 36 stays on the wholesaler.

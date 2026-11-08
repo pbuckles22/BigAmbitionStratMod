@@ -1083,6 +1083,513 @@ public class AuditTests
         }
     }
 
+    [Fact]
+    public void Audit_load_day_roll_needs_refill_recorded_call_slot_fill_store_connect_plan_assign_restock_sort_overflow_order_audit_bar_health_controls_telemetry_rent_layout_ops_names_the_cleaner_and_the_guard()
+    {
+        // Chain: load → day roll → needs refill → recorded call → slot fill → store connect → plan assign → restock → sort → overflow → order → audit → bar → health → controls → telemetry → rent → layout → ops
+        using var dir = new TempAudit();
+        var save = new object();
+        var prefix = Prefix(dir.Path, save);
+        var guard = LiveGuard();
+        var world = prefix.World;
+        Autopilot.Enabled = guard.Enabled;
+        Autopilot.DryRun = guard.DryRun;
+        try
+        {
+            var shot = WatchDay(dir.Path, ref world, guard, prefix.Api, prefix.Rolled, 1016, 10m, null);
+            var rented = Rent.Choose(
+                new[]
+                {
+                    new RentLot("ba:street_high", 2, 80m),
+                    new RentLot("ba:street_low", 9, 40m),
+                },
+                guard.Cash,
+                anyRented: false,
+                prefix.Api);
+            var rentLine = Rent.Record(dir.Path, rented, TopBar.Day(prefix.Rolled));
+            var chosen = Starter.Choose(Starter.StageOne(), alreadyOpen: false, prefix.Api);
+            var layoutLine = Starter.Record(dir.Path, chosen, rented, TopBar.Day(shot.Rolled));
+            var assigned = StoreOps.Assign(chosen, StoreOps.Opening(), prefix.Api);
+            var written = StoreOps.Record(dir.Path, assigned, rented, TopBar.Day(shot.Rolled));
+            var again = StoreOps.Record(dir.Path, assigned, rented, TopBar.Day(shot.Rolled));
+
+            Assert.Contains("day=1016", prefix.Rolled);
+            Assert.Contains("telemetry.written ", shot.Written);
+            Assert.Contains("building.rented ", rentLine);
+            Assert.Contains("layout.loaded ", layoutLine);
+            Assert.Equal("ba:street_low", rented.Street);
+            Assert.Equal(9, rented.Number);
+            Assert.Equal("GiftShopWholesalers", chosen.Layout);
+            Assert.True(assigned.Assigned);
+            Assert.Equal("Cleaner", assigned.Cleaner);
+            Assert.Equal("Guard", assigned.Guard);
+            Assert.False(assigned.Uniforms);
+            Assert.Equal("CleaningStationController.AssignEmployee", prefix.Api.Call("cleaner"));
+            Assert.Equal(prefix.Api.Call("cleaner"), assigned.CleanerCall);
+            Assert.Equal(prefix.Api.Call("guard"), assigned.GuardCall);
+            Assert.Equal("", assigned.UniformsCall);
+            Assert.Equal(
+                "ops.assigned version=" + LoadLog.Version
+                    + " day=1016 street=ba:street_low number=9 cleaner=Cleaner guard=Guard uniforms=false"
+                    + " cleanerCall=" + prefix.Api.Call("cleaner")
+                    + " guardCall=" + prefix.Api.Call("guard")
+                    + " uniformsCall=",
+                written);
+            Assert.Equal(written, again);
+            Assert.Equal(1, File.ReadAllLines(LoadLog.CeoLogPath(dir.Path)).Count(line => line.StartsWith("ops.assigned ")));
+        }
+        finally
+        {
+            Autopilot.Enabled = true;
+            Autopilot.DryRun = false;
+        }
+    }
+
+    [Fact]
+    public void Audit_load_day_roll_needs_refill_recorded_call_slot_fill_store_connect_plan_assign_restock_sort_overflow_order_audit_bar_health_controls_telemetry_rent_layout_ops_a_gift_shop_without_a_guard_locker_keeps_the_guard_off()
+    {
+        // Chain: load → day roll → needs refill → recorded call → slot fill → store connect → plan assign → restock → sort → overflow → order → audit → bar → health → controls → telemetry → rent → layout → ops → wholesaler
+        using var dir = new TempAudit();
+        var save = new object();
+        var prefix = Prefix(dir.Path, save);
+        var guard = LiveGuard();
+        var world = prefix.World;
+        Autopilot.Enabled = guard.Enabled;
+        Autopilot.DryRun = guard.DryRun;
+        try
+        {
+            var shot = WatchDay(dir.Path, ref world, guard, prefix.Api, prefix.Rolled, 1016, 10m, null);
+            var rented = Rent.Choose(
+                new[]
+                {
+                    new RentLot("ba:street_high", 2, 80m),
+                    new RentLot("ba:street_low", 9, 40m),
+                },
+                guard.Cash,
+                anyRented: false,
+                prefix.Api);
+            var rentLine = Rent.Record(dir.Path, rented, TopBar.Day(prefix.Rolled));
+            var chosen = Starter.Choose(Starter.StageOne(), alreadyOpen: false, prefix.Api);
+            var layoutLine = Starter.Record(dir.Path, chosen, rented, TopBar.Day(shot.Rolled));
+            var assigned = StoreOps.Assign(chosen, StoreOps.Opening(), StoreFixtures.GiftShopWholesalers(), prefix.Api);
+            var written = StoreOps.Record(dir.Path, assigned, rented, TopBar.Day(shot.Rolled));
+
+            Assert.Contains("day=1016", prefix.Rolled);
+            Assert.Contains("telemetry.written ", shot.Written);
+            Assert.Contains("building.rented ", rentLine);
+            Assert.Contains("layout.loaded ", layoutLine);
+            Assert.Equal("GiftShopWholesalers", chosen.Layout);
+            Assert.Equal("ba:street_low", rented.Street);
+            Assert.Equal(9, rented.Number);
+            Assert.True(assigned.Assigned);
+            Assert.Equal("Cleaner", assigned.Cleaner);
+            Assert.Equal("", assigned.Guard);
+            Assert.False(assigned.Uniforms);
+            Assert.Contains(
+                "ops.assigned version=" + LoadLog.Version
+                    + " day=1016 street=ba:street_low number=9 cleaner=Cleaner guard= uniforms=false",
+                written);
+            Assert.DoesNotContain("guard=Guard", written);
+        }
+        finally
+        {
+            Autopilot.Enabled = true;
+            Autopilot.DryRun = false;
+        }
+    }
+
+    [Fact]
+    public void Audit_load_day_roll_needs_refill_recorded_call_slot_fill_store_connect_plan_assign_restock_sort_overflow_order_audit_bar_health_controls_telemetry_rent_layout_ops_a_hire_without_a_person_spawns_one()
+    {
+        // Chain: load → day roll → needs refill → recorded call → slot fill → store connect → plan assign → restock → sort → overflow → order → audit → bar → health → controls → telemetry → rent → layout → ops → person
+        using var dir = new TempAudit();
+        var save = new object();
+        var prefix = Prefix(dir.Path, save);
+        var guard = LiveGuard();
+        var world = prefix.World;
+        Autopilot.Enabled = guard.Enabled;
+        Autopilot.DryRun = guard.DryRun;
+        try
+        {
+            var shot = WatchDay(dir.Path, ref world, guard, prefix.Api, prefix.Rolled, 1016, 10m, null);
+            var rented = Rent.Choose(
+                new[]
+                {
+                    new RentLot("ba:street_high", 2, 80m),
+                    new RentLot("ba:street_low", 9, 40m),
+                },
+                guard.Cash,
+                anyRented: false,
+                prefix.Api);
+            var rentLine = Rent.Record(dir.Path, rented, TopBar.Day(prefix.Rolled));
+            var chosen = Starter.Choose(Starter.StageOne(), alreadyOpen: false, prefix.Api);
+            var layoutLine = Starter.Record(dir.Path, chosen, rented, TopBar.Day(shot.Rolled));
+            var assigned = StoreOps.Assign(chosen, StoreOps.Opening(), StoreFixtures.GiftShopWholesalers(), prefix.Api);
+            var source = StoreOps.BodySource(assigned, stationHasPerson: false, recordHasPerson: false);
+            var outcome = StoreOps.Outcome(assigned, source);
+            var written = StoreOps.Record(dir.Path, assigned, rented, TopBar.Day(shot.Rolled));
+
+            Assert.Contains("day=1016", prefix.Rolled);
+            Assert.Contains("telemetry.written ", shot.Written);
+            Assert.Contains("building.rented ", rentLine);
+            Assert.Contains("layout.loaded ", layoutLine);
+            Assert.Equal("GiftShopWholesalers", chosen.Layout);
+            Assert.Equal("ba:street_low", rented.Street);
+            Assert.Equal(9, rented.Number);
+            Assert.Equal("Cleaner", assigned.Cleaner);
+            Assert.Equal("", assigned.Guard);
+            Assert.False(assigned.Uniforms);
+            Assert.Equal("spawn", source);
+            Assert.Equal("assigned", outcome);
+            Assert.Equal(StoreOps.SpawnPrefab, "Characters/HumanDefinitionLow");
+            Assert.Contains(
+                "ops.assigned version=" + LoadLog.Version
+                    + " day=1016 street=ba:street_low number=9 cleaner=Cleaner guard= uniforms=false",
+                written);
+            Assert.DoesNotContain("ops.missed", written);
+            Assert.DoesNotContain("guard=Guard", written);
+        }
+        finally
+        {
+            Autopilot.Enabled = true;
+            Autopilot.DryRun = false;
+        }
+    }
+
+    [Fact]
+    public void Audit_load_day_roll_needs_refill_recorded_call_slot_fill_store_connect_plan_assign_restock_sort_overflow_order_audit_bar_health_controls_telemetry_rent_layout_ops_an_unstarted_station_uses_the_cleaner_type()
+    {
+        // Chain: load → day roll → needs refill → recorded call → slot fill → store connect → plan assign → restock → sort → overflow → order → audit → bar → health → controls → telemetry → rent → layout → ops → person → type
+        using var dir = new TempAudit();
+        var save = new object();
+        var prefix = Prefix(dir.Path, save);
+        var guard = LiveGuard();
+        var world = prefix.World;
+        Autopilot.Enabled = guard.Enabled;
+        Autopilot.DryRun = guard.DryRun;
+        try
+        {
+            var shot = WatchDay(dir.Path, ref world, guard, prefix.Api, prefix.Rolled, 1016, 10m, null);
+            var rented = Rent.Choose(
+                new[]
+                {
+                    new RentLot("ba:street_high", 2, 80m),
+                    new RentLot("ba:street_low", 9, 40m),
+                },
+                guard.Cash,
+                anyRented: false,
+                prefix.Api);
+            var rentLine = Rent.Record(dir.Path, rented, TopBar.Day(prefix.Rolled));
+            var chosen = Starter.Choose(Starter.StageOne(), alreadyOpen: false, prefix.Api);
+            var layoutLine = Starter.Record(dir.Path, chosen, rented, TopBar.Day(shot.Rolled));
+            var assigned = StoreOps.Assign(chosen, StoreOps.Opening(), StoreFixtures.GiftShopWholesalers(), prefix.Api);
+            var source = StoreOps.BodySource(assigned, stationHasPerson: false, recordHasPerson: false);
+            var component = StoreOps.UnstartedType(assigned.Cleaner);
+            var written = StoreOps.Record(dir.Path, assigned, rented, TopBar.Day(shot.Rolled));
+
+            Assert.Contains("day=1016", prefix.Rolled);
+            Assert.Contains("telemetry.written ", shot.Written);
+            Assert.Contains("building.rented ", rentLine);
+            Assert.Contains("layout.loaded ", layoutLine);
+            Assert.Equal("GiftShopWholesalers", chosen.Layout);
+            Assert.Equal("ba:street_low", rented.Street);
+            Assert.Equal(9, rented.Number);
+            Assert.Equal("spawn", source);
+            Assert.Equal("CleanerEmployee", component);
+            Assert.Equal("", StoreOps.UnstartedType(assigned.Guard));
+            Assert.Contains(
+                "ops.assigned version=" + LoadLog.Version
+                    + " day=1016 street=ba:street_low number=9 cleaner=Cleaner guard= uniforms=false",
+                written);
+            Assert.DoesNotContain("reason=exception", written);
+        }
+        finally
+        {
+            Autopilot.Enabled = true;
+            Autopilot.DryRun = false;
+        }
+    }
+
+    [Fact]
+    public void Audit_load_day_roll_needs_refill_recorded_call_slot_fill_store_connect_plan_assign_restock_sort_overflow_order_audit_bar_health_controls_telemetry_rent_layout_ops_a_uniform_miss_keeps_the_cleaner_line()
+    {
+        // Chain: load → day roll → needs refill → recorded call → slot fill → store connect → plan assign → restock → sort → overflow → order → audit → bar → health → controls → telemetry → rent → layout → ops → person → type → cleaner
+        using var dir = new TempAudit();
+        var save = new object();
+        var prefix = Prefix(dir.Path, save);
+        var guard = LiveGuard();
+        var world = prefix.World;
+        Autopilot.Enabled = guard.Enabled;
+        Autopilot.DryRun = guard.DryRun;
+        try
+        {
+            var shot = WatchDay(dir.Path, ref world, guard, prefix.Api, prefix.Rolled, 1016, 10m, null);
+            var rented = Rent.Choose(
+                new[] { new RentLot("ba:street_low", 9, 40m) },
+                guard.Cash,
+                anyRented: false,
+                prefix.Api);
+            Rent.Record(dir.Path, rented, TopBar.Day(prefix.Rolled));
+            var chosen = Starter.Choose(Starter.StageOne(), alreadyOpen: false, prefix.Api);
+            Starter.Record(dir.Path, chosen, rented, TopBar.Day(shot.Rolled));
+            var assigned = StoreOps.Assign(chosen, StoreOps.Opening(), StoreFixtures.GiftShopWholesalers(), prefix.Api);
+            var source = StoreOps.BodySource(assigned, stationHasPerson: false, recordHasPerson: false);
+            var cleaner = StoreOps.CleanerLine(
+                dir.Path,
+                rented,
+                TopBar.Day(shot.Rolled),
+                new StoreOpsCleaner("emp1", "Cleaner", "item7", true, true, StoreOps.UnstartedType(assigned.Cleaner)));
+            var reason = StoreOps.UniformReason(locker: true, saveReady: true, presetId: "", dressed: false);
+            var missed = StoreOps.Miss(dir.Path, assigned, rented, TopBar.Day(shot.Rolled), reason);
+            var log = File.ReadAllLines(LoadLog.CeoLogPath(dir.Path));
+
+            Assert.Equal("spawn", source);
+            Assert.EndsWith(" employee=emp1 name=Cleaner station=item7 shift=true person=true type=CleanerEmployee placed=true", cleaner);
+            Assert.False(StoreOps.Retry(reason));
+            Assert.EndsWith(" reason=nopreset", missed);
+            Assert.True(
+                Array.FindIndex(log, line => line.StartsWith("ops.cleaner ")) < Array.FindIndex(log, line => line.StartsWith("ops.missed ")));
+            Assert.DoesNotContain(log, line => line.StartsWith("ops.assigned "));
+        }
+        finally
+        {
+            Autopilot.Enabled = true;
+            Autopilot.DryRun = false;
+        }
+    }
+
+    [Fact]
+    public void Audit_load_day_roll_needs_refill_recorded_call_slot_fill_store_connect_plan_assign_restock_sort_overflow_order_audit_bar_health_controls_telemetry_rent_layout_ops_a_new_save_seeds_the_default_uniform()
+    {
+        // Chain: load → day roll → needs refill → recorded call → slot fill → store connect → plan assign → restock → sort → overflow → order → audit → bar → health → controls → telemetry → rent → layout → ops → person → type → uniforms → verified
+        using var dir = new TempAudit();
+        var save = new object();
+        var prefix = Prefix(dir.Path, save);
+        var guard = LiveGuard();
+        var world = prefix.World;
+        Autopilot.Enabled = guard.Enabled;
+        Autopilot.DryRun = guard.DryRun;
+        try
+        {
+            var shot = WatchDay(dir.Path, ref world, guard, prefix.Api, prefix.Rolled, 1016, 10m, null);
+            var rented = Rent.Choose(
+                new[] { new RentLot("ba:street_low", 9, 40m) },
+                guard.Cash,
+                anyRented: false,
+                prefix.Api);
+            Rent.Record(dir.Path, rented, TopBar.Day(prefix.Rolled));
+            var chosen = Starter.Choose(Starter.StageOne(), alreadyOpen: false, prefix.Api);
+            Starter.Record(dir.Path, chosen, rented, TopBar.Day(shot.Rolled));
+            var assigned = StoreOps.Assign(
+                chosen,
+                new StoreOpsFacts(1, 100m, 2m, true, true),
+                StoreFixtures.GiftShopWholesalers(),
+                prefix.Api);
+            var bySkill = new Dictionary<string, string>();
+            var preset = StoreOps.UniformPreset(new[] { "default1" }, "giftdefault");
+            var seeded = StoreOps.SeedUniforms(
+                bySkill,
+                StoreOps.UniformSkills(new[] { "ba:skill_customerservice" }, new[] { "ba:skill_cleaning" }, StoreOps.CleanerSkill),
+                preset);
+            var written = StoreOps.Record(dir.Path, assigned, rented, TopBar.Day(shot.Rolled));
+            var verified = StoreOps.Verify(
+                dir.Path,
+                assigned,
+                rented,
+                TopBar.Day(shot.Rolled),
+                shift: true,
+                person: true,
+                type: StoreOps.UnstartedType(assigned.Cleaner),
+                uniform: StoreOps.Dressed(bySkill, StoreOps.CleanerSkill) ? bySkill[StoreOps.CleanerSkill] : "");
+
+            Assert.True(assigned.Uniforms);
+            Assert.Equal(new[] { "ba:skill_cleaning", "ba:skill_customerservice" }, seeded);
+            Assert.Contains(" cleaner=Cleaner guard= uniforms=true ", written);
+            Assert.DoesNotContain("nopreset", written);
+            Assert.EndsWith(" type=CleanerEmployee uniform=default1 kept=true", verified);
+        }
+        finally
+        {
+            Autopilot.Enabled = true;
+            Autopilot.DryRun = false;
+        }
+    }
+
+    [Fact]
+    public void Audit_load_day_roll_needs_refill_recorded_call_slot_fill_store_connect_plan_assign_restock_sort_overflow_order_audit_bar_health_controls_telemetry_rent_layout_ops_verified_keeps_the_cleaner()
+    {
+        // Chain: load → day roll → needs refill → recorded call → slot fill → store connect → plan assign → restock → sort → overflow → order → audit → bar → health → controls → telemetry → rent → layout → ops → person → type → verified
+        using var dir = new TempAudit();
+        var save = new object();
+        var prefix = Prefix(dir.Path, save);
+        var guard = LiveGuard();
+        var world = prefix.World;
+        Autopilot.Enabled = guard.Enabled;
+        Autopilot.DryRun = guard.DryRun;
+        try
+        {
+            var shot = WatchDay(dir.Path, ref world, guard, prefix.Api, prefix.Rolled, 1016, 10m, null);
+            var rented = Rent.Choose(
+                new[]
+                {
+                    new RentLot("ba:street_high", 2, 80m),
+                    new RentLot("ba:street_low", 9, 40m),
+                },
+                guard.Cash,
+                anyRented: false,
+                prefix.Api);
+            var rentLine = Rent.Record(dir.Path, rented, TopBar.Day(prefix.Rolled));
+            var chosen = Starter.Choose(Starter.StageOne(), alreadyOpen: false, prefix.Api);
+            var layoutLine = Starter.Record(dir.Path, chosen, rented, TopBar.Day(shot.Rolled));
+            var assigned = StoreOps.Assign(chosen, StoreOps.Opening(), StoreFixtures.GiftShopWholesalers(), prefix.Api);
+            var source = StoreOps.BodySource(assigned, stationHasPerson: false, recordHasPerson: false);
+            var written = StoreOps.Record(dir.Path, assigned, rented, TopBar.Day(shot.Rolled));
+            var watch = new StoreOpsWatch();
+            watch.Mark(save);
+            watch.Arm(rented.Street, rented.Number, TopBar.Day(shot.Rolled), StoreOps.VerifyFrames);
+            var frames = 0;
+            while (!watch.VerifyDue())
+            {
+                frames++;
+            }
+
+            var verified = StoreOps.Verify(
+                dir.Path,
+                assigned,
+                new BuildingRent(watch.VerifyStreet, watch.VerifyNumber, true, ""),
+                watch.VerifyDay,
+                shift: true,
+                person: true,
+                type: StoreOps.UnstartedType(assigned.Cleaner),
+                uniform: "p1");
+            var log = File.ReadAllLines(LoadLog.CeoLogPath(dir.Path));
+
+            Assert.Contains("day=1016", prefix.Rolled);
+            Assert.Contains("telemetry.written ", shot.Written);
+            Assert.Contains("building.rented ", rentLine);
+            Assert.Contains("layout.loaded ", layoutLine);
+            Assert.Equal("GiftShopWholesalers", chosen.Layout);
+            Assert.Equal("spawn", source);
+            Assert.False(watch.Due(save));
+            Assert.Equal(StoreOps.VerifyFrames - 1, frames);
+            Assert.Contains("ops.assigned ", written);
+            Assert.Equal(
+                "ops.verified version=" + LoadLog.Version
+                    + " day=1016 street=ba:street_low number=9 cleaner=Cleaner shift=true person=true type=CleanerEmployee uniform=p1 kept=true",
+                verified);
+            Assert.True(
+                Array.FindIndex(log, line => line.StartsWith("ops.assigned ")) < Array.FindIndex(log, line => line.StartsWith("ops.verified ")));
+            Assert.False(watch.VerifyDue());
+        }
+        finally
+        {
+            Autopilot.Enabled = true;
+            Autopilot.DryRun = false;
+        }
+    }
+
+    [Fact]
+    public void Audit_load_day_roll_needs_refill_recorded_call_slot_fill_store_connect_plan_assign_restock_sort_overflow_order_audit_bar_health_controls_telemetry_rent_layout_ops_an_exact_theft_line_keeps_the_guard_off()
+    {
+        // Chain: load → day roll → needs refill → recorded call → slot fill → store connect → plan assign → restock → sort → overflow → order → audit → bar → health → controls → telemetry → rent → layout → ops → line
+        using var dir = new TempAudit();
+        var save = new object();
+        var prefix = Prefix(dir.Path, save);
+        var guard = LiveGuard();
+        var world = prefix.World;
+        Autopilot.Enabled = guard.Enabled;
+        Autopilot.DryRun = guard.DryRun;
+        try
+        {
+            var shot = WatchDay(dir.Path, ref world, guard, prefix.Api, prefix.Rolled, 1016, 10m, null);
+            var rented = Rent.Choose(
+                new[]
+                {
+                    new RentLot("ba:street_high", 2, 80m),
+                    new RentLot("ba:street_low", 9, 40m),
+                },
+                guard.Cash,
+                anyRented: false,
+                prefix.Api);
+            var rentLine = Rent.Record(dir.Path, rented, TopBar.Day(prefix.Rolled));
+            var chosen = Starter.Choose(Starter.StageOne(), alreadyOpen: false, prefix.Api);
+            var layoutLine = Starter.Record(dir.Path, chosen, rented, TopBar.Day(shot.Rolled));
+            var assigned = StoreOps.Assign(
+                chosen,
+                new StoreOpsFacts(dirtSpots: 2, sales: 100m, theft: 1m, uniformsDemanded: false, canMeetUniforms: true),
+                prefix.Api);
+            var written = StoreOps.Record(dir.Path, assigned, rented, TopBar.Day(shot.Rolled));
+
+            Assert.Contains("day=1016", prefix.Rolled);
+            Assert.Contains("telemetry.written ", shot.Written);
+            Assert.Contains("building.rented ", rentLine);
+            Assert.Contains("layout.loaded ", layoutLine);
+            Assert.Equal("ba:street_low", rented.Street);
+            Assert.Equal(9, rented.Number);
+            Assert.Equal("GiftShopWholesalers", chosen.Layout);
+            Assert.True(assigned.Assigned);
+            Assert.Equal("Cleaner", assigned.Cleaner);
+            Assert.Equal("", assigned.Guard);
+            Assert.False(assigned.Uniforms);
+            Assert.Contains(
+                "ops.assigned version=" + LoadLog.Version
+                    + " day=1016 street=ba:street_low number=9 cleaner=Cleaner guard= uniforms=false",
+                written);
+            Assert.DoesNotContain("guard=Guard", written);
+        }
+        finally
+        {
+            Autopilot.Enabled = true;
+            Autopilot.DryRun = false;
+        }
+    }
+
+    [Fact]
+    public void Audit_load_day_roll_needs_refill_recorded_call_slot_fill_store_connect_plan_assign_restock_sort_overflow_order_audit_bar_health_controls_telemetry_rent_layout_ops_skips_a_store_that_is_already_open()
+    {
+        // Chain: load → day roll → needs refill → recorded call → slot fill → store connect → plan assign → restock → sort → overflow → order → audit → bar → health → controls → telemetry → rent → layout → ops → kept
+        using var dir = new TempAudit();
+        var save = new object();
+        var prefix = Prefix(dir.Path, save);
+        var guard = LiveGuard();
+        var world = prefix.World;
+        Autopilot.Enabled = guard.Enabled;
+        Autopilot.DryRun = guard.DryRun;
+        try
+        {
+            var shot = WatchDay(dir.Path, ref world, guard, prefix.Api, prefix.Rolled, 1016, 10m, null);
+            var rented = Rent.Choose(
+                new[] { new RentLot("ba:street_low", 9, 40m) },
+                guard.Cash,
+                anyRented: true,
+                prefix.Api);
+            var rentLine = Rent.Record(dir.Path, rented, TopBar.Day(shot.Rolled));
+            var chosen = Starter.Choose(Starter.StageOne(), alreadyOpen: true, prefix.Api);
+            var layoutLine = Starter.Record(dir.Path, chosen, rented, TopBar.Day(shot.Rolled));
+            var assigned = StoreOps.Assign(chosen, StoreOps.Opening(), prefix.Api);
+            var written = StoreOps.Record(dir.Path, assigned, rented, TopBar.Day(shot.Rolled));
+
+            Assert.Contains("day=1016", prefix.Rolled);
+            Assert.Contains("telemetry.written ", shot.Written);
+            Assert.Equal("", rentLine);
+            Assert.Equal("", layoutLine);
+            Assert.False(chosen.Loaded);
+            Assert.False(assigned.Assigned);
+            Assert.Equal("", assigned.Cleaner);
+            Assert.Equal("", assigned.Guard);
+            Assert.False(assigned.Uniforms);
+            Assert.Equal("", written);
+            Assert.DoesNotContain(
+                File.ReadAllLines(LoadLog.CeoLogPath(dir.Path)),
+                line => line.StartsWith("ops.assigned "));
+        }
+        finally
+        {
+            Autopilot.Enabled = true;
+            Autopilot.DryRun = false;
+        }
+    }
+
     private static DayShot WatchDay(
         string path,
         ref AuditWorld world,
