@@ -12,7 +12,7 @@ Default when the product has a `PM_PLAN` and a user-visible build:
 `MAJOR.EPIC.COUNTER` with an optional fix slot: `MAJOR.EPIC.COUNTER.FIX`
 
 - **MAJOR** changes only for a from-scratch break that `RELEASE.md` names.
-- **EPIC** is the epic number in `PM_PLAN`.
+- **EPIC** is the phase counter for the epic now shipping. When an epic runs after a higher-numbered epic, **EPIC** advances to `max(shipped_epic) + 1` (Epic 9 after `1.13.x` → `1.14.1`); later ships in that epic keep that segment.
 - **COUNTER** is a strictly increasing ship count **inside that epic**. It is not the story id. Story progress lives in `PM_PLAN` only. Start an epic at `MAJOR.N.1`. Each later ship raises the counter, whatever story it closes.
 - **FIX** is a correction after that ship and before the next: append `.1`, `.2`, and so on.
 - **Never go backwards.** A lower number reads as “the new build did not load.”

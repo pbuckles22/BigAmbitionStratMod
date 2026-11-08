@@ -9,11 +9,11 @@ The public version is the string a person checks to see that the build they are 
 | Segment | Meaning | When it changes |
 |---------|---------|-----------------|
 | **MAJOR** | Breaking generation named in RELEASE.md | Rare. Not every epic. |
-| **EPIC** | Epic number in PM_PLAN | Moving to another epic |
+| **EPIC** | Phase counter for the epic now shipping | Moving to another epic |
 | **COUNTER** | Ship count inside that epic | Every user-visible ship. **Not** the story id |
 | **FIX** | Correction before the next ship | `.1`, `.2`, … |
 
-**The number must never go backwards.**
+**The number must never go backwards.** When an epic runs after a higher-numbered epic, **EPIC** advances to `max(shipped_epic) + 1` so the public string keeps climbing (for example Epic 9 after 1.13.x ships as `1.14.1`); later ships in that epic keep that EPIC segment.
 
 Early epics often ship once per story, so the counter and the story id match. That is pace, not the rule. When one story takes many ships, the counter keeps climbing and the story id stays in PM_PLAN.
 

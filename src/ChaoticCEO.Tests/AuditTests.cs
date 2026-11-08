@@ -2425,6 +2425,186 @@ public class AuditTests
         }
     }
 
+    [Fact]
+    public void Audit_load_day_roll_needs_refill_recorded_call_slot_fill_store_connect_plan_assign_restock_sort_overflow_order_audit_bar_health_controls_telemetry_rent_layout_ops_wholesaler_hire_loan_demand_tax_time_marketing_stop_takeover_stage_locks_decide()
+    {
+        // Chain: load → day roll → needs refill → recorded call → slot fill → store connect → plan assign → restock → sort → overflow → order → audit → bar → health → controls → telemetry → rent → layout → ops → wholesaler → hire → loan → demand → tax → time → marketing → stop → takeover → stage
+        using var dir = new TempAudit();
+        var save = new object();
+        var prefix = Prefix(dir.Path, save);
+        var guard = LiveGuard();
+        var world = prefix.World;
+        Autopilot.Enabled = guard.Enabled;
+        Autopilot.DryRun = guard.DryRun;
+        try
+        {
+            var shot = WatchDay(dir.Path, ref world, guard, prefix.Api, prefix.Rolled, 1016, 10m, null);
+            var rented = Rent.Choose(
+                new[] { new RentLot("ba:street_low", 9, 40m) },
+                guard.Cash,
+                anyRented: false,
+                prefix.Api);
+            Rent.Record(dir.Path, rented, TopBar.Day(prefix.Rolled));
+            var chosen = Starter.Choose(Starter.StageOne(), alreadyOpen: false, prefix.Api);
+            Starter.Record(dir.Path, chosen, rented, TopBar.Day(shot.Rolled));
+            var assigned = StoreOps.Assign(chosen, StoreOps.Opening(), StoreFixtures.GiftShopWholesalers(), prefix.Api);
+            StoreOps.Record(dir.Path, assigned, rented, TopBar.Day(shot.Rolled));
+            var signed = Wholesaler.Sign(rented, chosen, Wholesaler.StageOne(), alreadySigned: false, prefix.Api);
+            Wholesaler.Record(dir.Path, signed, TopBar.Day(shot.Rolled));
+            var hired = Cashier.Hire(rented, chosen, signed, alreadyHired: false, prefix.Api);
+            Cashier.Record(dir.Path, hired, TopBar.Day(shot.Rolled));
+            var taken = BankLoan.Take(
+                projectedDailyProfit: 200m,
+                offers: new[] { new LoanOffer(2000m, 100) },
+                alreadyBorrowed: false,
+                prefix.Api);
+            BankLoan.RecordTake(dir.Path, taken, TopBar.Day(shot.Rolled));
+            var cleared = StaffDemand.Clear(
+                unmetDays: StaffDemand.DemandDays,
+                demandName: "ba:jobdemand_healthinsurance",
+                employeeId: "emp-1",
+                prefix.Api);
+            StaffDemand.Record(dir.Path, cleared, TopBar.Day(shot.Rolled));
+            var paid = TaxBill.Pay(currentDue: 55m, backDue: 12m, prefix.Api);
+            TaxBill.Record(dir.Path, paid, TopBar.Day(shot.Rolled));
+            var advanced = TimeAdvance.Skip(Needs.Hold(), alreadyAdvanced: false, prefix.Api);
+            TimeAdvance.RecordSkip(dir.Path, advanced, TopBar.Day(shot.Rolled));
+            var started = Marketing.Start(
+                dailyCost: 100m,
+                gain: 300m,
+                alreadyActive: false,
+                street: rented.Street,
+                number: rented.Number,
+                type: Marketing.StarterType,
+                prefix.Api);
+            Marketing.RecordStart(dir.Path, started, TopBar.Day(shot.Rolled));
+            var stopped = Marketing.Stop(
+                alreadyActive: started.Started,
+                street: rented.Street,
+                number: rented.Number,
+                prefix.Api);
+            Marketing.RecordStop(dir.Path, stopped, TopBar.Day(shot.Rolled));
+            var declined = RivalTakeover.Decline(
+                offerPrice: 1000m,
+                dailyProfit: 10m,
+                street: rented.Street,
+                number: rented.Number,
+                alreadyDeclined: false,
+                prefix.Api);
+            RivalTakeover.Record(dir.Path, declined, TopBar.Day(shot.Rolled));
+            var stage = Stage.Read(
+                TopBar.Day(shot.Rolled),
+                guard.Cash,
+                world.Needs,
+                shot.Report.Stops,
+                world.Holds,
+                world.Slots);
+
+            Assert.Contains("day=1016", prefix.Rolled);
+            Assert.Contains("telemetry.written ", shot.Written);
+            Assert.True(hired.Hired);
+            Assert.True(taken.Taken);
+            Assert.True(advanced.Advanced);
+            Assert.True(started.Started);
+            Assert.True(stopped.Stopped);
+            Assert.True(declined.Declined);
+            Assert.Equal(1, stage);
+            Assert.Equal("1", Between(shot.Bar, "Stage "));
+        }
+        finally
+        {
+            Autopilot.Enabled = true;
+            Autopilot.DryRun = false;
+        }
+    }
+
+    [Fact]
+    public void Audit_load_day_roll_needs_refill_recorded_call_slot_fill_store_connect_plan_assign_restock_sort_overflow_order_audit_bar_stage_locks_the_read_into_the_bar()
+    {
+        // Chain: load → day roll → needs refill → recorded call → slot fill → store connect → plan assign → restock → sort → overflow → order → audit → bar → stage
+        using var dir = new TempAudit();
+        var save = new object();
+        var prefix = Prefix(dir.Path, save);
+        var guard = new AuditGuard(
+            enabled: true,
+            dryRun: false,
+            cash: Stage.Stage4Cash,
+            dailyCost: 10m,
+            truckCost: 1,
+            build: LoadLog.PinnedBuild);
+        var world = prefix.World;
+        var report = Audit.Check(dir.Path, 1016, prefix.Api, world, guard, heal => HealFate.Done);
+        var stage = Stage.Read(
+            TopBar.Day(prefix.Rolled),
+            guard.Cash,
+            world.Needs,
+            report.Stops,
+            world.Holds,
+            world.Slots);
+        var line = TopBar.From(
+            prefix.Rolled,
+            File.ReadAllText(StatementDump.CsvPath(dir.Path)),
+            guard.Cash,
+            0m,
+            stage,
+            guard.Enabled,
+            TopBar.Clock(paused: false, rate: null));
+
+        Assert.Contains("day=1016", prefix.Rolled);
+        Assert.Contains("audit.summary ", string.Join("\n", report.Lines));
+        Assert.Equal(1, stage);
+        Assert.Equal("1", Between(line, "Stage "));
+        Assert.Contains("Cash " + Stage.Stage4Cash.ToString(CultureInfo.InvariantCulture), line);
+        Assert.True(Audit.EmptySlots(world.Slots) > 0);
+    }
+
+    [Fact]
+    public void Audit_load_day_roll_needs_refill_recorded_call_slot_fill_store_connect_plan_assign_restock_sort_overflow_order_audit_bar_health_controls_telemetry_rent_layout_ops_capacity_stage_stays_bootstrap()
+    {
+        // Chain: load → day roll → needs refill → recorded call → slot fill → store connect → plan assign → restock → sort → overflow → order → audit → bar → health → controls → telemetry → rent → layout → ops → capacity → stage
+        using var dir = new TempAudit();
+        var save = new object();
+        var prefix = Prefix(dir.Path, save);
+        var guard = LiveGuard();
+        var world = prefix.World;
+        Autopilot.Enabled = guard.Enabled;
+        Autopilot.DryRun = guard.DryRun;
+        try
+        {
+            var shot = WatchDay(dir.Path, ref world, guard, prefix.Api, prefix.Rolled, 1016, 10m, null);
+            var rented = Rent.Choose(
+                new[] { new RentLot("ba:street_low", 9, 40m) },
+                guard.Cash,
+                anyRented: false,
+                prefix.Api);
+            Rent.Record(dir.Path, rented, TopBar.Day(prefix.Rolled));
+            var chosen = Starter.Choose(Starter.StageOne(), alreadyOpen: false, prefix.Api);
+            Starter.Record(dir.Path, chosen, rented, TopBar.Day(shot.Rolled));
+            var assigned = StoreOps.Assign(chosen, StoreOps.Opening(), StoreFixtures.GiftShopWholesalers(), prefix.Api);
+            StoreOps.Record(dir.Path, assigned, rented, TopBar.Day(shot.Rolled));
+            var matched = Capacity.Match(rented, chosen, alreadyMatched: false, prefix.Api);
+            Capacity.Record(dir.Path, matched, TopBar.Day(shot.Rolled));
+            var stage = Stage.Read(
+                TopBar.Day(shot.Rolled),
+                guard.Cash,
+                world.Needs,
+                shot.Report.Stops,
+                world.Holds,
+                world.Slots);
+
+            Assert.Contains("day=1016", prefix.Rolled);
+            Assert.Contains("telemetry.written ", shot.Written);
+            Assert.True(matched.Matched);
+            Assert.Equal(1, stage);
+            Assert.Equal("1", Between(shot.Bar, "Stage "));
+        }
+        finally
+        {
+            Autopilot.Enabled = true;
+            Autopilot.DryRun = false;
+        }
+    }
+
     private static DayShot WatchDay(
         string path,
         ref AuditWorld world,

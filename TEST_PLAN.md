@@ -13,7 +13,7 @@ dotnet test src/ChaoticCEO.Tests/ChaoticCEO.Tests.csproj -p:GameManaged="C:\Prog
 dotnet build src/ChaoticCEO/ChaoticCEO.csproj -c Release -p:GameManaged="C:\Program Files (x86)\Steam\steamapps\common\Big Ambitions\Big Ambitions_Data\Managed"
 ```
 
-`dotnet test` is the Debug compile. The Release command installs `ChaoticCEO.dll` to ModsLocal. The gitignored counter is `build_number.txt`. The informational version is `1.13.8+N`.
+`dotnet test` is the Debug compile. The Release command installs `ChaoticCEO.dll` to ModsLocal. The gitignored counter is `build_number.txt`. The informational version is `1.14.1+N`.
 
 The story gate reuses `doc/gemini/cache/save.bin` and `save-index.sqlite` when both are current for the dropzone `.hsg`. Do not read or scan `save.bin` again while that blob is current. A renamed `.hsg` fails the recorded-name check on its own. Nobody announces the new name.
 
@@ -223,6 +223,21 @@ Human PASS 2026-11-07 on 1.13.3.8 for the cleaner block: day 1 at 26 7th Avenue,
 6. Version marker: public `1.13.8`. `ceo.log` starts at `mod.loaded version=1.13.8 build=3682`.
 
 Human PASS 2026-11-08 on 1.13.8. Day 1 at 26 7th Avenue: one `capacity.matched` with `call=Helpers.BusinessHelper.UpdateCustomerCapacity` after `ops.assigned` on the same street and number as `layout.loaded`. No second capacity line.
+
+## Story 9.1 — Stage.Decide (headless + version smoke)
+
+Tier 1: `StageTests` locks thresholds, boundaries, precedence, `Stage.Read` filtering, and the intentional `0 == 0` Stage 4 case. Chain test `… → marketing → stop → takeover → stage` locks `Stage.Read` through the real prefix at stage 1. Command: the Tier 1 `dotnet test` suite above.
+
+Human version smoke (install changed; no stage UI yet — that is **9.6**):
+
+1. Restart Big Ambitions so version 1.14.1 loads. Any save or a new game is fine.
+2. Open `%LocalAppData%\ChaoticCEO\ceo.log`.
+3. Do nothing else for this check.
+4. **PASS if** the first line is `mod.loaded version=1.14.1 build=3682`. **FAIL if** the version is still 1.13.8 or missing.
+5. Evidence: that `mod.loaded` line.
+6. Version marker: public `1.14.1`.
+
+Human PASS 2026-11-08 on 1.14.1. `mod.loaded version=1.14.1 build=3682`. New-game day 1 at 26 7th Avenue ran the Epic 13 chain through `takeover.declined` on day 8.
 
 ## Wholesaler contract human check
 

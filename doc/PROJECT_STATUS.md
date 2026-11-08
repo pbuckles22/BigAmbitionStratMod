@@ -8,7 +8,7 @@
 
 ## Summary
 
-**BigAmbitionStratMod** 1.13.8 — A new game rents the cheapest available lot, loads the stage-1 starter layout, places one cleaner, matches customer capacity to that layout, signs a recurring wholesaler contract from First Street 37, hires a cashier, takes a cover-fit bank loan, advances one day at a time for a week with sleep and food before NeedFloor, starts SmallInternet marketing after the loan, stops it after the week, and declines a weak rival takeover. Opening leaves uniforms off until a later story. A gift shop with no guard locker keeps the guard off. A save that already has a named business is skipped. Epic 13 is complete. **7.13** stays stashed. The rules are in [requirements/strategy.md](requirements/strategy.md). `origin` is this repo.
+**BigAmbitionStratMod** 1.14.1 — Epic 9 playbook started: `Stage.Decide` locks the four stage gates (cash/stores/supply/slots; higher gate wins). Epic 13 new-game calls are complete. Public **EPIC** is the phase counter (`1.14` for Epic 9 after `1.13`). **7.13** stays stashed until before **10.2**. The rules are in [requirements/strategy.md](requirements/strategy.md). `origin` is this repo.
 
 ---
 
@@ -16,7 +16,8 @@
 
 | Branch | Role |
 |--------|------|
-| **`main`** | Integration branch. Last land `43eb3de`, version 1.13.8. Epic 13 closed. |
+| **`main`** | Integration branch. Version 1.14.1. Story 9.1 landed. |
+| **`feature/9.1-stage-decide`** | Story 9.1 Stage.Decide locks. Version 1.14.1. Human PASS 2026-11-08. Kept after CMPH. |
 | **`feature/13.2-capacity-fixtures`** | Capacity fixtures (13.2 remainder). Version 1.13.8. Human PASS 2026-11-08. Kept after CMPH. |
 | **`feature/13.6-marketing-rival`** | Story 13.6 marketing start/stop and rival decline. Version 1.13.7. Human PASS 2026-11-08. Kept after CMPH. |
 | **`feature/13.5-time-advance`** | Story 13.5 time advance with player needs. Version 1.13.6. Human PASS 2026-11-08. Kept after CMPH. |

@@ -31,6 +31,8 @@ This is the durable home for technical debt across sessions. Handoff notes can m
 - `Close.Lock` only scores the layout street and family. `Buy.Lock` only runs after a close. Leave both locks. The close score, the payback, and the roadmap are separate decisions. The roadmap does not call them.
 - Store opening does not seed `uniformsBySkill` or wait on `UniformLockerController`. The seed helpers stay in `StoreOps` / `StoreOpsBridge.Uniforms`. Revisit when a story needs customer uniform demand or a cashier in uniform.
 - `CapacityBridge.AlreadyMatched` is untested on the production path; tests plant `alreadyMatched` instead. `TryCapacity` retries every frame with no evidence when `Live` fails. Revisit when capacity miss diagnosis hurts.
+- `Stage.Decide` treats `suppliedStores == goodsStores` as true when both are 0, so cash ≥ **Stage4Cash** with zero stores and zero empty slots returns Stage 4 (locked in `StageTests`). Revisit before **10.2** if a brand-new or fully liquidated save should stay Stage 1 Bootstrap.
+- Staff plan write (**7.9**) is still *Unverified* in `game-api.md`, and cost-center / FixDays / RedDays close filters (**7.13**) are stashed. Finish **7.13** + **7.9**, or fold **7.13**’s pure filter into **9.5**, before the live **10.2** Autopilot loop.
 
 ---
 
