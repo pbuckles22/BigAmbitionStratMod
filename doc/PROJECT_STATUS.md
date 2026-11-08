@@ -16,7 +16,7 @@
 
 | Branch | Role |
 |--------|------|
-| **`main`** | Integration branch. Last land `PLACEHOLDER`, version 1.14.6. Epic 9 closed. |
+| **`main`** | Integration branch. Last land `e70bdcd`, version 1.14.6. Epic 9 closed. |
 | **`feature/9.6-playbook-f9`** | Story 9.6 F9 playbook next step. Version 1.14.6. Human PASS 2026-11-08. Kept after CMPH. |
 | **`feature/9.5-managers-money`** | Story 9.5 managers, money, real estate, close, run. Version 1.14.5. Human PASS 2026-11-08. Kept after CMPH. |
 | **`feature/9.4-supply-trucks`** | Story 9.4 supply, trucks, warehouses. Version 1.14.4. Human PASS 2026-11-08. Kept after CMPH. |
