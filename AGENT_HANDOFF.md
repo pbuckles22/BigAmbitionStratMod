@@ -139,7 +139,7 @@ When shipping: update **PM_PLAN**, **doc/PROJECT_STATUS.md**, and **Current stat
 ## Current state
 
 - **Product:** Version 1.13.8. A new game rents, loads the starter layout, places one cleaner, matches customer capacity to that layout, signs a wholesaler contract, hires a cashier, takes a cover-fit bank loan, advances one day at a time for a week with sleep and food before NeedFloor, starts a SmallInternet campaign after the loan, stops it after the week, and declines a weak rival takeover. Opening leaves uniforms off. Demand clear and tax pay run when those balances exist. Epic 13 complete. 7.13 stays stashed. Ladder: [PM_PLAN.md](PM_PLAN.md).
-- **On:** `feature/13.2-capacity-fixtures` (landing). Stash `7.13 spare cost centers` on `feature/7.13-spare-cost-centers`. https://github.com/pbuckles22/BigAmbitionStratMod
+- **On:** `origin/main @ a674385`. Stash `7.13 spare cost centers` on `feature/7.13-spare-cost-centers`. https://github.com/pbuckles22/BigAmbitionStratMod
 - **Next:** Story **9.1** when asked.
 - **Blockers:** Do not pop 7.13. Do not load the day 1021 save. Do not continue a save that already says Starter Gift. Do not drop Fifth Avenue 36’s contract before the hub holds that item.
 
