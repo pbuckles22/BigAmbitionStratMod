@@ -16,7 +16,7 @@
 
 | Branch | Role |
 |--------|------|
-| **`main`** | Integration branch. Last land pending 1.13.6 CMPH |
+| **`main`** | Integration branch. Last land `9e5ad40`, version 1.13.6 |
 | **`feature/13.5-time-advance`** | Story 13.5 time advance with player needs. Version 1.13.6. Human PASS 2026-11-08. Kept after this CMPH. |
 | **`feature/13.4-hire-loan-taxes`** | Story 13.4 hire, loan, demand, taxes. Version 1.13.5. Human PASS 2026-11-08. Kept after CMPH. |
 | **`feature/13.3-wholesaler-contract`** | Story 13.3 wholesaler contract. Version 1.13.4. Human PASS 2026-11-07 (shelf stock waived). Kept after CMPH. |
@@ -78,7 +78,7 @@
 | **`feature/chain-prefix`** | Kept after CMPH (template history) |
 | **`feature/handoff-receiver-framing`** | Kept after CMPH (template history) |
 
-**Last land:** pending 1.13.6 CMPH. Branch `feature/13.5-time-advance` kept. Repo: https://github.com/pbuckles22/BigAmbitionStratMod.
+**Last land:** `9e5ad40` on `main`. Version 1.13.6. Branch `feature/13.5-time-advance` kept. Repo: https://github.com/pbuckles22/BigAmbitionStratMod.
 
 ---
 
