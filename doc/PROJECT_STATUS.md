@@ -16,7 +16,7 @@
 
 | Branch | Role |
 |--------|------|
-| **`main`** | Integration branch. Last land `PENDING`, version 1.13.5 |
+| **`main`** | Integration branch. Last land `bf698f0`, version 1.13.5 |
 | **`feature/13.4-hire-loan-taxes`** | Story 13.4 hire, loan, demand, taxes. Version 1.13.5. Human PASS 2026-11-08. Kept after this CMPH. |
 | **`feature/13.3-wholesaler-contract`** | Story 13.3 wholesaler contract. Version 1.13.4. Human PASS 2026-11-07 (shelf stock waived). Kept after CMPH. |
 | **`feature/13.2-store-ops`** | Story 13.2 store ops (cleaner). Version 1.13.3.9. Human PASS 2026-11-07. Kept after CMPH. |
@@ -77,7 +77,7 @@
 | **`feature/chain-prefix`** | Kept after CMPH (template history) |
 | **`feature/handoff-receiver-framing`** | Kept after CMPH (template history) |
 
-**Last land:** `PENDING` on `main`. Version 1.13.5. Branch `feature/13.4-hire-loan-taxes` kept. Repo: https://github.com/pbuckles22/BigAmbitionStratMod.
+**Last land:** `bf698f0` on `main`. Version 1.13.5. Branch `feature/13.4-hire-loan-taxes` kept. Repo: https://github.com/pbuckles22/BigAmbitionStratMod.
 
 ---
 
