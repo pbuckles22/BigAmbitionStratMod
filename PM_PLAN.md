@@ -1,10 +1,10 @@
 # PM_PLAN — BigAmbitionStratMod
 
-In-game advisor for one Big Ambitions save, then a new-game guide and autopilot. Version scheme `MAJOR.EPIC.COUNTER`. Current public version **1.15.1**. The first ship of a new epic phase is `1.N.1`. When an epic runs after a higher-numbered epic, **EPIC** is `max(shipped_epic) + 1` (Epic 9 after 1.13.x → 1.14.1). Never go backwards.
+In-game advisor for one Big Ambitions save, then a new-game guide and autopilot. Version scheme `MAJOR.EPIC.COUNTER`. Current public version **1.15.2**. The first ship of a new epic phase is `1.N.1`. When an epic runs after a higher-numbered epic, **EPIC** is `max(shipped_epic) + 1` (Epic 9 after 1.13.x → 1.14.1). Never go backwards.
 
 ## Context
 
-The game is Mono, build **3682**. A mod builds with `dotnet build` against `Big Ambitions_Data\Managed` (`BigAmbitions.dll`, `BigAmbitions.ModAPI.dll`). The pin is `doc/requirements/game-build.md`. Python save tools live in `script/`. The mod, when it exists, lives in `src/`. Evidence for the ledger is `doc/gemini/cache/ledger.log`. The mod writes `%LocalAppData%\ChaoticCEO\ceo.log`. The compile counter is gitignored `build_number.txt`. The mod informational version is `1.15.1+N`. The draw reference is `UnityEngine.IMGUIModule`.
+The game is Mono, build **3682**. A mod builds with `dotnet build` against `Big Ambitions_Data\Managed` (`BigAmbitions.dll`, `BigAmbitions.ModAPI.dll`). The pin is `doc/requirements/game-build.md`. Python save tools live in `script/`. The mod, when it exists, lives in `src/`. Evidence for the ledger is `doc/gemini/cache/ledger.log`. The mod writes `%LocalAppData%\ChaoticCEO\ceo.log`. The compile counter is gitignored `build_number.txt`. The mod informational version is `1.15.2+N`. The draw reference is `UnityEngine.IMGUIModule`.
 
 Epic 1 closed on 17 businesses and 5865 statement rows. `ba:businesstype_liquorstore` is **food**. Do not relabel it inside a routes story. A warehouse story may add a specialty override only with a new test.
 
@@ -162,7 +162,7 @@ Starts after Epic **13**. The rulebook as a pure library. Each decision has a Ti
 Starts after Epic **9**. Public versions for this epic are `1.15.COUNTER`. **8.1–8.3** are one deterministic sim. **8.4–8.5** add randomness inside **SimHorizonDays**. The result re-ranks the **7.6** roadmap that F9 shows and tunes every named threshold in `strategy.md`. **8.6** calls the Epic 9 library.
 
 - **8.1** `[x]` Fit demand and cost curves from the ledger CSVs. `Curves.Fit` / `Curves.FitFile` lock mean daily sales and goods-per-sale plus fixed wages/rent/marketing/theft; `Curves.Project` builds the statement row the day stepper reads. Headless. Version 1.15.1. Chain: `load → … → playbook → curves`.
-- **8.2** `[ ]` Day stepper using the Epic 4 library. Same `portfolio.csv` shape.
+- **8.2** `[x]` Day stepper using the Epic 4 library. Same `portfolio.csv` shape. `DayStep.Day` / `Run` project statement rows from curves; `DayStep.Portfolio` locks business/family/street/number/tco; `DayStep.Rank` calls `Advisor.Rank`. Headless. Version 1.15.2. Chain: `load → … → curves → day-step`.
 - **8.3** `[ ]` Calibration: a sim from day 1000 lands within tolerance of the real ledger at day 1014.
 - **8.4** `[ ]` Seeded demand, rival, and hiring noise. Distribution of net worth at **SimHorizonDays**.
 - **8.5** `[ ]` Compare policies over **SimHorizonDays**. Keep the best median with an acceptable worst case.
@@ -178,7 +178,7 @@ Starts after Epic **8**. Crossing **WinNetWorth** is a milestone. The autopilot 
 - **10.2** `[ ]` Autopilot loop. Each day, while `Autopilot.Enabled` is on: audit, heal, the stage’s actions through the recorded calls, then time advance, within the guardrails. The **12.3** toggle and F10 clear the flag. Human check: one autopilot day on a new save matches its `telemetry.csv` row, and a cleared flag skips the next day.
 - **10.3** `[ ]` Hands-off run from a new save. PASS is `win.reached` in `ceo.log` and later telemetry rows that still advance. Every decision the run finds becomes a Tier 1 test before the next run.
 
-**Next:** Story **8.1** shipped at version **1.15.1**. Next ship: story **8.2** when asked. **7.13** stays stashed until before **10.2**.
+**Next:** Story **8.2** shipped at version **1.15.2**. Next ship: story **8.3** when asked. **7.13** stays stashed until before **10.2**.
 
 Operating model (keep these when you replace this plan): `.cursor/rules/` ship commands (UCPH, CMPH, SWAT), human check, plan-coordinate versioning, long-run harvest (`testing.mdc`), and the chain harness and prefix (`integration-chain.mdc`). Do not delete them to “clean up” a new clone.
 

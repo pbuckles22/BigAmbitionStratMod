@@ -8,7 +8,7 @@
 
 ## Summary
 
-**BigAmbitionStratMod** 1.15.1 — Story **8.1** demand/cost curves shipped. Next is **8.2**. Public **EPIC** for Epic 8 is `1.15` after Epic 9’s `1.14`. **7.13** stays stashed until before **10.2**. The rules are in [requirements/strategy.md](requirements/strategy.md). `origin` is this repo.
+**BigAmbitionStratMod** 1.15.2 — Story **8.2** day stepper shipped. Next is **8.3**. Public **EPIC** for Epic 8 is `1.15` after Epic 9’s `1.14`. **7.13** stays stashed until before **10.2**. The rules are in [requirements/strategy.md](requirements/strategy.md). `origin` is this repo.
 
 ---
 
@@ -16,7 +16,8 @@
 
 | Branch | Role |
 |--------|------|
-| **`main`** | Integration branch. Last land `60f7e54`, version 1.15.1. Story 8.1 shipped. |
+| **`main`** | Integration branch. Last land `PLACEHOLDER`, version 1.15.2. Story 8.2 shipped. |
+| **`feature/8.2-day-stepper`** | Story 8.2 day stepper. Version 1.15.2. Human PASS 2026-11-08. Kept after CMPH. |
 | **`feature/8.1-demand-curves`** | Story 8.1 demand and cost curves. Version 1.15.1. Human PASS 2026-11-08. Kept after CMPH. |
 | **`feature/9.6-playbook-f9`** | Story 9.6 F9 playbook next step. Version 1.14.6. Human PASS 2026-11-08. Kept after CMPH. |
 | **`feature/9.5-managers-money`** | Story 9.5 managers, money, real estate, close, run. Version 1.14.5. Human PASS 2026-11-08. Kept after CMPH. |
