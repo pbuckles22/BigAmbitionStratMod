@@ -43,8 +43,73 @@ namespace ChaoticCEO
         public bool Closed { get; }
     }
 
+    public sealed class ClosePick
+    {
+        public ClosePick(string action, bool chosen)
+        {
+            Action = action ?? "";
+            Chosen = chosen;
+        }
+
+        public string Action { get; }
+
+        public bool Chosen { get; }
+
+        public static ClosePick None()
+        {
+            return new ClosePick("", false);
+        }
+    }
+
     public static class Close
     {
+        public const int FixDays = 7;
+
+        public const int RedDays = 7;
+
+        public static ClosePick Decide(
+            string? kind,
+            int suppliedDays,
+            int staffedDays,
+            int redProfitDays,
+            bool supplied,
+            bool staffed)
+        {
+            var name = kind ?? "";
+            if (name.Length == 0
+                || name == "warehouse"
+                || name == "headquarters"
+                || name == "office"
+                || name == "service")
+            {
+                return ClosePick.None();
+            }
+
+            if (name != "goods")
+            {
+                return ClosePick.None();
+            }
+
+            if (!supplied)
+            {
+                return new ClosePick("connect", true);
+            }
+
+            if (!staffed)
+            {
+                return new ClosePick("hire", true);
+            }
+
+            if (suppliedDays >= FixDays
+                && staffedDays >= FixDays
+                && redProfitDays >= RedDays)
+            {
+                return new ClosePick("close", true);
+            }
+
+            return ClosePick.None();
+        }
+
         public static StoreClose Lock(
             LayoutClone? layout,
             IReadOnlyList<LedgerDay>? days,

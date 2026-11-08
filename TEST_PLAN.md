@@ -284,6 +284,21 @@ Human version smoke (install changed; no supply UI yet — that is **9.6**):
 
 Human PASS 2026-11-08 on 1.14.4. `mod.loaded version=1.14.4 build=3682`. New-game day 1 at 30 7th Avenue continued the Epic 13 chain through layout and ops.
 
+## Story 9.5 — Managers, money, real estate, close, and run (headless + version smoke)
+
+Tier 1: `ManagerDecideTests` locks pricing-plan-before-hire, per-warehouse logistics/purchasing, **HrSpan** / **HuntSpan**, and unassigned-as-missing. `MoneyDecideTests` locks **ReserveDays**, **DaySpend**, Stage 1 **LoanCover** loan, and interest-vs-payback repay. `RealEstateDecideTests` locks Stage 4 kind order and **PaybackMax**. `CloseDecideTests` locks cost-center never-close, **FixDays** / **RedDays**, and connect-before-hire. `RunDecideTests` locks need floor, staff, store ops, marketing cover, tax, and takeover decline. Chain `… → prices → supply → managers` locks the pricing plan; chain `… → managers → money` locks DaySpend room after Stage 2 logistics. Command: the Tier 1 `dotnet test` suite above.
+
+Human version smoke (install changed; F9 playbook step is **9.6**):
+
+1. Restart Big Ambitions so version 1.14.5 loads. Any save or a new game is fine.
+2. Open `%LocalAppData%\ChaoticCEO\ceo.log`.
+3. Do nothing else for this check.
+4. **PASS if** the first line is `mod.loaded version=1.14.5 build=3682`. **FAIL if** the version is still 1.14.4 or missing.
+5. Evidence: that `mod.loaded` line.
+6. Version marker: public `1.14.5`.
+
+Human PASS 2026-11-08 on 1.14.5. `mod.loaded version=1.14.5 build=3682`. New-game continued through day 8 with marketing stop and takeover decline on 1.14.5.
+
 ## Wholesaler contract human check
 
 1. Restart Big Ambitions so version 1.13.4 loads. Start a new game and reach the city. Do not load the usual save and do not load the day 1021 save. This check rents one lot, loads one starter layout, places one cleaner, and signs a recurring wholesaler `DeliveryContract` for the starter gift shop. It does not hire a cashier. Capacity fixtures are not part of this check.
