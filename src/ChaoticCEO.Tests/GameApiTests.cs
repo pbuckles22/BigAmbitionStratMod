@@ -216,6 +216,20 @@ public class GameApiTests
         Assert.Equal("", api.Call("staff plan write"));
         Assert.Equal("Buildings.BuildingCommands.Command_RentBuilding", api.Call("rent"));
         Assert.Equal("Dialogs.WholesaleStoreManagerDialog.StartContract", api.Call("wholesaler contract"));
+        Assert.Equal("Helpers.EmployeeHelper.HireCandidate", api.Call("hire"));
+        Assert.Equal("Controllers.CashRegisterController.AssignEmployee", api.Call("cashier"));
+        Assert.Equal("Dialogs.BankDialog.LoanRequest", api.Call("loan"));
+        Assert.Equal("LoanEntryUi.PayOffLoan", api.Call("loan repay"));
+        Assert.Equal("Entities.EmployeeInstance.GiveBonus", api.Call("employee demand"));
+        Assert.Equal("Helpers.TaxHelper.PayCurrentTaxes", api.Call("taxes pay"));
+        Assert.Equal("Helpers.TaxHelper.PayBackTaxes", api.Call("taxes back"));
+        var live = GameApi.Live();
+        Assert.Equal(api.Call("cashier"), live.Call("cashier"));
+        Assert.Equal(api.Call("loan"), live.Call("loan"));
+        Assert.Equal(api.Call("loan repay"), live.Call("loan repay"));
+        Assert.Equal(api.Call("employee demand"), live.Call("employee demand"));
+        Assert.Equal(api.Call("taxes pay"), live.Call("taxes pay"));
+        Assert.Equal(api.Call("taxes back"), live.Call("taxes back"));
     }
 
     [Fact]

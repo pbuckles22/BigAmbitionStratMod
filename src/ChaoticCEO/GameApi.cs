@@ -74,6 +74,7 @@ namespace ChaoticCEO
                 ["truck buy"] = "Buildings.ContractVehicleForSale.Order",
                 ["slot assign"] = "Entities.VehicleSlot.AssignVehicle",
                 ["hire"] = "Helpers.EmployeeHelper.HireCandidate",
+                ["cashier"] = "Controllers.CashRegisterController.AssignEmployee",
                 ["plan assign"] = "Buildings.Office.Headquarters.HrManagerPlan.AssignEmployee",
                 ["purchasing plan"] = "UI.Smartphone.Apps.BizMan.PurchasingAgent.PurchasingAgentProductCellView.ChangeAssignedWarehouse",
                 ["pricing plan create"] = "UI.Smartphone.Apps.BizMan.PricingManagers.PricingManagersPlanList.AddPlan",
@@ -85,6 +86,11 @@ namespace ChaoticCEO
                 ["cleaner"] = "CleaningStationController.AssignEmployee",
                 ["guard"] = "Controllers.SecurityGuardLockerController.AssignEmployee",
                 ["uniforms"] = "BuildingRegistration.uniformsBySkill",
+                ["loan"] = "Dialogs.BankDialog.LoanRequest",
+                ["loan repay"] = "LoanEntryUi.PayOffLoan",
+                ["employee demand"] = "Entities.EmployeeInstance.GiveBonus",
+                ["taxes pay"] = "Helpers.TaxHelper.PayCurrentTaxes",
+                ["taxes back"] = "Helpers.TaxHelper.PayBackTaxes",
             };
             return new ApiNote(
                 LoadLog.PinnedBuild,

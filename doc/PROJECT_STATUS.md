@@ -2,13 +2,13 @@
 
 **Human-readable current state.** Keep in sync with [AGENT_HANDOFF.md](../AGENT_HANDOFF.md) → *Current state* when milestones ship.
 
-**Last updated:** 2026-11-07
+**Last updated:** 2026-11-08
 
 ---
 
 ## Summary
 
-**BigAmbitionStratMod** 1.13.4 — A new game rents the cheapest available lot, loads the stage-1 starter layout, places one cleaner, and signs a recurring wholesaler contract (`contract.signed` from First Street 37). Opening leaves uniforms off until a later story. A gift shop with no guard locker keeps the guard off. A save that already has a named business is skipped. Capacity fixtures are still open. **7.13** stays stashed. The rules are in [requirements/strategy.md](requirements/strategy.md). `origin` is this repo.
+**BigAmbitionStratMod** 1.13.5 — A new game rents the cheapest available lot, loads the stage-1 starter layout, places one cleaner, signs a recurring wholesaler contract from First Street 37, hires a cashier, and takes a cover-fit bank loan. Opening leaves uniforms off until a later story. A gift shop with no guard locker keeps the guard off. A save that already has a named business is skipped. Capacity fixtures are still open. **7.13** stays stashed. The rules are in [requirements/strategy.md](requirements/strategy.md). `origin` is this repo.
 
 ---
 
@@ -16,8 +16,9 @@
 
 | Branch | Role |
 |--------|------|
-| **`main`** | Integration branch. Last land `ecdb230`, version 1.13.4 |
-| **`feature/13.3-wholesaler-contract`** | Story 13.3 wholesaler contract. Version 1.13.4. Human PASS 2026-11-07 (shelf stock waived). Kept after this CMPH. |
+| **`main`** | Integration branch. Last land `PENDING`, version 1.13.5 |
+| **`feature/13.4-hire-loan-taxes`** | Story 13.4 hire, loan, demand, taxes. Version 1.13.5. Human PASS 2026-11-08. Kept after this CMPH. |
+| **`feature/13.3-wholesaler-contract`** | Story 13.3 wholesaler contract. Version 1.13.4. Human PASS 2026-11-07 (shelf stock waived). Kept after CMPH. |
 | **`feature/13.2-store-ops`** | Story 13.2 store ops (cleaner). Version 1.13.3.9. Human PASS 2026-11-07. Kept after CMPH. |
 | **`feature/13.2-starter-layout`** | Story 13.2 layout and hours. Version 1.13.2. Human PASS 2026-11-07. Kept after this CMPH. |
 | **`feature/13.1-rent-building`** | Story 13.1. Version 1.13.1. Human PASS 2026-11-07. Kept after this CMPH. |
@@ -76,7 +77,7 @@
 | **`feature/chain-prefix`** | Kept after CMPH (template history) |
 | **`feature/handoff-receiver-framing`** | Kept after CMPH (template history) |
 
-**Last land:** `1406dfd` on `main`. Version 1.13.3.9. Branch `feature/13.2-store-ops` kept. Repo: https://github.com/pbuckles22/BigAmbitionStratMod.
+**Last land:** `PENDING` on `main`. Version 1.13.5. Branch `feature/13.4-hire-loan-taxes` kept. Repo: https://github.com/pbuckles22/BigAmbitionStratMod.
 
 ---
 
@@ -100,7 +101,7 @@
 
 ## Next up (maintainers)
 
-- Story **13.4** hire, loan, demand, and taxes when asked. Capacity fixtures stay open. **7.13** stays stashed.
+- Story **13.5** time advance with player needs when asked. Capacity fixtures stay open. **7.13** stays stashed.
 - Variants: merge upstream when AgenticTemplate skills/rules change
 
 ---

@@ -626,6 +626,242 @@ namespace ChaoticCEO
             return Wholesaler.Record(localAppData, signed, current.Day);
         }
 
+        public static string? TryCashier(CashierWatch watch, string localAppData)
+        {
+            if (watch == null || string.IsNullOrEmpty(localAppData) || !InCity())
+            {
+                return null;
+            }
+
+            var current = SaveGameManager.Current;
+            if (current == null || !watch.Due(current))
+            {
+                return null;
+            }
+
+            if (!LastContract(localAppData, out var street, out var number, out var skipped))
+            {
+                return null;
+            }
+
+            if (skipped)
+            {
+                watch.Mark(current);
+                return null;
+            }
+
+            var registration = FindRented(current, street, number);
+            if (registration == null)
+            {
+                return null;
+            }
+
+            var rented = new BuildingRent(street, number, true, "");
+            var chosen = Starter.Choose(Starter.StageOne(), alreadyOpen: false, GameApi.Live());
+            var signed = Wholesaler.Sign(
+                rented,
+                chosen,
+                Wholesaler.StageOne(),
+                alreadySigned: false,
+                GameApi.Live());
+            var already = CashierBridge.HasCashier(registration);
+            var hired = Cashier.Hire(rented, chosen, signed, already, GameApi.Live());
+            if (!hired.Hired)
+            {
+                watch.Mark(current);
+                return "";
+            }
+
+            if (!CashierBridge.Live(registration, hired, out var reason))
+            {
+                if (Cashier.Retry(reason))
+                {
+                    watch.Note();
+                    if (watch.Waiting())
+                    {
+                        return null;
+                    }
+                }
+
+                watch.Mark(current);
+                return Cashier.Miss(localAppData, hired, current.Day, reason);
+            }
+
+            watch.Mark(current);
+            return Cashier.Record(localAppData, hired, current.Day);
+        }
+
+        public static string? TryLoan(BankLoanWatch watch, string localAppData)
+        {
+            if (watch == null || string.IsNullOrEmpty(localAppData) || !InCity())
+            {
+                return null;
+            }
+
+            var current = SaveGameManager.Current;
+            if (current == null || !watch.Due(current))
+            {
+                return null;
+            }
+
+            if (!LastCashier(localAppData, out _, out _, out var skipped))
+            {
+                return null;
+            }
+
+            if (skipped)
+            {
+                watch.Mark(current);
+                return null;
+            }
+
+            var profit = Starter.StageOne()[0].DailyProfit;
+            var already = BankLoanBridge.HasLoan();
+            var taken = BankLoan.Take(profit, BankLoanBridge.Offers(profit), already, GameApi.Live());
+            watch.Mark(current);
+            if (!taken.Taken)
+            {
+                return "";
+            }
+
+            if (!BankLoanBridge.Take(taken))
+            {
+                return "";
+            }
+
+            return BankLoan.RecordTake(localAppData, taken, current.Day);
+        }
+
+        public static string? TryDemand(StaffDemandWatch watch, string localAppData)
+        {
+            if (watch == null || string.IsNullOrEmpty(localAppData) || !InCity())
+            {
+                return null;
+            }
+
+            var current = SaveGameManager.Current;
+            if (current == null || !watch.Due(current))
+            {
+                return null;
+            }
+
+            DemandPick? cleared = null;
+            foreach (var row in StaffDemandBridge.Due())
+            {
+                var pick = StaffDemand.Clear(row.unmetDays, row.demand, row.employeeId, GameApi.Live());
+                if (!pick.Cleared)
+                {
+                    continue;
+                }
+
+                if (!StaffDemandBridge.Live(pick))
+                {
+                    continue;
+                }
+
+                cleared = pick;
+                break;
+            }
+
+            watch.Mark(current);
+            if (cleared == null)
+            {
+                return "";
+            }
+
+            return StaffDemand.Record(localAppData, cleared, current.Day);
+        }
+
+        public static string? TryTax(TaxBillWatch watch, string localAppData)
+        {
+            if (watch == null || string.IsNullOrEmpty(localAppData) || !InCity())
+            {
+                return null;
+            }
+
+            var current = SaveGameManager.Current;
+            if (current == null || !watch.Due(current))
+            {
+                return null;
+            }
+
+            var due = TaxBillBridge.Due();
+            var paid = TaxBill.Pay(due.current, due.back, GameApi.Live());
+            watch.Mark(current);
+            if (!paid.Paid)
+            {
+                return "";
+            }
+
+            if (!TaxBillBridge.Live(paid))
+            {
+                return "";
+            }
+
+            return TaxBill.Record(localAppData, paid, current.Day);
+        }
+
+        private static bool LastContract(string localAppData, out string street, out int number, out bool skipped)
+        {
+            return LastNamed(localAppData, "contract.signed ", out street, out number, out skipped);
+        }
+
+        private static bool LastCashier(string localAppData, out string street, out int number, out bool skipped)
+        {
+            return LastNamed(localAppData, "hire.cashier ", out street, out number, out skipped);
+        }
+
+        private static bool LastNamed(
+            string localAppData,
+            string prefix,
+            out string street,
+            out int number,
+            out bool skipped)
+        {
+            street = "";
+            number = 0;
+            skipped = false;
+            var path = LoadLog.CeoLogPath(localAppData);
+            if (!File.Exists(path))
+            {
+                return false;
+            }
+
+            var found = false;
+            foreach (var line in File.ReadAllLines(path))
+            {
+                if (!line.StartsWith(prefix, System.StringComparison.Ordinal))
+                {
+                    continue;
+                }
+
+                var streetAt = line.IndexOf(" street=", System.StringComparison.Ordinal);
+                var numberAt = line.IndexOf(" number=", System.StringComparison.Ordinal);
+                if (streetAt < 0 || numberAt <= streetAt)
+                {
+                    continue;
+                }
+
+                var parsedStreet = line.Substring(streetAt + " street=".Length, numberAt - (streetAt + " street=".Length));
+                var rest = line.Substring(numberAt + " number=".Length);
+                var stop = rest.IndexOf(' ');
+                var token = stop < 0 ? rest : rest.Substring(0, stop);
+                if (parsedStreet.Length == 0
+                    || !int.TryParse(token, NumberStyles.Integer, CultureInfo.InvariantCulture, out var parsedNumber)
+                    || parsedNumber <= 0)
+                {
+                    continue;
+                }
+
+                street = parsedStreet;
+                number = parsedNumber;
+                skipped = false;
+                found = true;
+            }
+
+            return found;
+        }
+
         private static bool LastOps(string localAppData, out string street, out int number, out bool skipped)
         {
             street = "";

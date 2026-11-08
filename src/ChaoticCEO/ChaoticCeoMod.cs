@@ -22,6 +22,10 @@ namespace ChaoticCEO
         private readonly StarterWatch _layouts = new StarterWatch();
         private readonly StoreOpsWatch _ops = new StoreOpsWatch();
         private readonly WholesalerWatch _contracts = new WholesalerWatch();
+        private readonly CashierWatch _cashiers = new CashierWatch();
+        private readonly BankLoanWatch _loans = new BankLoanWatch();
+        private readonly StaffDemandWatch _demands = new StaffDemandWatch();
+        private readonly TaxBillWatch _taxes = new TaxBillWatch();
         private bool _hooked;
         private bool _panelFailed;
         private string _localAppData = "";
@@ -78,6 +82,10 @@ namespace ChaoticCEO
             LiveDump.TryLayout(_layouts, _localAppData);
             LiveDump.TryOps(_ops, _localAppData);
             LiveDump.TryWholesaler(_contracts, _localAppData);
+            LiveDump.TryCashier(_cashiers, _localAppData);
+            LiveDump.TryLoan(_loans, _localAppData);
+            LiveDump.TryDemand(_demands, _localAppData);
+            LiveDump.TryTax(_taxes, _localAppData);
             if (LiveDump.Roll(_days, _localAppData) != null)
             {
                 LiveDump.FillSlots(_slots, _localAppData);

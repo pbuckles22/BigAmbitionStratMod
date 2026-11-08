@@ -224,6 +224,17 @@ Human PASS 2026-11-07 on 1.13.3.8 for the cleaner block: day 1 at 26 7th Avenue,
 
 Human PASS 2026-11-07 on 1.13.4 for the contract log: day 1 at 26 7th Avenue, one `contract.signed` with `wholesale=ba:street_firststreet 37` and `call=Dialogs.WholesaleStoreManagerDialog.StartContract` after `ops.assigned`. Next-morning shelf stock waived.
 
+## Hire, loan, demand, and taxes human check
+
+1. Restart Big Ambitions so version 1.13.5 loads. Start a new game and reach the city. Do not load the usual save and do not load the day 1021 save. This check rents one lot, loads one starter layout, places one cleaner, signs a wholesaler contract, hires a cashier, and takes a bank loan. Demand clear and tax pay run when the game already has an unmet demand or a tax balance.
+2. Wait until you are inside the starter store and the missing-employee alert is gone.
+3. Open `%LocalAppData%\ChaoticCEO\ceo.log`. Check the bank loan list in the phone Econo view.
+4. **PASS if** one `hire.cashier` line names `role=Cashier`, `skill=ba:skill_customerservice`, and `call=Helpers.EmployeeHelper.HireCandidate` on the same street and number as `contract.signed`, the register worker is in the store, and one `loan.taken` line names a positive `amount` with `call=Dialogs.BankDialog.LoanRequest`. **FAIL if** `hire.missed`, no cashier line, no loan line, or the missing-employee alert stays after those lines.
+5. Evidence: `hire.cashier` (`day`, `street`, `number`, `role`, `skill`, `type`, `call`, `stationCall`) and `loan.taken` (`day`, `amount`, `dailyPayment`, `call`) after `contract.signed`. A later frame does not append them again. `demand.cleared` and `tax.paid` are optional on a brand-new day 1 save.
+6. Version marker: public `1.13.5`. `ceo.log` starts at `mod.loaded version=1.13.5 build=3682`.
+
+Human PASS 2026-11-08 on 1.13.5. Day 1 at 15 7th Avenue: one `hire.cashier` with `role=Cashier`, `skill=ba:skill_customerservice`, `type=SelfServiceEmployee`, `call=Helpers.EmployeeHelper.HireCandidate`, `stationCall=Controllers.CashRegisterController.AssignEmployee` after `contract.signed`, and one `loan.taken` with `amount=500`, `dailyPayment=5`, `call=Dialogs.BankDialog.LoanRequest`. Cash on screen was $15.5K. No `hire.missed`. `demand.cleared` and `tax.paid` were not due on that new save.
+
 ## Warehouse sort and restock human check
 
 1. Restart Big Ambitions so version 1.11.8.1 loads. You are in the city on the usual save. Do not load the day 1021 save. This check records warehouse homes, drains, overflow, and the first import order. It does not call the game. BizMan’s warehouses and purchasing screens stay as they are. Fifth Avenue 36 stays on the wholesaler.
