@@ -49,9 +49,92 @@ namespace ChaoticCEO
         public int Destination { get; }
     }
 
+    public sealed class OwnedLayout
+    {
+        public OwnedLayout(string type, string size, string blueprint, int score)
+        {
+            Type = type ?? "";
+            Size = size ?? "";
+            Blueprint = blueprint ?? "";
+            Score = score;
+        }
+
+        public string Type { get; }
+
+        public string Size { get; }
+
+        public string Blueprint { get; }
+
+        public int Score { get; }
+    }
+
+    public sealed class LayoutPick
+    {
+        public LayoutPick(string blueprint, bool chosen)
+        {
+            Blueprint = blueprint ?? "";
+            Chosen = chosen;
+        }
+
+        public string Blueprint { get; }
+
+        public bool Chosen { get; }
+
+        public static LayoutPick None()
+        {
+            return new LayoutPick("", false);
+        }
+    }
+
     public static class Layout
     {
         private const int ClusterMinimum = 3;
+
+        public static LayoutPick Decide(
+            int stage,
+            string? type,
+            string? size,
+            IReadOnlyList<OwnedLayout>? owned,
+            IReadOnlyList<StarterOffer>? starters)
+        {
+            var business = type ?? "";
+            var building = size ?? "";
+            if (business.Length == 0 || building.Length == 0)
+            {
+                return LayoutPick.None();
+            }
+
+            if (stage >= 2)
+            {
+                OwnedLayout? winner = null;
+                if (owned != null)
+                {
+                    foreach (var layout in owned)
+                    {
+                        if (layout == null
+                            || layout.Type != business
+                            || layout.Size != building
+                            || layout.Blueprint.Length == 0
+                            || layout.Score <= 0)
+                        {
+                            continue;
+                        }
+
+                        if (winner == null || layout.Score >= winner.Score)
+                        {
+                            winner = layout;
+                        }
+                    }
+                }
+
+                if (winner != null)
+                {
+                    return new LayoutPick(winner.Blueprint, true);
+                }
+            }
+
+            return StarterFor(business, starters);
+        }
 
         public static LayoutClone Lock(
             StaffPlan? staff,
@@ -124,6 +207,28 @@ namespace ChaoticCEO
                 source.Blueprint,
                 source.Number,
                 destination.Number);
+        }
+
+        private static LayoutPick StarterFor(string type, IReadOnlyList<StarterOffer>? starters)
+        {
+            if (starters == null)
+            {
+                return LayoutPick.None();
+            }
+
+            foreach (var offer in starters)
+            {
+                if (offer == null
+                    || offer.BusinessType != type
+                    || offer.Layout.Length == 0)
+                {
+                    continue;
+                }
+
+                return new LayoutPick(offer.Layout, true);
+            }
+
+            return LayoutPick.None();
         }
 
         private static LayoutClone None()

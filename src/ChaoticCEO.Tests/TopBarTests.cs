@@ -39,7 +39,7 @@ public class TopBarTests
         var csv = "day,street,number,sales,goods,wages,rent,marketing,theft,profit\n"
             + "1015,a,1,0,0,0,0,0,0,3\n"
             + "1015,b,2,0,0,0,0,0,0,4\n";
-        var line = TopBar.From("day.rolled version=1.14.2 day=1016", csv, 10m, 20m, 1, true, 1);
+        var line = TopBar.From("day.rolled version=1.14.3 day=1016", csv, 10m, 20m, 1, true, 1);
 
         Assert.Equal(7m, TopBar.Profit(csv));
         Assert.Equal(

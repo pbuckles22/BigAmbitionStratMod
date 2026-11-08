@@ -254,6 +254,21 @@ Human version smoke (install changed; no open/where UI yet — that is **9.6**):
 
 Human PASS 2026-11-08 on 1.14.2. `mod.loaded version=1.14.2 build=3682`. New-game day 1 at 22 7th Avenue continued the Epic 13 chain through layout and ops.
 
+## Story 9.3 — Golden layout and prices (headless + version smoke)
+
+Tier 1: `GoldenLayoutTests` locks Stage 1 starter, Stage 2+ score winner for type/size, later-layout ties, starter fallback (never another size), score 0 skip, and blank blueprint. `PriceDecideTests` locks **PriceStep**, **PriceSatisfied**, leave-default raise, hold-and-raise, step-back on units or satisfaction, later-price ties, never-default on step-back, and empty-trial keep. Chain `… → open → where → layout` locks Stage 1 gift shop onto `GiftShopWholesalers`; chain `… → layout → prices` locks Stage 2 score golden then a raise. Command: the Tier 1 `dotnet test` suite above.
+
+Human version smoke (install changed; no layout/price UI yet — that is **9.6**):
+
+1. Restart Big Ambitions so version 1.14.3 loads. Any save or a new game is fine.
+2. Open `%LocalAppData%\ChaoticCEO\ceo.log`.
+3. Do nothing else for this check.
+4. **PASS if** the first line is `mod.loaded version=1.14.3 build=3682`. **FAIL if** the version is still 1.14.2 or missing.
+5. Evidence: that `mod.loaded` line.
+6. Version marker: public `1.14.3`.
+
+Human PASS 2026-11-08 on 1.14.3. `mod.loaded version=1.14.3 build=3682`. New-game day 1 at 22 7th Avenue continued the Epic 13 chain through layout and ops.
+
 ## Wholesaler contract human check
 
 1. Restart Big Ambitions so version 1.13.4 loads. Start a new game and reach the city. Do not load the usual save and do not load the day 1021 save. This check rents one lot, loads one starter layout, places one cleaner, and signs a recurring wholesaler `DeliveryContract` for the starter gift shop. It does not hire a cashier. Capacity fixtures are not part of this check.
