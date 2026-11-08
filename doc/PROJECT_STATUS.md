@@ -16,7 +16,7 @@
 
 | Branch | Role |
 |--------|------|
-| **`main`** | Integration branch. Last land `PLACEHOLDER`, version 1.14.5. Story 9.5 landed. |
+| **`main`** | Integration branch. Last land `131966f`, version 1.14.5. Story 9.5 landed. |
 | **`feature/9.5-managers-money`** | Story 9.5 managers, money, real estate, close, run. Version 1.14.5. Human PASS 2026-11-08. Kept after CMPH. |
 | **`feature/9.4-supply-trucks`** | Story 9.4 supply, trucks, warehouses. Version 1.14.4. Human PASS 2026-11-08. Kept after CMPH. |
 | **`feature/9.3-layout-prices`** | Story 9.3 golden layout and prices. Version 1.14.3. Human PASS 2026-11-08. Kept after CMPH. |
