@@ -1,10 +1,10 @@
 # PM_PLAN — BigAmbitionStratMod
 
-In-game advisor for one Big Ambitions save, then a new-game guide and autopilot. Version scheme `MAJOR.EPIC.COUNTER`. Current public version **1.14.3**. The first ship of a new epic phase is `1.N.1`. When an epic runs after a higher-numbered epic, **EPIC** is `max(shipped_epic) + 1` (Epic 9 after 1.13.x → 1.14.1). Never go backwards.
+In-game advisor for one Big Ambitions save, then a new-game guide and autopilot. Version scheme `MAJOR.EPIC.COUNTER`. Current public version **1.14.4**. The first ship of a new epic phase is `1.N.1`. When an epic runs after a higher-numbered epic, **EPIC** is `max(shipped_epic) + 1` (Epic 9 after 1.13.x → 1.14.1). Never go backwards.
 
 ## Context
 
-The game is Mono, build **3682**. A mod builds with `dotnet build` against `Big Ambitions_Data\Managed` (`BigAmbitions.dll`, `BigAmbitions.ModAPI.dll`). The pin is `doc/requirements/game-build.md`. Python save tools live in `script/`. The mod, when it exists, lives in `src/`. Evidence for the ledger is `doc/gemini/cache/ledger.log`. The mod writes `%LocalAppData%\ChaoticCEO\ceo.log`. The compile counter is gitignored `build_number.txt`. The mod informational version is `1.14.3+N`. The draw reference is `UnityEngine.IMGUIModule`.
+The game is Mono, build **3682**. A mod builds with `dotnet build` against `Big Ambitions_Data\Managed` (`BigAmbitions.dll`, `BigAmbitions.ModAPI.dll`). The pin is `doc/requirements/game-build.md`. Python save tools live in `script/`. The mod, when it exists, lives in `src/`. Evidence for the ledger is `doc/gemini/cache/ledger.log`. The mod writes `%LocalAppData%\ChaoticCEO\ceo.log`. The compile counter is gitignored `build_number.txt`. The mod informational version is `1.14.4+N`. The draw reference is `UnityEngine.IMGUIModule`.
 
 Epic 1 closed on 17 businesses and 5865 statement rows. `ba:businesstype_liquorstore` is **food**. Do not relabel it inside a routes story. A warehouse story may add a specialty override only with a new test.
 
@@ -151,7 +151,7 @@ Starts after Epic **13**. The rulebook as a pure library. Each decision has a Ti
 - **9.1** `[x]` `Stage.Decide(day, cash, goodsStores, suppliedStores, warehouses, emptySlots, plans)` and the stage gates. Stage 4 passes when cash is at least **Stage4Cash**, supplied stores equal goods stores, and empty slots are 0. Higher gate wins. Day and warehouse count are unused. Headless. Version 1.14.1. Chain: `load → … → marketing → stop → takeover → stage`.
 - **9.2** `[x]` What to open and where (`strategy.md` sections 1 and 2). `Open.Decide` and `Where.Decide`. Larger profit wins; ties keep the later type. Stage 1 keeps wholesaler starter goods. Truck load above **TruckBusy** opens service or office. Stage 3+ blocks a second goods store without a warehouse. Cluster streets beat traffic÷rent; a building over the cash reserve is out. Headless. Version 1.14.2. Chain: `load → … → takeover → stage → open → where`.
 - **9.3** `[x]` Golden layout and prices (`strategy.md` sections 3 and 4). `Layout.Decide` and `Prices.Decide`. Stage 1 uses the starter layout. Stage 2+ picks the larger interior score for that type and size; a tie keeps the later layout; a missing size uses the starter, never another size. **PriceStep** raises while units hold and satisfaction stays at **PriceSatisfied**; otherwise step back to the larger (price − wholesale) × units and never the default. Headless. Version 1.14.3. Chain: `load → … → open → where → layout` and `… → layout → prices`.
-- **9.4** `[ ]` Supply by stage, trucks, and warehouses (sections 5 and 6).
+- **9.4** `[x]` Supply by stage, trucks, and warehouses (`strategy.md` sections 5 and 6). `Supply.Decide`, `Trucks.Decide`, and `Warehouses.Decide`. Stage 1 uses a wholesaler contract. Stage 2+ uses a warehouse that holds the item and drops that contract; a recurring plan stop beats a dated contract; an item no warehouse holds stays on the wholesaler. **RefillDays** orders when stock falls below that burn. An empty slot on a delivering warehouse is the first spend after the cash reserve. A family home opens on enter or stock-without-home; a second warehouse only when trucks exceed **TruckBusy** or an ordered home is under **RefillDays**. A mixed warehouse keeps the largest family. Headless. Version 1.14.4. Chain: `load → … → layout → prices → supply`.
 - **9.5** `[ ]` Managers, money, real estate, closing, and running the business (sections 7 through 11).
 - **9.6** `[ ]` F9 shows the next playbook step on a new game. Human check is F9 on a new save.
 
@@ -178,7 +178,7 @@ Starts after Epic **8**. Crossing **WinNetWorth** is a milestone. The autopilot 
 - **10.2** `[ ]` Autopilot loop. Each day, while `Autopilot.Enabled` is on: audit, heal, the stage’s actions through the recorded calls, then time advance, within the guardrails. The **12.3** toggle and F10 clear the flag. Human check: one autopilot day on a new save matches its `telemetry.csv` row, and a cleared flag skips the next day.
 - **10.3** `[ ]` Hands-off run from a new save. PASS is `win.reached` in `ceo.log` and later telemetry rows that still advance. Every decision the run finds becomes a Tier 1 test before the next run.
 
-**Next:** Story **9.3** closed at version 1.14.3. Next ship: story **9.4** when asked. **7.13** stays stashed until before **10.2**.
+**Next:** Story **9.4** closed at version 1.14.4. Next ship: story **9.5** when asked. **7.13** stays stashed until before **10.2**.
 
 Operating model (keep these when you replace this plan): `.cursor/rules/` ship commands (UCPH, CMPH, SWAT), human check, plan-coordinate versioning, long-run harvest (`testing.mdc`), and the chain harness and prefix (`integration-chain.mdc`). Do not delete them to “clean up” a new clone.
 

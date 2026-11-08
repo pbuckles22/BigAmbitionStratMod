@@ -2981,6 +2981,294 @@ public class AuditTests
     }
 
     [Fact]
+    public void Audit_load_day_roll_needs_refill_recorded_call_slot_fill_store_connect_plan_assign_restock_sort_overflow_order_audit_bar_stage_open_where_layout_prices_supply_locks_the_warehouse_source()
+    {
+        // Chain: load → day roll → needs refill → recorded call → slot fill → store connect → plan assign → restock → sort → overflow → order → audit → bar → stage → open → where → layout → prices → supply
+        using var dir = new TempAudit();
+        var save = new object();
+        var prefix = Prefix(dir.Path, save);
+        var guard = new AuditGuard(
+            enabled: true,
+            dryRun: false,
+            cash: Stage.Stage2Cash,
+            dailyCost: 10m,
+            truckCost: 1,
+            build: LoadLog.PinnedBuild);
+        var needs = new[]
+        {
+            new GoodsNeed("ba:street_a 1", "ba:itemname_cheapgift"),
+            new GoodsNeed("ba:street_b 2", "ba:itemname_cheapgift"),
+            new GoodsNeed("ba:street_c 3", "ba:itemname_cheapgift"),
+        };
+        var holds = new[]
+        {
+            new WarehouseHold("W12", "ba:street_twelfthstreet", 6, "ba:itemname_cheapgift", 40),
+        };
+        var world = new AuditWorld(
+            prefix.World.Stops,
+            holds,
+            needs,
+            prefix.World.Sales,
+            prefix.World.Slots,
+            prefix.World.Drivers,
+            prefix.World.Levels,
+            prefix.World.PricingPlan,
+            prefix.World.Seats,
+            prefix.World.Hired,
+            prefix.World.Stores,
+            prefix.World.Staffed);
+        var report = Audit.Check(dir.Path, 1016, prefix.Api, world, guard, heal => HealFate.Done);
+        var stage = Stage.Read(
+            TopBar.Day(prefix.Rolled),
+            guard.Cash,
+            world.Needs,
+            report.Stops,
+            world.Holds,
+            world.Slots);
+        var open = Open.Decide(
+            stage,
+            new[]
+            {
+                new OpenCandidate(
+                    "ba:businesstype_giftshop",
+                    "goods",
+                    90m,
+                    wholesalerSells: true,
+                    "specialty",
+                    0,
+                    true),
+                new OpenCandidate(
+                    "ba:businesstype_hairdresser",
+                    "service",
+                    40m,
+                    wholesalerSells: false,
+                    "service",
+                    0,
+                    false),
+            },
+            truckLoadFraction: 0m);
+        var site = Where.Decide(
+            new[]
+            {
+                new SiteCandidate("ba:street_gift", 5, familyOnStreet: Where.ClusterMin, traffic: 12m, dailyRent: 20m, cost: 80m),
+            },
+            guard.Cash,
+            guard.DailyCost * Audit.ReserveDays);
+        var golden = Layout.Decide(
+            stage,
+            open.Type,
+            "small",
+            new[]
+            {
+                new OwnedLayout(open.Type, "small", "GiftShopLive", 44),
+                new OwnedLayout(open.Type, "small", "GiftShopBest", 70),
+            },
+            Starter.StageOne());
+        var price = Prices.Decide(
+            "ba:itemname_cheapgift",
+            currentPrice: 20m,
+            defaultPrice: 10m,
+            wholesale: 4m,
+            priorUnits: 8,
+            currentUnits: 9,
+            satisfaction: Prices.PriceSatisfied,
+            trials: new[]
+            {
+                new ItemSoldPerPriceEntry("ba:itemname_cheapgift", 18f, 9),
+            });
+        var supply = Supply.Decide(
+            stage,
+            site.Street + " " + site.Number.ToString(CultureInfo.InvariantCulture),
+            "ba:itemname_cheapgift",
+            world.Holds,
+            report.Stops);
+        var truck = Trucks.Decide(
+            new[]
+            {
+                new GarageSlot("W12", 1, filled: false),
+                new GarageSlot("W12", 2, filled: false),
+            },
+            delivering: new[] { "W12" },
+            cash: guard.Cash,
+            reserve: guard.DailyCost * Audit.ReserveDays,
+            truckCost: guard.TruckCost);
+        var warehouse = Warehouses.Decide(
+            "specialty",
+            enteringFamily: false,
+            hasStockWithoutHome: false,
+            new[]
+            {
+                new WarehouseLevel("W12", "specialty", onHand: 40, daily: 4, ordered: false, shelves: 99),
+                new WarehouseLevel("W13", "", onHand: 0, daily: 0, ordered: false, shelves: 95),
+            },
+            trucksBusy: true);
+
+        Assert.Contains("day=1016", prefix.Rolled);
+        Assert.Equal(2, stage);
+        Assert.True(open.Chosen);
+        Assert.Equal("ba:businesstype_giftshop", open.Type);
+        Assert.True(site.Chosen);
+        Assert.Equal("ba:street_gift", site.Street);
+        Assert.Equal(5, site.Number);
+        Assert.True(golden.Chosen);
+        Assert.Equal("GiftShopBest", golden.Blueprint);
+        Assert.True(price.Chosen);
+        Assert.Equal(21m, price.Price);
+        Assert.True(supply.Chosen);
+        Assert.Equal("warehouse", supply.Source);
+        Assert.Equal("W12", supply.Warehouse);
+        Assert.True(supply.DropContract);
+        Assert.True(truck.Chosen);
+        Assert.Equal("W12", truck.Warehouse);
+        Assert.Equal(1, truck.Slot);
+        Assert.True(warehouse.Chosen);
+        Assert.Equal("W13", warehouse.Warehouse);
+        Assert.Equal("second", warehouse.Action);
+        Assert.Equal("trucks", warehouse.Reason);
+    }
+
+    [Fact]
+    public void Audit_load_day_roll_needs_refill_recorded_call_slot_fill_store_connect_plan_assign_restock_sort_overflow_order_audit_bar_health_controls_telemetry_rent_layout_ops_wholesaler_hire_loan_demand_tax_time_marketing_stop_takeover_stage_open_where_layout_prices_supply_locks_stage_one_wholesaler()
+    {
+        // Chain: load → day roll → needs refill → recorded call → slot fill → store connect → plan assign → restock → sort → overflow → order → audit → bar → health → controls → telemetry → rent → layout → ops → wholesaler → hire → loan → demand → tax → time → marketing → stop → takeover → stage → open → where → layout → prices → supply
+        using var dir = new TempAudit();
+        var save = new object();
+        var prefix = Prefix(dir.Path, save);
+        var guard = LiveGuard();
+        var world = prefix.World;
+        Autopilot.Enabled = guard.Enabled;
+        Autopilot.DryRun = guard.DryRun;
+        try
+        {
+            var shot = WatchDay(dir.Path, ref world, guard, prefix.Api, prefix.Rolled, 1016, 10m, null);
+            var rented = Rent.Choose(
+                new[] { new RentLot("ba:street_low", 9, 40m) },
+                guard.Cash,
+                anyRented: false,
+                prefix.Api);
+            Rent.Record(dir.Path, rented, TopBar.Day(prefix.Rolled));
+            var chosen = Starter.Choose(Starter.StageOne(), alreadyOpen: false, prefix.Api);
+            Starter.Record(dir.Path, chosen, rented, TopBar.Day(shot.Rolled));
+            var assigned = StoreOps.Assign(chosen, StoreOps.Opening(), StoreFixtures.GiftShopWholesalers(), prefix.Api);
+            StoreOps.Record(dir.Path, assigned, rented, TopBar.Day(shot.Rolled));
+            var signed = Wholesaler.Sign(rented, chosen, Wholesaler.StageOne(), alreadySigned: false, prefix.Api);
+            Wholesaler.Record(dir.Path, signed, TopBar.Day(shot.Rolled));
+            var hired = Cashier.Hire(rented, chosen, signed, alreadyHired: false, prefix.Api);
+            Cashier.Record(dir.Path, hired, TopBar.Day(shot.Rolled));
+            var taken = BankLoan.Take(
+                projectedDailyProfit: 200m,
+                offers: new[] { new LoanOffer(2000m, 100) },
+                alreadyBorrowed: false,
+                prefix.Api);
+            BankLoan.RecordTake(dir.Path, taken, TopBar.Day(shot.Rolled));
+            var cleared = StaffDemand.Clear(
+                unmetDays: StaffDemand.DemandDays,
+                demandName: "ba:jobdemand_healthinsurance",
+                employeeId: "emp-1",
+                prefix.Api);
+            StaffDemand.Record(dir.Path, cleared, TopBar.Day(shot.Rolled));
+            var paid = TaxBill.Pay(currentDue: 55m, backDue: 12m, prefix.Api);
+            TaxBill.Record(dir.Path, paid, TopBar.Day(shot.Rolled));
+            var advanced = TimeAdvance.Skip(Needs.Hold(), alreadyAdvanced: false, prefix.Api);
+            TimeAdvance.RecordSkip(dir.Path, advanced, TopBar.Day(shot.Rolled));
+            var started = Marketing.Start(
+                dailyCost: 100m,
+                gain: 300m,
+                alreadyActive: false,
+                street: rented.Street,
+                number: rented.Number,
+                type: Marketing.StarterType,
+                prefix.Api);
+            Marketing.RecordStart(dir.Path, started, TopBar.Day(shot.Rolled));
+            var stopped = Marketing.Stop(
+                alreadyActive: started.Started,
+                street: rented.Street,
+                number: rented.Number,
+                prefix.Api);
+            Marketing.RecordStop(dir.Path, stopped, TopBar.Day(shot.Rolled));
+            var declined = RivalTakeover.Decline(
+                offerPrice: 1000m,
+                dailyProfit: 10m,
+                street: rented.Street,
+                number: rented.Number,
+                alreadyDeclined: false,
+                prefix.Api);
+            RivalTakeover.Record(dir.Path, declined, TopBar.Day(shot.Rolled));
+            var stage = Stage.Read(
+                TopBar.Day(shot.Rolled),
+                guard.Cash,
+                world.Needs,
+                shot.Report.Stops,
+                world.Holds,
+                world.Slots);
+            var offers = new List<OpenCandidate>();
+            foreach (var offer in Starter.StageOne())
+            {
+                offers.Add(new OpenCandidate(
+                    offer.BusinessType,
+                    "goods",
+                    offer.DailyProfit,
+                    wholesalerSells: true,
+                    StoreFamily.For(offer.BusinessType) ?? "specialty",
+                    ownedOfFamily: 0,
+                    familyHasWarehouse: false));
+            }
+
+            var open = Open.Decide(stage, offers, truckLoadFraction: 0m);
+            var reserve = guard.DailyCost * Audit.ReserveDays;
+            var site = Where.Decide(
+                new[]
+                {
+                    new SiteCandidate(rented.Street, rented.Number, familyOnStreet: Where.ClusterMin, traffic: 20m, dailyRent: 40m, cost: rented.Number),
+                },
+                guard.Cash,
+                reserve);
+            var golden = Layout.Decide(
+                stage,
+                open.Type,
+                "small",
+                Array.Empty<OwnedLayout>(),
+                Starter.StageOne());
+            var price = Prices.Decide(
+                "ba:itemname_cheapgift",
+                currentPrice: 10m,
+                defaultPrice: 10m,
+                wholesale: 4m,
+                priorUnits: 5,
+                currentUnits: 3,
+                satisfaction: 0.5m,
+                trials: null);
+            var supply = Supply.Decide(
+                stage,
+                site.Street + " " + site.Number.ToString(CultureInfo.InvariantCulture),
+                "ba:itemname_cheapgift",
+                world.Holds,
+                shot.Report.Stops);
+
+            Assert.Contains("day=1016", prefix.Rolled);
+            Assert.Equal(1, stage);
+            Assert.True(open.Chosen);
+            Assert.Equal("ba:businesstype_giftshop", open.Type);
+            Assert.True(site.Chosen);
+            Assert.Equal(rented.Street, site.Street);
+            Assert.Equal(rented.Number, site.Number);
+            Assert.True(golden.Chosen);
+            Assert.Equal("GiftShopWholesalers", golden.Blueprint);
+            Assert.True(price.Chosen);
+            Assert.Equal(10.5m, price.Price);
+            Assert.True(supply.Chosen);
+            Assert.Equal("wholesaler", supply.Source);
+            Assert.Equal("", supply.Warehouse);
+            Assert.False(supply.DropContract);
+        }
+        finally
+        {
+            Autopilot.Enabled = true;
+            Autopilot.DryRun = false;
+        }
+    }
+
+    [Fact]
     public void Audit_load_day_roll_needs_refill_recorded_call_slot_fill_store_connect_plan_assign_restock_sort_overflow_order_audit_bar_stage_locks_the_read_into_the_bar()
     {
         // Chain: load → day roll → needs refill → recorded call → slot fill → store connect → plan assign → restock → sort → overflow → order → audit → bar → stage

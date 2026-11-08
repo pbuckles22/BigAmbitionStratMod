@@ -122,9 +122,128 @@ namespace ChaoticCEO
         public IReadOnlyList<SupplyGap> Unsupplied { get; }
     }
 
+    public sealed class SupplyPick
+    {
+        public SupplyPick(string source, string warehouse, bool dropContract, bool chosen)
+        {
+            Source = source ?? "";
+            Warehouse = warehouse ?? "";
+            DropContract = dropContract;
+            Chosen = chosen;
+        }
+
+        public string Source { get; }
+
+        public string Warehouse { get; }
+
+        public bool DropContract { get; }
+
+        public bool Chosen { get; }
+
+        public static SupplyPick None()
+        {
+            return new SupplyPick("", "", false, false);
+        }
+    }
+
     public static class Supply
     {
         public const int RefillDays = 7;
+
+        public static SupplyPick Decide(
+            int stage,
+            string? store,
+            string? item,
+            IReadOnlyList<WarehouseHold>? holds,
+            IReadOnlyList<DeliveryStop>? stops)
+        {
+            var place = store ?? "";
+            var cargo = item ?? "";
+            if (place.Length == 0 || cargo.Length == 0)
+            {
+                return SupplyPick.None();
+            }
+
+            if (stage <= 1)
+            {
+                return new SupplyPick("wholesaler", "", false, true);
+            }
+
+            var stock = holds ?? Array.Empty<WarehouseHold>();
+            var routes = stops ?? Array.Empty<DeliveryStop>();
+            var recurring = PlannedWarehouse(place, cargo, routes);
+            if (recurring.Length > 0)
+            {
+                return new SupplyPick("warehouse", recurring, HoldsItem(stock, cargo), true);
+            }
+
+            var hub = HoldingWarehouse(stock, cargo);
+            if (hub.Length > 0)
+            {
+                return new SupplyPick("warehouse", hub, true, true);
+            }
+
+            return new SupplyPick("wholesaler", "", false, true);
+        }
+
+        public static bool NeedsRefill(int onHand, int dailyBurn)
+        {
+            if (dailyBurn <= 0)
+            {
+                return false;
+            }
+
+            return onHand < OrderTarget(dailyBurn);
+        }
+
+        public static int OrderTarget(int dailyBurn)
+        {
+            if (dailyBurn <= 0)
+            {
+                return 0;
+            }
+
+            return RefillDays * dailyBurn;
+        }
+
+        private static string PlannedWarehouse(string store, string item, IReadOnlyList<DeliveryStop> stops)
+        {
+            foreach (var stop in stops)
+            {
+                if (stop == null
+                    || stop.Day != null
+                    || stop.Destination != store
+                    || stop.Item != item
+                    || stop.Warehouse.Length == 0)
+                {
+                    continue;
+                }
+
+                return stop.Warehouse;
+            }
+
+            return "";
+        }
+
+        private static string HoldingWarehouse(IReadOnlyList<WarehouseHold> holds, string item)
+        {
+            foreach (var hold in holds)
+            {
+                if (hold == null || hold.Item != item || hold.Amount <= 0 || hold.Warehouse.Length == 0)
+                {
+                    continue;
+                }
+
+                return hold.Warehouse;
+            }
+
+            return "";
+        }
+
+        private static bool HoldsItem(IReadOnlyList<WarehouseHold> holds, string item)
+        {
+            return HoldingWarehouse(holds, item).Length > 0;
+        }
 
         public static SupplyList List(
             IReadOnlyList<DeliveryStop>? stops,

@@ -8,7 +8,7 @@
 
 ## Summary
 
-**BigAmbitionStratMod** 1.14.3 — Epic 9 playbook: `Layout.Decide` / `Prices.Decide` lock golden layout and price steps after Open/Where. Epic 13 new-game calls are complete. Public **EPIC** is the phase counter (`1.14` for Epic 9 after `1.13`). **7.13** stays stashed until before **10.2**. The rules are in [requirements/strategy.md](requirements/strategy.md). `origin` is this repo.
+**BigAmbitionStratMod** 1.14.4 — Epic 9 playbook: `Supply.Decide` / `Trucks.Decide` / `Warehouses.Decide` lock supply by stage and fleet/home rules after layout/prices. Epic 13 new-game calls are complete. Public **EPIC** is the phase counter (`1.14` for Epic 9 after `1.13`). **7.13** stays stashed until before **10.2**. The rules are in [requirements/strategy.md](requirements/strategy.md). `origin` is this repo.
 
 ---
 
@@ -16,7 +16,8 @@
 
 | Branch | Role |
 |--------|------|
-| **`main`** | Integration branch. Last land `3627709`, version 1.14.3. Story 9.3 landed. |
+| **`main`** | Integration branch. Last land TBD, version 1.14.4. Story 9.4 landed. |
+| **`feature/9.4-supply-trucks`** | Story 9.4 supply, trucks, warehouses. Version 1.14.4. Human PASS 2026-11-08. Kept after CMPH. |
 | **`feature/9.3-layout-prices`** | Story 9.3 golden layout and prices. Version 1.14.3. Human PASS 2026-11-08. Kept after CMPH. |
 | **`feature/9.2-open-where`** | Story 9.2 Open/Where locks. Version 1.14.2. Human PASS 2026-11-08. Kept after CMPH. |
 | **`feature/9.1-stage-decide`** | Story 9.1 Stage.Decide locks. Version 1.14.1. Human PASS 2026-11-08. Kept after CMPH. |
