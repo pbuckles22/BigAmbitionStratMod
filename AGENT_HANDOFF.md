@@ -139,7 +139,7 @@ When shipping: update **PM_PLAN**, **doc/PROJECT_STATUS.md**, and **Current stat
 ## Current state
 
 - **Product:** Version 1.16.2. Story 10.2 autopilot day loop shipped (`Autopilot.Day` / `LiveDump.RunAutopilot`). Next is 10.3. 7.13 stays stashed. Ladder: [PM_PLAN.md](PM_PLAN.md).
-- **On:** `origin/main @ c4ba92e`. Stash `7.13 spare cost centers` on `feature/7.13-spare-cost-centers`. https://github.com/pbuckles22/BigAmbitionStratMod
+- **On:** `origin/main @ dc91397`. Stash `7.13 spare cost centers` on `feature/7.13-spare-cost-centers`. https://github.com/pbuckles22/BigAmbitionStratMod
 - **Next:** Story **10.3** when asked.
 - **Blockers:** Do not load the day 1021 save. Do not continue a save that already says Starter Gift. Do not drop Fifth Avenue 36’s contract before the hub holds that item.
 
