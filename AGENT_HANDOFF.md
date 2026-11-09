@@ -139,7 +139,7 @@ When shipping: update **PM_PLAN**, **doc/PROJECT_STATUS.md**, and **Current stat
 ## Current state
 
 - **Product:** Version 1.16.3 on `feature/10.3-hands-off-win` (not merged). Story 10.3 WIP: expansion gated, Store #1 still weekly stockout → Temporarily Closed. Full runbook plan ships A–E. 7.13 stays stashed. Ladder: [PM_PLAN.md](PM_PLAN.md).
-- **On:** `feature/10.3-hands-off-win` (push after this UCPH); `origin/main @ f4dee94`. Plan: full expansion runbook (G1–G5 → Stage 4 → win). https://github.com/pbuckles22/BigAmbitionStratMod
+- **On:** `origin/feature/10.3-hands-off-win @ 472aef3` (not merged); `origin/main @ f4dee94`. Plan: full expansion runbook (G1–G5 → Stage 4 → win). https://github.com/pbuckles22/BigAmbitionStratMod
 - **Next:** Resume **10.3** when asked — Ship A: real G1–G5 sensors/heals + delivery survival before Stores 2–3 or soak.
 - **Blockers:** No CMPH / no $100M soak. Human Stage-1 FAIL (day 14: spikes day 3/9, then −6 closed). New game only. Do not invent Unverified calls.
 
