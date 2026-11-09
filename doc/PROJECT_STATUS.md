@@ -16,7 +16,7 @@
 
 | Branch | Role |
 |--------|------|
-| **`main`** | Integration branch. Last land pending 10.1 CMPH, version 1.16.1. Story 10.1 shipped. |
+| **`main`** | Integration branch. Last land `e0e19ba`, version 1.16.1. Story 10.1 shipped. |
 | **`feature/10.1-win-reached`** | Story 10.1 win milestone. Version 1.16.1. Human PASS 2026-11-08. Kept after CMPH. |
 | **`feature/8.6-stage-sim`** | Story 8.6 stage sim. Version 1.15.6. Human PASS 2026-11-08. Kept after CMPH. |
 | **`feature/8.5-compare-policies`** | Story 8.5 policy compare. Version 1.15.5. Human PASS 2026-11-08. Kept after CMPH. |
