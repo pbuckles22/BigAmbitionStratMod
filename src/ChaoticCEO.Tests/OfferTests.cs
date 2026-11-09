@@ -373,7 +373,7 @@ public class OfferTests
         Assert.Equal("", Offer.Record(dir.Path, undone));
         Assert.Equal(1, Count(File.ReadAllText(LoadLog.CeoLogPath(dir.Path)), "building.offered"));
         Assert.Equal(
-            "building.offered version=1.16.3 street=ba:street_fourthavenue number=28 call=BizManPresentation.SendBuyBuildingOffer",
+            "building.offered version=1.16.4.1 street=ba:street_fourthavenue number=28 call=BizManPresentation.SendBuyBuildingOffer",
             logged);
         Assert.DoesNotContain("SendBuyBuildingOffer", statementsBefore);
         Assert.DoesNotContain("SendBuyBuildingOffer", routesBefore);

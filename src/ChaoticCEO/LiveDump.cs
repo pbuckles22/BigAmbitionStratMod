@@ -378,6 +378,13 @@ namespace ChaoticCEO
                 truckCost: 0,
                 LoadLog.PinnedBuild);
             var wealth = Helpers.PlayerHelper.GetPersonalWealth();
+            WholesalerBridge.Maintain(localAppData, current.Day);
+            var ownedHealth = OwnedStoreHealth(current);
+            foreach (var row in ownedHealth)
+            {
+                StoreHealth.Record(localAppData, row);
+            }
+
             var day = WinRun.Day(
                 localAppData,
                 current.Day,
@@ -2135,13 +2142,123 @@ namespace ChaoticCEO
                 var place = building.StreetName
                     + " "
                     + building.StreetNumber.ToString(CultureInfo.InvariantCulture);
-                var open = !building.temporarilyClosed;
-                var stocked = building.Alerts == 0;
-                var staffed = !building.warnedLastHourAboutNoEmployee;
+                var cargo = FixtureCargo(building);
+                var needed = Wholesaler.Catalog(building.businessTypeName);
+                var staffedStations = StaffedStationCount(building);
                 var lastIncome = LastDailyIncome(building);
-                var selling = lastIncome > 0f;
-                var profitable = lastIncome > 0f;
-                rows.Add(new StoreHealth(open, stocked, staffed, selling, profitable, place));
+                var customers = lastIncome > 0f ? 1 : CustomersToday(building, current.Day);
+                rows.Add(
+                    StoreHealth.Assess(
+                        new StoreFacts(
+                            place,
+                            building.temporarilyClosed,
+                            needed,
+                            cargo,
+                            registerStaffed: staffedStations > 0 && !building.warnedLastHourAboutNoEmployee,
+                            cleanerStaffed: staffedStations > 0 || !building.warnedLastHourAboutNoEmployee,
+                            staffSatisfaction: building.warnedLastHourAboutNoEmployee
+                                ? 0f
+                                : StoreHealthGate.SatisfactionFloor,
+                            scheduledOpen: true,
+                            dailyCustomers: customers,
+                            dailyRevenue: (decimal)lastIncome,
+                            recentOpenDayProfits: OpenDayProfits(building))));
+            }
+
+            return rows;
+        }
+
+        private static IReadOnlyDictionary<string, int> FixtureCargo(BuildingRegistration building)
+        {
+            var rows = new List<CargoAmount>();
+            if (building.itemInstances == null)
+            {
+                return StoreHealth.CountCargoAmounts(rows);
+            }
+
+            foreach (var item in building.itemInstances.Values)
+            {
+                CollectCargoAmounts(item, rows);
+            }
+
+            return StoreHealth.CountCargoAmounts(rows);
+        }
+
+        private static void CollectCargoAmounts(ItemInstance item, List<CargoAmount> rows)
+        {
+            if (item?.cargoInstances == null)
+            {
+                return;
+            }
+
+            foreach (var box in item.cargoInstances)
+            {
+                if (box == null)
+                {
+                    continue;
+                }
+
+                rows.Add(new CargoAmount(box.itemName, box.amount));
+                if (box.nestedCargoInstances == null)
+                {
+                    continue;
+                }
+
+                foreach (var nested in box.nestedCargoInstances)
+                {
+                    if (nested == null)
+                    {
+                        continue;
+                    }
+
+                    rows.Add(new CargoAmount(nested.itemName, nested.amount));
+                }
+            }
+        }
+
+        private static int StaffedStationCount(BuildingRegistration building)
+        {
+            return building.aiEmployees == null ? 0 : building.aiEmployees.Count;
+        }
+
+        private static int CustomersToday(BuildingRegistration building, int day)
+        {
+            if (building.orderHistory == null)
+            {
+                return 0;
+            }
+
+            var units = 0;
+            foreach (var entry in building.orderHistory)
+            {
+                if (entry == null || entry.dayNumber != day || entry.itemSales == null)
+                {
+                    continue;
+                }
+
+                foreach (var sale in entry.itemSales)
+                {
+                    if (sale != null)
+                    {
+                        units += sale.amountSold;
+                    }
+                }
+            }
+
+            return units;
+        }
+
+        private static IReadOnlyList<decimal> OpenDayProfits(BuildingRegistration building)
+        {
+            if (building.dailyIncomes == null || building.dailyIncomes.Count == 0)
+            {
+                return Array.Empty<decimal>();
+            }
+
+            var rows = new List<decimal>(building.dailyIncomes.Count);
+            foreach (var income in building.dailyIncomes)
+            {
+                rows.Add((decimal)income);
             }
 
             return rows;

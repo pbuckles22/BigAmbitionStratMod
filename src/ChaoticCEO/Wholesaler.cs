@@ -42,6 +42,63 @@ namespace ChaoticCEO
 
     public static class Wholesaler
     {
+        /// <summary>Buffer days of stock when next delivery is pulled to tomorrow.</summary>
+        public const int CoverOpenDays = 2;
+
+        public const int MinContractAmount = 50;
+
+        /// <summary>Live day-24: amount=70 sold through in about one open day.</summary>
+        public const int StageOneDailyBurn = 70;
+
+        public const string PaperBag = "ba:itemname_paperbag";
+
+        public static int ContractAmount(int dailyBurn)
+        {
+            if (dailyBurn <= 0)
+            {
+                return MinContractAmount;
+            }
+
+            var sized = dailyBurn * CoverOpenDays;
+            return sized < MinContractAmount ? MinContractAmount : sized;
+        }
+
+        public static int ItemAmount(string? item, int dailyBurn)
+        {
+            var amount = ContractAmount(dailyBurn);
+            if (item == PaperBag)
+            {
+                return amount * 2;
+            }
+
+            return amount;
+        }
+
+        public static bool MidWeekSurvives(int onHand, int dailyBurn, int openDaysUntilNext)
+        {
+            if (dailyBurn <= 0)
+            {
+                return true;
+            }
+
+            if (openDaysUntilNext <= 0)
+            {
+                return onHand > 0;
+            }
+
+            return onHand >= dailyBurn * openDaysUntilNext;
+        }
+
+        public static bool NeedsReschedule(int currentDay, int nextDeliveryDay)
+        {
+            return nextDeliveryDay > currentDay + 1;
+        }
+
+        public static int RescheduleDay(int currentDay)
+        {
+            return currentDay + 1;
+        }
+
         public static IReadOnlyList<WholesalerOffer> StageOne()
         {
             return new[]
