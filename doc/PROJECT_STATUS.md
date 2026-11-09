@@ -8,7 +8,7 @@
 
 ## Summary
 
-**BigAmbitionStratMod** 1.15.3 — Story **8.3** calibration shipped. Next is **8.4**. Public **EPIC** for Epic 8 is `1.15` after Epic 9’s `1.14`. **7.13** stays stashed until before **10.2**. The rules are in [requirements/strategy.md](requirements/strategy.md). `origin` is this repo.
+**BigAmbitionStratMod** 1.15.4 — Story **8.4** seeded noise shipped. Next is **8.5**. Public **EPIC** for Epic 8 is `1.15` after Epic 9’s `1.14`. **7.13** stays stashed until before **10.2**. The rules are in [requirements/strategy.md](requirements/strategy.md). `origin` is this repo.
 
 ---
 
@@ -16,7 +16,8 @@
 
 | Branch | Role |
 |--------|------|
-| **`main`** | Integration branch. Last land `34d2dd5`, version 1.15.3. Story 8.3 shipped. |
+| **`main`** | Integration branch. Last land PLACEHOLDER, version 1.15.4. Story 8.4 shipped. |
+| **`feature/8.4-seeded-noise`** | Story 8.4 seeded noise. Version 1.15.4. Human PASS 2026-11-08. Kept after CMPH. |
 | **`feature/8.3-calibration`** | Story 8.3 calibration. Version 1.15.3. Human PASS 2026-11-08. Kept after CMPH. |
 | **`feature/8.2-day-stepper`** | Story 8.2 day stepper. Version 1.15.2. Human PASS 2026-11-08. Kept after CMPH. |
 | **`feature/8.1-demand-curves`** | Story 8.1 demand and cost curves. Version 1.15.1. Human PASS 2026-11-08. Kept after CMPH. |

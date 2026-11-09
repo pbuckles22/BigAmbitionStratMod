@@ -359,6 +359,21 @@ Human version smoke (install changed; calibration is headless):
 
 Human PASS 2026-11-08 on 1.15.3. `mod.loaded version=1.15.3 build=3682`.
 
+## Story 8.4 — Seeded noise (headless + version smoke)
+
+Tier 1: `NoiseTests` locks seeded `Draw` inside **DemandNoise** / **RivalNoise** / **HireNoise**, `Project` sales/rival/hiring scales, quiet Project matches `Curves.Project`, `Trial` determinism, `Run` net-worth distribution at **SimHorizonDays**, empty inputs, and hiring-only wages. Chain `… → calibrate → noise` locks the distribution after Calibrate; chain via FitFile locks file curves into `Run`. Command: the Tier 1 `dotnet test` suite above.
+
+Human version smoke (install changed; noise is headless):
+
+1. Restart Big Ambitions so version 1.15.4 loads. Any save or a new game is fine.
+2. Open `%LocalAppData%\ChaoticCEO\ceo.log`.
+3. Do nothing else for this check.
+4. **PASS if** the first line is `mod.loaded version=1.15.4 build=3682`. **FAIL if** the version is still 1.15.3 or missing.
+5. Evidence: that `mod.loaded` line.
+6. Version marker: public `1.15.4`.
+
+Human PASS 2026-11-08 on 1.15.4. `mod.loaded version=1.15.4 build=3682`.
+
 ## Wholesaler contract human check
 
 1. Restart Big Ambitions so version 1.13.4 loads. Start a new game and reach the city. Do not load the usual save and do not load the day 1021 save. This check rents one lot, loads one starter layout, places one cleaner, and signs a recurring wholesaler `DeliveryContract` for the starter gift shop. It does not hire a cashier. Capacity fixtures are not part of this check.

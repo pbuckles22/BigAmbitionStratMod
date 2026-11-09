@@ -7,6 +7,7 @@ The autopilot plays a brand-new game with no hands on the keyboard and keeps run
 - **Win:** net worth of **WinNetWorth** = $100,000,000. The first crossing logs `win.reached` once, with day and net worth, and the autopilot keeps running. Changing the number needs the owner’s OK and an edit here.
 - **Horizon:** **SimHorizonDays** = 365 is the Epic 8 window for scoring policies. It is not an in-game stop.
 - **Calibration:** a sim fit at or before day **1000** and stepped to day **1014** stays within **CalibrateTol** = 20% relative empire profit of the real ledger at day 1014.
+- **Noise:** seeded **DemandNoise** = 0.10 scales sales, **RivalNoise** = 0.05 is the fraction of sales lost, and **HireNoise** = 0.10 scales wages. The Monte Carlo window is **SimHorizonDays**.
 - **Continuous:** After the milestone the autopilot stays in Stage 4, compounding and self-healing, until Autopilot is turned off or F10 is pressed.
 - **Boundary:** the mod acts through game-state and command calls only. Those calls rent, load a layout, sign or drop a wholesaler contract, hire, train, meet a demand, write plans, set store ops, take a loan, pay taxes, buy, decline a takeover, and advance time. It does not walk, drive, or push a hand cart.
 - **Calls:** a call the autopilot uses is listed in [game-api.md](game-api.md) as recorded. An unverified call is a discovery story, not code.
