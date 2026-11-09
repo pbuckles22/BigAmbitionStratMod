@@ -19,7 +19,8 @@ This is the durable home for technical debt across sessions. Handoff notes can m
 
 (High ROI; frequent pain; not blocking.)
 
-- (none)
+- `StageSim.cs` (~780 lines) embeds a second headless empire (`World`) beside `DayStep` / `Calibrate`. It drives Epic 9 decides but not close, run, audit, marketing, or time-advance. Split `World` or share one step kernel before Epic **10** growth makes the two paths drift.
+- `StageSim.Tune` only scores caller-supplied `StageThresholdOption` bags. `strategy.md` still says tune every **named** threshold with a Tier 1 lock per tuned value; chains only exercise **Stage2Cash** climb vs tight. Add an owner-facing search/grid or narrow the rulebook text before **10.1** applies tuned numbers live.
 
 ## Accept for now
 
@@ -33,7 +34,8 @@ This is the durable home for technical debt across sessions. Handoff notes can m
 - `CapacityBridge.AlreadyMatched` is untested on the production path; tests plant `alreadyMatched` instead. `TryCapacity` retries every frame with no evidence when `Live` fails. Revisit when capacity miss diagnosis hurts.
 - `Stage.Decide` treats `suppliedStores == goodsStores` as true when both are 0, so cash ≥ **Stage4Cash** with zero stores and zero empty slots returns Stage 4 (locked in `StageTests`). Revisit before **10.2** if a brand-new or fully liquidated save should stay Stage 1 Bootstrap.
 - Staff plan write (**7.9**) is still *Unverified* in `game-api.md`, and cost-center / FixDays / RedDays close filters (**7.13**) are stashed. Finish **7.13** + **7.9**, or fold **7.13**’s pure filter into **9.5**, before the live **10.2** Autopilot loop.
-- `LiveDump.NextPlaybook` only feeds open, money, and run into `Playbook.Decide` (other picks stay `None()`). Enough for a new-game F9 step. Revisit when Epic **8** or **10.2** needs managers/supply/close on the live board.
+- `LiveDump.NextPlaybook` only feeds open, money, and run into `Playbook.Decide` (other picks stay `None()`). Enough for a new-game F9 step. Epic **8** stage-sim is headless only. Revisit when **10.2** needs managers/supply/close on the live board.
+- `StageSim.World` stubs wholesaler supply (`Contracted` without full refill/contract drop), fixed wage/rent in `DailyCost`, and `ClosePick.None()` / `RunPick.None()` every day. Fine for **8.6** median/worst scoring. Revisit when the live autopilot must match strategy.md stages 3–4 and continuous play.
 
 ---
 

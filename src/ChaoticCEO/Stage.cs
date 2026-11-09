@@ -21,19 +21,41 @@ namespace ChaoticCEO
             int emptySlots,
             int plans)
         {
+            return Decide(
+                day,
+                cash,
+                goodsStores,
+                suppliedStores,
+                warehouses,
+                emptySlots,
+                plans,
+                StageThresholds.Starting());
+        }
+
+        public static int Decide(
+            int day,
+            decimal cash,
+            int goodsStores,
+            int suppliedStores,
+            int warehouses,
+            int emptySlots,
+            int plans,
+            StageThresholds? thresholds)
+        {
             _ = day;
             _ = warehouses;
-            if (cash >= Stage4Cash && suppliedStores == goodsStores && emptySlots == 0)
+            var gates = thresholds ?? StageThresholds.Starting();
+            if (cash >= gates.Stage4Cash && suppliedStores == goodsStores && emptySlots == 0)
             {
                 return 4;
             }
 
-            if (plans > 0 && suppliedStores >= Stage3Supplied)
+            if (plans > 0 && suppliedStores >= gates.Stage3Supplied)
             {
                 return 3;
             }
 
-            if (cash >= Stage2Cash && goodsStores >= Stage2Stores)
+            if (cash >= gates.Stage2Cash && goodsStores >= gates.Stage2Stores)
             {
                 return 2;
             }

@@ -9,6 +9,7 @@ The autopilot plays a brand-new game with no hands on the keyboard and keeps run
 - **Calibration:** a sim fit at or before day **1000** and stepped to day **1014** stays within **CalibrateTol** = 20% relative empire profit of the real ledger at day 1014.
 - **Noise:** seeded **DemandNoise** = 0.10 scales sales, **RivalNoise** = 0.05 is the fraction of sales lost, and **HireNoise** = 0.10 scales wages. The Monte Carlo window is **SimHorizonDays**.
 - **Policy:** compare curve sets over **SimHorizonDays**. Keep the best median whose worst stays within **PolicyWorstTol** = 0.98 of that policy’s own median.
+- **Stage sim:** run the four stages from day 1 over **SimHorizonDays** through the Epic 9 decides, with the named thresholds. Report whether **WinNetWorth** is reached at the median and at the worst. Tune keeps the best median that still passes **PolicyWorstTol**.
 - **Continuous:** After the milestone the autopilot stays in Stage 4, compounding and self-healing, until Autopilot is turned off or F10 is pressed.
 - **Boundary:** the mod acts through game-state and command calls only. Those calls rent, load a layout, sign or drop a wholesaler contract, hire, train, meet a demand, write plans, set store ops, take a loan, pay taxes, buy, decline a takeover, and advance time. It does not walk, drive, or push a hand cart.
 - **Calls:** a call the autopilot uses is listed in [game-api.md](game-api.md) as recorded. An unverified call is a discovery story, not code.

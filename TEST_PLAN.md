@@ -389,6 +389,21 @@ Human version smoke (install changed; policy compare is headless):
 
 Human PASS 2026-11-08 on 1.15.5. `mod.loaded version=1.15.5 build=3682`.
 
+## Story 8.6 — Stage sim (headless + version smoke)
+
+Tier 1: `StageSimTests` locks **StageThresholds.Starting** against every named production const, `Stage.Decide` with thresholds, stage-1 open cap at **Stage2Stores**, `Trial` / `Run` win flags against **WinNetWorth**, empty inputs, and `Tune` (climb over tight, median tie, blank skip). Chain `… → policy → stage-sim` reports win flags after calibrate/noise/policy; FitFile chain tunes climb over tight. Command: the Tier 1 `dotnet test` suite above.
+
+Human version smoke (install changed; stage sim is headless):
+
+1. Restart Big Ambitions so version 1.15.6 loads. Any save or a new game is fine.
+2. Open `%LocalAppData%\ChaoticCEO\ceo.log`.
+3. Do nothing else for this check.
+4. **PASS if** the first line is `mod.loaded version=1.15.6 build=3682`. **FAIL if** the version is still 1.15.5 or missing.
+5. Evidence: that `mod.loaded` line.
+6. Version marker: public `1.15.6`.
+
+Human PASS 2026-11-08 on 1.15.6. `mod.loaded version=1.15.6 build=3682`.
+
 ## Wholesaler contract human check
 
 1. Restart Big Ambitions so version 1.13.4 loads. Start a new game and reach the city. Do not load the usual save and do not load the day 1021 save. This check rents one lot, loads one starter layout, places one cleaner, and signs a recurring wholesaler `DeliveryContract` for the starter gift shop. It does not hire a cashier. Capacity fixtures are not part of this check.

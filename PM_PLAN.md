@@ -10,7 +10,7 @@ Epic 1 closed on 17 businesses and 5865 statement rows. `ba:businesstype_liquors
 
 The end goal is a brand-new game played with no hands on the keyboard. Crossing **WinNetWorth** ($100M) logs `win.reached` once, and the autopilot keeps running. **SimHorizonDays** (365) is only the Epic 8 scoring window. The mod acts through game-state and command calls. It does not walk, drive, or hand-cart. The rules and the four stages are in [doc/requirements/strategy.md](doc/requirements/strategy.md). Calls not yet found are listed under *Unverified* in `doc/requirements/game-api.md`, and code does not use them.
 
-Run order: Epics 12, 13, and 9 are done. Next are Epics 8 and 10. **7.13** and **7.9–7.12** stay stashed until just before **10.2**. Epic numbers stay as they are; the public **EPIC** segment is the phase counter.
+Run order: Epics 12, 13, 9, and 8 are done. Next is Epic 10. **7.13** and **7.9–7.12** stay stashed until just before **10.2**. Epic numbers stay as they are; the public **EPIC** segment is the phase counter.
 
 One story per branch. Human check after **2.2**, after **3.3**, and on every story in Epics 5 through 13. Each epic in the run order waits until the one before it works. Monte Carlo is only **8.4–8.5**. The story test gate reuses the save index. Rebuild it when the dropzone `.hsg` changes, when `script/Slice-SaveGame.py` changes, or at epic close.
 
@@ -157,7 +157,7 @@ Starts after Epic **13**. The rulebook as a pure library. Each decision has a Ti
 
 ## Epic 8 — Strategy engine
 
-**Status:** in progress
+**Status:** complete — 2026-11-08
 
 Starts after Epic **9**. Public versions for this epic are `1.15.COUNTER`. **8.1–8.3** are one deterministic sim. **8.4–8.5** add randomness inside **SimHorizonDays**. The result re-ranks the **7.6** roadmap that F9 shows and tunes every named threshold in `strategy.md`. **8.6** calls the Epic 9 library.
 
@@ -166,19 +166,19 @@ Starts after Epic **9**. Public versions for this epic are `1.15.COUNTER`. **8.1
 - **8.3** `[x]` Calibration: a sim from day 1000 lands within tolerance of the real ledger at day 1014. `Calibrate.Check` / `CheckFile` fit at or before day 1000, `DayStep.Run` to 1014, empire profit within **CalibrateTol** (20%). Headless. Version 1.15.3. Chain: `load → … → day-step → calibrate`.
 - **8.4** `[x]` Seeded demand, rival, and hiring noise. `Noise.Draw` / `Project` / `Trial` / `Run` lock **DemandNoise**, **RivalNoise**, **HireNoise**, and the net-worth distribution at **SimHorizonDays**. Headless. Version 1.15.4. Chain: `load → … → calibrate → noise`.
 - **8.5** `[x]` Compare policies over **SimHorizonDays**. `Policy.Compare` / `Acceptable` keep the best median whose worst stays within **PolicyWorstTol** (0.98) of that policy’s own median. Headless. Version 1.15.5. Chain: `load → … → noise → policy`.
-- **8.6** `[ ]` Stage sim. Call the Epic 9 library. Run the four stages from day 1 over **SimHorizonDays** with the starting thresholds. Tune every named threshold. Report whether **WinNetWorth** is reached at the median by that horizon, and the worst case. Each tuned threshold gets a named Tier 1 test. A target that is not reachable comes back to the owner before Epic 10.
+- **8.6** `[x]` Stage sim. Call the Epic 9 library. `StageSim.Trial` / `Run` / `Tune` and `StageThresholds.Starting` run the four stages from day 1 over **SimHorizonDays**, report **WinNetWorth** at median and worst, and keep the best median that passes **PolicyWorstTol**. Headless. Version 1.15.6. Chain: `load → … → policy → stage-sim`.
 
 ## Epic 10 — Watch it win
 
-**Status:** later
+**Status:** next
 
-Starts after Epic **8**. Crossing **WinNetWorth** is a milestone. The autopilot keeps compounding in Stage 4.
+Starts after Epic **8**. Crossing **WinNetWorth** is a milestone. The autopilot keeps compounding in Stage 4. Public versions for this epic are `1.16.COUNTER`.
 
 - **10.1** `[ ]` Lock the milestone. Crossing **WinNetWorth**, or the number **8.6** returned and the owner approved, logs `win.reached` once. Later days do not log it again, and the autopilot stays on.
 - **10.2** `[ ]` Autopilot loop. Each day, while `Autopilot.Enabled` is on: audit, heal, the stage’s actions through the recorded calls, then time advance, within the guardrails. The **12.3** toggle and F10 clear the flag. Human check: one autopilot day on a new save matches its `telemetry.csv` row, and a cleared flag skips the next day.
 - **10.3** `[ ]` Hands-off run from a new save. PASS is `win.reached` in `ceo.log` and later telemetry rows that still advance. Every decision the run finds becomes a Tier 1 test before the next run.
 
-**Next:** Story **8.5** shipped at version **1.15.5**. Next ship: story **8.6** when asked. **7.13** stays stashed until before **10.2**.
+**Next:** Epic **8** closed at version **1.15.6**. Next ship: story **10.1** when asked. **7.13** stays stashed until before **10.2**.
 
 Operating model (keep these when you replace this plan): `.cursor/rules/` ship commands (UCPH, CMPH, SWAT), human check, plan-coordinate versioning, long-run harvest (`testing.mdc`), and the chain harness and prefix (`integration-chain.mdc`). Do not delete them to “clean up” a new clone.
 
