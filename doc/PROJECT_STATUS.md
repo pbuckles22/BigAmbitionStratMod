@@ -16,7 +16,7 @@
 
 | Branch | Role |
 |--------|------|
-| **`main`** | Integration branch. Last land `dc91397`, version 1.16.2. Story 10.2 shipped. |
+| **`main`** | Integration branch. Last land `97f7626`, version 1.16.2. Story 10.2 shipped. |
 | **`feature/10.2-autopilot-loop`** | Story 10.2 autopilot day loop. Version 1.16.2. Human PASS 2026-11-09. Kept after CMPH. |
 | **`feature/10.1-win-reached`** | Story 10.1 win milestone. Version 1.16.1. Human PASS 2026-11-08. Kept after CMPH. |
 | **`feature/8.6-stage-sim`** | Story 8.6 stage sim. Version 1.15.6. Human PASS 2026-11-08. Kept after CMPH. |
