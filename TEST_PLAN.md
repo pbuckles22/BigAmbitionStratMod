@@ -374,6 +374,21 @@ Human version smoke (install changed; noise is headless):
 
 Human PASS 2026-11-08 on 1.15.4. `mod.loaded version=1.15.4 build=3682`.
 
+## Story 8.5 — Compare policies (headless + version smoke)
+
+Tier 1: `PolicyTests` locks **PolicyWorstTol**, `Acceptable` against own median, `Compare` picks the higher median when the worst stays acceptable, keeps the stable policy when a higher median breaks the tol, median ties keep the earlier name, empty/null/blank inputs, and blank-name skip. Chain `… → noise → policy` picks close over keep after calibrate/noise; FitFile chain keeps stable over gamble. Command: the Tier 1 `dotnet test` suite above.
+
+Human version smoke (install changed; policy compare is headless):
+
+1. Restart Big Ambitions so version 1.15.5 loads. Any save or a new game is fine.
+2. Open `%LocalAppData%\ChaoticCEO\ceo.log`.
+3. Do nothing else for this check.
+4. **PASS if** the first line is `mod.loaded version=1.15.5 build=3682`. **FAIL if** the version is still 1.15.4 or missing.
+5. Evidence: that `mod.loaded` line.
+6. Version marker: public `1.15.5`.
+
+Human PASS 2026-11-08 on 1.15.5. `mod.loaded version=1.15.5 build=3682`.
+
 ## Wholesaler contract human check
 
 1. Restart Big Ambitions so version 1.13.4 loads. Start a new game and reach the city. Do not load the usual save and do not load the day 1021 save. This check rents one lot, loads one starter layout, places one cleaner, and signs a recurring wholesaler `DeliveryContract` for the starter gift shop. It does not hire a cashier. Capacity fixtures are not part of this check.

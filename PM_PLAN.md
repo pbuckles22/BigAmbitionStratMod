@@ -165,7 +165,7 @@ Starts after Epic **9**. Public versions for this epic are `1.15.COUNTER`. **8.1
 - **8.2** `[x]` Day stepper using the Epic 4 library. Same `portfolio.csv` shape. `DayStep.Day` / `Run` project statement rows from curves; `DayStep.Portfolio` locks business/family/street/number/tco; `DayStep.Rank` calls `Advisor.Rank`. Headless. Version 1.15.2. Chain: `load → … → curves → day-step`.
 - **8.3** `[x]` Calibration: a sim from day 1000 lands within tolerance of the real ledger at day 1014. `Calibrate.Check` / `CheckFile` fit at or before day 1000, `DayStep.Run` to 1014, empire profit within **CalibrateTol** (20%). Headless. Version 1.15.3. Chain: `load → … → day-step → calibrate`.
 - **8.4** `[x]` Seeded demand, rival, and hiring noise. `Noise.Draw` / `Project` / `Trial` / `Run` lock **DemandNoise**, **RivalNoise**, **HireNoise**, and the net-worth distribution at **SimHorizonDays**. Headless. Version 1.15.4. Chain: `load → … → calibrate → noise`.
-- **8.5** `[ ]` Compare policies over **SimHorizonDays**. Keep the best median with an acceptable worst case.
+- **8.5** `[x]` Compare policies over **SimHorizonDays**. `Policy.Compare` / `Acceptable` keep the best median whose worst stays within **PolicyWorstTol** (0.98) of that policy’s own median. Headless. Version 1.15.5. Chain: `load → … → noise → policy`.
 - **8.6** `[ ]` Stage sim. Call the Epic 9 library. Run the four stages from day 1 over **SimHorizonDays** with the starting thresholds. Tune every named threshold. Report whether **WinNetWorth** is reached at the median by that horizon, and the worst case. Each tuned threshold gets a named Tier 1 test. A target that is not reachable comes back to the owner before Epic 10.
 
 ## Epic 10 — Watch it win
@@ -178,7 +178,7 @@ Starts after Epic **8**. Crossing **WinNetWorth** is a milestone. The autopilot 
 - **10.2** `[ ]` Autopilot loop. Each day, while `Autopilot.Enabled` is on: audit, heal, the stage’s actions through the recorded calls, then time advance, within the guardrails. The **12.3** toggle and F10 clear the flag. Human check: one autopilot day on a new save matches its `telemetry.csv` row, and a cleared flag skips the next day.
 - **10.3** `[ ]` Hands-off run from a new save. PASS is `win.reached` in `ceo.log` and later telemetry rows that still advance. Every decision the run finds becomes a Tier 1 test before the next run.
 
-**Next:** Story **8.4** shipped at version **1.15.4**. Next ship: story **8.5** when asked. **7.13** stays stashed until before **10.2**.
+**Next:** Story **8.5** shipped at version **1.15.5**. Next ship: story **8.6** when asked. **7.13** stays stashed until before **10.2**.
 
 Operating model (keep these when you replace this plan): `.cursor/rules/` ship commands (UCPH, CMPH, SWAT), human check, plan-coordinate versioning, long-run harvest (`testing.mdc`), and the chain harness and prefix (`integration-chain.mdc`). Do not delete them to “clean up” a new clone.
 
