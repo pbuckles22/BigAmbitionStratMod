@@ -4,7 +4,7 @@ The autopilot plays a brand-new game with no hands on the keyboard and keeps run
 
 ## Win and boundary
 
-- **Win:** net worth of **WinNetWorth** = $100,000,000. The first crossing logs `win.reached` once, with day and net worth, and the autopilot keeps running. Changing the number needs the owner’s OK and an edit here.
+- **Win:** net worth of **WinNetWorth** = $100,000,000. The first crossing logs `win.reached` once, with day and net worth, and the autopilot keeps running. An owner-approved target from the Epic 8 stage sim may replace that number. Changing the number needs the owner’s OK and an edit here.
 - **Horizon:** **SimHorizonDays** = 365 is the Epic 8 window for scoring policies. It is not an in-game stop.
 - **Calibration:** a sim fit at or before day **1000** and stepped to day **1014** stays within **CalibrateTol** = 20% relative empire profit of the real ledger at day 1014.
 - **Noise:** seeded **DemandNoise** = 0.10 scales sales, **RivalNoise** = 0.05 is the fraction of sales lost, and **HireNoise** = 0.10 scales wages. The Monte Carlo window is **SimHorizonDays**.

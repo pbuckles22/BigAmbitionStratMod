@@ -1367,11 +1367,21 @@ namespace ChaoticCEO
                 return;
             }
 
+            var hud = HudLine();
             Telemetry.Record(
                 localAppData,
-                HudLine(),
+                hud,
                 Health.Latest(localAppData),
                 Controls.Row(Autopilot.Enabled, Autopilot.DryRun));
+            var current = SaveGameManager.Current;
+            if (current != null)
+            {
+                var wealth = Helpers.PlayerHelper.GetPersonalWealth();
+                Win.Record(
+                    LoadLog.CeoLogPath(localAppData),
+                    current.Day,
+                    ToMoney(wealth.CurrentWealth));
+            }
         }
 
         private static HealFate LiveHeal(AuditHeal heal)
