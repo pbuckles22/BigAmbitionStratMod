@@ -16,7 +16,7 @@
 
 | Branch | Role |
 |--------|------|
-| **`main`** | Integration branch. Last land pending 8.5 CMPH, version 1.15.5. |
+| **`main`** | Integration branch. Last land `cc7dcac`, version 1.15.5. Story 8.5 shipped. |
 | **`feature/8.5-compare-policies`** | Story 8.5 policy compare. Version 1.15.5. Human PASS 2026-11-08. Kept after CMPH. |
 | **`feature/8.4-seeded-noise`** | Story 8.4 seeded noise. Version 1.15.4. Human PASS 2026-11-08. Kept after CMPH. |
 | **`feature/8.3-calibration`** | Story 8.3 calibration. Version 1.15.3. Human PASS 2026-11-08. Kept after CMPH. |
