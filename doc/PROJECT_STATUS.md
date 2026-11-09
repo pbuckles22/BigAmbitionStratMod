@@ -16,7 +16,7 @@
 
 | Branch | Role |
 |--------|------|
-| **`main`** | Integration branch. Last land TBD after CMPH, version 1.16.4.1. Story 10.3 Ship A stock PASS. |
+| **`main`** | Integration branch. Last land `962ce6a`, version 1.16.4.1. Story 10.3 Ship A stock PASS. |
 | **`feature/10.3-hands-off-win`** | Story 10.3 hands-off win. Version 1.16.4.1. Ship A Stage-1 stock PASS 2026-11-09. Kept after CMPH. |
 | **`feature/10.2-autopilot-loop`** | Story 10.2 autopilot day loop. Version 1.16.2. Human PASS 2026-11-09. Kept after CMPH. |
 | **`feature/10.1-win-reached`** | Story 10.1 win milestone. Version 1.16.1. Human PASS 2026-11-08. Kept after CMPH. |
