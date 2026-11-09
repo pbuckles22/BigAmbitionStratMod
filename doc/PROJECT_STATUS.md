@@ -16,7 +16,7 @@
 
 | Branch | Role |
 |--------|------|
-| **`main`** | Integration branch. Last land pending this CMPH, version 1.16.5.6. Story 10.3 soak-speed PASS. |
+| **`main`** | Integration branch. Last land `edc36f5`, version 1.16.5.6. Story 10.3 soak-speed PASS. |
 | **`feature/10.3-hands-off-win`** | Story 10.3 hands-off win. Version 1.16.5.6. Soak-speed + Resume skip PASS 2026-11-09. Kept after CMPH. |
 | **`feature/10.2-autopilot-loop`** | Story 10.2 autopilot day loop. Version 1.16.2. Human PASS 2026-11-09. Kept after CMPH. |
 | **`feature/10.1-win-reached`** | Story 10.1 win milestone. Version 1.16.1. Human PASS 2026-11-08. Kept after CMPH. |
