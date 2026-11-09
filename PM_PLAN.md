@@ -176,9 +176,9 @@ Starts after Epic **8**. Crossing **WinNetWorth** is a milestone. The autopilot 
 
 - **10.1** `[x]` Lock the milestone. `Win.Record` / `Milestone` log `win.reached` once at **WinNetWorth** or an owner-approved target; later days do not log it again; Autopilot stays on. Headless. Version 1.16.1. Chain: `load → … → stage-sim → win`.
 - **10.2** `[x]` Autopilot loop. Each day, while `Autopilot.Enabled` is on: audit, heal, the stage’s actions through the recorded calls, then time advance, within the guardrails. The **12.3** toggle and F10 clear the flag. Human PASS 2026-11-09. New game days 2–8: `autopilot.day ran=true` matched `telemetry.csv`; F10 cleared. Version 1.16.2. Chain: `load → … → win → autopilot`.
-- **10.3** `[ ]` Hands-off run from a new save. PASS is `win.reached` in `ceo.log` and later telemetry rows that still advance. Every decision the run finds becomes a Tier 1 test before the next run.
+- **10.3** `[ ]` Hands-off run from a new save. PASS is `win.reached` in `ceo.log` and later telemetry rows that still advance. Every decision the run finds becomes a Tier 1 test before the next run. **WIP (2026-11-09):** G1–G5 text + coarse open gate + catalog/amount parked on `feature/10.3-hands-off-win` at 1.16.3. Live still weekly stockout → Temporarily Closed; no soak. Full runbook Ships A–E (sensors/heals → Stage 2 handover → scale → win). Plan: full expansion runbook.
 
-**Next:** Story **10.2** shipped at version **1.16.2**. Next ship: story **10.3** when asked. **7.13** stays stashed until before a story that needs close filters.
+**Next:** Resume **10.3** Ship A when asked — real G1–G5 + delivery survival. **7.13** stays stashed until a story needs close filters.
 
 Operating model (keep these when you replace this plan): `.cursor/rules/` ship commands (UCPH, CMPH, SWAT), human check, plan-coordinate versioning, long-run harvest (`testing.mdc`), and the chain harness and prefix (`integration-chain.mdc`). Do not delete them to “clean up” a new clone.
 

@@ -100,7 +100,8 @@ namespace ChaoticCEO
                 items.Add(new DeliveryContractItem
                 {
                     itemName = name,
-                    amount = 10,
+                    // Days 3→9 stockout: amount=10 sold out in one open day; size for a week of burn.
+                    amount = 50,
                 });
             }
 
@@ -109,25 +110,7 @@ namespace ChaoticCEO
 
         private static IReadOnlyList<string> Catalog(string businessType)
         {
-            if (businessType == "ba:businesstype_giftshop")
-            {
-                return new[]
-                {
-                    "ba:itemname_cheapgift",
-                    "ba:itemname_expensivegift",
-                };
-            }
-
-            if (businessType == "ba:businesstype_florist")
-            {
-                return new[]
-                {
-                    "ba:itemname_cheapflower",
-                    "ba:itemname_expensiveflower",
-                };
-            }
-
-            return System.Array.Empty<string>();
+            return Wholesaler.Catalog(businessType);
         }
 
         private static bool Split(string place, out string street, out int number)

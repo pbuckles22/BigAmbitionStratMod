@@ -178,7 +178,9 @@ namespace ChaoticCEO
 
         public bool Due(object? save)
         {
-            return save != null && _completed < TimeAdvance.WeekDays;
+            // WeekDays still gates the one-week TryTime finish via Completed + Mark.
+            // Hands-off soak must keep Due after day 8 so Autopilot can force-skip.
+            return save != null;
         }
 
         public bool Waiting(int day)

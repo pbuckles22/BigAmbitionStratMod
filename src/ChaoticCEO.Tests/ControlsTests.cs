@@ -2,6 +2,7 @@ using ChaoticCEO;
 
 namespace ChaoticCEO.Tests;
 
+[Collection(nameof(AutopilotState))]
 public class ControlsTests
 {
     [Fact]

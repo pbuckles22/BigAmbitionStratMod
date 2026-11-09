@@ -159,6 +159,23 @@ public class TimeAdvanceTests
     }
 
     [Fact]
+    public void TimeAdvance_watch_stays_due_past_week_days_for_hands_off_soak()
+    {
+        // Harvest: WeekDays=7 stopped TryTime after day 8; soak cannot force-skip forever.
+        var watch = new TimeAdvanceWatch();
+        var save = new object();
+        for (var i = 0; i < TimeAdvance.WeekDays + 3; i++)
+        {
+            Assert.True(watch.Due(save));
+            watch.WaitFor(i + 1);
+            Assert.True(watch.Arrive(i + 1));
+        }
+
+        Assert.True(watch.Due(save));
+        Assert.True(watch.Completed > TimeAdvance.WeekDays);
+    }
+
+    [Fact]
     public void TimeAdvance_a_week_is_seven_safe_day_skips()
     {
         var api = GameApi.Live();

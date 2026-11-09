@@ -42,6 +42,54 @@ public class WholesalerTests
     }
 
     [Fact]
+    public void Wholesaler_gift_shop_catalog_covers_GiftShopWholesalers_layout_stock()
+    {
+        // Inspected from StreamingAssets/BusinessLayouts/GiftShop/*/GiftShopWholesalers.json
+        // (cheapgift, cheapflower, sodacan, paperbag, umbrella). Do not guess umbrella.
+        var needed = Wholesaler.GiftShopWholesalersStock();
+        var catalog = Wholesaler.Catalog("ba:businesstype_giftshop");
+
+        Assert.Equal(
+            new[]
+            {
+                "ba:itemname_cheapgift",
+                "ba:itemname_cheapflower",
+                "ba:itemname_sodacan",
+                "ba:itemname_paperbag",
+                "ba:itemname_umbrella",
+            },
+            needed);
+        Assert.True(Wholesaler.Covers(needed, catalog));
+        Assert.Contains("ba:itemname_umbrella", catalog);
+        Assert.Contains("ba:itemname_paperbag", catalog);
+        Assert.Contains("ba:itemname_sodacan", catalog);
+        Assert.Contains("ba:itemname_cheapflower", catalog);
+        Assert.Contains("ba:itemname_cheapgift", catalog);
+    }
+
+    [Fact]
+    public void Wholesaler_covers_fails_when_catalog_misses_a_needed_item()
+    {
+        // Harvest: day-8 reds for umbrella/paperbag/flowers/soda while catalog was gifts-only.
+        Assert.False(
+            Wholesaler.Covers(
+                Wholesaler.GiftShopWholesalersStock(),
+                new[] { "ba:itemname_cheapgift", "ba:itemname_expensivegift" }));
+        Assert.False(Wholesaler.Covers(Wholesaler.GiftShopWholesalersStock(), null));
+        Assert.False(Wholesaler.Covers(null, Wholesaler.Catalog("ba:businesstype_giftshop")));
+        Assert.Empty(Wholesaler.Catalog(""));
+        Assert.Empty(Wholesaler.Catalog(null));
+    }
+
+    [Fact]
+    public void Wholesaler_gift_shop_layout_umbrella_is_specialty_cargo()
+    {
+        Assert.Equal("specialty", Advisor.CargoFamily("ba:itemname_umbrella"));
+        Assert.Equal("specialty", Advisor.CargoFamily("ba:itemname_cheapgift"));
+        Assert.Equal("food", Advisor.CargoFamily("ba:itemname_sodacan"));
+    }
+
+    [Fact]
     public void Wholesaler_a_signed_store_stays_put_and_skips_what_cannot_be_contracted()
     {
         var api = GameApi.Live();

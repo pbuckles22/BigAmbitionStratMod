@@ -2,6 +2,7 @@ using ChaoticCEO;
 
 namespace ChaoticCEO.Tests;
 
+[Collection(nameof(AutopilotState))]
 public class AutopilotTests
 {
     private const string Hair = "ba:itemname_haircareproduct";
@@ -136,6 +137,68 @@ public class AutopilotTests
         Assert.Equal("", Autopilot.Call(PlaybookStep.None(), api));
         Assert.Equal("", Autopilot.Call(null, api));
         Assert.Equal("", Autopilot.CallKey(null));
+    }
+
+    [Fact]
+    public void Autopilot_day_invokes_action_bridge_before_logging_the_step()
+    {
+        // Harvest: Autopilot.Day logged autopilot.action without calling a live bridge.
+        using var dir = new TempLog();
+        Autopilot.Enabled = true;
+        Autopilot.DryRun = false;
+        var api = GameApi.Live();
+        PlaybookStep? seen = null;
+        var callSeen = "";
+        var day = Autopilot.Day(
+            dir.Path,
+            12,
+            api,
+            ClearWorld(),
+            LiveGuard(),
+            heal => HealFate.Done,
+            new PlaybookStep("money", "loan 500", true),
+            Needs.Hold(),
+            TopBar.Line(12, 100m, 200m, 1m, 1, true, 1),
+            Health.Section(null, null),
+            timeBridge: skip => true,
+            actionBridge: (step, call) =>
+            {
+                seen = step;
+                callSeen = call;
+                return true;
+            });
+
+        Assert.True(day.Ran);
+        Assert.NotNull(seen);
+        Assert.Equal("money", seen!.Kind);
+        Assert.Equal(api.Call("loan"), callSeen);
+        Assert.Contains("autopilot.action ", day.Action);
+        Assert.StartsWith("time.advanced ", day.Advanced);
+    }
+
+    [Fact]
+    public void Autopilot_day_skips_action_line_when_action_bridge_refuses()
+    {
+        using var dir = new TempLog();
+        Autopilot.Enabled = true;
+        Autopilot.DryRun = false;
+        var day = Autopilot.Day(
+            dir.Path,
+            12,
+            GameApi.Live(),
+            ClearWorld(),
+            LiveGuard(),
+            heal => HealFate.Done,
+            new PlaybookStep("money", "loan 500", true),
+            Needs.Hold(),
+            TopBar.Line(12, 100m, 200m, 1m, 1, true, 1),
+            Health.Section(null, null),
+            timeBridge: skip => true,
+            actionBridge: (_, _) => false);
+
+        Assert.True(day.Ran);
+        Assert.Equal("", day.Action);
+        Assert.DoesNotContain("autopilot.action ", File.ReadAllText(LoadLog.CeoLogPath(dir.Path)));
     }
 
     [Fact]

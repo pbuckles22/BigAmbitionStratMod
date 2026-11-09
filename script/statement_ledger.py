@@ -134,6 +134,7 @@ _ITEM_GROUPS = {
         "cheapgift",
         "expensiveflower",
         "expensivegift",
+        "umbrella",
         "limitededitionbook",
         "motivationalbook",
         "novel",

@@ -434,6 +434,21 @@ Human check:
 
 Human PASS 2026-11-09 on 1.16.2. New game: `mod.loaded version=1.16.2 build=3682`. Days 2–8 each `autopilot.day ran=true` with matching `audit.summary` and `telemetry.csv` (day 8: cash 14664, net 14199, profit -106, stage 1, missingPlans 1). F10 logged `autopilot.paused reason=f10` and the bar flipped Autopilot off. Live path does not call the day loop when cleared, so no further `autopilot.action` after F10.
 
+## Story 10.3 — Hands-off win run
+
+Tier 1: `WinRunTests` locks `WinRun.Day` / `Run`, pending open → where, pending clear + suppress open same tick (money/run), and chain `… → autopilot → win-run` (pending unlock → money action bridge). `WholesalerTests` locks `GiftShopWholesalers` catalog stock (`cheapgift`, `cheapflower`, `sodacan`, `paperbag`, `umbrella` from layout JSON) and `Covers`. `AutopilotTests` locks action-bridge invoke/refuse. `TimeAdvanceTests` locks watch Due past `WeekDays`. Command: the Tier 1 `dotnet test` suite above.
+
+Human check (Stage-1 stock foundation — not a $100M soak yet):
+
+1. Restart Big Ambitions so version 1.16.3 loads. Start a **new** game and reach the city. Do not load the day 1021 save. Do not continue a Starter Gift save.
+2. Wait through day-1 setup (`layout.loaded`, `contract.signed`). Skip or let time reach the next morning, then open Store #1 and look at Product Panel / Display / Drinks Fridge / Cash Register.
+3. Leave Autopilot on through days 2–3. Open `%LocalAppData%\ChaoticCEO\ceo.log` and the F9 bar.
+4. **PASS if** day 2–3 show zero red stock alerts on Store #1, daily profit > 0 on the bar, one `contract.signed`, and autopilot is not stuck blank after one `kind=open` (money/run or where can appear). **FAIL if** version is still 1.16.2, shelves stay empty with reds for umbrella/paperbag/flowers/soda, profit stays negative, or playbook stays blank after pending open.
+5. Evidence: `contract.signed`; day 2+ `autopilot.action` not stuck after one open; bar profit > 0. If overnight delivery still leaves panels empty after the wider catalog, stop — that is a shelf-delivery discovery find, not a PASS waive.
+6. Version marker: public `1.16.3`. `ceo.log` starts at `mod.loaded version=1.16.3 build=3682`.
+
+Full `win.reached` soak stays blocked until this Stage-1 stock PASS.
+
 ## Wholesaler contract human check
 
 1. Restart Big Ambitions so version 1.13.4 loads. Start a new game and reach the city. Do not load the usual save and do not load the day 1021 save. This check rents one lot, loads one starter layout, places one cleaner, and signs a recurring wholesaler `DeliveryContract` for the starter gift shop. It does not hire a cashier. Capacity fixtures are not part of this check.

@@ -32,6 +32,21 @@ The stage is a pure decision, `Stage.Decide(day, cash, goodsStores, suppliedStor
 - Stage 1 opens only goods types whose stock a wholesaler sells. Gift shop, florist, and fast food are the starting list.
 - When filled garage slots carry more than **TruckBusy** = 85% of their daily cargo, the next opening is a service or office business (law, web, graphics, hair, gym). Those need no trucks.
 - A new goods family needs a warehouse for that family before Stage 3 opens a second store of it.
+- **Store readiness before expansion:** do not emit `open` or `where` while `PendingOpen` is set, or while any currently owned business fails the Store Readiness Gate (G1–G5). Store 1 has no prior store to check. Store N+1 waits until stores 1…N are Ready. Stage promotions use the same gate on every owned goods store.
+
+### Store Readiness Gate (G1–G5)
+
+Every owned business must pass all five before expansion or stage promotion:
+
+| Gate | Name | Condition | If failed |
+| --- | --- | --- | --- |
+| G1 | Open | Not temporarily closed | Re-open, restaff register, or clear the closure cause |
+| G2 | Stocked | Zero stock reds; every layout sellable item plus `ba:itemname_paperbag` has supply and morning stock > 0 | Widen or resize the wholesaler / warehouse order |
+| G3 | Staffed | Required stations have an employee on shift | Hire or reassign cashier / cleaner |
+| G4 | Selling | On scheduled open days: customers > 0 and revenue > 0 | Fix stock/staff first; then prices or marketing |
+| G5 | Profitable | Most recent open day profit > 0, and rolling open-day profit over **ProfitProofDays** = 3 days > 0 | Hold expansion; tune contract size and prices |
+
+Stage 1 → 2 also needs **HealthyGoodsStores** ≥ **Stage2Stores**, liquid cash ≥ **Stage2Cash**, and positive empire daily profit large enough to carry HQ + warehouse overhead. Stage 2+ warehouse handover keeps wholesaler contracts live until warehouse stock covers **RefillDays**.
 
 ## 2. Where
 

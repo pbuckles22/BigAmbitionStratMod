@@ -8,7 +8,7 @@
 
 ## Summary
 
-**BigAmbitionStratMod** 1.16.2 — Story **10.2** autopilot day loop shipped. Next is **10.3**. Public **EPIC** for Epic 10 is `1.16`. **7.13** stays stashed. The rules are in [requirements/strategy.md](requirements/strategy.md). `origin` is this repo.
+**BigAmbitionStratMod** — Story **10.2** shipped at 1.16.2. **10.3** WIP on `feature/10.3-hands-off-win` at 1.16.3: open gated on store health; Store #1 still fails Stage-1 stock/profit (weekly spike → closed). Full expansion runbook Ships A–E ahead. Public **EPIC** for Epic 10 is `1.16`. **7.13** stays stashed. Rules: [requirements/strategy.md](requirements/strategy.md).
 
 ---
 
@@ -16,7 +16,8 @@
 
 | Branch | Role |
 |--------|------|
-| **`main`** | Integration branch. Last land `97f7626`, version 1.16.2. Story 10.2 shipped. |
+| **`main`** | Integration branch. Last land `f4dee94`, version 1.16.2. Story 10.2 shipped. |
+| **`feature/10.3-hands-off-win`** | Story 10.3 hands-off win. Version 1.16.3. Expansion gated; Stage-1 stock FAIL day 14. Not merged. |
 | **`feature/10.2-autopilot-loop`** | Story 10.2 autopilot day loop. Version 1.16.2. Human PASS 2026-11-09. Kept after CMPH. |
 | **`feature/10.1-win-reached`** | Story 10.1 win milestone. Version 1.16.1. Human PASS 2026-11-08. Kept after CMPH. |
 | **`feature/8.6-stage-sim`** | Story 8.6 stage sim. Version 1.15.6. Human PASS 2026-11-08. Kept after CMPH. |

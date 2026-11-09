@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
@@ -376,9 +377,11 @@ namespace ChaoticCEO
                 dailyCost: 0m,
                 truckCost: 0,
                 LoadLog.PinnedBuild);
-            var day = Autopilot.Day(
+            var wealth = Helpers.PlayerHelper.GetPersonalWealth();
+            var day = WinRun.Day(
                 localAppData,
                 current.Day,
+                ToMoney(wealth.CurrentWealth),
                 GameApi.Live(),
                 world,
                 guard,
@@ -386,17 +389,52 @@ namespace ChaoticCEO
                 NextPlaybook(),
                 TimeAdvanceBridge.Read(),
                 HudLine(),
-                Health.Latest(localAppData));
-            if (day.Ran)
+                Health.Latest(localAppData),
+                timeBridge: TimeAdvanceBridge.Skip,
+                actionBridge: ExecutePlaybook);
+            return day.Loop;
+        }
+
+        private static bool ExecutePlaybook(PlaybookStep step, string call)
+        {
+            if (step == null || !step.Chosen || Autopilot.DryRun)
             {
-                var wealth = Helpers.PlayerHelper.GetPersonalWealth();
-                Win.Record(
-                    LoadLog.CeoLogPath(localAppData),
-                    current.Day,
-                    ToMoney(wealth.CurrentWealth));
+                return true;
             }
 
-            return day;
+            if (step.Kind == "where")
+            {
+                if (!SplitPlace(step.Detail, out var street, out var number))
+                {
+                    return false;
+                }
+
+                return RentBridge.Live(new BuildingRent(street, number, true, call));
+            }
+
+            // open / money / run / others: log through Autopilot; expand bridges as Stage 1 needs them.
+            return true;
+        }
+
+        private static bool SplitPlace(string place, out string street, out int number)
+        {
+            street = "";
+            number = 0;
+            if (string.IsNullOrEmpty(place))
+            {
+                return false;
+            }
+
+            var at = place.LastIndexOf(' ');
+            if (at <= 0 || at >= place.Length - 1)
+            {
+                return false;
+            }
+
+            street = place.Substring(0, at);
+            return int.TryParse(place.Substring(at + 1), NumberStyles.Integer, CultureInfo.InvariantCulture, out number)
+                && street.Length > 0
+                && number > 0;
         }
 
         private static AuditWorld AuditWorldFrom(GameInstance current)
@@ -2023,14 +2061,21 @@ namespace ChaoticCEO
             var holds = Holds(current);
             var slots = Garage(current);
             var stage = Stage.Read(current.Day, cash, needs, plans, holds, slots);
-            var open = Open.Decide(stage, StarterOpens(), truckLoadFraction: 0m);
+            var opens = Open.StageOneCandidates(
+                Starter.StageOne(),
+                OwnedByFamily(current),
+                WinRun.PendingOpen);
+            var health = OwnedStoreHealth(current);
+            var sites = SiteCandidates(current);
             var business = TopBar.Yesterday(Days(current), current.Day);
             var profit = TopBar.ShownProfit(DayTotal(current, business), business);
+            var openChosen = WinRun.PendingOpen.Length == 0
+                && Open.Decide(stage, opens, truckLoadFraction: 0m, health).Chosen;
             var money = Money.Decide(
                 stage,
                 cash,
                 dailyCost: 0m,
-                projectedDailyProfit: profit > 0m ? profit : open.Chosen ? 40m : 0m,
+                projectedDailyProfit: profit > 0m ? profit : openChosen ? 40m : 0m,
                 offers: BankLoanBridge.Offers(profit > 0m ? profit : 40m),
                 loan: null,
                 bestPaybackRate: 0m);
@@ -2050,41 +2095,113 @@ namespace ChaoticCEO
                     taxDue: 0m,
                     takeoverOffer: 0m,
                     takeoverDailyProfit: 0m));
-            return Playbook.Decide(
-                open,
-                SitePick.None(),
-                LayoutPick.None(),
-                PricePick.None(),
-                SupplyPick.None(),
-                TruckPick.None(),
-                WarehousePick.None(),
-                ManagerPick.None(),
+            return WinRun.Next(
+                stage,
+                opens,
+                WinRun.PendingOpen,
+                sites,
+                cash,
+                Money.Reserve(0m),
                 money,
-                EstatePick.None(),
-                ClosePick.None(),
-                run);
+                run,
+                health);
         }
 
-        private static IReadOnlyList<OpenCandidate> StarterOpens()
+        private static IReadOnlyList<StoreHealth> OwnedStoreHealth(GameInstance current)
         {
-            var rows = new List<OpenCandidate>();
-            foreach (var offer in Starter.StageOne())
+            var rows = new List<StoreHealth>();
+            if (current.BuildingRegistrations == null)
             {
-                if (offer == null || offer.BusinessType.Length == 0)
+                return rows;
+            }
+
+            foreach (var building in current.BuildingRegistrations)
+            {
+                if (building == null
+                    || !building.RentedByPlayer
+                    || string.IsNullOrEmpty(building.businessTypeName)
+                    || string.IsNullOrEmpty(building.StreetName)
+                    || building.StreetNumber <= 0)
                 {
                     continue;
                 }
 
-                var family = StoreFamily.For(offer.BusinessType) ?? "";
-                rows.Add(
-                    new OpenCandidate(
-                        offer.BusinessType,
-                        "goods",
-                        offer.DailyProfit,
-                        wholesalerSells: true,
-                        family,
-                        ownedOfFamily: 0,
-                        familyHasWarehouse: false));
+                var family = StoreFamily.For(building.businessTypeName);
+                if (family != "specialty" && family != "food" && family != "durables" && family != "service")
+                {
+                    continue;
+                }
+
+                var place = building.StreetName
+                    + " "
+                    + building.StreetNumber.ToString(CultureInfo.InvariantCulture);
+                var open = !building.temporarilyClosed;
+                var stocked = building.Alerts == 0;
+                var staffed = !building.warnedLastHourAboutNoEmployee;
+                var lastIncome = LastDailyIncome(building);
+                var selling = lastIncome > 0f;
+                var profitable = lastIncome > 0f;
+                rows.Add(new StoreHealth(open, stocked, staffed, selling, profitable, place));
+            }
+
+            return rows;
+        }
+
+        private static float LastDailyIncome(BuildingRegistration building)
+        {
+            if (building.dailyIncomes == null || building.dailyIncomes.Count == 0)
+            {
+                return 0f;
+            }
+
+            return building.dailyIncomes[building.dailyIncomes.Count - 1];
+        }
+
+        private static IReadOnlyDictionary<string, int> OwnedByFamily(GameInstance current)
+        {
+            var owned = new Dictionary<string, int>(StringComparer.Ordinal);
+            if (current.BuildingRegistrations == null)
+            {
+                return owned;
+            }
+
+            foreach (var building in current.BuildingRegistrations)
+            {
+                if (building == null || !building.RentedByPlayer || string.IsNullOrEmpty(building.businessTypeName))
+                {
+                    continue;
+                }
+
+                var family = StoreFamily.For(building.businessTypeName);
+                if (string.IsNullOrEmpty(family))
+                {
+                    continue;
+                }
+
+                owned.TryGetValue(family, out var count);
+                owned[family] = count + 1;
+            }
+
+            return owned;
+        }
+
+        private static IReadOnlyList<SiteCandidate> SiteCandidates(GameInstance current)
+        {
+            var rows = new List<SiteCandidate>();
+            foreach (var lot in OpenLots(current))
+            {
+                if (lot == null || lot.Street.Length == 0 || lot.Number <= 0)
+                {
+                    continue;
+                }
+
+                rows.Add(new SiteCandidate(
+                    lot.Street,
+                    lot.Number,
+                    familyOnStreet: 0,
+                    traffic: 20m,
+                    dailyRent: lot.DailyRent,
+                    cost: 0m));
             }
 
             return rows;

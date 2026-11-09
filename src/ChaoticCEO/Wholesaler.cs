@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
@@ -47,6 +48,73 @@ namespace ChaoticCEO
             {
                 new WholesalerOffer("ba:businesstype_giftshop", "ba:street_firststreet 37"),
             };
+        }
+
+        /// <summary>
+        /// Sellable stock tokens from StreamingAssets GiftShop/*/GiftShopWholesalers.json.
+        /// </summary>
+        public static IReadOnlyList<string> GiftShopWholesalersStock()
+        {
+            return new[]
+            {
+                "ba:itemname_cheapgift",
+                "ba:itemname_cheapflower",
+                "ba:itemname_sodacan",
+                "ba:itemname_paperbag",
+                "ba:itemname_umbrella",
+            };
+        }
+
+        public static IReadOnlyList<string> Catalog(string? businessType)
+        {
+            if (businessType == "ba:businesstype_giftshop")
+            {
+                return GiftShopWholesalersStock();
+            }
+
+            if (businessType == "ba:businesstype_florist")
+            {
+                return new[]
+                {
+                    "ba:itemname_cheapflower",
+                    "ba:itemname_expensiveflower",
+                };
+            }
+
+            return Array.Empty<string>();
+        }
+
+        public static bool Covers(IReadOnlyList<string>? needed, IReadOnlyList<string>? catalog)
+        {
+            if (needed == null || needed.Count == 0 || catalog == null || catalog.Count == 0)
+            {
+                return false;
+            }
+
+            foreach (var item in needed)
+            {
+                if (string.IsNullOrEmpty(item))
+                {
+                    continue;
+                }
+
+                var found = false;
+                foreach (var entry in catalog)
+                {
+                    if (entry == item)
+                    {
+                        found = true;
+                        break;
+                    }
+                }
+
+                if (!found)
+                {
+                    return false;
+                }
+            }
+
+            return true;
         }
 
         public static WholesalerPick Sign(

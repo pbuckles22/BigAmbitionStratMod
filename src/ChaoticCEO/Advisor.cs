@@ -437,7 +437,7 @@ namespace ChaoticCEO
             var map = new Dictionary<string, string>();
             Add(map, "food", "apple", "banana", "beer", "bottleofwine", "burger", "carrot", "cigar", "cigarette", "croissant", "cupcake", "cupofcoffee", "donut", "frenchfries", "freshfood", "frozenfood", "hotdog", "icecream", "kabob", "lettuce", "margarita", "martini", "pear", "pizza", "salad", "sodacan", "tomato", "whisky");
             Add(map, "durables", "cheapjewelry", "classiccheapfemaleclothing", "classiccheapmaleclothing", "classicexpensivefemaleclothing", "classicexpensivemaleclothing", "earbuds01", "expensivejewelry", "headphones01", "moderncheapfemaleclothing", "moderncheapmaleclothing", "modernexpensivefemaleclothing", "modernexpensivemaleclothing", "smartphone1", "smartphone2", "smartwatch1", "smartwatch2");
-            Add(map, "specialty", "cheapflower", "cheapgift", "expensiveflower", "expensivegift", "limitededitionbook", "motivationalbook", "novel", "picturebook", "technicalmanual", "youngnovel");
+            Add(map, "specialty", "cheapflower", "cheapgift", "expensiveflower", "expensivegift", "umbrella", "limitededitionbook", "motivationalbook", "novel", "picturebook", "technicalmanual", "youngnovel");
             Add(map, "service", "haircareproduct");
             return map;
         }

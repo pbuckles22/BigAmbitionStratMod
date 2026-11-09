@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 
 namespace ChaoticCEO
@@ -69,9 +70,15 @@ namespace ChaoticCEO
         public static OpenPick Decide(
             int stage,
             IReadOnlyList<OpenCandidate>? candidates,
-            decimal truckLoadFraction)
+            decimal truckLoadFraction,
+            IReadOnlyList<StoreHealth>? ownedHealth = null)
         {
             if (candidates == null || candidates.Count == 0)
+            {
+                return OpenPick.None();
+            }
+
+            if (!StoreHealthGate.ExpansionAllowed(ownedHealth))
             {
                 return OpenPick.None();
             }
@@ -92,6 +99,50 @@ namespace ChaoticCEO
             }
 
             return winner == null ? OpenPick.None() : new OpenPick(winner.Type, true);
+        }
+
+        public static IReadOnlyList<OpenCandidate> StageOneCandidates(
+            IReadOnlyList<StarterOffer>? offers,
+            IReadOnlyDictionary<string, int>? ownedByFamily,
+            string? pendingOpen)
+        {
+            if (!string.IsNullOrEmpty(pendingOpen))
+            {
+                return Array.Empty<OpenCandidate>();
+            }
+
+            if (offers == null || offers.Count == 0)
+            {
+                return Array.Empty<OpenCandidate>();
+            }
+
+            var rows = new List<OpenCandidate>();
+            foreach (var offer in offers)
+            {
+                if (offer == null || offer.BusinessType.Length == 0)
+                {
+                    continue;
+                }
+
+                var family = StoreFamily.For(offer.BusinessType) ?? "";
+                var owned = 0;
+                if (ownedByFamily != null && family.Length > 0)
+                {
+                    ownedByFamily.TryGetValue(family, out owned);
+                }
+
+                rows.Add(
+                    new OpenCandidate(
+                        offer.BusinessType,
+                        "goods",
+                        offer.DailyProfit,
+                        wholesalerSells: true,
+                        family,
+                        owned,
+                        familyHasWarehouse: false));
+            }
+
+            return rows;
         }
 
         private static bool Eligible(int stage, OpenCandidate? candidate, bool busy)

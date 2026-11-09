@@ -75,7 +75,8 @@ namespace ChaoticCEO
             PlayerNeeds? needs,
             string? bar,
             string? health,
-            Func<TimeSkipPick, bool>? timeBridge = null)
+            Func<TimeSkipPick, bool>? timeBridge = null,
+            Func<PlaybookStep, string, bool>? actionBridge = null)
         {
             if (string.IsNullOrWhiteSpace(localAppData) || day <= 0)
             {
@@ -101,8 +102,12 @@ namespace ChaoticCEO
             var call = Call(step, api);
             if (step != null && step.Chosen && call.Length > 0)
             {
-                action = ActionLine(day, step, call);
-                Append(localAppData, action);
+                var executed = actionBridge == null || actionBridge(step, call);
+                if (executed)
+                {
+                    action = ActionLine(day, step, call);
+                    Append(localAppData, action);
+                }
             }
 
             var advanced = "";

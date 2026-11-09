@@ -39,7 +39,7 @@ public class RouteDumpTests
             """.Replace("\r\n", "\n") + "\n",
             holdsCsv);
         Assert.Equal(
-            "routes.written version=1.16.2 routes=1 warehouses=1 warehouse=ba:street_fourthstreet 46 destination=ba:street_firstavenue 38 item=ba:itemname_sodacan day=1016",
+            "routes.written version=1.16.3 routes=1 warehouses=1 warehouse=ba:street_fourthstreet 46 destination=ba:street_firstavenue 38 item=ba:itemname_sodacan day=1016",
             line);
         Assert.Equal(line, File.ReadAllText(Path.Combine(dir.Path, "ChaoticCEO", "ceo.log")).TrimEnd('\r', '\n'));
     }
@@ -69,7 +69,7 @@ public class RouteDumpTests
 
         var csv = File.ReadAllText(RouteDump.RoutesPath(dir.Path));
         Assert.Equal(
-            "routes.written version=1.16.2 routes=2 warehouses=0 warehouse=ba:street_fourthstreet 46 destination=ba:street_firstavenue 38 item=ba:itemname_sodacan day=1016",
+            "routes.written version=1.16.3 routes=2 warehouses=0 warehouse=ba:street_fourthstreet 46 destination=ba:street_firstavenue 38 item=ba:itemname_sodacan day=1016",
             line);
         Assert.Contains("ba:itemname_cheapgift", csv);
         Assert.Contains("ba:vehicle_van", csv);
@@ -90,7 +90,7 @@ public class RouteDumpTests
             "warehouse,street,number,item,amount\n",
             File.ReadAllText(RouteDump.WarehousesPath(dir.Path)).Replace("\r\n", "\n"));
         Assert.Equal(
-            "routes.written version=1.16.2 routes=0 warehouses=0 warehouse= destination= item= day=",
+            "routes.written version=1.16.3 routes=0 warehouses=0 warehouse= destination= item= day=",
             line);
     }
 
