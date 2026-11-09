@@ -16,7 +16,7 @@
 
 | Branch | Role |
 |--------|------|
-| **`main`** | Integration branch. Last land `4088f52`, version 1.15.6. Epic 8 closed. |
+| **`main`** | Integration branch. Last land `7fe16da`, version 1.15.6. Epic 8 closed. |
 | **`feature/8.6-stage-sim`** | Story 8.6 stage sim. Version 1.15.6. Human PASS 2026-11-08. Kept after CMPH. |
 | **`feature/8.5-compare-policies`** | Story 8.5 policy compare. Version 1.15.5. Human PASS 2026-11-08. Kept after CMPH. |
 | **`feature/8.4-seeded-noise`** | Story 8.4 seeded noise. Version 1.15.4. Human PASS 2026-11-08. Kept after CMPH. |

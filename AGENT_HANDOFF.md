@@ -139,7 +139,7 @@ When shipping: update **PM_PLAN**, **doc/PROJECT_STATUS.md**, and **Current stat
 ## Current state
 
 - **Product:** Version 1.15.6. Epic 8 closed (`StageSim` / `StageThresholds`, **WinNetWorth** at median and worst). Next is 10.1. 7.13 stays stashed until before 10.2. Ladder: [PM_PLAN.md](PM_PLAN.md).
-- **On:** `origin/main @ 4088f52`. Stash `7.13 spare cost centers` on `feature/7.13-spare-cost-centers`. https://github.com/pbuckles22/BigAmbitionStratMod
+- **On:** `origin/main @ 7fe16da`. Stash `7.13 spare cost centers` on `feature/7.13-spare-cost-centers`. https://github.com/pbuckles22/BigAmbitionStratMod
 - **Next:** Story **10.1** when asked.
 - **Blockers:** Do not pop 7.13. Do not load the day 1021 save. Do not continue a save that already says Starter Gift. Do not drop Fifth Avenue 36’s contract before the hub holds that item. Owner must approve if full-horizon median misses **WinNetWorth** before **10.1**.
 
