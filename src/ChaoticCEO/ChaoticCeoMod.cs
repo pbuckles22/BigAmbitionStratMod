@@ -100,8 +100,10 @@ namespace ChaoticCEO
                 LiveDump.ConnectStores(_stores, _localAppData);
                 LiveDump.AssignPlans(_plans, _localAppData);
                 LiveDump.RestockWarehouses(_restock, _localAppData);
-                LiveDump.AuditDay(_localAppData);
-                LiveDump.WriteTelemetry(_localAppData);
+                if (Autopilot.Enabled)
+                {
+                    LiveDump.RunAutopilot(_localAppData);
+                }
             }
         }
 

@@ -12,11 +12,53 @@ namespace ChaoticCEO
         Skip,
     }
 
-    public static class Autopilot
+    public static partial class Autopilot
     {
         public static bool Enabled { get; set; } = true;
 
         public static bool DryRun { get; set; }
+    }
+
+    public sealed class AutopilotDay
+    {
+        public AutopilotDay(
+            bool ran,
+            string marker,
+            string action,
+            string advanced,
+            string telemetry,
+            AuditReport report)
+        {
+            Ran = ran;
+            Marker = marker ?? "";
+            Action = action ?? "";
+            Advanced = advanced ?? "";
+            Telemetry = telemetry ?? "";
+            Report = report ?? new AuditReport(Array.Empty<string>(), Array.Empty<DeliveryStop>());
+        }
+
+        public bool Ran { get; }
+
+        public string Marker { get; }
+
+        public string Action { get; }
+
+        public string Advanced { get; }
+
+        public string Telemetry { get; }
+
+        public AuditReport Report { get; }
+
+        public static AutopilotDay Skipped(string marker)
+        {
+            return new AutopilotDay(
+                false,
+                marker,
+                "",
+                "",
+                "",
+                new AuditReport(Array.Empty<string>(), Array.Empty<DeliveryStop>()));
+        }
     }
 
     public sealed class AuditCounts

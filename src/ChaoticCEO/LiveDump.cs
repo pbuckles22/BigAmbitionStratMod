@@ -344,6 +344,63 @@ namespace ChaoticCEO
                 return;
             }
 
+            var world = AuditWorldFrom(current);
+            var guard = new AuditGuard(
+                Autopilot.Enabled,
+                Autopilot.DryRun,
+                cash: 0m,
+                dailyCost: 0m,
+                truckCost: 0,
+                LoadLog.PinnedBuild);
+            Audit.Check(localAppData, current.Day, GameApi.Live(), world, guard, LiveHeal);
+        }
+
+        public static AutopilotDay RunAutopilot(string localAppData)
+        {
+            if (string.IsNullOrEmpty(localAppData))
+            {
+                return AutopilotDay.Skipped("");
+            }
+
+            var current = SaveGameManager.Current;
+            if (current == null)
+            {
+                return AutopilotDay.Skipped("");
+            }
+
+            var world = AuditWorldFrom(current);
+            var guard = new AuditGuard(
+                Autopilot.Enabled,
+                Autopilot.DryRun,
+                cash: 0m,
+                dailyCost: 0m,
+                truckCost: 0,
+                LoadLog.PinnedBuild);
+            var day = Autopilot.Day(
+                localAppData,
+                current.Day,
+                GameApi.Live(),
+                world,
+                guard,
+                LiveHeal,
+                NextPlaybook(),
+                TimeAdvanceBridge.Read(),
+                HudLine(),
+                Health.Latest(localAppData));
+            if (day.Ran)
+            {
+                var wealth = Helpers.PlayerHelper.GetPersonalWealth();
+                Win.Record(
+                    LoadLog.CeoLogPath(localAppData),
+                    current.Day,
+                    ToMoney(wealth.CurrentWealth));
+            }
+
+            return day;
+        }
+
+        private static AuditWorld AuditWorldFrom(GameInstance current)
+        {
             var needs = new List<GoodsNeed>();
             var sales = new List<DailyUnits>();
             ReadStores(current, needs, sales);
@@ -354,7 +411,7 @@ namespace ChaoticCEO
             var arranged = Restock.Arrange(holds, shelves);
             var demanded = Restock.WithBurn(arranged.Homes, plans, sales, ordered);
             var overflow = Restock.Overflow(demanded, null);
-            var world = new AuditWorld(
+            return new AuditWorld(
                 plans,
                 holds,
                 needs,
@@ -367,14 +424,6 @@ namespace ChaoticCEO
                 Hired(current),
                 new string[0],
                 new string[0]);
-            var guard = new AuditGuard(
-                Autopilot.Enabled,
-                Autopilot.DryRun,
-                cash: 0m,
-                dailyCost: 0m,
-                truckCost: 0,
-                LoadLog.PinnedBuild);
-            Audit.Check(localAppData, current.Day, GameApi.Live(), world, guard, LiveHeal);
         }
 
         public static string? TryRent(RentWatch watch, string localAppData)
@@ -1022,6 +1071,11 @@ namespace ChaoticCEO
                 }
 
                 return TimeAdvance.RecordCare(localAppData, care, current.Day);
+            }
+
+            if (!Autopilot.Enabled)
+            {
+                return null;
             }
 
             var advanced = TimeAdvance.Skip(needs, alreadyAdvanced: false, GameApi.Live());

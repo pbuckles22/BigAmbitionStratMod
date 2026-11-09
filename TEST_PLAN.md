@@ -419,6 +419,21 @@ Human version smoke (install changed; win.reached needs a crossing and is locked
 
 Human PASS 2026-11-08 on 1.16.1. `mod.loaded version=1.16.1 build=3682`.
 
+## Story 10.2 — Autopilot day loop
+
+Tier 1: `AutopilotTests` locks `Autopilot.Day` (audit → stage action via recorded call → time advance → telemetry) when enabled, skip when cleared / F10, CallKey maps, none-step, blank inputs, and Enabled-flag winner over a planted guard. Chain `… → win → autopilot` runs the real day; a second chain locks F10 skip after win. Command: the Tier 1 `dotnet test` suite above.
+
+Human check:
+
+1. Restart Big Ambitions so version 1.16.2 loads. Start a **new** game and reach the city. Do not load the day 1021 save. Do not continue a save that already says Starter Gift. This check is one autopilot day and a cleared-flag skip. It does not require a full hands-off win run (that is 10.3).
+2. Leave Autopilot on. Let one day roll under autopilot. Open `%LocalAppData%\ChaoticCEO\ceo.log` and `%LocalAppData%\ChaoticCEO\telemetry.csv`.
+3. Press F10 (or flip Autopilot off). Let the next day arrive.
+4. **PASS if** the autopilot day has `autopilot.day … ran=true`, matching `audit.summary` / `telemetry.written` for that day, and the `telemetry.csv` row for that day matches the log; after clear, the next day has `autopilot.day … ran=false` and no new `autopilot.action` / heal for that skipped day. **FAIL if** version is still 1.16.1, the telemetry row disagrees with the day, or a cleared flag still heals or advances the stage action.
+5. Evidence: `autopilot.day` (`ran`), `audit.summary`, optional `autopilot.action` (`kind`, `call`), `time.advanced` or live time care, `telemetry.written` (`day`, `autopilot`). After F10: `autopilot.paused reason=f10` then `autopilot.day ran=false`.
+6. Version marker: public `1.16.2`. `ceo.log` starts at `mod.loaded version=1.16.2 build=3682`.
+
+Human PASS 2026-11-09 on 1.16.2. New game: `mod.loaded version=1.16.2 build=3682`. Days 2–8 each `autopilot.day ran=true` with matching `audit.summary` and `telemetry.csv` (day 8: cash 14664, net 14199, profit -106, stage 1, missingPlans 1). F10 logged `autopilot.paused reason=f10` and the bar flipped Autopilot off. Live path does not call the day loop when cleared, so no further `autopilot.action` after F10.
+
 ## Wholesaler contract human check
 
 1. Restart Big Ambitions so version 1.13.4 loads. Start a new game and reach the city. Do not load the usual save and do not load the day 1021 save. This check rents one lot, loads one starter layout, places one cleaner, and signs a recurring wholesaler `DeliveryContract` for the starter gift shop. It does not hire a cashier. Capacity fixtures are not part of this check.

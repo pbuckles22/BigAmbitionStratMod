@@ -2,13 +2,13 @@
 
 **Human-readable current state.** Keep in sync with [AGENT_HANDOFF.md](../AGENT_HANDOFF.md) → *Current state* when milestones ship.
 
-**Last updated:** 2026-11-08
+**Last updated:** 2026-11-09
 
 ---
 
 ## Summary
 
-**BigAmbitionStratMod** 1.16.1 — Story **10.1** win milestone shipped. Next is **10.2**. Public **EPIC** for Epic 10 is `1.16`. **7.13** stays stashed until before **10.2**. The rules are in [requirements/strategy.md](requirements/strategy.md). `origin` is this repo.
+**BigAmbitionStratMod** 1.16.2 — Story **10.2** autopilot day loop shipped. Next is **10.3**. Public **EPIC** for Epic 10 is `1.16`. **7.13** stays stashed. The rules are in [requirements/strategy.md](requirements/strategy.md). `origin` is this repo.
 
 ---
 
@@ -16,7 +16,8 @@
 
 | Branch | Role |
 |--------|------|
-| **`main`** | Integration branch. Last land `e0e19ba`, version 1.16.1. Story 10.1 shipped. |
+| **`main`** | Integration branch. Last land PENDING, version 1.16.2. Story 10.2 shipped. |
+| **`feature/10.2-autopilot-loop`** | Story 10.2 autopilot day loop. Version 1.16.2. Human PASS 2026-11-09. Kept after CMPH. |
 | **`feature/10.1-win-reached`** | Story 10.1 win milestone. Version 1.16.1. Human PASS 2026-11-08. Kept after CMPH. |
 | **`feature/8.6-stage-sim`** | Story 8.6 stage sim. Version 1.15.6. Human PASS 2026-11-08. Kept after CMPH. |
 | **`feature/8.5-compare-policies`** | Story 8.5 policy compare. Version 1.15.5. Human PASS 2026-11-08. Kept after CMPH. |

@@ -175,10 +175,10 @@ Starts after Epic **9**. Public versions for this epic are `1.15.COUNTER`. **8.1
 Starts after Epic **8**. Crossing **WinNetWorth** is a milestone. The autopilot keeps compounding in Stage 4. Public versions for this epic are `1.16.COUNTER`.
 
 - **10.1** `[x]` Lock the milestone. `Win.Record` / `Milestone` log `win.reached` once at **WinNetWorth** or an owner-approved target; later days do not log it again; Autopilot stays on. Headless. Version 1.16.1. Chain: `load → … → stage-sim → win`.
-- **10.2** `[ ]` Autopilot loop. Each day, while `Autopilot.Enabled` is on: audit, heal, the stage’s actions through the recorded calls, then time advance, within the guardrails. The **12.3** toggle and F10 clear the flag. Human check: one autopilot day on a new save matches its `telemetry.csv` row, and a cleared flag skips the next day.
+- **10.2** `[x]` Autopilot loop. Each day, while `Autopilot.Enabled` is on: audit, heal, the stage’s actions through the recorded calls, then time advance, within the guardrails. The **12.3** toggle and F10 clear the flag. Human PASS 2026-11-09. New game days 2–8: `autopilot.day ran=true` matched `telemetry.csv`; F10 cleared. Version 1.16.2. Chain: `load → … → win → autopilot`.
 - **10.3** `[ ]` Hands-off run from a new save. PASS is `win.reached` in `ceo.log` and later telemetry rows that still advance. Every decision the run finds becomes a Tier 1 test before the next run.
 
-**Next:** Story **10.1** shipped at version **1.16.1**. Next ship: story **10.2** when asked. **7.13** stays stashed until before **10.2**.
+**Next:** Story **10.2** shipped at version **1.16.2**. Next ship: story **10.3** when asked. **7.13** stays stashed until before a story that needs close filters.
 
 Operating model (keep these when you replace this plan): `.cursor/rules/` ship commands (UCPH, CMPH, SWAT), human check, plan-coordinate versioning, long-run harvest (`testing.mdc`), and the chain harness and prefix (`integration-chain.mdc`). Do not delete them to “clean up” a new clone.
 

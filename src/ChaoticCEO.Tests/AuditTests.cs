@@ -5516,6 +5516,278 @@ public class AuditTests
     }
 
     [Fact]
+    public void Audit_load_day_roll_needs_refill_recorded_call_slot_fill_store_connect_plan_assign_restock_sort_overflow_order_audit_bar_stage_open_where_layout_prices_supply_managers_money_playbook_curves_file_day_step_calibrate_noise_policy_stage_sim_win_autopilot_runs_the_day()
+    {
+        // Chain: load → day roll → needs refill → recorded call → slot fill → store connect → plan assign → restock → sort → overflow → order → audit → bar → stage → open → where → layout → prices → supply → managers → money → playbook → curves → day-step → calibrate → noise → policy → stage-sim → win → autopilot
+        using var dir = new TempAudit();
+        var save = new object();
+        var prefix = Prefix(dir.Path, save);
+        var guard = LiveGuard();
+        var world = prefix.World;
+        Autopilot.Enabled = guard.Enabled;
+        Autopilot.DryRun = guard.DryRun;
+        try
+        {
+            var shot = WatchDay(dir.Path, ref world, guard, prefix.Api, prefix.Rolled, 1016, 10m, null);
+            var stage = Stage.Read(
+                TopBar.Day(shot.Rolled),
+                guard.Cash,
+                world.Needs,
+                world.Stops,
+                world.Holds,
+                world.Slots);
+            var open = Open.Decide(stage, Array.Empty<OpenCandidate>(), truckLoadFraction: 0m);
+            var reserve = Money.Reserve(guard.DailyCost);
+            var site = Where.Decide(Array.Empty<SiteCandidate>(), guard.Cash, reserve);
+            var golden = Layout.Decide(stage, "", "small", Array.Empty<OwnedLayout>(), Starter.StageOne());
+            var price = Prices.Decide(
+                "",
+                currentPrice: 0m,
+                defaultPrice: 10m,
+                wholesale: 4m,
+                priorUnits: 8,
+                currentUnits: 8,
+                satisfaction: 0m,
+                trials: Array.Empty<ItemSoldPerPriceEntry>());
+            var supply = Supply.Decide(stage, "", "ba:itemname_cheapgift", world.Holds, world.Stops);
+            var managers = Managers.Decide(
+                stage,
+                Array.Empty<string>(),
+                employees: 0,
+                openRoles: 0,
+                seats: Array.Empty<ManagerSeat>(),
+                pricingPlanExists: true);
+            var money = Money.Decide(
+                stage,
+                guard.Cash,
+                guard.DailyCost,
+                projectedDailyProfit: 200m,
+                offers: new[]
+                {
+                    new LoanOffer(1_000m, 80),
+                    new LoanOffer(2_000m, 100),
+                },
+                loan: null,
+                bestPaybackRate: 0.1m);
+            var step = Playbook.Decide(
+                open,
+                site,
+                golden,
+                price,
+                supply,
+                TruckPick.None(),
+                WarehousePick.None(),
+                managers,
+                money,
+                EstatePick.None(),
+                ClosePick.None(),
+                RunPick.None());
+            var ledger = Path.Combine(dir.Path, "stage-sim-statements.csv");
+            File.WriteAllText(
+                ledger,
+                "day,street,number,sales,goods,wages,rent,marketing,theft,profit\n"
+                + "1000,ba:street_gift,5,80,16,8,4,0,0,52\n"
+                + "1014,ba:street_gift,5,80,16,8,4,0,0,52\n");
+            var curves = Curves.FitFile(ledger);
+            var days = DayStep.Run(Calibrate.StartDay, Calibrate.EndDay - Calibrate.StartDay + 1, curves);
+            var calibrated = Calibrate.CheckFile(ledger);
+            var seeds = new[] { 1, 2, 3, 4, 5 };
+            var noise = Noise.Run(curves, startNetWorth: 1000m, seeds: seeds, horizonDays: 60);
+            var keep = new PolicyOption("keep", curves);
+            var gambleCurves = curves
+                .Concat(new[]
+                {
+                    new StoreCurve("ba:street_risk", 2, 300m, 0.05m, 5m, 200m, 0m, 0m, 1),
+                })
+                .ToList();
+            var gamble = new PolicyOption("gamble", gambleCurves);
+            var pick = Policy.Compare(
+                new[] { keep, gamble },
+                startNetWorth: 1000m,
+                seeds: seeds,
+                horizonDays: 60);
+            var opens = new List<OpenCandidate>();
+            var sites = new List<SiteCandidate>();
+            for (var i = 1; i <= 8; i++)
+            {
+                opens.Add(new OpenCandidate(
+                    "ba:businesstype_giftshop",
+                    "goods",
+                    200_000m,
+                    wholesalerSells: true,
+                    "specialty",
+                    0,
+                    false));
+                sites.Add(new SiteCandidate(
+                    "ba:street_climb" + i.ToString(CultureInfo.InvariantCulture),
+                    i,
+                    familyOnStreet: 0,
+                    traffic: 20m,
+                    dailyRent: 10m,
+                    cost: 5_000m));
+            }
+
+            var catalog = new StageSimCatalog(
+                opens,
+                sites,
+                loans: new[] { new LoanOffer(100_000m, 50) },
+                estates: Array.Empty<EstateCandidate>(),
+                item: "ba:itemname_cheapgift",
+                warehouseName: "W1",
+                truckCost: 1_000m);
+            var tuned = StageSim.Tune(
+                new[]
+                {
+                    new StageThresholdOption(
+                        "tight",
+                        StageThresholds.Starting().With(stage2Cash: 100_000_000m, stage4Cash: 200_000_000m)),
+                    new StageThresholdOption(
+                        "climb",
+                        StageThresholds.Starting().With(stage2Cash: 30_000m, stage4Cash: 200_000m)),
+                },
+                startCash: 40_000m,
+                startNetWorth: 40_000m,
+                catalog,
+                seeds,
+                horizonDays: 80);
+
+            Assert.Contains("day=1016", shot.Rolled);
+            Assert.True(step.Chosen);
+            Assert.Equal("money", step.Kind);
+            Assert.Equal(Calibrate.EndDay, days[^1].Day);
+            Assert.True(calibrated.Within);
+            Assert.Equal(60, noise.HorizonDays);
+            Assert.Equal("keep", pick.Name);
+            Assert.Equal("climb", tuned.Name);
+            Assert.True(tuned.WinAtMedian);
+
+            Win.ClearApproved();
+            var logPath = LoadLog.CeoLogPath(dir.Path);
+            var reached = Win.Record(logPath, TopBar.Day(shot.Rolled), tuned.Median);
+            Assert.StartsWith("win.reached version=" + LoadLog.Version, reached);
+            Assert.True(Autopilot.Enabled);
+
+            var loop = Autopilot.Day(
+                dir.Path,
+                TopBar.Day(shot.Rolled),
+                prefix.Api,
+                world,
+                guard,
+                heal => HealFate.Done,
+                step,
+                Needs.Hold(),
+                shot.Bar,
+                shot.Health);
+            Assert.True(loop.Ran);
+            Assert.Equal(
+                "autopilot.day version=" + LoadLog.Version
+                    + " day=" + TopBar.Day(shot.Rolled).ToString(CultureInfo.InvariantCulture)
+                    + " ran=true",
+                loop.Marker);
+            Assert.Equal(
+                "autopilot.action version=" + LoadLog.Version
+                    + " day=" + TopBar.Day(shot.Rolled).ToString(CultureInfo.InvariantCulture)
+                    + " kind=money detail=" + step.Detail
+                    + " call=" + Autopilot.Call(step, prefix.Api),
+                loop.Action);
+            Assert.Equal(prefix.Api.Call("loan"), Autopilot.Call(step, prefix.Api));
+            Assert.Contains("time.advanced ", loop.Advanced);
+            var dayKey = TopBar.Day(shot.Rolled).ToString(CultureInfo.InvariantCulture);
+            Assert.True(
+                loop.Telemetry.Contains("telemetry.written ", StringComparison.Ordinal)
+                    || File.ReadAllLines(Telemetry.CsvPath(dir.Path))
+                        .Any(row => row.StartsWith(dayKey + ",", StringComparison.Ordinal)),
+                "telemetry row for the autopilot day");
+            Assert.Equal(dayKey, File.ReadAllLines(Telemetry.CsvPath(dir.Path))[^1].Split(',')[0]);
+            Assert.True(Autopilot.Enabled);
+            Assert.True(Win.AlreadyLogged(logPath));
+        }
+        finally
+        {
+            Autopilot.Enabled = false;
+            Autopilot.DryRun = false;
+            Win.ClearApproved();
+        }
+    }
+
+    [Fact]
+    public void Audit_load_day_roll_needs_refill_recorded_call_slot_fill_store_connect_plan_assign_restock_sort_overflow_order_audit_bar_stage_open_where_layout_prices_supply_managers_money_playbook_win_autopilot_skips_after_f10()
+    {
+        // Chain: load → day roll → needs refill → recorded call → slot fill → store connect → plan assign → restock → sort → overflow → order → audit → bar → stage → open → where → layout → prices → supply → managers → money → playbook → win → autopilot
+        using var dir = new TempAudit();
+        var save = new object();
+        var prefix = Prefix(dir.Path, save);
+        var guard = LiveGuard();
+        var world = prefix.World;
+        Autopilot.Enabled = true;
+        Autopilot.DryRun = false;
+        try
+        {
+            var shot = WatchDay(dir.Path, ref world, guard, prefix.Api, prefix.Rolled, 1016, 10m, null);
+            var stage = Stage.Read(
+                TopBar.Day(shot.Rolled),
+                guard.Cash,
+                world.Needs,
+                world.Stops,
+                world.Holds,
+                world.Slots);
+            var money = Money.Decide(
+                stage,
+                guard.Cash,
+                guard.DailyCost,
+                projectedDailyProfit: 200m,
+                offers: new[] { new LoanOffer(2_000m, 100) },
+                loan: null,
+                bestPaybackRate: 0.1m);
+            var step = Playbook.Decide(
+                OpenPick.None(),
+                SitePick.None(),
+                LayoutPick.None(),
+                PricePick.None(),
+                SupplyPick.None(),
+                TruckPick.None(),
+                WarehousePick.None(),
+                ManagerPick.None(),
+                money,
+                EstatePick.None(),
+                ClosePick.None(),
+                RunPick.None());
+            Win.ClearApproved();
+            var reached = Win.Record(LoadLog.CeoLogPath(dir.Path), TopBar.Day(shot.Rolled), TopBar.WinNetWorth);
+            Assert.StartsWith("win.reached ", reached);
+            Assert.True(step.Chosen);
+            Assert.Equal("money", step.Kind);
+
+            Controls.Pause();
+            Assert.False(Autopilot.Enabled);
+            var loop = Autopilot.Day(
+                dir.Path,
+                TopBar.Day(shot.Rolled) + 1,
+                prefix.Api,
+                world,
+                guard,
+                heal => HealFate.Done,
+                step,
+                Needs.Hold(),
+                TopBar.Line(TopBar.Day(shot.Rolled) + 1, guard.Cash, 10m, 7m, stage, false, 1),
+                shot.Health);
+            Assert.False(loop.Ran);
+            Assert.Contains("ran=false", loop.Marker);
+            Assert.Equal("", loop.Action);
+            Assert.Equal("", loop.Advanced);
+            Assert.DoesNotContain(
+                File.ReadAllLines(LoadLog.CeoLogPath(dir.Path)),
+                line => line.StartsWith("autopilot.action ") && line.Contains("day=" + (TopBar.Day(shot.Rolled) + 1).ToString(CultureInfo.InvariantCulture)));
+        }
+        finally
+        {
+            Autopilot.Enabled = false;
+            Autopilot.DryRun = false;
+            Win.ClearApproved();
+        }
+    }
+
+    [Fact]
     public void Audit_load_day_roll_needs_refill_recorded_call_slot_fill_store_connect_plan_assign_restock_sort_overflow_order_audit_bar_health_controls_telemetry_rent_layout_ops_wholesaler_hire_loan_demand_tax_time_marketing_stop_takeover_stage_open_where_layout_prices_supply_locks_stage_one_wholesaler()
     {
         // Chain: load → day roll → needs refill → recorded call → slot fill → store connect → plan assign → restock → sort → overflow → order → audit → bar → health → controls → telemetry → rent → layout → ops → wholesaler → hire → loan → demand → tax → time → marketing → stop → takeover → stage → open → where → layout → prices → supply

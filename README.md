@@ -6,7 +6,7 @@ Cursor **rules**, **skills**, **handoff protocol**, and **test discipline** for 
 
 **Start with [CONTRIBUTING.md](CONTRIBUTING.md)** — reading order, tracked vs gitignored docs, PR expectations.
 
-**Current work:** [doc/PROJECT_STATUS.md](doc/PROJECT_STATUS.md). Version 1.16.1. Story 10.1 shipped; next is 10.2 when asked.
+**Current work:** [doc/PROJECT_STATUS.md](doc/PROJECT_STATUS.md). Version 1.16.2. Story 10.2 shipped; next is 10.3 when asked.
 
 ## Quick start
 
