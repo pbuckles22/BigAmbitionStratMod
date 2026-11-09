@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
@@ -30,6 +31,10 @@ namespace ChaoticCEO
         public const string ExecuteAll = "Execute all";
 
         public const string ExecuteAllStory = "7.12";
+
+        public const string ResumeSkipLabel = "Resume skip";
+
+        public static Action? OnResumeSkip;
 
         private static string _seen = "";
 
@@ -94,6 +99,17 @@ namespace ChaoticCEO
             return Autopilot.DryRun;
         }
 
+        public static bool ResumeSkip(string localAppData)
+        {
+            Autopilot.Enabled = true;
+            OnResumeSkip?.Invoke();
+            var line = "time.resumed version=" + LoadLog.Version
+                + " boost=" + (TimeAdvance.SoakBoostsGameSpeed ? "true" : "false");
+            Append(localAppData ?? "", line);
+            Append(localAppData ?? "", Pressed("action=resume-skip"));
+            return true;
+        }
+
         public static IReadOnlyList<string> Buttons(bool autopilot, bool dryRun)
         {
             return new[]
@@ -101,13 +117,14 @@ namespace ChaoticCEO
                 "Autopilot " + (autopilot ? "on" : "off"),
                 "Dry run " + (dryRun ? "on" : "off"),
                 ExecuteAll,
+                ResumeSkipLabel,
             };
         }
 
         public static string Row(bool autopilot, bool dryRun)
         {
             var buttons = Buttons(autopilot, dryRun);
-            return buttons[0] + "  " + buttons[1] + "  " + buttons[2];
+            return buttons[0] + "  " + buttons[1] + "  " + buttons[2] + "  " + buttons[3];
         }
 
         public static void Append(string localAppData, string line)

@@ -74,6 +74,11 @@ namespace ChaoticCEO
 
         public const decimal MinimumAmount = 500m;
 
+        public static bool SoakUnlocked(bool saveHasLoan, bool logRecorded)
+        {
+            return saveHasLoan || logRecorded;
+        }
+
         public static LoanTakePick Take(
             decimal projectedDailyProfit,
             IReadOnlyList<LoanOffer>? offers,

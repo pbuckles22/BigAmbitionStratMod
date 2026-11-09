@@ -138,10 +138,10 @@ When shipping: update **PM_PLAN**, **doc/PROJECT_STATUS.md**, and **Current stat
 
 ## Current state
 
-- **Product:** Version 1.16.4.1. Story 10.3 Ship A Stage-1 stock/delivery PASS; G3/`ready` and Stores 2–3 still open. Ships B–E ahead. 7.13 stays stashed. Ladder: [PM_PLAN.md](PM_PLAN.md).
-- **On:** `origin/main @ 6bcf802`. Plan: full expansion runbook. https://github.com/pbuckles22/BigAmbitionStratMod
-- **Next:** Resume **10.3** when asked — G3 staff/`ready=true` + Store N fit-out, then Ships B–E. No `$100M` soak yet.
-- **Blockers:** No soak until Store #1 `ready=true` × ProfitProofDays. Do not invent Unverified calls.
+- **Product:** Version 1.16.5.6. Story 10.3 soak-speed + F9 Resume skip PASS; `ready` (g4/g5) and Stores 2–3 still open. Ships B–E ahead. 7.13 stays stashed. Ladder: [PM_PLAN.md](PM_PLAN.md).
+- **On:** `origin/main` (land sha after this CMPH). Plan: full expansion runbook. https://github.com/pbuckles22/BigAmbitionStratMod
+- **Next:** Resume **10.3** when asked — `ready=true` × ProfitProofDays (g4/g5) + Store N fit-out, then Ships B–E. No `$100M` soak yet.
+- **Blockers:** No `$100M` soak until Store #1 `ready=true` × ProfitProofDays. Do not invent Unverified calls.
 
 ## Run and test
 

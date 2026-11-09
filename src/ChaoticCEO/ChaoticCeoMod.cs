@@ -41,6 +41,12 @@ namespace ChaoticCEO
             var localAppData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
             LoadLog.StartSession(localAppData);
             _localAppData = localAppData;
+            Controls.OnResumeSkip = () =>
+            {
+                _time.ClearWait();
+                TimeAdvanceBridge.CancelRunning();
+                TimeAdvanceBridge.BoostForSkip();
+            };
             if (!_hooked)
             {
                 UnityLifecycleProvider.OnUpdate += OnFrame;
@@ -52,6 +58,7 @@ namespace ChaoticCEO
 
         public Task OnUnloadAsync()
         {
+            Controls.OnResumeSkip = null;
             if (_hooked)
             {
                 UnityLifecycleProvider.OnUpdate -= OnFrame;
@@ -100,6 +107,8 @@ namespace ChaoticCEO
                 LiveDump.ConnectStores(_stores, _localAppData);
                 LiveDump.AssignPlans(_plans, _localAppData);
                 LiveDump.RestockWarehouses(_restock, _localAppData);
+                // Fit-out once per day roll — never per frame (scene scans stalled SkipTime).
+                LiveDump.TryFitOut(_localAppData);
                 if (Autopilot.Enabled)
                 {
                     LiveDump.RunAutopilot(_localAppData);

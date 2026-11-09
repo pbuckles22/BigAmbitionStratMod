@@ -398,11 +398,11 @@ namespace ChaoticCEO
                 HudLine(),
                 Health.Latest(localAppData),
                 timeBridge: TimeAdvanceBridge.Skip,
-                actionBridge: ExecutePlaybook);
+                actionBridge: (step, call) => ExecutePlaybook(localAppData, step, call));
             return day.Loop;
         }
 
-        private static bool ExecutePlaybook(PlaybookStep step, string call)
+        private static bool ExecutePlaybook(string localAppData, PlaybookStep step, string call)
         {
             if (step == null || !step.Chosen || Autopilot.DryRun)
             {
@@ -416,7 +416,15 @@ namespace ChaoticCEO
                     return false;
                 }
 
-                return RentBridge.Live(new BuildingRent(street, number, true, call));
+                var rent = new BuildingRent(street, number, true, call);
+                if (!RentBridge.Live(rent))
+                {
+                    return false;
+                }
+
+                var current = SaveGameManager.Current;
+                Rent.Record(localAppData, rent, current == null ? 0 : current.Day);
+                return true;
             }
 
             // open / money / run / others: log through Autopilot; expand bridges as Stage 1 needs them.
@@ -834,6 +842,92 @@ namespace ChaoticCEO
             return Cashier.Record(localAppData, hired, current.Day);
         }
 
+        public static string? TryFitOut(string localAppData)
+        {
+            if (string.IsNullOrEmpty(localAppData) || !InCity())
+            {
+                return null;
+            }
+
+            var current = SaveGameManager.Current;
+            if (current?.BuildingRegistrations == null)
+            {
+                return null;
+            }
+
+            BuildingRegistration? target = null;
+            string place = "";
+            FitOutProgress? progress = null;
+            foreach (var building in current.BuildingRegistrations)
+            {
+                if (building == null
+                    || !building.RentedByPlayer
+                    || string.IsNullOrEmpty(building.StreetName)
+                    || building.StreetNumber <= 0)
+                {
+                    continue;
+                }
+
+                var family = StoreFamily.For(building.businessTypeName ?? "");
+                var goods = family == "specialty"
+                    || family == "food"
+                    || family == "durables"
+                    || family == "service";
+                var emptyLot = string.IsNullOrEmpty(building.businessTypeName)
+                    && string.IsNullOrEmpty(building.BusinessName);
+                if (!goods && !emptyLot)
+                {
+                    continue;
+                }
+
+                var row = FitProgress(localAppData, building);
+                if (row.LayoutLoaded
+                    && row.OpsAssigned
+                    && row.CapacityMatched
+                    && row.ContractSigned
+                    && row.CashierHired)
+                {
+                    continue;
+                }
+
+                target = building;
+                place = building.StreetName
+                    + " "
+                    + building.StreetNumber.ToString(CultureInfo.InvariantCulture);
+                progress = row;
+                break;
+            }
+
+            if (target == null || progress == null || place.Length == 0)
+            {
+                return null;
+            }
+
+            var priors = new List<StoreHealth>();
+            foreach (var health in OwnedStoreHealth(current))
+            {
+                if (health != null && health.Place != place)
+                {
+                    priors.Add(health);
+                }
+            }
+
+            var pick = FitOut.Decide(priors, place, progress);
+            if (!pick.Chosen)
+            {
+                return null;
+            }
+
+            var line = RunFitOutStep(localAppData, current, target, place, pick);
+            if (line == null)
+            {
+                return null;
+            }
+
+            FitOut.Record(localAppData, pick, current.Day);
+            return line;
+        }
+
         public static string? TryLoan(BankLoanWatch watch, string localAppData)
         {
             if (watch == null || string.IsNullOrEmpty(localAppData) || !InCity())
@@ -1081,7 +1175,8 @@ namespace ChaoticCEO
             }
 
             var current = SaveGameManager.Current;
-            if (current == null || !watch.Due(current) || watch.Finished(current))
+            // Keep Skipping even after WeekDays / a stale Finished mark so soak stays on SkipTime, not game speed.
+            if (current == null || !TimeAdvance.KeepSkipping(watch, current))
             {
                 return null;
             }
@@ -1098,11 +1193,6 @@ namespace ChaoticCEO
 
             if (watch.Arrive(current.Day))
             {
-                if (watch.Completed >= TimeAdvance.WeekDays)
-                {
-                    watch.Mark(current);
-                }
-
                 return "";
             }
 
@@ -1126,8 +1216,7 @@ namespace ChaoticCEO
             var advanced = TimeAdvance.Skip(needs, alreadyAdvanced: false, GameApi.Live());
             if (!advanced.Advanced || !TimeAdvanceBridge.Skip(advanced))
             {
-                watch.Mark(current);
-                return "";
+                return null;
             }
 
             watch.WaitFor(current.Day + 1);
@@ -1137,20 +1226,21 @@ namespace ChaoticCEO
         private static bool HasLoan(string localAppData)
         {
             var path = LoadLog.CeoLogPath(localAppData);
-            if (!File.Exists(path))
+            var logRecorded = false;
+            if (File.Exists(path))
             {
-                return false;
-            }
-
-            foreach (var line in File.ReadAllLines(path))
-            {
-                if (line.StartsWith("loan.taken ", System.StringComparison.Ordinal))
+                foreach (var line in File.ReadAllLines(path))
                 {
-                    return true;
+                    if (line.StartsWith("loan.taken ", System.StringComparison.Ordinal))
+                    {
+                        logRecorded = true;
+                        break;
+                    }
                 }
             }
 
-            return false;
+            // Save already borrowed: session log may lack loan.taken after StartSession wipe.
+            return BankLoan.SoakUnlocked(BankLoanBridge.HasLoan(), logRecorded);
         }
 
         private static bool LastContract(string localAppData, out string street, out int number, out bool skipped)
@@ -1411,6 +1501,156 @@ namespace ChaoticCEO
             }
 
             return null;
+        }
+
+        private static FitOutProgress FitProgress(string localAppData, BuildingRegistration building)
+        {
+            var street = building.StreetName ?? "";
+            var number = building.StreetNumber;
+            var layout = StoreOpsBridge.HasItems(building)
+                || !string.IsNullOrEmpty(building.BusinessName);
+            var ops = StoreOpsBridge.HasCleaner(building);
+            var capacity = CapacityBridge.AlreadyMatched(localAppData, street, number);
+            var contract = WholesalerBridge.HasContract(street, number);
+            var cashier = CashierBridge.HasCashier(building);
+            return new FitOutProgress(layout, ops, capacity, contract, cashier);
+        }
+
+        private static string? RunFitOutStep(
+            string localAppData,
+            GameInstance current,
+            BuildingRegistration registration,
+            string place,
+            FitOutPick pick)
+        {
+            if (!SplitPlace(place, out var street, out var number))
+            {
+                return null;
+            }
+
+            var rented = new BuildingRent(street, number, true, "");
+            switch (pick.Step)
+            {
+                case "layout":
+                {
+                    if (!StarterBridge.Inside(rented))
+                    {
+                        return null;
+                    }
+
+                    StarterPick chosen;
+                    try
+                    {
+                        chosen = Starter.Choose(StarterBridge.Offers(registration), alreadyOpen: false, GameApi.Live());
+                    }
+                    catch (Exception)
+                    {
+                        return Starter.Miss(localAppData, Starter.Choose(null, false, null), rented, current.Day);
+                    }
+
+                    if (!chosen.Loaded)
+                    {
+                        return Starter.Miss(localAppData, chosen, rented, current.Day);
+                    }
+
+                    if (!StarterBridge.Live(registration, chosen))
+                    {
+                        return Starter.Miss(localAppData, chosen, rented, current.Day);
+                    }
+
+                    return Starter.Record(localAppData, chosen, rented, current.Day);
+                }
+
+                case "ops":
+                {
+                    if (!StoreOpsBridge.HasItems(registration))
+                    {
+                        return null;
+                    }
+
+                    var chosen = Starter.Choose(Starter.StageOne(), alreadyOpen: false, GameApi.Live());
+                    var assigned = StoreOps.Assign(
+                        chosen,
+                        StoreOps.Opening(),
+                        StoreOpsBridge.Fixtures(registration),
+                        GameApi.Live());
+                    if (!assigned.Assigned)
+                    {
+                        return StoreOps.Miss(localAppData, assigned, rented, current.Day, "empty");
+                    }
+
+                    if (!StoreOpsBridge.Live(registration, assigned, out var reason, out var placed))
+                    {
+                        return StoreOps.Miss(localAppData, assigned, rented, current.Day, reason);
+                    }
+
+                    StoreOps.CleanerLine(localAppData, rented, current.Day, placed);
+                    return StoreOps.Record(localAppData, assigned, rented, current.Day);
+                }
+
+                case "capacity":
+                {
+                    var chosen = Starter.Choose(Starter.StageOne(), alreadyOpen: false, GameApi.Live());
+                    var already = CapacityBridge.AlreadyMatched(localAppData, street, number);
+                    var matched = Capacity.Match(rented, chosen, already, GameApi.Live());
+                    if (!matched.Matched)
+                    {
+                        return "";
+                    }
+
+                    if (!CapacityBridge.Live(registration, matched))
+                    {
+                        return null;
+                    }
+
+                    return Capacity.Record(localAppData, matched, current.Day);
+                }
+
+                case "contract":
+                {
+                    var chosen = Starter.Choose(Starter.StageOne(), alreadyOpen: false, GameApi.Live());
+                    var already = WholesalerBridge.HasContract(street, number);
+                    var signed = Wholesaler.Sign(rented, chosen, Wholesaler.StageOne(), already, GameApi.Live());
+                    if (!signed.Signed)
+                    {
+                        return "";
+                    }
+
+                    if (!WholesalerBridge.Live(signed, chosen.BusinessType))
+                    {
+                        return Wholesaler.Miss(localAppData, signed, current.Day);
+                    }
+
+                    return Wholesaler.Record(localAppData, signed, current.Day);
+                }
+
+                case "cashier":
+                {
+                    var chosen = Starter.Choose(Starter.StageOne(), alreadyOpen: false, GameApi.Live());
+                    var signed = Wholesaler.Sign(
+                        rented,
+                        chosen,
+                        Wholesaler.StageOne(),
+                        alreadySigned: false,
+                        GameApi.Live());
+                    var already = CashierBridge.HasCashier(registration);
+                    var hired = Cashier.Hire(rented, chosen, signed, already, GameApi.Live());
+                    if (!hired.Hired)
+                    {
+                        return "";
+                    }
+
+                    if (!CashierBridge.Live(registration, hired, out var reason))
+                    {
+                        return Cashier.Miss(localAppData, hired, current.Day, reason);
+                    }
+
+                    return Cashier.Record(localAppData, hired, current.Day);
+                }
+
+                default:
+                    return null;
+            }
         }
 
         private static bool PlayerRents(GameInstance current)
@@ -2144,7 +2384,7 @@ namespace ChaoticCEO
                     + building.StreetNumber.ToString(CultureInfo.InvariantCulture);
                 var cargo = FixtureCargo(building);
                 var needed = Wholesaler.Catalog(building.businessTypeName);
-                var staffedStations = StaffedStationCount(building);
+                var staff = SenseStaff(building);
                 var lastIncome = LastDailyIncome(building);
                 var customers = lastIncome > 0f ? 1 : CustomersToday(building, current.Day);
                 rows.Add(
@@ -2154,15 +2394,81 @@ namespace ChaoticCEO
                             building.temporarilyClosed,
                             needed,
                             cargo,
-                            registerStaffed: staffedStations > 0 && !building.warnedLastHourAboutNoEmployee,
-                            cleanerStaffed: staffedStations > 0 || !building.warnedLastHourAboutNoEmployee,
-                            staffSatisfaction: building.warnedLastHourAboutNoEmployee
-                                ? 0f
-                                : StoreHealthGate.SatisfactionFloor,
+                            staff.RegisterStaffed,
+                            staff.CleanerStaffed,
+                            staff.Satisfaction,
                             scheduledOpen: true,
                             dailyCustomers: customers,
                             dailyRevenue: (decimal)lastIncome,
                             recentOpenDayProfits: OpenDayProfits(building))));
+            }
+
+            return rows;
+        }
+
+        private static StaffSense SenseStaff(BuildingRegistration building)
+        {
+            var fromShifts = StoreStaff.FromShifts(
+                ReadStaffShifts(building),
+                building.warnedLastHourAboutNoEmployee);
+            var register = fromShifts.RegisterStaffed || CashierBridge.HasCashier(building);
+            var cleaner = fromShifts.CleanerStaffed || StoreOpsBridge.HasCleaner(building);
+            var satisfaction = register && cleaner && !building.warnedLastHourAboutNoEmployee
+                ? 100f
+                : 0f;
+            return StoreStaff.Sense(
+                register,
+                cleaner,
+                satisfaction,
+                employeeHeadcount: building.aiEmployees == null ? 0 : building.aiEmployees.Count);
+        }
+
+        private static IReadOnlyList<StaffShift> ReadStaffShifts(BuildingRegistration building)
+        {
+            var rows = new List<StaffShift>();
+            if (building?.scheduleDays == null)
+            {
+                return rows;
+            }
+
+            var cleanerStations = new HashSet<string>(StringComparer.Ordinal);
+            if (building.itemInstances != null)
+            {
+                foreach (var item in building.itemInstances.Values)
+                {
+                    if (item != null
+                        && item.itemName == "ba:itemname_cleaningstation"
+                        && !string.IsNullOrEmpty(item.id))
+                    {
+                        cleanerStations.Add(item.id);
+                    }
+                }
+            }
+
+            foreach (var day in building.scheduleDays)
+            {
+                if (day?.workShifts == null)
+                {
+                    continue;
+                }
+
+                foreach (var shift in day.workShifts)
+                {
+                    if (shift == null || string.IsNullOrEmpty(shift.employeeId))
+                    {
+                        continue;
+                    }
+
+                    var itemId = shift.itemInstanceId ?? "";
+                    if (shift.type == WorkShiftType.Cleaning || cleanerStations.Contains(itemId))
+                    {
+                        rows.Add(new StaffShift(shift.employeeId, itemId, StaffShift.Cleaner));
+                    }
+                    else
+                    {
+                        rows.Add(new StaffShift(shift.employeeId, itemId, StaffShift.Register));
+                    }
+                }
             }
 
             return rows;
@@ -2214,11 +2520,6 @@ namespace ChaoticCEO
                     rows.Add(new CargoAmount(nested.itemName, nested.amount));
                 }
             }
-        }
-
-        private static int StaffedStationCount(BuildingRegistration building)
-        {
-            return building.aiEmployees == null ? 0 : building.aiEmployees.Count;
         }
 
         private static int CustomersToday(BuildingRegistration building, int day)

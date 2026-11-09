@@ -278,6 +278,12 @@ namespace ChaoticCEO
                 Controls.Append(_localAppData, Controls.Pressed(Controls.PressAll()));
             }
 
+            if (GUILayout.Button(captions[3]))
+            {
+                Controls.ResumeSkip(_localAppData);
+                _session.Close();
+            }
+
             GUILayout.EndHorizontal();
         }
 

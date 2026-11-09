@@ -176,6 +176,57 @@ public class TimeAdvanceTests
     }
 
     [Fact]
+    public void TimeAdvance_watch_keeps_skipping_after_week_and_ignores_finish_mark()
+    {
+        // Harvest: TryTime Mark after WeekDays made Finished=true; soak fell back to slow game speed.
+        var watch = new TimeAdvanceWatch();
+        var save = new object();
+        for (var i = 0; i < TimeAdvance.WeekDays; i++)
+        {
+            watch.WaitFor(i + 1);
+            Assert.True(watch.Arrive(i + 1));
+        }
+
+        Assert.Equal(TimeAdvance.WeekDays, watch.Completed);
+        Assert.True(TimeAdvance.KeepSkipping(watch, save));
+        Assert.False(watch.Finished(save));
+
+        watch.Mark(save);
+        Assert.True(watch.Finished(save));
+        Assert.True(TimeAdvance.KeepSkipping(watch, save));
+        Assert.True(watch.Due(save));
+    }
+
+    [Fact]
+    public void TimeAdvance_ClearWait_unblocks_stuck_skip_after_interrupted_SkipTime()
+    {
+        // Harvest: opening F9 / looking at stats mid-SkipTime left Waiting(day) true forever.
+        var watch = new TimeAdvanceWatch();
+        watch.WaitFor(12);
+        Assert.True(watch.Waiting(11));
+        watch.ClearWait();
+        Assert.False(watch.Waiting(11));
+        Assert.False(watch.Waiting(12));
+    }
+
+    [Fact]
+    public void TimeAdvance_soak_boosts_game_speed_before_SkipTime()
+    {
+        // Harvest: SkipTime(span, useConstantSpeed:true) stalled soak; boost FastForward instead.
+        Assert.True(TimeAdvance.SoakBoostsGameSpeed);
+        Assert.Equal("1d", TimeAdvance.DaySpan);
+    }
+
+    [Fact]
+    public void BankLoan_SoakUnlocked_accepts_save_loan_without_log_line()
+    {
+        // Harvest: loaded save with Loans.Count>0 but StartSession wiped loan.taken — Resume did nothing.
+        Assert.True(BankLoan.SoakUnlocked(saveHasLoan: true, logRecorded: false));
+        Assert.True(BankLoan.SoakUnlocked(saveHasLoan: false, logRecorded: true));
+        Assert.False(BankLoan.SoakUnlocked(saveHasLoan: false, logRecorded: false));
+    }
+
+    [Fact]
     public void TimeAdvance_a_week_is_seven_safe_day_skips()
     {
         var api = GameApi.Live();

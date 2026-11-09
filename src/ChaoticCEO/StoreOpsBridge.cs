@@ -100,6 +100,26 @@ namespace ChaoticCEO
             return false;
         }
 
+        public static bool HasCleaner(BuildingRegistration registration)
+        {
+            if (registration == null)
+            {
+                return false;
+            }
+
+            try
+            {
+                var cleaner = ReadCleaner(registration);
+                return cleaner != null
+                    && cleaner.EmployeeId.Length > 0
+                    && cleaner.Shift;
+            }
+            catch (System.Exception)
+            {
+                return false;
+            }
+        }
+
         private static bool Place(
             BuildingRegistration registration,
             string itemName,

@@ -70,8 +70,53 @@ namespace ChaoticCEO
 
             try
             {
+                // FastForward before SkipTime — the (span, useConstantSpeed) overload stalled soak.
+                BoostForSkip();
                 TimeMachine.SkipTime(pick.Span);
                 return true;
+            }
+            catch (System.Exception)
+            {
+                return false;
+            }
+        }
+
+        public static bool CancelRunning()
+        {
+            try
+            {
+                var machine = Object.FindObjectOfType<TimeMachine>();
+                if (machine == null || !machine.isRunning)
+                {
+                    return false;
+                }
+
+                machine.CancelTimeMachine();
+                return true;
+            }
+            catch (System.Exception)
+            {
+                return false;
+            }
+        }
+
+        public static bool BoostForSkip()
+        {
+            try
+            {
+                var clock = Object.FindObjectOfType<GameSpeedController>();
+                if (clock == null)
+                {
+                    return false;
+                }
+
+                if (clock.Paused)
+                {
+                    clock.SetPlayerPause(false, false);
+                }
+
+                clock.Set(new GameSpeed(false, TimeSpeed.FastForward, false));
+                return !clock.Paused;
             }
             catch (System.Exception)
             {

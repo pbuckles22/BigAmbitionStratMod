@@ -738,7 +738,7 @@ public class AuditTests
             Assert.DoesNotContain("Autopilot on", pausedBar);
             Assert.Equal("Execute all", Controls.ExecuteAll);
             Assert.Equal("7.12", Controls.ExecuteAllStory);
-            Assert.EndsWith("Execute all", row);
+            Assert.EndsWith(Controls.ResumeSkipLabel, row);
             Assert.Equal("action=execute-all story=7.12", Controls.PressAll());
             Assert.Equal(shown, again);
             Assert.StartsWith("controls.shown version=" + LoadLog.Version + " Autopilot on", shown);
@@ -790,7 +790,7 @@ public class AuditTests
             Assert.Contains("Autopilot on", bar);
             Assert.DoesNotContain("Autopilot off", bar);
             Assert.Contains("Dry run on", row);
-            Assert.EndsWith("Execute all", row);
+            Assert.EndsWith(Controls.ResumeSkipLabel, row);
             Assert.Equal(bar, frame[0]);
             Assert.Equal(health, frame[1]);
             Assert.Equal(row, frame[2]);

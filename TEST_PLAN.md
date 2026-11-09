@@ -436,18 +436,17 @@ Human PASS 2026-11-09 on 1.16.2. New game: `mod.loaded version=1.16.2 build=3682
 
 ## Story 10.3 — Hands-off win run
 
-Tier 1: `StoreHealthTests` locks G1–G5, zero-amount paperbag G2 fail, weekly `NeedsReschedule` → tomorrow, paperbag `ItemAmount`×2, `store.health`, and chains `fixture→heal→open blocked` plus `reschedule→amount→ready→open`. `WinRunTests` / `WholesalerTests` as before. Command: the Tier 1 `dotnet test` suite above.
+Tier 1: `StoreHealthTests` / `FitOutTests` as before, plus `StoreStaff.FromShifts` and `TimeAdvance.KeepSkipping` past WeekDays. Fit-out runs on day.roll only (not per frame). Command: the Tier 1 `dotnet test` suite above.
 
-Human check (Ship A Stage-1 stock/profit — not a $100M soak yet):
+Human check (Resume skip on F9):
 
-1. Restart Big Ambitions so version **1.16.4.1** loads. Start a **new** game and reach the city. Do not load the day 1021 / day-24 paper-bag FAIL save.
-2. Wait through day-1 setup (`layout.loaded`, `contract.signed`). Skip to the next morning, then open Store #1 shelves and cash register.
-3. Leave Autopilot on through **days 2–10**. Watch for paper-bag reds and weekly dry gaps. Open `%LocalAppData%\ChaoticCEO\ceo.log` and the F9 bar.
-4. **PASS if** Store #1 keeps paper bags / layout stock mid-week (no multi-day empty gap), profit > 0 on open days, `contract.rescheduled` appears when a weekly `next` was pulled to tomorrow, and no `kind=open` while `store.health ready=false`. **FAIL if** still 1.16.4 (no `.1`), paper-bag alert returns with days of 0 profit, or next delivery keeps jumping +7 with no reschedule lines.
-5. Evidence: `contract.signed`; `contract.rescheduled` (`from`, `next`); `store.health`; csv profits without a 5–6 day zero streak after a spike.
-6. Version marker: public `1.16.4.1`. `ceo.log` starts at `mod.loaded version=1.16.4.1 build=3682`.
+1. Restart Big Ambitions so version **1.16.5.6** loads. Continue or start a game with Autopilot soak running.
+2. Open F9 / look at stats until days stop. Press **Resume skip** (F9 closes).
+3. **PASS if** the TimeMachine jump is fast again (not wall-clock Normal) and days advance. **FAIL if** skip screen crawls or days stay stuck.
+4. Evidence: `time.resumed ... boost=true`, then more `day.rolled` / `time.advanced`. Saved games with an existing loan should resume without needing a fresh `loan.taken` line.
+5. Version marker: public `1.16.5.6`.
 
-Full `win.reached` soak stays blocked until this Stage-1 stock PASS.
+Full `win.reached` soak stays blocked until Store #1 `ready=true` × ProfitProofDays.
 
 ## Wholesaler contract human check
 

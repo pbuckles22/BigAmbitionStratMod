@@ -48,6 +48,9 @@ namespace ChaoticCEO
 
         public const int WeekDays = 7;
 
+        // Player Normal makes SkipTime crawl; soak boosts GameSpeed to FastForward first.
+        public const bool SoakBoostsGameSpeed = true;
+
         public static bool BelowFloor(PlayerNeeds now)
         {
             if (now == null)
@@ -98,6 +101,11 @@ namespace ChaoticCEO
             }
 
             return new TimeSkipPick(true, DaySpan, call);
+        }
+
+        public static bool KeepSkipping(TimeAdvanceWatch? watch, object? save)
+        {
+            return watch != null && watch.Due(save);
         }
 
         public static string RecordCare(string localAppData, TimeCarePick? pick, int day)
@@ -203,6 +211,11 @@ namespace ChaoticCEO
         public void WaitFor(int day)
         {
             _waitingForDay = day;
+        }
+
+        public void ClearWait()
+        {
+            _waitingForDay = null;
         }
 
         public int Completed => _completed;

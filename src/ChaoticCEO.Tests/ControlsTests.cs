@@ -5,6 +5,21 @@ namespace ChaoticCEO.Tests;
 [Collection(nameof(AutopilotState))]
 public class ControlsTests
 {
+    private sealed class ControlsTempDir : IDisposable
+    {
+        public ControlsTempDir()
+        {
+            Path = Directory.CreateTempSubdirectory("ceo-controls").FullName;
+        }
+
+        public string Path { get; }
+
+        public void Dispose()
+        {
+            Directory.Delete(Path, recursive: true);
+        }
+    }
+
     [Fact]
     public void Controls_execute_names_each_roadmap_step()
     {
@@ -43,8 +58,35 @@ public class ControlsTests
         Assert.Equal("Execute all", Controls.ExecuteAll);
         Assert.Equal("7.12", Controls.ExecuteAllStory);
         Assert.Equal("Execute all", buttons[2]);
-        Assert.EndsWith("Execute all", row);
+        Assert.Equal(Controls.ResumeSkipLabel, buttons[3]);
+        Assert.EndsWith(Controls.ResumeSkipLabel, row);
         Assert.Equal("action=execute-all story=7.12", Controls.PressAll());
+    }
+
+    [Fact]
+    public void Controls_ResumeSkip_turns_autopilot_on_and_clears_wait()
+    {
+        Autopilot.Enabled = false;
+        Autopilot.DryRun = false;
+        var cleared = false;
+        Controls.OnResumeSkip = () => cleared = true;
+        try
+        {
+            using var dir = new ControlsTempDir();
+            Assert.True(Controls.ResumeSkip(dir.Path));
+            Assert.True(Autopilot.Enabled);
+            Assert.True(cleared);
+            var text = File.ReadAllText(LoadLog.CeoLogPath(dir.Path));
+            Assert.Contains("time.resumed version=", text);
+            Assert.Contains("boost=true", text);
+            Assert.Contains("action=resume-skip", text);
+        }
+        finally
+        {
+            Controls.OnResumeSkip = null;
+            Autopilot.Enabled = true;
+            Autopilot.DryRun = false;
+        }
     }
 
     [Fact]
@@ -93,7 +135,7 @@ public class ControlsTests
             Assert.Contains("Dry run on", row);
             Assert.Contains("Autopilot on", row);
             Assert.Equal("Dry run on", buttons[1]);
-            Assert.EndsWith("Execute all", row);
+            Assert.EndsWith(Controls.ResumeSkipLabel, row);
         }
         finally
         {
@@ -122,7 +164,8 @@ public class ControlsTests
             Assert.Empty(buttons);
             Assert.Equal("Autopilot off", captions[0]);
             Assert.Equal("Execute all", captions[2]);
-            Assert.Equal("Autopilot off  Dry run off  Execute all", row);
+            Assert.Equal(Controls.ResumeSkipLabel, captions[3]);
+            Assert.Equal("Autopilot off  Dry run off  Execute all  Resume skip", row);
         }
         finally
         {
