@@ -96,7 +96,7 @@
 | **`feature/chain-prefix`** | Kept after CMPH (template history) |
 | **`feature/handoff-receiver-framing`** | Kept after CMPH (template history) |
 
-**Last land:** `9e5ad40` on `main`. Version 1.13.6. Branch `feature/13.5-time-advance` kept. Repo: https://github.com/pbuckles22/BigAmbitionStratMod.
+**Last land:** `22662d8` on `main`. Version 1.16.6.1. Branch `feature/10.3-store1-ready` kept. Repo: https://github.com/pbuckles22/BigAmbitionStratMod.
 
 ---
 
