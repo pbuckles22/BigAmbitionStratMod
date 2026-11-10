@@ -1,6 +1,6 @@
 # Strategy rulebook
 
-The autopilot plays a brand-new game with no hands on the keyboard and keeps running after the milestone. Each rule below is one testable sentence. A rule that names a threshold uses the name in bold. The number after it is the starting value. Epic 8 tunes it, and a tuned value gets a named Tier 1 test before the autopilot uses it.
+The autopilot plays a brand-new game with no hands on the keyboard and keeps running after the milestone. Each rule below is one testable sentence. A rule that names a threshold uses the name in bold. The number after it is the starting value. A story that changes one of those numbers locks that number with a Tier 1 test. Epic 8 does not search every named threshold. The longer notes live in [strategy/](strategy/). Those files are rules. Their sample code is not the mod.
 
 ## Win and boundary
 
@@ -17,20 +17,20 @@ The autopilot plays a brand-new game with no hands on the keyboard and keeps run
 
 ## Stages
 
-The stage is a pure decision, `Stage.Decide(day, cash, goodsStores, suppliedStores, warehouses, emptySlots, plans)`. The autopilot never runs a stage’s actions before that stage’s gate passes. A later stage keeps every rule of the earlier ones unless it says otherwise. Stage 4 passes when cash is at least **Stage4Cash**, supplied stores equal goods stores, and empty slots are 0. Stage 4 does not end at **WinNetWorth**.
+The stage is a pure decision, `Stage.Decide(day, cash, goodsStores, suppliedStores, warehouses, emptySlots, plans)`. The autopilot never runs a stage’s actions before that stage’s gate passes. A later stage keeps every rule of the earlier ones unless it says otherwise. Stage 4 passes when cash is at least **Stage4Cash**, at least one goods store is open, supplied stores equal goods stores, and empty slots are 0. Zero goods stores stays Stage 1. Stage 4 does not end at **WinNetWorth**.
 
 | Stage | Gate in | Supply | Stores and layouts | People and fleet |
 | --- | --- | --- | --- | --- |
 | 1 Bootstrap | New game | Wholesaler `DeliveryContract` to each store | Rent low-rent small lots. Open high-margin goods stores (gift, florist, fast food) from a starter layout | Cashiers hired directly. Loan funds stores 1 to 3 |
-| 2 First HQ and warehouse | Cash at least **Stage2Cash** = $150,000 and at least **Stage2Stores** = 3 goods stores | One single-family warehouse. Stores of that family move from contracts to a logistics plan | Clone the best layout of each type | Rent HQ. Logistics manager, purchasing agent, HR manager, headhunter, pricing plan. Truck 1 and driver 1 |
+| 2 First HQ and warehouse | Cash at least **Stage2Cash** = $150,000 and at least **Stage2Stores** = 3 goods stores | One single-family warehouse. Stores of that family move from contracts to a logistics plan | Clone the best layout of that type and building size. Insurance starts at Bronze | Rent HQ. Logistics manager, purchasing agent, HR manager, headhunter, pricing plan. Truck 1 and driver 1 |
 | 3 Scale | A warehouse plan is live and at least **Stage3Supplied** = 5 stores are on it | One family per warehouse, two trucks per warehouse | Street clusters. Services and offices when trucks are busy | Fill every garage slot. Managers scale by ratio |
-| 4 Real estate | Cash at least **Stage4Cash** = $2,000,000, supplied stores equal goods stores, and empty slots are 0. Stays on after **WinNetWorth** | Same, with rebalancing | Buy buildings by payback | Training to full skill |
+| 4 Real estate | Cash at least **Stage4Cash** = $2,000,000, at least one goods store, supplied stores equal goods stores, and empty slots are 0. Stays on after **WinNetWorth** | Same, with rebalancing | Buy buildings by payback | Training to full skill |
 
 ## 1. What business to open
 
 - The type with the larger expected daily gross profit wins. That profit is the sum over its items of (retail price − wholesale cost) × daily units, minus rent and wages. Ties keep the later type.
-- Stage 1 opens only goods types whose stock a wholesaler sells. Gift shop, florist, and fast food are the starting list.
-- When filled garage slots carry more than **TruckBusy** = 85% of their daily cargo, the next opening is a service or office business (law, web, graphics, hair, gym). Those need no trucks.
+- Stage 1 opens only goods types whose stock a wholesaler sells. Gift shop, florist, and fast food are the starting list. An electronics store stays closed while the factory pipeline is off. Factory-locked phones, earbuds, headphones, and the smartwatch are not ordered.
+- When filled garage slots carry more than **TruckBusy** = 85% of their daily cargo, the next opening is a service or office business (law, web, graphics, hair, gym). Offices and a gym have no shelves and no delivery contract. A hairdresser stocks `ba:itemname_haircareproduct` only.
 - A new goods family needs a warehouse for that family before Stage 3 opens a second store of it.
 - **Store readiness before expansion:** do not emit `open` or `where` while `PendingOpen` is set, or while any currently owned business fails the Store Readiness Gate (G1–G5). Store 1 has no prior store to check. Store N+1 waits until stores 1…N are Ready. Stage promotions use the same gate on every owned goods store.
 
@@ -41,7 +41,7 @@ Every owned business must pass all five before expansion or stage promotion:
 | Gate | Name | Condition | If failed |
 | --- | --- | --- | --- |
 | G1 | Open | Not temporarily closed | Re-open, restaff register, or clear the closure cause |
-| G2 | Stocked | Zero stock reds; every layout sellable item plus `ba:itemname_paperbag` has supply and morning stock > 0 | Widen or resize the wholesaler / warehouse order |
+| G2 | Stocked | Goods: every layout sellable item plus `ba:itemname_paperbag` has supply and morning stock > 0. Hairdresser: hair-care product on hand and a styling station. Office or gym: enough complete workstations, never cargo | Widen the order, or finish the workstation |
 | G3 | Staffed | Required stations have an employee on shift | Hire or reassign cashier / cleaner |
 | G4 | Selling | On scheduled open days: customers > 0 and revenue > 0 | Fix stock/staff first; then prices or marketing |
 | G5 | Profitable | Most recent open day profit > 0, and rolling open-day profit over **ProfitProofDays** = 3 days > 0 | Hold expansion; tune contract size and prices |
@@ -53,7 +53,7 @@ Stage 1 → 2 also needs **HealthyGoodsStores** ≥ **Stage2Stores**, liquid cas
 | Story | Done when | Out of scope |
 | --- | --- | --- |
 | **10.3** | Store #1 G1–G5 true; `ready=true` for **ProfitProofDays**; stall pause when remedies exhaust | Store #2+, warehouse, `$100M` |
-| **10.4** | Prior Ready → live rent + fit-out; 3 healthy goods stores | HQ / warehouse |
+| **10.4** | Prior Ready → live rent + fit-out; 3 healthy goods stores. Waits on **14.2**, **14.3**, and **14.4** | HQ / warehouse, offices, tax |
 | **10.5** | Stage2Cash + HealthyGoodsStores≥3; warehouse+truck+managers; wholesaler until stock ≥ **RefillDays**; then connect | Clusters / buy |
 | **10.6** | ≥5 healthy supplied; **ClusterMin**; **TruckBusy** → service/office; Close after **FixDays**+**RedDays** | Real-estate buy |
 | **10.7** | Stage4Cash + all Ready + emptySlots=0; live buy by payback; `win.reached` once | LLM / RL |
@@ -68,13 +68,14 @@ A gate that stays false for **StuckDays** = 3 open days runs that gate’s *If f
 - Otherwise the building with the larger traffic index per dollar of daily rent wins.
 - A tie keeps the later building.
 - A building over the cash reserve is not a choice.
+- A neighborhood on wholesaler supply holds at most **WholesalerDistrictMax** = 3 businesses. Store 4 goes to another neighborhood. After that family’s importer is running, the cap is **PreGoldDistrictMax** = 7 until Gold insurance is on, then the cap is off.
 
 ## 3. Which layout
 
 - There is one golden layout per business type and building size.
 - In Stage 1 it is the starter layout from story 13.2. That layout works on a fresh profile with zero saved layouts.
 - From Stage 2 it is the store of that type and size with the larger interior score (`Layout.Lock`). A tie keeps the later layout.
-- A size with no golden layout uses the starter layout, never a clone from another size.
+- A size with no golden layout uses the starter layout for that size. An A1 layout is never loaded onto a B1. The key is the building size code.
 
 ## 4. Prices
 
@@ -85,7 +86,7 @@ A gate that stays false for **StuckDays** = 3 open days runs that gate’s *If f
 
 ## 5. Where stock comes from
 
-- **Stage 1:** each goods store has a wholesaler contract for its items. Nothing is hand-carted.
+- **Stage 1:** each goods store has a wholesaler contract for its items. Nothing is hand-carted. Burn is the units that left the shelf over **BurnLookbackDays** = 3 open days, or **SeedBurn** = 25 when there is no history. `orderHistory` does not carry units per item. Cover starts at **CoverOpenDays** = 2. The order is cover × burn minus the stock still expected when the truck arrives, and never above the shelf space left. If the last drop lasted fewer days than the cover, raise the cover by that gap and stop at **CoverMax** = 4. **Maintain** raises and lowers the quantity from those readings. Headroom under **MinReplenishAmount** = 10 waits **HoldDeliveryDays** = 2. A delivery that is already due stays on that day.
 - **Stage 2 on, downstream:** a warehouse supplies every store of its family through one logistics plan with stock targets.
 - **Stage 2 on, upstream:** a purchasing agent orders that family from an importer when warehouse stock falls below **RefillDays** = 7 days of the sales that home will serve.
 - The first order of a new home uses the sales of that family’s stores that still sit on a wholesaler. After those stores connect, later orders use their connected burn.
@@ -112,10 +113,12 @@ A gate that stays false for **StuckDays** = 3 open days runs that gate’s *If f
   - one headhunter per **HuntSpan** = 5 open roles
 - A manager capacity is read from the game, not guessed. Until that read is recorded, **HrSpan** stays 25.
 - A plan without an assigned person counts as missing.
+- Stage 2 insurance starts at **Bronze**. **Gold** is on before any district reaches **RivalPoachAttackThreshold** = 8 businesses. A health, wage, or hours demand is met by the plan. A bonus does not clear it.
 
 ## 8. Money
 
-- Keep a cash reserve of **ReserveDays** = 7 days of total costs. No action spends below it.
+- Keep a cash reserve of **ReserveDays** = 7 days of total costs, plus billed tax and unbilled tax at **EstimatedTaxRate** = 25% when the save has no brackets. No ordinary action spends that reserve.
+- Back taxes are paid first, down to **MinSurvivalDays** = 3 of operating cost. In the **TaxShieldWindowDays** = 5 before an assessment, trucks, pallet shelves, and Stage 4 building buys may spend up to **TaxShieldDaySpend** = 60% above the operating reserve. Loan principal is not a deduction.
 - Stage 1 takes the largest loan whose daily repayment is at most **LoanCover** = 50% of projected daily profit.
 - Repay a loan when its interest rate beats the best payback rate on offer.
 - Each day the autopilot spends at most **DaySpend** = 25% of cash above the reserve.
@@ -128,7 +131,7 @@ A gate that stays false for **StuckDays** = 3 open days runs that gate’s *If f
 
 ## 10. Closing
 
-- Warehouses, headquarters, and offices are cost centers. They are never close steps (story 7.13).
+- Warehouses, headquarters, and offices are cost centers. They are never close steps (story **14.6**, which folds 7.13).
 - A goods store is a close step only after it has been supplied and staffed for **FixDays** = 7 days and its profit is still below zero for **RedDays** = 7 days.
 - An unsupplied store gets connected. An unstaffed store gets hired.
 
@@ -137,7 +140,7 @@ A gate that stays false for **StuckDays** = 3 open days runs that gate’s *If f
 **The player.** During time advance the player sleeps and eats before energy, hunger, or happiness reach **NeedFloor** = 20%.
 
 **Staff.**
-- An employee demand that is unmet for **DemandDays** = 3 days is met (story 13.4) or that employee is replaced (story 11.0).
+- An employee demand that is unmet for **DemandDays** = 3 days is met (story 13.4) or that employee is replaced (story 11.0). Insurance, wages, and hours are not cleared with a bonus.
 - A sick, retired, quitting, or poached employee is replaced through the headhunter.
 - Training targets full skill (story 11.0).
 
@@ -146,7 +149,7 @@ A gate that stays false for **StuckDays** = 3 open days runs that gate’s *If f
 - A store with theft above **TheftMax** = 1% of sales has a guard.
 - A customer demand the store can meet (for example uniforms) is met.
 - Opening hours cover the busiest hours of that type.
-- Customer capacity matches the layout.
+- Customer capacity matches the layout. A capacity miss logs one line. It does not retry every frame. In Stage 2 a storage rack is added when cover × burn exceeds 80% of that fixture’s space and the floor has room.
 
 **Market and money.**
 - A marketing campaign runs when its daily cost is below **MarketingCover** = 50% of the gain it measures.

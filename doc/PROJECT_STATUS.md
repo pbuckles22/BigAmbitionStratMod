@@ -2,13 +2,13 @@
 
 **Human-readable current state.** Keep in sync with [AGENT_HANDOFF.md](../AGENT_HANDOFF.md) → *Current state* when milestones ship.
 
-**Last updated:** 2026-11-09
+**Last updated:** 2026-11-10
 
 ---
 
 ## Summary
 
-**BigAmbitionStratMod** — Epic 10 (**10.4–10.7** next). **10.3** Ready+stall at **1.16.6.1** on `main` (orderHistory/statement g4/g5; live Run policies; Ready×3 PASS). Public **EPIC** is `1.16`. **7.13** stays stashed. Rules: [requirements/strategy.md](requirements/strategy.md).
+**BigAmbitionStratMod** — Epic 14 docs are on `feature/14.1-rulebook`. Epic 10 stays open. **10.4** still ends at three healthy goods stores and waits on **14.2**, **14.3**, and **14.4**. The **10.4** code is stashed. The installed mod under test is **1.16.7.7**. This branch’s code is **1.16.6.1**. Public **EPIC** stays `1.16` until Epic 14 ships as `1.17`. **7.9–7.12** stay. **7.13** is **14.6**. Rules: [requirements/strategy.md](requirements/strategy.md).
 
 ---
 
@@ -17,6 +17,8 @@
 | Branch | Role |
 |--------|------|
 | **`main`** | Integration branch. Version 1.16.6.1. Story 10.3 Ready+stall PASS. |
+| **`feature/14.1-rulebook`** | Epic 14 docs. Stories 14.1–14.13. No mod change. Not pushed. |
+| **`feature/10.4-stores-2-3`** | Story 10.4 Stores 2–3. Code is stashed, not on this commit. Installed mod 1.16.7.7. No PASS. |
 | **`feature/10.3-store1-ready`** | Story 10.3 Store #1 Ready + stall. Version 1.16.6.1. Human PASS 2026-11-10. Kept after CMPH. |
 | **`feature/10.3-hands-off-win`** | Story 10.3 soak-speed slice. Version 1.16.5.6. Soak-speed + Resume skip PASS 2026-11-09. Kept after CMPH. |
 | **`feature/10.2-autopilot-loop`** | Story 10.2 autopilot day loop. Version 1.16.2. Human PASS 2026-11-09. Kept after CMPH. |
