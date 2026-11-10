@@ -47,6 +47,26 @@ namespace ChaoticCEO
                         return "food";
                     }
 
+                    if (step.Detail == "tax")
+                    {
+                        return "taxes pay";
+                    }
+
+                    if (step.Detail == "demand")
+                    {
+                        return "employee demand";
+                    }
+
+                    if (step.Detail == "marketing")
+                    {
+                        return "marketing start";
+                    }
+
+                    if (step.Detail == "decline")
+                    {
+                        return "rival takeover decline";
+                    }
+
                     return "";
                 default:
                     return "";

@@ -152,7 +152,7 @@ namespace ChaoticCEO
             TopBar.Record(_localAppData, _bar);
             _health = Health.Latest(_localAppData);
             Health.Record(_localAppData, _health);
-            var playbook = LiveDump.NextPlaybook();
+            var playbook = LiveDump.NextPlaybook(_localAppData);
             _playbook = Playbook.Line(playbook);
             Playbook.Record(_localAppData, playbook);
             Controls.Record(_localAppData, Controls.Row(Autopilot.Enabled, Autopilot.DryRun));

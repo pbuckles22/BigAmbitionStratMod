@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 
 namespace ChaoticCEO
@@ -68,6 +69,19 @@ namespace ChaoticCEO
         public IReadOnlyList<decimal> RecentOpenDayProfits { get; }
     }
 
+    public sealed class DaySales
+    {
+        public DaySales(int customers, decimal revenue)
+        {
+            Customers = customers;
+            Revenue = revenue;
+        }
+
+        public int Customers { get; }
+
+        public decimal Revenue { get; }
+    }
+
     public sealed class StoreHealth
     {
         private static string _seen = "";
@@ -78,7 +92,10 @@ namespace ChaoticCEO
             bool staffed,
             bool selling,
             bool profitable,
-            string place = "")
+            string place = "",
+            int customers = 0,
+            decimal revenue = 0m,
+            IReadOnlyList<decimal>? recentOpenDayProfits = null)
         {
             Open = open;
             Stocked = stocked;
@@ -86,6 +103,9 @@ namespace ChaoticCEO
             Selling = selling;
             Profitable = profitable;
             Place = place ?? "";
+            Customers = customers;
+            Revenue = revenue;
+            RecentOpenDayProfits = recentOpenDayProfits ?? Array.Empty<decimal>();
         }
 
         public bool Open { get; }
@@ -99,6 +119,12 @@ namespace ChaoticCEO
         public bool Profitable { get; }
 
         public string Place { get; }
+
+        public int Customers { get; }
+
+        public decimal Revenue { get; }
+
+        public IReadOnlyList<decimal> RecentOpenDayProfits { get; }
 
         public bool Ready => Open && Stocked && Staffed && Selling && Profitable;
 
@@ -123,7 +149,121 @@ namespace ChaoticCEO
             var selling = !facts.ScheduledOpen
                 || (facts.DailyCustomers > 0 && facts.DailyRevenue > 0m);
             var profitable = ProfitableProof(facts.RecentOpenDayProfits);
-            return new StoreHealth(open, stocked, staffed, selling, profitable, facts.Place);
+            return new StoreHealth(
+                open,
+                stocked,
+                staffed,
+                selling,
+                profitable,
+                facts.Place,
+                facts.DailyCustomers,
+                facts.DailyRevenue,
+                facts.RecentOpenDayProfits);
+        }
+
+        public static DaySales CompletedDaySales(
+            int todayCustomers,
+            decimal todayRevenue,
+            int priorCustomers,
+            decimal priorRevenue)
+        {
+            if (todayCustomers <= 0
+                && todayRevenue <= 0m
+                && (priorCustomers > 0 || priorRevenue > 0m))
+            {
+                return new DaySales(priorCustomers, priorRevenue);
+            }
+
+            return new DaySales(todayCustomers, todayRevenue);
+        }
+
+        public static DaySales OrderDaySales(int totalCustomers, decimal totalRevenue)
+        {
+            if (totalCustomers < 0)
+            {
+                totalCustomers = 0;
+            }
+
+            if (totalRevenue < 0m)
+            {
+                totalRevenue = 0m;
+            }
+
+            return new DaySales(totalCustomers, totalRevenue);
+        }
+
+        public static IReadOnlyList<decimal> StatementProfits(
+            IReadOnlyList<FinancialDay>? days,
+            string? street,
+            int number,
+            int currentDay)
+        {
+            var name = street ?? "";
+            if (days == null || days.Count == 0 || name.Length == 0 || number <= 0)
+            {
+                return Array.Empty<decimal>();
+            }
+
+            var rows = new List<(int Day, decimal Profit)>();
+            foreach (var day in days)
+            {
+                if (day == null || day.Day <= 0 || day.Rows == null)
+                {
+                    continue;
+                }
+
+                if (currentDay > 0 && day.Day > currentDay)
+                {
+                    continue;
+                }
+
+                foreach (var row in day.Rows)
+                {
+                    if (row == null || row.Street != name || row.Number != number)
+                    {
+                        continue;
+                    }
+
+                    rows.Add((day.Day, (decimal)row.Profit));
+                }
+            }
+
+            if (rows.Count == 0)
+            {
+                return Array.Empty<decimal>();
+            }
+
+            rows.Sort((left, right) => left.Day.CompareTo(right.Day));
+            var profits = new decimal[rows.Count];
+            for (var index = 0; index < rows.Count; index++)
+            {
+                profits[index] = rows[index].Profit;
+            }
+
+            return profits;
+        }
+
+        public static IReadOnlyList<decimal> DropIncompleteTail(
+            IReadOnlyList<decimal>? incomes,
+            int todayUnits)
+        {
+            if (incomes == null || incomes.Count == 0)
+            {
+                return Array.Empty<decimal>();
+            }
+
+            if (todayUnits > 0 || incomes[incomes.Count - 1] != 0m)
+            {
+                return incomes;
+            }
+
+            var kept = new decimal[incomes.Count - 1];
+            for (var index = 0; index < kept.Length; index++)
+            {
+                kept[index] = incomes[index];
+            }
+
+            return kept;
         }
 
         public static bool FixtureCargoProof(
@@ -178,7 +318,8 @@ namespace ChaoticCEO
             if (health == null)
             {
                 return "store.health version=" + LoadLog.Version
-                    + " place= g1=false g2=false g3=false g4=false g5=false ready=false";
+                    + " place= g1=false g2=false g3=false g4=false g5=false ready=false"
+                    + " customers=0 revenue=0 profits=";
             }
 
             return "store.health version=" + LoadLog.Version
@@ -188,7 +329,10 @@ namespace ChaoticCEO
                 + " g3=" + Flag(health.Staffed)
                 + " g4=" + Flag(health.Selling)
                 + " g5=" + Flag(health.Profitable)
-                + " ready=" + Flag(health.Ready);
+                + " ready=" + Flag(health.Ready)
+                + " customers=" + health.Customers.ToString(CultureInfo.InvariantCulture)
+                + " revenue=" + FormatAmount(health.Revenue)
+                + " profits=" + FormatProfits(health.RecentOpenDayProfits);
         }
 
         public static string Record(string localAppData, StoreHealth? health)
@@ -237,6 +381,33 @@ namespace ChaoticCEO
         private static string Flag(bool value)
         {
             return value ? "true" : "false";
+        }
+
+        private static string FormatAmount(decimal amount)
+        {
+            var rounded = Math.Round(amount, 4, MidpointRounding.ToEven);
+            if (rounded == Math.Truncate(rounded))
+            {
+                return ((long)rounded).ToString(CultureInfo.InvariantCulture);
+            }
+
+            return rounded.ToString("0.####", CultureInfo.InvariantCulture);
+        }
+
+        private static string FormatProfits(IReadOnlyList<decimal> profits)
+        {
+            if (profits == null || profits.Count == 0)
+            {
+                return "";
+            }
+
+            var parts = new string[profits.Count];
+            for (var index = 0; index < profits.Count; index++)
+            {
+                parts[index] = FormatAmount(profits[index]);
+            }
+
+            return string.Join("|", parts);
         }
     }
 

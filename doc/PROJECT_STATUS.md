@@ -8,7 +8,7 @@
 
 ## Summary
 
-**BigAmbitionStratMod** — Story **10.3** soak-speed + F9 Resume skip PASS at **1.16.5.6** (`g3=true`, day.roll fit-out). `ready` (g4/g5) and Stores 2–3 still open; Ships B–E ahead. Public **EPIC** for Epic 10 is `1.16`. **7.13** stays stashed. Rules: [requirements/strategy.md](requirements/strategy.md).
+**BigAmbitionStratMod** — Epic 10 (**10.4–10.7** next). **10.3** Ready+stall at **1.16.6.1** on `main` (orderHistory/statement g4/g5; live Run policies; Ready×3 PASS). Public **EPIC** is `1.16`. **7.13** stays stashed. Rules: [requirements/strategy.md](requirements/strategy.md).
 
 ---
 
@@ -16,8 +16,9 @@
 
 | Branch | Role |
 |--------|------|
-| **`main`** | Integration branch. Last land `edc36f5`, version 1.16.5.6. Story 10.3 soak-speed PASS. |
-| **`feature/10.3-hands-off-win`** | Story 10.3 hands-off win. Version 1.16.5.6. Soak-speed + Resume skip PASS 2026-11-09. Kept after CMPH. |
+| **`main`** | Integration branch. Version 1.16.6.1. Story 10.3 Ready+stall PASS. |
+| **`feature/10.3-store1-ready`** | Story 10.3 Store #1 Ready + stall. Version 1.16.6.1. Human PASS 2026-11-10. Kept after CMPH. |
+| **`feature/10.3-hands-off-win`** | Story 10.3 soak-speed slice. Version 1.16.5.6. Soak-speed + Resume skip PASS 2026-11-09. Kept after CMPH. |
 | **`feature/10.2-autopilot-loop`** | Story 10.2 autopilot day loop. Version 1.16.2. Human PASS 2026-11-09. Kept after CMPH. |
 | **`feature/10.1-win-reached`** | Story 10.1 win milestone. Version 1.16.1. Human PASS 2026-11-08. Kept after CMPH. |
 | **`feature/8.6-stage-sim`** | Story 8.6 stage sim. Version 1.15.6. Human PASS 2026-11-08. Kept after CMPH. |

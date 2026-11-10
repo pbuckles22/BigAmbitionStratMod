@@ -383,6 +383,10 @@ namespace ChaoticCEO
             foreach (var row in ownedHealth)
             {
                 StoreHealth.Record(localAppData, row);
+                if (Autopilot.Enabled)
+                {
+                    Stall.Track(localAppData, row, current.Day);
+                }
             }
 
             var day = WinRun.Day(
@@ -393,7 +397,7 @@ namespace ChaoticCEO
                 world,
                 guard,
                 LiveHeal,
-                NextPlaybook(),
+                NextPlaybook(localAppData),
                 TimeAdvanceBridge.Read(),
                 HudLine(),
                 Health.Latest(localAppData),
@@ -427,8 +431,108 @@ namespace ChaoticCEO
                 return true;
             }
 
-            // open / money / run / others: log through Autopilot; expand bridges as Stage 1 needs them.
+            if (step.Kind == "run")
+            {
+                return ExecuteRun(localAppData, step.Detail);
+            }
+
+            // open / money / others: log through Autopilot; expand bridges as Stage 1 needs them.
             return true;
+        }
+
+        private static bool ExecuteRun(string localAppData, string action)
+        {
+            var current = SaveGameManager.Current;
+            if (current == null)
+            {
+                return false;
+            }
+
+            switch (action)
+            {
+                case "tax":
+                {
+                    var due = TaxBillBridge.Due();
+                    var paid = TaxBill.Pay(due.current, due.back, GameApi.Live());
+                    if (!paid.Paid || !TaxBillBridge.Live(paid))
+                    {
+                        return false;
+                    }
+
+                    TaxBill.Record(localAppData, paid, current.Day);
+                    return true;
+                }
+                case "demand":
+                {
+                    var any = false;
+                    foreach (var row in StaffDemandBridge.Due())
+                    {
+                        var pick = StaffDemand.Clear(
+                            row.unmetDays,
+                            row.demand,
+                            row.employeeId,
+                            GameApi.Live());
+                        if (!pick.Cleared || !StaffDemandBridge.Live(pick))
+                        {
+                            continue;
+                        }
+
+                        StaffDemand.Record(localAppData, pick, current.Day);
+                        any = true;
+                    }
+
+                    return any;
+                }
+                case "marketing":
+                {
+                    if (!LastRent(localAppData, out var street, out var number))
+                    {
+                        return false;
+                    }
+
+                    var started = Marketing.Start(
+                        Marketing.StarterCost,
+                        Marketing.StarterGain,
+                        MarketingBridge.HasCampaign(street, number),
+                        street,
+                        number,
+                        Marketing.StarterType,
+                        GameApi.Live());
+                    if (!started.Started || !MarketingBridge.Start(started))
+                    {
+                        return false;
+                    }
+
+                    Marketing.RecordStart(localAppData, started, current.Day);
+                    return true;
+                }
+                case "decline":
+                {
+                    var pending = RivalTakeoverBridge.Pending();
+                    if (pending == null)
+                    {
+                        return false;
+                    }
+
+                    var declined = RivalTakeover.Decline(
+                        pending.Value.offer,
+                        pending.Value.dailyProfit,
+                        pending.Value.street,
+                        pending.Value.number,
+                        alreadyDeclined: false,
+                        GameApi.Live());
+                    if (!declined.Declined)
+                    {
+                        return false;
+                    }
+
+                    RivalTakeoverBridge.Decline(declined);
+                    RivalTakeover.Record(localAppData, declined, current.Day);
+                    return true;
+                }
+                default:
+                    return true;
+            }
         }
 
         private static bool SplitPlace(string place, out string street, out int number)
@@ -2291,7 +2395,7 @@ namespace ChaoticCEO
             return TopBar.Line(current.Day, cash, net, profit, stage, Autopilot.Enabled, ReadSpeed());
         }
 
-        public static PlaybookStep NextPlaybook()
+        public static PlaybookStep NextPlaybook(string? localAppData = null)
         {
             var current = SaveGameManager.Current;
             if (current == null)
@@ -2326,22 +2430,7 @@ namespace ChaoticCEO
                 offers: BankLoanBridge.Offers(profit > 0m ? profit : 40m),
                 loan: null,
                 bestPaybackRate: 0m);
-            var run = Run.Decide(
-                new RunFacts(
-                    current.Energy,
-                    current.Hunger,
-                    current.Happiness,
-                    unmetDemandDays: 0,
-                    employeeState: "",
-                    hasDirt: false,
-                    theft: 0m,
-                    sales: 0m,
-                    unmetCustomerDemand: false,
-                    marketingCost: 0m,
-                    marketingGain: 0m,
-                    taxDue: 0m,
-                    takeoverOffer: 0m,
-                    takeoverDailyProfit: 0m));
+            var run = Run.Decide(LiveRunFacts(current, localAppData));
             return WinRun.Next(
                 stage,
                 opens,
@@ -2352,6 +2441,46 @@ namespace ChaoticCEO
                 money,
                 run,
                 health);
+        }
+
+        private static RunFacts LiveRunFacts(GameInstance current, string? localAppData)
+        {
+            var unmetDays = 0;
+            foreach (var row in StaffDemandBridge.Due())
+            {
+                if (row.unmetDays > unmetDays)
+                {
+                    unmetDays = row.unmetDays;
+                }
+            }
+
+            var tax = TaxBillBridge.Due();
+            var pending = RivalTakeoverBridge.Pending();
+            var marketingCost = 0m;
+            var marketingGain = 0m;
+            if (!string.IsNullOrEmpty(localAppData)
+                && LastRent(localAppData, out var street, out var number)
+                && !MarketingBridge.HasCampaign(street, number))
+            {
+                marketingCost = Marketing.StarterCost;
+                marketingGain = Marketing.StarterGain;
+            }
+
+            return new RunFacts(
+                current.Energy,
+                current.Hunger,
+                current.Happiness,
+                unmetDays,
+                employeeState: "",
+                hasDirt: false,
+                theft: 0m,
+                sales: 0m,
+                unmetCustomerDemand: false,
+                marketingCost,
+                marketingGain,
+                taxDue: tax.current + tax.back,
+                takeoverOffer: pending == null ? 0m : pending.Value.offer,
+                takeoverDailyProfit: pending == null ? 0m : pending.Value.dailyProfit);
         }
 
         private static IReadOnlyList<StoreHealth> OwnedStoreHealth(GameInstance current)
@@ -2385,8 +2514,21 @@ namespace ChaoticCEO
                 var cargo = FixtureCargo(building);
                 var needed = Wholesaler.Catalog(building.businessTypeName);
                 var staff = SenseStaff(building);
-                var lastIncome = LastDailyIncome(building);
-                var customers = lastIncome > 0f ? 1 : CustomersToday(building, current.Day);
+                var todayOrder = OrderDaySales(building, current.Day);
+                var priorOrder = OrderDaySales(building, current.Day - 1);
+                var sales = StoreHealth.CompletedDaySales(
+                    todayOrder.Customers,
+                    todayOrder.Revenue,
+                    priorOrder.Customers,
+                    priorOrder.Revenue);
+                var statementProfits = StoreHealth.StatementProfits(
+                    Days(current),
+                    building.StreetName,
+                    building.StreetNumber,
+                    current.Day);
+                var incomeProfits = OpenDayProfits(building);
+                var rawProfits = statementProfits.Count > 0 ? statementProfits : incomeProfits;
+                var profits = StoreHealth.DropIncompleteTail(rawProfits, sales.Customers);
                 rows.Add(
                     StoreHealth.Assess(
                         new StoreFacts(
@@ -2398,9 +2540,9 @@ namespace ChaoticCEO
                             staff.CleanerStaffed,
                             staff.Satisfaction,
                             scheduledOpen: true,
-                            dailyCustomers: customers,
-                            dailyRevenue: (decimal)lastIncome,
-                            recentOpenDayProfits: OpenDayProfits(building))));
+                            dailyCustomers: sales.Customers,
+                            dailyRevenue: sales.Revenue,
+                            recentOpenDayProfits: profits)));
             }
 
             return rows;
@@ -2522,31 +2664,24 @@ namespace ChaoticCEO
             }
         }
 
-        private static int CustomersToday(BuildingRegistration building, int day)
+        private static DaySales OrderDaySales(BuildingRegistration building, int day)
         {
-            if (building.orderHistory == null)
+            if (building?.orderHistory == null || day <= 0)
             {
-                return 0;
+                return StoreHealth.OrderDaySales(0, 0m);
             }
 
-            var units = 0;
             foreach (var entry in building.orderHistory)
             {
-                if (entry == null || entry.dayNumber != day || entry.itemSales == null)
+                if (entry == null || entry.dayNumber != day)
                 {
                     continue;
                 }
 
-                foreach (var sale in entry.itemSales)
-                {
-                    if (sale != null)
-                    {
-                        units += sale.amountSold;
-                    }
-                }
+                return StoreHealth.OrderDaySales(entry.totalCustomers, (decimal)entry.totalRevenue);
             }
 
-            return units;
+            return StoreHealth.OrderDaySales(0, 0m);
         }
 
         private static IReadOnlyList<decimal> OpenDayProfits(BuildingRegistration building)
@@ -2563,16 +2698,6 @@ namespace ChaoticCEO
             }
 
             return rows;
-        }
-
-        private static float LastDailyIncome(BuildingRegistration building)
-        {
-            if (building.dailyIncomes == null || building.dailyIncomes.Count == 0)
-            {
-                return 0f;
-            }
-
-            return building.dailyIncomes[building.dailyIncomes.Count - 1];
         }
 
         private static IReadOnlyDictionary<string, int> OwnedByFamily(GameInstance current)

@@ -95,6 +95,168 @@ public class StoreHealthTests
     }
 
     [Fact]
+    public void StoreHealth_completed_day_sales_keep_prior_proof_when_morning_zeros()
+    {
+        // Harvest: day-roll morning customers=0 revenue=0 wiped g4 while yesterday sold.
+        var morning = StoreHealth.CompletedDaySales(
+            todayCustomers: 0,
+            todayRevenue: 0m,
+            priorCustomers: 14,
+            priorRevenue: 420m);
+        var live = StoreHealth.CompletedDaySales(9, 300m, 14, 420m);
+        var cold = StoreHealth.CompletedDaySales(0, 0m, 0, 0m);
+
+        Assert.Equal(14, morning.Customers);
+        Assert.Equal(420m, morning.Revenue);
+        Assert.Equal(9, live.Customers);
+        Assert.Equal(300m, live.Revenue);
+        Assert.Equal(0, cold.Customers);
+        Assert.Equal(0m, cold.Revenue);
+    }
+
+    [Fact]
+    public void StoreHealth_order_history_and_statements_prove_g4_g5_when_dailyIncomes_empty()
+    {
+        // Harvest: 1.16.6.1 soak had customers from units but revenue=0 profits= empty (dailyIncomes unused).
+        var order = StoreHealth.OrderDaySales(totalCustomers: 141, totalRevenue: 1128m);
+        Assert.Equal(141, order.Customers);
+        Assert.Equal(1128m, order.Revenue);
+        var profits = StoreHealth.StatementProfits(
+            new[]
+            {
+                new FinancialDay(
+                    2,
+                    new[]
+                    {
+                        new StatementRow("ba:street_seventhavenue", 15, 400f, 100f, 50f, 20f, 0f, 0f, 80f),
+                    }),
+                new FinancialDay(
+                    3,
+                    new[]
+                    {
+                        new StatementRow("ba:street_seventhavenue", 15, 420f, 100f, 50f, 20f, 0f, 0f, 90f),
+                    }),
+                new FinancialDay(
+                    4,
+                    new[]
+                    {
+                        new StatementRow("ba:street_seventhavenue", 15, 450f, 100f, 50f, 20f, 0f, 0f, 100f),
+                    }),
+                new FinancialDay(
+                    5,
+                    new[]
+                    {
+                        new StatementRow("ba:street_seventhavenue", 15, 0f, 0f, 0f, 0f, 0f, 0f, 0f),
+                    }),
+            },
+            "ba:street_seventhavenue",
+            15,
+            currentDay: 5);
+        var completed = StoreHealth.DropIncompleteTail(profits, todayUnits: 0);
+        Assert.Equal(new[] { 80m, 90m, 100m }, completed);
+        var sales = StoreHealth.CompletedDaySales(0, 0m, order.Customers, order.Revenue);
+        var health = StoreHealth.Assess(
+            Facts(customers: sales.Customers, revenue: sales.Revenue, openDayProfits: completed));
+        Assert.True(health.Selling);
+        Assert.True(health.Profitable);
+        Assert.True(health.Ready);
+    }
+
+    [Fact]
+    public void StoreHealth_drop_incomplete_tail_clears_day_roll_zero_before_g5()
+    {
+        // Harvest: dailyIncomes ended with a fresh 0 at day.roll while ProfitProofDays already green.
+        var kept = StoreHealth.DropIncompleteTail(new[] { 80m, 90m, 100m, 0m }, todayUnits: 0);
+        var realZero = StoreHealth.DropIncompleteTail(new[] { 80m, 90m, 0m, 0m }, todayUnits: 0);
+        var midDay = StoreHealth.DropIncompleteTail(new[] { 80m, 90m, 100m }, todayUnits: 5);
+
+        Assert.Equal(new[] { 80m, 90m, 100m }, kept);
+        Assert.Equal(new[] { 80m, 90m, 0m }, realZero);
+        Assert.Equal(new[] { 80m, 90m, 100m }, midDay);
+        Assert.True(StoreHealth.Assess(Facts(customers: 14, revenue: 420m, openDayProfits: kept)).Ready);
+        Assert.False(StoreHealth.Assess(Facts(openDayProfits: new[] { 80m, 90m, 100m, 0m })).Profitable);
+    }
+
+    [Fact]
+    public void Stall_decide_waits_StuckDays_then_remedies_then_pauses()
+    {
+        Assert.Equal(3, Stall.StuckDays);
+        var unprofitable = StoreHealth.Assess(Facts(openDayProfits: new[] { 40m, 40m, -1m }));
+        Assert.Equal("g5", Stall.FailedGate(unprofitable));
+        Assert.False(Stall.Decide(unprofitable, falseDays: 2, tried: null).Chosen);
+        var first = Stall.Decide(unprofitable, falseDays: Stall.StuckDays, tried: null);
+        Assert.True(first.Chosen);
+        Assert.False(first.Pause);
+        Assert.Equal("g5", first.Gate);
+        Assert.Equal("restock", first.Action);
+        var second = Stall.Decide(unprofitable, falseDays: Stall.StuckDays, tried: new[] { "restock" });
+        Assert.Equal("prices", second.Action);
+        var stuck = Stall.Decide(
+            unprofitable,
+            falseDays: Stall.StuckDays,
+            tried: new[] { "restock", "prices" });
+        Assert.True(stuck.Pause);
+        Assert.Equal("g5", stuck.Gate);
+        Assert.Equal("", stuck.Action);
+        Assert.False(Stall.Decide(StoreHealth.Assess(Facts()), Stall.StuckDays, null).Chosen);
+    }
+
+    [Fact]
+    public void Chain_completed_day_ready_unlocks_expansion_and_stall_pauses_when_exhausted()
+    {
+        // Chain: morning zeros → completed-day sales → DropIncompleteTail → Ready → ExpansionAllowed
+        //      → stuck g5 remedies → autopilot.paused reason=stuck
+        var sales = StoreHealth.CompletedDaySales(0, 0m, 12, 400m);
+        var profits = StoreHealth.DropIncompleteTail(new[] { 80m, 90m, 100m, 0m }, todayUnits: 0);
+        var health = StoreHealth.Assess(
+            Facts(customers: sales.Customers, revenue: sales.Revenue, openDayProfits: profits));
+        var candidates = new[]
+        {
+            new OpenCandidate(
+                "ba:businesstype_giftshop",
+                "goods",
+                40m,
+                wholesalerSells: true,
+                "specialty",
+                ownedOfFamily: 1,
+                familyHasWarehouse: false),
+        };
+
+        Assert.True(health.Ready);
+        Assert.True(StoreHealthGate.ExpansionAllowed(new[] { health }));
+        Assert.True(Open.Decide(1, candidates, 0m, new[] { health }).Chosen);
+
+        var losing = StoreHealth.Assess(Facts(openDayProfits: new[] { 10m, 10m, -5m }));
+        Assert.False(StoreHealthGate.ExpansionAllowed(new[] { losing }));
+        Assert.False(Open.Decide(1, candidates, 0m, new[] { losing }).Chosen);
+        var stuck = Stall.Decide(losing, Stall.StuckDays, new[] { "restock", "prices" });
+        Assert.True(stuck.Pause);
+        var line = Stall.PauseLine(losing.Place, stuck.Gate);
+        Assert.Contains("autopilot.paused", line);
+        Assert.Contains("reason=stuck", line);
+        Assert.Contains("gate=g5", line);
+        Assert.Contains("place=" + losing.Place, line);
+    }
+
+    [Fact]
+    public void Stall_record_pause_writes_stuck_line()
+    {
+        var dir = Directory.CreateDirectory(
+            Path.Combine(Path.GetTempPath(), "ceo-stall-pause-" + Guid.NewGuid().ToString("N")));
+        try
+        {
+            var written = Stall.RecordPause(dir.FullName, "ba:street_seventhavenue 30", "g5");
+            Assert.Contains("reason=stuck", written);
+            Assert.Contains("gate=g5", written);
+            Assert.Contains(written, File.ReadAllText(LoadLog.CeoLogPath(dir.FullName)));
+        }
+        finally
+        {
+            Directory.Delete(dir.FullName, recursive: true);
+        }
+    }
+
+    [Fact]
     public void Delivery_mid_week_survival_sizes_contract_for_open_days_until_next_drop()
     {
         // Harvest: amount=70 sold out in ~1 open day; nextDeliveryDay jumped 2→8→15→22→29.
@@ -162,7 +324,8 @@ public class StoreHealthTests
 
             Assert.Equal(
                 "store.health version=" + LoadLog.Version
-                    + " place=ba:street_seventhavenue 30 g1=true g2=false g3=true g4=true g5=true ready=false",
+                    + " place=ba:street_seventhavenue 30 g1=true g2=false g3=true g4=true g5=true ready=false"
+                    + " customers=12 revenue=400 profits=80|90|100",
                 line);
             Assert.Equal(line, written);
             Assert.Contains(line, File.ReadAllText(LoadLog.CeoLogPath(dir.FullName)));

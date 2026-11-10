@@ -1,10 +1,10 @@
 # PM_PLAN — BigAmbitionStratMod
 
-In-game advisor for one Big Ambitions save, then a new-game guide and autopilot. Version scheme `MAJOR.EPIC.COUNTER`. Current public version **1.15.4**. The first ship of a new epic phase is `1.N.1`. When an epic runs after a higher-numbered epic, **EPIC** is `max(shipped_epic) + 1` (Epic 9 after 1.13.x → 1.14.1). Never go backwards.
+In-game advisor for one Big Ambitions save, then a new-game guide and autopilot. Version scheme `MAJOR.EPIC.COUNTER`. Current public version **1.16.6.1**. The first ship of a new epic phase is `1.N.1`. When an epic runs after a higher-numbered epic, **EPIC** is `max(shipped_epic) + 1` (Epic 9 after 1.13.x → 1.14.1). Never go backwards.
 
 ## Context
 
-The game is Mono, build **3682**. A mod builds with `dotnet build` against `Big Ambitions_Data\Managed` (`BigAmbitions.dll`, `BigAmbitions.ModAPI.dll`). The pin is `doc/requirements/game-build.md`. Python save tools live in `script/`. The mod, when it exists, lives in `src/`. Evidence for the ledger is `doc/gemini/cache/ledger.log`. The mod writes `%LocalAppData%\ChaoticCEO\ceo.log`. The compile counter is gitignored `build_number.txt`. The mod informational version is `1.15.4+N`. The draw reference is `UnityEngine.IMGUIModule`.
+The game is Mono, build **3682**. A mod builds with `dotnet build` against `Big Ambitions_Data\Managed` (`BigAmbitions.dll`, `BigAmbitions.ModAPI.dll`). The pin is `doc/requirements/game-build.md`. Python save tools live in `script/`. The mod, when it exists, lives in `src/`. Evidence for the ledger is `doc/gemini/cache/ledger.log`. The mod writes `%LocalAppData%\ChaoticCEO\ceo.log`. The compile counter is gitignored `build_number.txt`. The mod informational version is `1.16.6.1+N`. The draw reference is `UnityEngine.IMGUIModule`.
 
 Epic 1 closed on 17 businesses and 5865 statement rows. `ba:businesstype_liquorstore` is **food**. Do not relabel it inside a routes story. A warehouse story may add a specialty override only with a new test.
 
@@ -172,13 +172,17 @@ Starts after Epic **9**. Public versions for this epic are `1.15.COUNTER`. **8.1
 
 **Status:** in progress
 
-Starts after Epic **8**. Crossing **WinNetWorth** is a milestone. The autopilot keeps compounding in Stage 4. Public versions for this epic are `1.16.COUNTER`.
+Starts after Epic **8**. Crossing **WinNetWorth** is a milestone. The autopilot keeps compounding in Stage 4. Public versions for this epic are `1.16.COUNTER`. Live stage exits and the stall rule are in [doc/requirements/strategy.md](doc/requirements/strategy.md).
 
 - **10.1** `[x]` Lock the milestone. `Win.Record` / `Milestone` log `win.reached` once at **WinNetWorth** or an owner-approved target; later days do not log it again; Autopilot stays on. Headless. Version 1.16.1. Chain: `load → … → stage-sim → win`.
 - **10.2** `[x]` Autopilot loop. Each day, while `Autopilot.Enabled` is on: audit, heal, the stage’s actions through the recorded calls, then time advance, within the guardrails. The **12.3** toggle and F10 clear the flag. Human PASS 2026-11-09. New game days 2–8: `autopilot.day ran=true` matched `telemetry.csv`; F10 cleared. Version 1.16.2. Chain: `load → … → win → autopilot`.
-- **10.3** `[ ]` Hands-off run from a new save. PASS is `win.reached` in `ceo.log` and later telemetry rows that still advance. Every decision the run finds becomes a Tier 1 test before the next run. **WIP (2026-11-09):** Ship A Stage-1 stock/delivery PASS on 1.16.4.1. Soak-speed + F9 Resume skip PASS on 1.16.5.6 (`g3=true` via schedule shifts; fit-out on day.roll; FastForward boost; save-loan unlock). `ready` still false (g4/g5); Stores 2–3 and Ships B–E not started. No `$100M` soak yet.
+- **10.3** `[x]` Stage 1 foundation — Store #1 Ready. New game: G1–G5 all true; `ready=true` for **ProfitProofDays**; no `kind=open` while not Ready; soak-speed stays. Stall: a gate false for **StuckDays** runs that gate’s *If failed* remedy one at a time; exhausted remedies log `autopilot.paused reason=stuck` and stop (never silent hold). `store.health` g4/g5 from orderHistory + statements. Live Run policies (tax/demand/marketing/takeover) while cash-waiting. **Out:** Store #2+, warehouse, `$100M`. **PASS (2026-11-10):** 1.16.6.1 Ready×3+ with revenue/profits; CMPH.
+- **10.4** `[ ]` Stage 1 scale — Stores 2–3. Prior stores Ready → live rent + fit-out for Store N; 3 healthy goods stores. Stall covers Store N gates. **Out:** HQ / warehouse.
+- **10.5** `[ ]` Stage 2 — HQ + warehouse + zero-downtime handover. Stage2Cash + HealthyGoodsStores≥3; warehouse+truck+managers; wholesaler stays until warehouse stock ≥ RefillDays; then connect. Stall covers Stage 2 gates. **Out:** Clusters / buy buildings.
+- **10.6** `[ ]` Stage 3 — clusters + truck pressure. ≥5 healthy supplied stores; ClusterMin; TruckBusy → service/office; Close after FixDays+RedDays. Stall covers Stage 3 gates. **Out:** Real-estate buy.
+- **10.7** `[ ]` Stage 4 → win. Stage4Cash + all Ready + emptySlots=0; live buy by payback; `win.reached` once; telemetry still advances. Stall covers Stage 4 gates. **Out:** LLM / RL.
 
-**Next:** Resume **10.3** when asked — `ready=true` × ProfitProofDays (g4 selling / g5 profit proof) + Store N fit-out, then Ships B–E. **7.13** stays stashed until a story needs close filters.
+**Next:** Start **10.4** — Stores 2–3 when prior Ready. No `$100M` soak until **10.7**. **7.13** stays stashed until a story needs close filters.
 
 Operating model (keep these when you replace this plan): `.cursor/rules/` ship commands (UCPH, CMPH, SWAT), human check, plan-coordinate versioning, long-run harvest (`testing.mdc`), and the chain harness and prefix (`integration-chain.mdc`). Do not delete them to “clean up” a new clone.
 

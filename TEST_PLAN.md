@@ -434,19 +434,21 @@ Human check:
 
 Human PASS 2026-11-09 on 1.16.2. New game: `mod.loaded version=1.16.2 build=3682`. Days 2–8 each `autopilot.day ran=true` with matching `audit.summary` and `telemetry.csv` (day 8: cash 14664, net 14199, profit -106, stage 1, missingPlans 1). F10 logged `autopilot.paused reason=f10` and the bar flipped Autopilot off. Live path does not call the day loop when cleared, so no further `autopilot.action` after F10.
 
-## Story 10.3 — Hands-off win run
+## Story 10.3 — Store #1 Ready + stall
 
-Tier 1: `StoreHealthTests` / `FitOutTests` as before, plus `StoreStaff.FromShifts` and `TimeAdvance.KeepSkipping` past WeekDays. Fit-out runs on day.roll only (not per frame). Command: the Tier 1 `dotnet test` suite above.
+Exit is Store #1 `ready=true` × ProfitProofDays and the stall pause — not `win.reached`. Stories **10.4–10.7** get their own human checks when started. Full `$100M` soak is **10.7** only.
 
-Human check (Resume skip on F9):
+Tier 1: `StoreHealthTests` / stall Decide (completed open-day g4/g5; StuckDays → remedy; exhausted → `reason=stuck`); chain through ExpansionAllowed (no open while not Ready). Soak-speed / Resume skip already PASS on 1.16.5.6. Command: the Tier 1 `dotnet test` suite above.
 
-1. Restart Big Ambitions so version **1.16.5.6** loads. Continue or start a game with Autopilot soak running.
-2. Open F9 / look at stats until days stop. Press **Resume skip** (F9 closes).
-3. **PASS if** the TimeMachine jump is fast again (not wall-clock Normal) and days advance. **FAIL if** skip screen crawls or days stay stuck.
-4. Evidence: `time.resumed ... boost=true`, then more `day.rolled` / `time.advanced`. Saved games with an existing loan should resume without needing a fresh `loan.taken` line.
-5. Version marker: public `1.16.5.6`.
+Human check (Ready×3):
 
-Full `win.reached` soak stays blocked until Store #1 `ready=true` × ProfitProofDays.
+1. Restart Big Ambitions so **1.16.6.1** loads. Start a **new** game; Autopilot on.
+2. Let Store #1 run until F9 / `ceo.log` show `store.health … ready=true` for **ProfitProofDays** (3) open days. Do not expect Store #2. While cash-blocked for Store #2, days should still advance; tax/demand/marketing/takeover still run when due.
+3. **PASS if** `ready=true` holds for those days with non-zero `revenue`/`profits` after sales, no Store #2 while not Ready, and if a gate stalls past **StuckDays** you see `autopilot.paused reason=stuck`. **FAIL if** `ready` stays false with `customers>0 revenue=0`, Store #2 opens while not Ready, or time freezes while waiting on cash.
+4. Evidence: `store.health` (`g1`–`g5`, `ready`, `customers`, `revenue`, `profits`), optional `stall.remedy` / `autopilot.paused reason=stuck`, optional `tax.paid` / `marketing.started` / `takeover.declined`.
+5. Version marker: public `1.16.6.1`. `ceo.log` starts at `mod.loaded version=1.16.6.1 build=3682`.
+
+Prior soak-speed / Resume skip PASS 2026-11-09 on 1.16.5.6 remains.
 
 ## Wholesaler contract human check
 

@@ -19,6 +19,7 @@ This is the durable home for technical debt across sessions. Handoff notes can m
 
 (High ROI; frequent pain; not blocking.)
 
+- Day-roll blip: `store.health` can briefly show `customers=0 revenue=0 ready=false` (and a trailing `-100` profit) even after Ready days, then recover. Harvest into Tier 1 + keep Ready sticky across morning zeros before **10.4** expansion reads Ready.
 - `StageSim.cs` (~780 lines) embeds a second headless empire (`World`) beside `DayStep` / `Calibrate`. It drives Epic 9 decides but not close, run, audit, marketing, or time-advance. Split `World` or share one step kernel before Epic **10** growth makes the two paths drift.
 - `StageSim.Tune` only scores caller-supplied `StageThresholdOption` bags. `strategy.md` still says tune every **named** threshold with a Tier 1 lock per tuned value; chains only exercise **Stage2Cash** climb vs tight. Add an owner-facing search/grid or narrow the rulebook text before **10.1** applies tuned numbers live.
 

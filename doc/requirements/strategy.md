@@ -48,6 +48,20 @@ Every owned business must pass all five before expansion or stage promotion:
 
 Stage 1 → 2 also needs **HealthyGoodsStores** ≥ **Stage2Stores**, liquid cash ≥ **Stage2Cash**, and positive empire daily profit large enough to carry HQ + warehouse overhead. Stage 2+ warehouse handover keeps wholesaler contracts live until warehouse stock covers **RefillDays**.
 
+### Live stage exits (Epic 10 ships)
+
+| Story | Done when | Out of scope |
+| --- | --- | --- |
+| **10.3** | Store #1 G1–G5 true; `ready=true` for **ProfitProofDays**; stall pause when remedies exhaust | Store #2+, warehouse, `$100M` |
+| **10.4** | Prior Ready → live rent + fit-out; 3 healthy goods stores | HQ / warehouse |
+| **10.5** | Stage2Cash + HealthyGoodsStores≥3; warehouse+truck+managers; wholesaler until stock ≥ **RefillDays**; then connect | Clusters / buy |
+| **10.6** | ≥5 healthy supplied; **ClusterMin**; **TruckBusy** → service/office; Close after **FixDays**+**RedDays** | Real-estate buy |
+| **10.7** | Stage4Cash + all Ready + emptySlots=0; live buy by payback; `win.reached` once | LLM / RL |
+
+### Stall rule
+
+A gate that stays false for **StuckDays** = 3 open days runs that gate’s *If failed* remedy from the G1–G5 table, one remedy at a time, then waits **ProfitProofDays** to measure. When every remedy for that gate has been tried and it is still false, the autopilot logs `autopilot.paused reason=stuck gate=<g> place=<store>` and clears Autopilot. It never holds silently. `store.health` carries the numbers behind g4 and g5 (customers, revenue, recent open-day profits). A stall a human resolves becomes a new remedy line here plus a named Tier 1 test before the next soak.
+
 ## 2. Where
 
 - A street with at least **ClusterMin** = 2 stores of that family wins.

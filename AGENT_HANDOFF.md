@@ -138,10 +138,10 @@ When shipping: update **PM_PLAN**, **doc/PROJECT_STATUS.md**, and **Current stat
 
 ## Current state
 
-- **Product:** Version 1.16.5.6. Story 10.3 soak-speed + F9 Resume skip PASS; `ready` (g4/g5) and Stores 2–3 still open. Ships B–E ahead. 7.13 stays stashed. Ladder: [PM_PLAN.md](PM_PLAN.md).
-- **On:** `origin/main @ edc36f5`. Plan: full expansion runbook. https://github.com/pbuckles22/BigAmbitionStratMod
-- **Next:** Resume **10.3** when asked — `ready=true` × ProfitProofDays (g4/g5) + Store N fit-out, then Ships B–E. No `$100M` soak yet.
-- **Blockers:** No `$100M` soak until Store #1 `ready=true` × ProfitProofDays. Do not invent Unverified calls.
+- **Product:** Version **1.16.6.1** — **10.3** Store #1 Ready + stall landed. Epic 10 continues **10.4–10.7**. 7.13 stays stashed. Ladder: [PM_PLAN.md](PM_PLAN.md).
+- **On:** `origin/main` (after 10.3 CMPH). https://github.com/pbuckles22/BigAmbitionStratMod
+- **Next:** **10.4** when asked. No `$100M` soak until **10.7**.
+- **Blockers:** No `$100M` soak until **10.7**. Do not invent Unverified calls. Day-roll Ready blip tracked in TECH_DEBT.
 
 ## Run and test
 

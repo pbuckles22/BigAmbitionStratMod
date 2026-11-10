@@ -134,6 +134,12 @@ public class AutopilotTests
         Assert.Equal(api.Call("buy"), Autopilot.Call(new PlaybookStep("realestate", "headquarters ba:street_hq 1", true), api));
         Assert.Equal(api.Call("sleep"), Autopilot.Call(new PlaybookStep("run", "sleep", true), api));
         Assert.Equal(api.Call("food"), Autopilot.Call(new PlaybookStep("run", "eat", true), api));
+        Assert.Equal(api.Call("taxes pay"), Autopilot.Call(new PlaybookStep("run", "tax", true), api));
+        Assert.Equal(api.Call("employee demand"), Autopilot.Call(new PlaybookStep("run", "demand", true), api));
+        Assert.Equal(api.Call("marketing start"), Autopilot.Call(new PlaybookStep("run", "marketing", true), api));
+        Assert.Equal(
+            api.Call("rival takeover decline"),
+            Autopilot.Call(new PlaybookStep("run", "decline", true), api));
         Assert.Equal("", Autopilot.Call(PlaybookStep.None(), api));
         Assert.Equal("", Autopilot.Call(null, api));
         Assert.Equal("", Autopilot.CallKey(null));
