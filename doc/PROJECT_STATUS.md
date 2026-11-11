@@ -100,7 +100,7 @@
 | **`feature/chain-prefix`** | Kept after CMPH (template history) |
 | **`feature/handoff-receiver-framing`** | Kept after CMPH (template history) |
 
-**Last land:** `22662d8` on `main`. Version 1.16.6.1. Branch `feature/10.3-store1-ready` kept. Repo: https://github.com/pbuckles22/BigAmbitionStratMod.
+**Last land:** `a57df96` on `main`. Version 1.17.2.2. Branch `feature/14.3-shelf-goods` kept. Repo: https://github.com/pbuckles22/BigAmbitionStratMod.
 
 ---
 
