@@ -138,10 +138,10 @@ When shipping: update **PM_PLAN**, **doc/PROJECT_STATUS.md**, and **Current stat
 
 ## Current state
 
-- **Product:** Version **1.17.1**. Story **14.2** delivery cover PASS. A retail order is 200 plus twice the daily average. A paper bag adds one register of 200. Epic 10 stays open. Ladder: [PM_PLAN.md](PM_PLAN.md). Handoff: [doc/handoff/0090-HANDOFF-2026-11-10_1935.md](doc/handoff/0090-HANDOFF-2026-11-10_1935.md).
-- **On:** `feature/14.2-delivery-cover` not merged. **10.4** code stays stashed. https://github.com/pbuckles22/BigAmbitionStratMod
-- **Next:** **14.3** when asked. No `$100M` soak until **10.7**.
-- **Blockers:** Do not merge until CMPH. Do not pop the **10.4** stash onto this branch. **7.9** blocks **14.10**. The branch also carries the **14.9** rack wording.
+- **Product:** Version **1.17.2.2**. Story **14.3** goods list. The line is target minus on hand. Fixture space does not cut it. Epic 10 stays open. Ladder: [PM_PLAN.md](PM_PLAN.md). Handoff: [doc/handoff/0092-HANDOFF-2026-11-11_1249.md](doc/handoff/0092-HANDOFF-2026-11-11_1249.md).
+- **On:** `origin/main` after this land. **10.4** code stays stashed. https://github.com/pbuckles22/BigAmbitionStratMod
+- **Next:** Start **14.4** when asked. No `$100M` soak until **10.7**.
+- **Blockers:** Do not pop the **10.4** stash onto this branch. **7.9** blocks **14.10**.
 
 ## Run and test
 

@@ -873,7 +873,9 @@ namespace ChaoticCEO
             }
 
             watch.Mark(current);
-            if (!WholesalerBridge.Live(signed, chosen.BusinessType))
+            if (!WholesalerBridge.Live(
+                signed,
+                Wholesaler.ContractType(registration.businessTypeName, chosen.BusinessType)))
             {
                 return Wholesaler.Miss(localAppData, signed, current.Day);
             }
@@ -1720,7 +1722,9 @@ namespace ChaoticCEO
                         return "";
                     }
 
-                    if (!WholesalerBridge.Live(signed, chosen.BusinessType))
+                    if (!WholesalerBridge.Live(
+                        signed,
+                        Wholesaler.ContractType(registration.businessTypeName, chosen.BusinessType)))
                     {
                         return Wholesaler.Miss(localAppData, signed, current.Day);
                     }

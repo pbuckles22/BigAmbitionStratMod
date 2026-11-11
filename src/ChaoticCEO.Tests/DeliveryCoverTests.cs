@@ -316,7 +316,7 @@ public class DeliveryCoverTests
             Assert.Equal(
                 "contract.cover version=" + LoadLog.Version
                     + " day=5 street=ba:street_thirdstreet number=35 item=" + Umbrella
-                    + " sold=16|20 average=18 gap=2 window=2 multiplier=2.0 onHand=0 target=36 need=36 replace=true next=6 guess=false",
+                    + " sold=16|20 average=18 gap=2 window=2 multiplier=2.0 onHand=0 target=36 need=36 cap=0 replace=true next=6 guess=false",
                 line);
             Assert.Equal(line, written);
             Assert.Contains(line, File.ReadAllText(LoadLog.CeoLogPath(dir.FullName)));
@@ -376,13 +376,13 @@ public class DeliveryCoverTests
         var step = Playbook.Decide(null, null, null, null, supply, null, null, null, null, null, null, null);
 
         Assert.Equal(280, plan.Target);
-        Assert.Equal(219, plan.Need);
+        Assert.Equal(249, plan.Need);
         Assert.Equal(7, plan.NextDay);
         Assert.Contains("sold=40|40", line);
         Assert.Contains("gap=6", line);
         Assert.Contains("window=2", line);
         Assert.Contains("onHand=31", line);
-        Assert.Contains("need=219", line);
+        Assert.Contains("need=249", line);
         Assert.Contains("replace=true", line);
         Assert.Contains("next=7", line);
         Assert.DoesNotContain("need=10", line);
@@ -426,7 +426,7 @@ public class DeliveryCoverTests
     }
 
     [Fact]
-    public void Cover_caps_the_line_at_the_shelf_space_left()
+    public void Cover_keeps_the_full_line_when_the_shelf_is_smaller()
     {
         var plan = Wholesaler.Cover(
             Umbrella,
@@ -441,11 +441,11 @@ public class DeliveryCoverTests
             fixtureCap: 30);
 
         Assert.Equal(36, plan.Target);
-        Assert.Equal(20, plan.Need);
+        Assert.Equal(26, plan.Need);
     }
 
     [Fact]
-    public void Cover_keeps_the_minimum_line_when_the_shelf_already_holds_the_target()
+    public void Cover_keeps_the_minimum_line_when_on_hand_exceeds_the_target()
     {
         var plan = Wholesaler.Cover(
             Umbrella,

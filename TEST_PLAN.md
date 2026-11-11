@@ -779,7 +779,7 @@ Human PASS 2026-10-29: `routes=4`, `warehouses=147`, cheap-gift day `1016`, W1 s
 
 ## Story 14.2 — Delivery cover
 
-Tier 1: `DeliveryCoverTests`. Chain: `open days → burn → stand floor → line → Maintain → playbook`. Burn is the last two completed open days. A closed day is skipped. No history uses seed 25. Paper bags with no sales use seed 50 on the first drop. A zero sale of that item stays at 5. A gap of 1 is sized as 2 days and the date stays. A gap of 2 or 3 stays when units on hand still cover burn × gap × 1.5. A thinner shelf pulls that truck to tomorrow and sizes it for 2 days. A truck due today stays today and is sized for 2 days. An open day below 5 units is left out when another open day sold at least 5. Target stock is 2 × the daily average, plus a stand floor of 200 on a retail line (2 stands × 100). The window does not multiply the sales piece. A paper bag uses one cash register. The register holds 200, and that capacity is the bag floor, plus 2 × the daily average. The truck-pull check stays burn × gap × 1.5. The line is that target minus units on hand, at least 10, and not above the shelf space left. `contract.cover` records the open days, the average, the gap, on-hand, the target, and the line. Command: the Tier 1 `dotnet test` suite above.
+Tier 1: `DeliveryCoverTests`. Chain: `open days → burn → stand floor → line → Maintain → playbook`. Burn is the last two completed open days. A closed day is skipped. No history uses seed 25. Paper bags with no sales use seed 50 on the first drop. A zero sale of that item stays at 5. A gap of 1 is sized as 2 days and the date stays. A gap of 2 or 3 stays when units on hand still cover burn × gap × 1.5. A thinner shelf pulls that truck to tomorrow and sizes it for 2 days. A truck due today stays today and is sized for 2 days. An open day below 5 units is left out when another open day sold at least 5. Target stock is 2 × the daily average, plus a stand floor of 200 on a retail line (2 stands × 100). The window does not multiply the sales piece. A paper bag uses one cash register. The register holds 200, and that capacity is the bag floor, plus 2 × the daily average. The truck-pull check stays burn × gap × 1.5. The line is that target minus units on hand, at least 10. Fixture space does not cut it. `contract.cover` records the open days, the average, the gap, on-hand, the target, and the line. Command: the Tier 1 `dotnet test` suite above.
 
 The build checked is `1.17.1+403`. `1.17.1+399` still adds 450 and multiplies the sales piece by the window.
 
@@ -792,5 +792,19 @@ Human check. This slice is the delivery amount on the store that already has a c
 5. Version marker: public `1.17.1`. The installed dll informational version is `1.17.1+403`.
 
 Human PASS 2026-11-10 on 1.17.1 at 22 7th Avenue. Mornings 3–29 stayed above half a fixture. Day 2 bag `target=300` with `multiplier=2.0`.
+
+## Story 14.3 — Goods list, shelf ceiling removed
+
+Tier 1: `ShelfGoodsTests`. Chain: `open type → catalog → line` and `open type → catalog → line → short gap`. A florist or fast-food contract uses that type's list. Hair and office stay on the gift starter. A short wholesaler line is a supply gap. Fixture space does not reduce `need`. An unread fixture adds nothing to capacity.
+
+Human check. This slice is the order on the gift shop at 22 7th Avenue. It does not open a florist.
+
+1. Restart Big Ambitions so 1.17.2.2 loads. Continue the same save. Let one morning pass.
+2. Open `%LocalAppData%\ChaoticCEO\ceo.log`.
+3. **PASS if** `mod.loaded version=1.17.2.2` and a `contract.cover` line with on-hand below the target has `need` equal to `target` minus `onHand`. **FAIL if** `need` is only the room left on the shelf.
+4. Evidence: `contract.cover`. Day 56 cheap gifts were on-hand 184, target 344, and the clipped build ordered 10. This build orders 160.
+5. Version marker: public `1.17.2.2`.
+
+Human PASS 2026-11-11 on 1.17.2.2 at 22 7th Avenue. Days 106–111: `mod.loaded version=1.17.2.2`, and every cover with on-hand below the target had `need` equal to `target` minus `onHand`. Morning fills stayed at or above half the last shelf reading. A mid-day yellow on one fixture is not in the log.
 
 **Long run:** A batch or soak is not Tier 1. When it trips a gate, extract that decision and add a named Tier 1 test before the next long run. See `.cursor/rules/testing.mdc`.

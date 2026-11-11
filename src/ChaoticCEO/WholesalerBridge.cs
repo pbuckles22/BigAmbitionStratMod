@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using BigAmbitions.Items;
 using Entities;
 using Player.SaveSystem;
 
@@ -142,6 +143,7 @@ namespace ChaoticCEO
 
             var touched = false;
             CoverPlan? replacement = null;
+            var shelves = Shelves(building);
             foreach (var item in contract.items)
             {
                 if (item == null || string.IsNullOrEmpty(item.itemName))
@@ -149,13 +151,32 @@ namespace ChaoticCEO
                     continue;
                 }
 
+                var cap = Wholesaler.FixtureCapacity(item.itemName, shelves);
                 var plan = Wholesaler.Cover(
                     item.itemName,
                     day,
                     contract.nextDeliveryDay,
                     Sales(building, item.itemName),
                     UnitsOnHand(building, item.itemName),
-                    stands: Wholesaler.RetailStands(item.itemName));
+                    cap,
+                    Wholesaler.RetailStands(item.itemName));
+                var gap = Wholesaler.ShortLine(
+                    contract.businessAddress.streetName
+                        + " "
+                        + contract.businessAddress.streetNumber.ToString(CultureInfo.InvariantCulture),
+                    item.itemName,
+                    item.amount,
+                    plan.Need);
+                if (gap != null && !string.IsNullOrEmpty(localAppData))
+                {
+                    Wholesaler.RecordShort(
+                        localAppData,
+                        gap,
+                        day,
+                        contract.businessAddress.streetName,
+                        contract.businessAddress.streetNumber,
+                        item.amount);
+                }
                 if (!string.IsNullOrEmpty(localAppData))
                 {
                     Wholesaler.RecordCover(
@@ -207,6 +228,71 @@ namespace ChaoticCEO
             }
 
             return null;
+        }
+
+        private static IReadOnlyList<ShelfFixture> Shelves(BuildingRegistration? building)
+        {
+            var rows = new List<ShelfFixture>();
+            if (building?.itemInstances == null)
+            {
+                return rows;
+            }
+
+            foreach (var placed in building.itemInstances.Values)
+            {
+                if (placed == null)
+                {
+                    continue;
+                }
+
+                var sold = placed.playerItemPurchaserSettings == null
+                    ? ""
+                    : placed.playerItemPurchaserSettings.itemName;
+                if (string.IsNullOrEmpty(sold))
+                {
+                    sold = FirstCargo(placed);
+                }
+
+                if (string.IsNullOrEmpty(sold))
+                {
+                    continue;
+                }
+
+                rows.Add(new ShelfFixture(placed.itemName, sold, 0));
+            }
+
+            return rows;
+        }
+
+        private static string FirstCargo(ItemInstance placed)
+        {
+            if (placed.cargoInstances == null)
+            {
+                return "";
+            }
+
+            foreach (var box in placed.cargoInstances)
+            {
+                if (box != null && !string.IsNullOrEmpty(box.itemName))
+                {
+                    return box.itemName;
+                }
+
+                if (box?.nestedCargoInstances == null)
+                {
+                    continue;
+                }
+
+                foreach (var nested in box.nestedCargoInstances)
+                {
+                    if (nested != null && !string.IsNullOrEmpty(nested.itemName))
+                    {
+                        return nested.itemName;
+                    }
+                }
+            }
+
+            return "";
         }
 
         private static int UnitsOnHand(BuildingRegistration? building, string item)

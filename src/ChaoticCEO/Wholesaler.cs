@@ -278,23 +278,7 @@ namespace ChaoticCEO
             var floor = name == PaperBag ? RegisterFloor(stands) : StandFloor(stands);
             var target = floor + salesTarget;
             var raw = target - stock;
-            int need;
-            if (fixtureCap > 0)
-            {
-                var headroom = fixtureCap - stock;
-                if (headroom < MinLineAmount || raw < MinLineAmount)
-                {
-                    need = MinLineAmount;
-                }
-                else
-                {
-                    need = raw < headroom ? raw : headroom;
-                }
-            }
-            else
-            {
-                need = raw < MinLineAmount ? MinLineAmount : raw;
-            }
+            var need = raw < MinLineAmount ? MinLineAmount : raw;
 
             return new CoverPlan(
                 name,
@@ -350,9 +334,51 @@ namespace ChaoticCEO
                 + " onHand=" + plan.OnHand.ToString(CultureInfo.InvariantCulture)
                 + " target=" + plan.Target.ToString(CultureInfo.InvariantCulture)
                 + " need=" + plan.Need.ToString(CultureInfo.InvariantCulture)
+                + " cap=" + plan.FixtureCap.ToString(CultureInfo.InvariantCulture)
                 + " replace=" + (plan.Replace ? "true" : "false")
                 + " next=" + plan.NextDay.ToString(CultureInfo.InvariantCulture)
                 + " guess=" + (plan.Guess ? "true" : "false");
+        }
+
+        public static string ShortRecord(SupplyGap? gap, int day, string? street, int number, int amount)
+        {
+            if (gap == null || gap.Reason != "short")
+            {
+                return "";
+            }
+
+            return "contract.short version=" + LoadLog.Version
+                + " day=" + day.ToString(CultureInfo.InvariantCulture)
+                + " street=" + (street ?? "")
+                + " number=" + number.ToString(CultureInfo.InvariantCulture)
+                + " item=" + gap.Item
+                + " amount=" + amount.ToString(CultureInfo.InvariantCulture)
+                + " line=" + gap.Target.ToString(CultureInfo.InvariantCulture);
+        }
+
+        public static string RecordShort(
+            string localAppData,
+            SupplyGap? gap,
+            int day,
+            string? street,
+            int number,
+            int amount)
+        {
+            var line = ShortRecord(gap, day, street, number, amount);
+            if (line.Length == 0 || string.IsNullOrEmpty(localAppData))
+            {
+                return line;
+            }
+
+            var path = LoadLog.CeoLogPath(localAppData);
+            var directory = Path.GetDirectoryName(path);
+            if (!string.IsNullOrEmpty(directory))
+            {
+                Directory.CreateDirectory(directory);
+            }
+
+            File.AppendAllText(path, line + Environment.NewLine);
+            return line;
         }
 
         public static string RecordCover(string localAppData, CoverPlan? plan, int day, string? street, int number)
@@ -397,6 +423,37 @@ namespace ChaoticCEO
             };
         }
 
+        /// <summary>
+        /// Sellable stock from StreamingAssets Florist/A1/FloristWholesalers.json, register bag included.
+        /// </summary>
+        public static IReadOnlyList<string> FloristWholesalersStock()
+        {
+            return new[]
+            {
+                "ba:itemname_expensiveflower",
+                "ba:itemname_umbrella",
+                "ba:itemname_paperbag",
+                "ba:itemname_sodacan",
+                "ba:itemname_cheapflower",
+            };
+        }
+
+        /// <summary>
+        /// Sellable stock from StreamingAssets FastFoodRestaurant/A1/FastFoodKabob.json, register bag included.
+        /// </summary>
+        public static IReadOnlyList<string> FastFoodKabobStock()
+        {
+            return new[]
+            {
+                "ba:itemname_paperbag",
+                "ba:itemname_sodacan",
+                "ba:itemname_frenchfries",
+                "ba:itemname_banana",
+                "ba:itemname_apple",
+                "ba:itemname_kabob",
+            };
+        }
+
         public static IReadOnlyList<string> Catalog(string? businessType)
         {
             if (businessType == "ba:businesstype_giftshop")
@@ -406,14 +463,64 @@ namespace ChaoticCEO
 
             if (businessType == "ba:businesstype_florist")
             {
-                return new[]
-                {
-                    "ba:itemname_cheapflower",
-                    "ba:itemname_expensiveflower",
-                };
+                return FloristWholesalersStock();
+            }
+
+            if (businessType == "ba:businesstype_fastfoodrestaurant")
+            {
+                return FastFoodKabobStock();
             }
 
             return Array.Empty<string>();
+        }
+
+        public static string ContractType(string? openType, string? starterType)
+        {
+            if (Catalog(openType).Count > 0)
+            {
+                return openType ?? "";
+            }
+
+            return starterType ?? "";
+        }
+
+        public static int FixtureCapacity(string? item, IReadOnlyList<ShelfFixture?>? fixtures)
+        {
+            if (string.IsNullOrEmpty(item) || fixtures == null)
+            {
+                return 0;
+            }
+
+            var total = 0;
+            foreach (var fixture in fixtures)
+            {
+                if (fixture == null || fixture.Item != item)
+                {
+                    continue;
+                }
+
+                if (fixture.Capacity > 0)
+                {
+                    total += fixture.Capacity;
+                }
+            }
+
+            return total;
+        }
+
+        public static SupplyGap? ShortLine(string? store, string? item, int contractAmount, int lineAmount)
+        {
+            if (string.IsNullOrEmpty(store) || string.IsNullOrEmpty(item) || lineAmount <= 0)
+            {
+                return null;
+            }
+
+            if (contractAmount >= lineAmount)
+            {
+                return null;
+            }
+
+            return new SupplyGap(store, "", item, "short", lineAmount);
         }
 
         public static bool Covers(IReadOnlyList<string>? needed, IReadOnlyList<string>? catalog)
@@ -550,6 +657,22 @@ namespace ChaoticCEO
         {
             return new WholesalerPick("", "", 0, false, "");
         }
+    }
+
+    public sealed class ShelfFixture
+    {
+        public ShelfFixture(string fixture, string item, int capacity)
+        {
+            Fixture = fixture ?? "";
+            Item = item ?? "";
+            Capacity = capacity < 0 ? 0 : capacity;
+        }
+
+        public string Fixture { get; }
+
+        public string Item { get; }
+
+        public int Capacity { get; }
     }
 
     public sealed class CoverSale
