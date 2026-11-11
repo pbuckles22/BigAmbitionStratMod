@@ -2,14 +2,18 @@
 
 ## 1. Executive Summary: Two Mid-Game Scaling Bottlenecks Resolved
 
-This specification closes the final two engineering gaps between Stage 1 bootstrap and Stage 4 compounding:
+This specification closes the final two engineering gaps between Stage 1 bootstrap and Stage 4 compounding, and synchronizes in-store shelf capacity with the **$1.5\times$ delivery buffer math (`TargetStock = ceil(AvgDailyBurn * GapDays * 1.5)`)**:
+
 1. **In-Store Capacity Scaling & "Golden Layout" Creation (Charlie Pryor Ep. 03):**
-   * In `logistics_stocking_strategy_detailed.md`, `Wholesaler.cs` assumes `DefaultFixtureCap = 100` per sellable item ($200$ for `paperbag`), and `Prices.cs` stops undercutting when `CapacityUtilization >= 0.85m`.
-   * In `overall_growth_strategy_stage_1_to_4.md`, Stage 2+ calls `Layout.Decide` to clone the owned layout of the same type and size with the highest interior score (`OwnedLayout.Score > 0`).
-   * **The Gap:** If Stage 1 only ever loads bare starter presets (`GiftShopWholesalers` on an `A1` $75\text{ m}^2$ lot with $1$ small register = $20$ customers/hr and $1$ shelf per item = $100$ units), then:
-     1. High-traffic stores cap out at $20$ customers/hr (checkout bottleneck) and $50$ units/day burn (`CoverOpenDays = 2` $\times 50 = 100 = \text{FixtureCap}$),
+   * In `logistics_stocking_strategy_detailed.md`, each item's post-delivery shelf target is:
+     $$\text{TargetStock}(s, i) = \left\lceil \text{AvgDailyBurn}(s, i) \times \text{GapDays} \times 1.5 \right\rceil$$
+   * On a $2$-day delivery gap (`GapDays = 2`), `TargetStock` equals **$3.0 \times \text{AvgDailyBurn}$** ($2$ days of sales $\times 1.5$ buffer).
+   * If a starter store only has $1$ display fixture (`FixtureCap = 100` to `150` units) and an item's average daily sales reach $40\text{–}50$ units/day, `TargetStock` hits $120\text{–}150$ units—saturating $100\%$ of the shelf capacity!
+   * Furthermore, if Stage 1 only ever loads bare starter presets (`GiftShopWholesalers` on an `A1` $75\text{ m}^2$ lot with $1$ small register = $20$ customers/hr), then:
+     1. High-traffic stores cap out at $20$ customers/hr (checkout bottleneck),
      2. No owned store ever has an upgraded layout (`Score > StarterScore`), so `Layout.Decide` never has a "Golden Layout" to clone, and
      3. When `Where.Decide` rents a `B1` or `C1` building size, cloning an `A1` layout fails because **blueprints in *Big Ambitions* are locked to exact building size codes (`BuildingSizeInfo`)**!
+
 2. **The `durables` SKU Scope Lock vs. 1.0 Factories (Charlie Pryor Ep. 12):**
    * `pricing_profit_margin_neighborhood_competition_strategy.md` lists `ba:itemname_smartphone1` and `ba:itemname_earbuds01` under `durables` with Stage 2+ Importer margin floors ($45\%$).
    * **The 1.0 Engine Rule:** In *Big Ambitions 1.0*, high-tech Electronics (`smartphone1`, `earbuds01`, `headphones`, `smartwatch`) **cannot be imported from any overseas Importer**. They are restricted to tiny Wholesaler quantities or player-built **Factories** (which require multi-stage raw material and component assembly lines).
@@ -21,16 +25,18 @@ This specification closes the final two engineering gaps between Stage 1 bootstr
 
 ### 2.1 The Three Store Bottlenecks & Their Exact Triggers
 
-Every morning on `day.rolled` (in Stage 2+ once `SpendRoom > $5,000`), evaluate each `Ready` retail store $s$ for three physical upgrades:
+Every morning on `day.rolled` (once `SpendRoom >= $2,500`), evaluate each retail store $s$ for three physical upgrades:
 
 | Upgrade Action | Bottleneck Predicate | Physical Mutation on `BuildingRegistration` | Capacity & Profit Impact |
 | :--- | :--- | :--- | :--- |
-| **1. Backroom Storage Rack Addition (`add_storage_rack`)** | Any SKU $i$ in store $s$ has $\text{MeasuredBurn}(s, i) \times \text{CoverOpenDays}\ (2) > \text{FixtureCap}(s, i) \times 0.80$ | Add $1$ `ba:itemname_storagerack` (or second display shelf for SKU $i$) into available floor/backroom tiles (`FixtureCap += 200` units) | Raises `ShelfHeadroom` from $100 \rightarrow 300+$ units so high-velocity stores never stock out between deliveries. |
+| **1. Backroom Storage Rack / Display Shelf Addition (`add_storage_rack`)** | Any SKU $i$ in store $s$ has $\text{TargetStock}(s, i) = \lceil \text{AvgDailyBurn}(s, i) \times \text{GapDays} \times 1.5 \rceil \ge \text{FixtureCap}(s, i) \times 0.85$ | Add $1$ `ba:itemname_storagerack` (or second display fixture for SKU $i$) into available floor/backroom tiles (`FixtureCap += 200` units) | Raises `FixtureCap` and `ShelfHeadroom` by $+200$ units so `OrderAmount = TargetStock - OnHand` is never clipped by a small starter shelf! (Allowed in Stage 1+ whenever `SpendRoom >= $2,500`). |
 | **2. Second Checkout Register + Cashier (`add_register`)** | `PeakHourlyCustomers(s) >= RegisterServiceCap(s) * 0.85` ($17$ cust/hr on a $20$/hr small register) AND `BuildingCustomerCapacity(s) > RegisterServiceCap(s)` | Add $1$ `ba:itemname_cashregister` + checkout counter (`RegisterServiceCap += 20` cust/hr) and hire/assign Cashier #2 (`8–16`) | Doubles store checkout throughput from $20 \rightarrow 40$ customers/hr ($160 \rightarrow 320$ customers/day). |
 | **3. Extended Double-Shift Hours (`extend_hours_8_22`)** | `Stage >= 2` AND `CapacityUtilization(s) >= 0.80m` AND `RecentDailyProfit(s) >= $600` | Extend store open hours from `8–16` ($8\text{h}$) to **`8–22` ($14\text{h}$)** Mon–Sat; schedule Shift A (`8–15`) + Shift B (`15–22`) Cashiers & Cleaners | Increases daily revenue by $+65\%\text{–}+75\%$ on the exact same building rent (`RentPerDay` is fixed!). |
 
 ### 2.2 Building Size Code Matching (`BuildingSizeCode`) & Golden Layout Promotion
+
 In Build 3682, `new BuildingSizeInfo(registration)` encodes the building's floorplan template (e.g., `A1`, `A2`, `B1`, `B2`, `C1`, `M1`).
+
 * **Rule L1 (Strict Floorplan Code Keying):** `Layout.Decide(businessType, buildingSizeCode, ownedLayouts)` must match **both** `BusinessType` and `BuildingSizeCode` (`sizeKey = registration.BuildingCached.BuildingTypeCode`). Never attempt to clone an `A1` layout into a `B1` building.
 * **Rule L2 (Golden Layout Auto-Save):** Whenever a store completes a capacity upgrade (`add_storage_rack` or `add_register`) and logs `ready=true` with a higher daily profit than any prior store of `(BusinessType, BuildingSizeCode)`, save/register its layout as the **Golden Layout** for `(BusinessType, BuildingSizeCode)` (`BusinessLayoutSetHelper.SaveBusinessLayoutSet`).
 
@@ -102,7 +108,7 @@ namespace ChaoticCEO
 
         public const decimal RegisterBusyThreshold = 0.85m;
 
-        public const decimal RackTriggerRatio = 0.80m;
+        public const decimal RackTriggerRatio = 0.85m;
 
         public const decimal DoubleShiftProfitFloor = 600m;
 
@@ -116,19 +122,21 @@ namespace ChaoticCEO
             int peakHourlyCustomers,
             int currentOpenHours,
             decimal recentDailyProfit,
-            IReadOnlyDictionary<string, int>? measuredBurnByItem,
-            IReadOnlyDictionary<string, int>? fixtureCapByItem)
+            IReadOnlyDictionary<string, int>? avgBurnByItem,
+            IReadOnlyDictionary<string, int>? fixtureCapByItem,
+            int deliveryGapDays = Wholesaler.DefaultGapDays)
         {
             var addr = storeAddress ?? "";
-            if (stage < 2 || !storeReady || string.IsNullOrEmpty(addr) || spendRoom < 2_500m)
+            if (string.IsNullOrEmpty(addr) || spendRoom < 2_500m)
             {
                 return StoreScalePick.None();
             }
 
-            // 1. Check if any item's 2-day cover target exceeds 80% of its current fixture capacity.
-            if (measuredBurnByItem != null)
+            // 1. Check if any item's 1.5x delivery window TargetStock (Avg * GapDays * 1.5) exceeds 85% of its current fixture capacity.
+            // Allowed in Stage 1+ so a fast-selling starter store never clips its 1.5x delivery buffer!
+            if (avgBurnByItem != null)
             {
-                foreach (var kv in measuredBurnByItem)
+                foreach (var kv in avgBurnByItem)
                 {
                     var item = kv.Key;
                     var burn = kv.Value;
@@ -143,12 +151,17 @@ namespace ChaoticCEO
                         cap = liveCap;
                     }
 
-                    var coverNeed = burn * Wholesaler.CoverOpenDays;
-                    if (coverNeed >= cap * RackTriggerRatio)
+                    var targetStock = Wholesaler.ComputeTargetStock(burn, deliveryGapDays);
+                    if (targetStock >= cap * RackTriggerRatio)
                     {
                         return new StoreScalePick(addr, "add_storage_rack", item, StorageRackUnitCap, true);
                     }
                 }
+            }
+
+            if (stage < 2 || !storeReady)
+            {
+                return StoreScalePick.None();
             }
 
             // 2. Check if checkout register throughput is bottlenecking building customer capacity.
@@ -236,27 +249,29 @@ namespace ChaoticCEO.Tests
     public sealed class StoreScaleAndScopeTests
     {
         [Fact]
-        public void StoreScale_adds_storage_rack_when_two_day_burn_exceeds_eighty_percent_of_fixture_cap()
+        public void StoreScale_adds_storage_rack_when_1_5x_delivery_window_target_reaches_eighty_five_percent_of_cap()
         {
-            var burn = new Dictionary<string, int> { ["ba:itemname_cheapgift"] = 45 }; // 2d cover = 90 >= 80% of 100 cap
-            var cap = new Dictionary<string, int> { ["ba:itemname_cheapgift"] = 100 };
+            // Avg burn = 30/day on 2-day delivery gap -> TargetStock = 30 * 2 * 1.5 = 90 >= 85% of 100 fixture cap!
+            var burn = new Dictionary<string, int> { ["ba:itemname_umbrella"] = 30 };
+            var cap = new Dictionary<string, int> { ["ba:itemname_umbrella"] = 100 };
 
             var pick = StoreScale.DecideUpgrade(
-                stage: 2,
-                storeAddress: "ba:street_seventhavenue 30",
+                stage: 1,
+                storeAddress: "3rd Street 35",
                 storeReady: true,
-                spendRoom: 10_000m,
+                spendRoom: 5_000m,
                 registerCount: 1,
                 buildingCustomerCap: 30,
                 peakHourlyCustomers: 12,
                 currentOpenHours: 8,
-                recentDailyProfit: 500m,
-                measuredBurnByItem: burn,
-                fixtureCapByItem: cap);
+                recentDailyProfit: 400m,
+                avgBurnByItem: burn,
+                fixtureCapByItem: cap,
+                deliveryGapDays: 2);
 
             Assert.True(pick.Chosen);
             Assert.Equal("add_storage_rack", pick.Action);
-            Assert.Equal("ba:itemname_cheapgift", pick.ItemOrStation);
+            Assert.Equal("ba:itemname_umbrella", pick.ItemOrStation);
             Assert.Equal(200, pick.AddedCapacity);
         }
 
@@ -264,7 +279,7 @@ namespace ChaoticCEO.Tests
         public void StoreScale_adds_second_register_when_checkout_hits_eighty_five_percent_and_building_has_headroom()
         {
             var burn = new Dictionary<string, int> { ["ba:itemname_cheapgift"] = 20 };
-            var cap = new Dictionary<string, int> { ["ba:itemname_cheapgift"] = 100 };
+            var cap = new Dictionary<string, int> { ["ba:itemname_cheapgift"] = 150 };
 
             // 1 register = 20 cust/hr cap; building holds 35 cust/hr; peak is 18 cust/hr (>= 85% of 20).
             var pick = StoreScale.DecideUpgrade(
@@ -277,7 +292,7 @@ namespace ChaoticCEO.Tests
                 peakHourlyCustomers: 18,
                 currentOpenHours: 8,
                 recentDailyProfit: 500m,
-                measuredBurnByItem: burn,
+                avgBurnByItem: burn,
                 fixtureCapByItem: cap);
 
             Assert.True(pick.Chosen);

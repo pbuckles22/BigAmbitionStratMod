@@ -8,7 +8,7 @@
 
 ## Summary
 
-**BigAmbitionStratMod** — Epic 14 docs are on `feature/14.1-rulebook`. Epic 10 stays open. **10.4** still ends at three healthy goods stores and waits on **14.2**, **14.3**, and **14.4**. The **10.4** code is stashed. The installed mod under test is **1.16.7.7**. This branch’s code is **1.16.6.1**. Public **EPIC** stays `1.16` until Epic 14 ships as `1.17`. **7.9–7.12** stay. **7.13** is **14.6**. Rules: [requirements/strategy.md](requirements/strategy.md).
+**BigAmbitionStratMod** — Story **14.2** delivery cover is PASS on `feature/14.2-delivery-cover` at **1.17.1**. Not on `main`. Epic 10 stays open. **10.4** still waits on **14.3** and **14.4**. The **10.4** code stays stashed. **7.9–7.12** stay. **7.13** is **14.6**. Rules: [requirements/strategy.md](requirements/strategy.md).
 
 ---
 
@@ -16,8 +16,9 @@
 
 | Branch | Role |
 |--------|------|
-| **`main`** | Integration branch. Version 1.16.6.1. Story 10.3 Ready+stall PASS. |
-| **`feature/14.1-rulebook`** | Epic 14 docs. Stories 14.1–14.13. No mod change. Not pushed. |
+| **`main`** | Integration branch. Version 1.16.6.1. Story 10.3 Ready+stall PASS. **14.2** is not merged. |
+| **`feature/14.2-delivery-cover`** | Story 14.2 delivery cover. Version 1.17.1. Human PASS 2026-11-10. Not merged. |
+| **`feature/14.1-rulebook`** | Epic 14 docs. Story 14.1. No mod change. |
 | **`feature/10.4-stores-2-3`** | Story 10.4 Stores 2–3. Code is stashed, not on this commit. Installed mod 1.16.7.7. No PASS. |
 | **`feature/10.3-store1-ready`** | Story 10.3 Store #1 Ready + stall. Version 1.16.6.1. Human PASS 2026-11-10. Kept after CMPH. |
 | **`feature/10.3-hands-off-win`** | Story 10.3 soak-speed slice. Version 1.16.5.6. Soak-speed + Resume skip PASS 2026-11-09. Kept after CMPH. |

@@ -52,6 +52,31 @@ namespace ChaoticCEO
 
         public const string PaperBag = "ba:itemname_paperbag";
 
+        /// <summary>One-day opening guess before any open day of sales. First drop is this times 1.5.</summary>
+        public const int OpeningDailyGuess = 25;
+
+        public const int PaperBagSeed = 50;
+
+        public const int MinBurnFloor = 5;
+
+        public const int MinLineAmount = 10;
+
+        /// <summary>Pull check only. The order line does not multiply by this.</summary>
+        public const decimal CoverMultiplier = 1.5m;
+
+        /// <summary>Applied to the daily average only. Not applied to the stand floor, and not multiplied by the window.</summary>
+        public const decimal SalesWindowMultiplier = 2.0m;
+
+        public const int MaxKeptWindow = 3;
+
+        public const int DefaultGapDays = 2;
+
+        /// <summary>Units one selling stand holds. Two stands are the retail floor of 200.</summary>
+        public const int StandCap = 100;
+
+        /// <summary>Units one cash register holds. That capacity is the paper-bag floor.</summary>
+        public const int RegisterCap = 200;
+
         public static int ContractAmount(int dailyBurn)
         {
             if (dailyBurn <= 0)
@@ -97,6 +122,256 @@ namespace ChaoticCEO
         public static int RescheduleDay(int currentDay)
         {
             return currentDay + 1;
+        }
+
+        public static int RetailStands(string? item)
+        {
+            return item == PaperBag ? 1 : 2;
+        }
+
+        public static int StandFloor(int stands)
+        {
+            if (stands <= 1)
+            {
+                return 0;
+            }
+
+            return stands * StandCap;
+        }
+
+        public static int RegisterFloor(int registers)
+        {
+            if (registers <= 0)
+            {
+                return 0;
+            }
+
+            return registers * RegisterCap;
+        }
+
+        public static CoverPlan Cover(
+            string? item,
+            int currentDay,
+            int nextDeliveryDay,
+            IReadOnlyList<CoverSale>? days,
+            int onHand = 0,
+            int fixtureCap = 0,
+            int stands = 1)
+        {
+            var gap = nextDeliveryDay - currentDay;
+            var stock = onHand < 0 ? 0 : onHand;
+
+            var openDays = new List<int>();
+            var soldByDay = new Dictionary<int, int>();
+            var ordersByDay = new Dictionary<int, int>();
+            if (days != null)
+            {
+                foreach (var day in days)
+                {
+                    if (day == null || !day.Open || day.Day <= 0 || day.Day >= currentDay)
+                    {
+                        continue;
+                    }
+
+                    if (!soldByDay.ContainsKey(day.Day))
+                    {
+                        soldByDay[day.Day] = 0;
+                        ordersByDay[day.Day] = 0;
+                        openDays.Add(day.Day);
+                    }
+
+                    soldByDay[day.Day] += day.Sold;
+                    ordersByDay[day.Day] += day.StoreOrders;
+                }
+            }
+
+            openDays.Sort();
+            var name = item ?? "";
+            var guess = openDays.Count == 0;
+            var samples = guess ? 0 : openDays.Count == 1 ? 1 : 2;
+            var older = 0;
+            var newer = 0;
+            decimal average;
+            if (guess)
+            {
+                average = name == PaperBag ? PaperBagSeed : OpeningDailyGuess;
+            }
+            else
+            {
+                if (samples == 1)
+                {
+                    newer = soldByDay[openDays[0]];
+                }
+                else
+                {
+                    older = soldByDay[openDays[openDays.Count - 2]];
+                    newer = soldByDay[openDays[openDays.Count - 1]];
+                }
+
+                if (name == PaperBag && older + newer == 0)
+                {
+                    if (samples == 1)
+                    {
+                        newer = ordersByDay[openDays[0]];
+                    }
+                    else
+                    {
+                        older = ordersByDay[openDays[openDays.Count - 2]];
+                        newer = ordersByDay[openDays[openDays.Count - 1]];
+                    }
+                }
+
+                if (samples == 2)
+                {
+                    var low = older < newer ? older : newer;
+                    var high = older < newer ? newer : older;
+                    if (high >= MinBurnFloor && low < MinBurnFloor)
+                    {
+                        older = 0;
+                        newer = high;
+                        samples = 1;
+                    }
+                }
+
+                average = samples == 1 ? newer : (older + newer) / 2m;
+                var burn = CeilUnits(average);
+                if (burn < MinBurnFloor)
+                {
+                    burn = MinBurnFloor;
+                }
+
+                average = burn;
+            }
+
+            var daysUntilTruck = gap > 0 ? gap : 1;
+            var requiredBeforeTruck = CeilUnits(average * daysUntilTruck * CoverMultiplier);
+            var runsOut = !guess && gap > 1 && stock < requiredBeforeTruck;
+            int window;
+            int next;
+            bool replace;
+            if (gap > MaxKeptWindow || runsOut)
+            {
+                window = DefaultGapDays;
+                replace = true;
+                next = RescheduleDay(currentDay);
+            }
+            else if (gap >= 1)
+            {
+                window = gap < DefaultGapDays ? DefaultGapDays : gap;
+                replace = false;
+                next = nextDeliveryDay;
+            }
+            else if (gap == 0)
+            {
+                window = DefaultGapDays;
+                replace = false;
+                next = currentDay;
+            }
+            else
+            {
+                window = DefaultGapDays;
+                replace = true;
+                next = currentDay;
+            }
+
+            var salesTarget = CeilUnits(average * SalesWindowMultiplier);
+            var floor = name == PaperBag ? RegisterFloor(stands) : StandFloor(stands);
+            var target = floor + salesTarget;
+            var raw = target - stock;
+            int need;
+            if (fixtureCap > 0)
+            {
+                var headroom = fixtureCap - stock;
+                if (headroom < MinLineAmount || raw < MinLineAmount)
+                {
+                    need = MinLineAmount;
+                }
+                else
+                {
+                    need = raw < headroom ? raw : headroom;
+                }
+            }
+            else
+            {
+                need = raw < MinLineAmount ? MinLineAmount : raw;
+            }
+
+            return new CoverPlan(
+                name,
+                guess,
+                samples,
+                older,
+                newer,
+                average,
+                gap,
+                window,
+                replace,
+                next,
+                need,
+                stock,
+                target,
+                fixtureCap);
+        }
+
+        private static int CeilUnits(decimal value)
+        {
+            if (value <= 0)
+            {
+                return 0;
+            }
+
+            return (int)Math.Ceiling(value);
+        }
+
+        public static string CoverLine(CoverPlan? plan, int day, string? street, int number)
+        {
+            if (plan == null)
+            {
+                return "";
+            }
+
+            var sold = plan.Guess
+                ? ""
+                : plan.Samples == 1
+                    ? plan.NewerSold.ToString(CultureInfo.InvariantCulture)
+                    : plan.OlderSold.ToString(CultureInfo.InvariantCulture)
+                        + "|"
+                        + plan.NewerSold.ToString(CultureInfo.InvariantCulture);
+            return "contract.cover version=" + LoadLog.Version
+                + " day=" + day.ToString(CultureInfo.InvariantCulture)
+                + " street=" + (street ?? "")
+                + " number=" + number.ToString(CultureInfo.InvariantCulture)
+                + " item=" + plan.Item
+                + " sold=" + sold
+                + " average=" + plan.Average.ToString("0.##", CultureInfo.InvariantCulture)
+                + " gap=" + plan.Gap.ToString(CultureInfo.InvariantCulture)
+                + " window=" + plan.Window.ToString(CultureInfo.InvariantCulture)
+                + " multiplier=" + SalesWindowMultiplier.ToString("0.0", CultureInfo.InvariantCulture)
+                + " onHand=" + plan.OnHand.ToString(CultureInfo.InvariantCulture)
+                + " target=" + plan.Target.ToString(CultureInfo.InvariantCulture)
+                + " need=" + plan.Need.ToString(CultureInfo.InvariantCulture)
+                + " replace=" + (plan.Replace ? "true" : "false")
+                + " next=" + plan.NextDay.ToString(CultureInfo.InvariantCulture)
+                + " guess=" + (plan.Guess ? "true" : "false");
+        }
+
+        public static string RecordCover(string localAppData, CoverPlan? plan, int day, string? street, int number)
+        {
+            var line = CoverLine(plan, day, street, number);
+            if (line.Length == 0 || string.IsNullOrEmpty(localAppData))
+            {
+                return line;
+            }
+
+            var path = LoadLog.CeoLogPath(localAppData);
+            var directory = Path.GetDirectoryName(path);
+            if (!string.IsNullOrEmpty(directory))
+            {
+                Directory.CreateDirectory(directory);
+            }
+
+            File.AppendAllText(path, line + Environment.NewLine);
+            return line;
         }
 
         public static IReadOnlyList<WholesalerOffer> StageOne()
@@ -275,6 +550,88 @@ namespace ChaoticCEO
         {
             return new WholesalerPick("", "", 0, false, "");
         }
+    }
+
+    public sealed class CoverSale
+    {
+        public CoverSale(int day, int sold, bool open, int storeOrders = 0)
+        {
+            Day = day;
+            Sold = sold;
+            Open = open;
+            StoreOrders = storeOrders;
+        }
+
+        public int Day { get; }
+
+        public int Sold { get; }
+
+        public bool Open { get; }
+
+        public int StoreOrders { get; }
+    }
+
+    public sealed class CoverPlan
+    {
+        public CoverPlan(
+            string item,
+            bool guess,
+            int samples,
+            int olderSold,
+            int newerSold,
+            decimal average,
+            int gap,
+            int window,
+            bool replace,
+            int nextDay,
+            int need,
+            int onHand = 0,
+            int target = 0,
+            int fixtureCap = 0)
+        {
+            Item = item ?? "";
+            Guess = guess;
+            Samples = samples;
+            OlderSold = olderSold;
+            NewerSold = newerSold;
+            Average = average;
+            Gap = gap;
+            Window = window;
+            Replace = replace;
+            NextDay = nextDay;
+            Need = need;
+            OnHand = onHand;
+            Target = target;
+            FixtureCap = fixtureCap;
+        }
+
+        public string Item { get; }
+
+        public bool Guess { get; }
+
+        public int Samples { get; }
+
+        public int OlderSold { get; }
+
+        public int NewerSold { get; }
+
+        public decimal Average { get; }
+
+        public int Gap { get; }
+
+        public int Window { get; }
+
+        public bool Replace { get; }
+
+        public int NextDay { get; }
+
+        public int Need { get; }
+
+        public int OnHand { get; }
+
+        public int Target { get; }
+
+        public int FixtureCap { get; }
     }
 
     public sealed class WholesalerWatch

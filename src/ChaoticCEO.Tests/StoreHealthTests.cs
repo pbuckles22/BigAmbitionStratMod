@@ -117,7 +117,7 @@ public class StoreHealthTests
     [Fact]
     public void StoreHealth_order_history_and_statements_prove_g4_g5_when_dailyIncomes_empty()
     {
-        // Harvest: 1.16.6.1 soak had customers from units but revenue=0 profits= empty (dailyIncomes unused).
+        // Harvest: 1.17.1 soak had customers from units but revenue=0 profits= empty (dailyIncomes unused).
         var order = StoreHealth.OrderDaySales(totalCustomers: 141, totalRevenue: 1128m);
         Assert.Equal(141, order.Customers);
         Assert.Equal(1128m, order.Revenue);

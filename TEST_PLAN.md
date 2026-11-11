@@ -777,4 +777,20 @@ Human PASS 2026-10-29: `routes=4`, `warehouses=147`, cheap-gift day `1016`, W1 s
 5. `doc/gemini/cache/ledger.log` contains `portfolio.written` with `version=1.1.2` and `business=Chaotic Clothing #3`.
 6. Version marker: `1.1.2` printed by the script and on that log line.
 
+## Story 14.2 — Delivery cover
+
+Tier 1: `DeliveryCoverTests`. Chain: `open days → burn → stand floor → line → Maintain → playbook`. Burn is the last two completed open days. A closed day is skipped. No history uses seed 25. Paper bags with no sales use seed 50 on the first drop. A zero sale of that item stays at 5. A gap of 1 is sized as 2 days and the date stays. A gap of 2 or 3 stays when units on hand still cover burn × gap × 1.5. A thinner shelf pulls that truck to tomorrow and sizes it for 2 days. A truck due today stays today and is sized for 2 days. An open day below 5 units is left out when another open day sold at least 5. Target stock is 2 × the daily average, plus a stand floor of 200 on a retail line (2 stands × 100). The window does not multiply the sales piece. A paper bag uses one cash register. The register holds 200, and that capacity is the bag floor, plus 2 × the daily average. The truck-pull check stays burn × gap × 1.5. The line is that target minus units on hand, at least 10, and not above the shelf space left. `contract.cover` records the open days, the average, the gap, on-hand, the target, and the line. Command: the Tier 1 `dotnet test` suite above.
+
+The build checked is `1.17.1+403`. `1.17.1+399` still adds 450 and multiplies the sales piece by the window.
+
+Human check. This slice is the delivery amount on the store that already has a contract. It does not furnish a second building. Every retail item is treated as 2 stands of 100. A paper bag uses one cash register of 200.
+
+1. Restart Big Ambitions so that build loads. Continue the current shop or start a **new** game. Autopilot on. Let one morning pass.
+2. Open `%LocalAppData%\ChaoticCEO\ceo.log` and find that morning's `contract.cover` lines.
+3. **PASS if** `mod.loaded` is `version=1.17.1`, `multiplier=2.0`, a retail `target` is 200 plus 2 × `average`, and the paper-bag `target` is 200 plus 2 × its `average`. **FAIL if** a retail `target` is still about 500, or a paper-bag `target` is only 2 × its `average`.
+4. Evidence: `contract.cover`. Umbrella shape: average 25, target 250. Above that target the line drops to 10.
+5. Version marker: public `1.17.1`. The installed dll informational version is `1.17.1+403`.
+
+Human PASS 2026-11-10 on 1.17.1 at 22 7th Avenue. Mornings 3–29 stayed above half a fixture. Day 2 bag `target=300` with `multiplier=2.0`.
+
 **Long run:** A batch or soak is not Tier 1. When it trips a gate, extract that decision and add a named Tier 1 test before the next long run. See `.cursor/rules/testing.mdc`.

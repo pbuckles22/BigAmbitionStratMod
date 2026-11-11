@@ -1,17 +1,16 @@
 # Logistics & Stocking Strategy — Stage 1 Door Delivery to Stage 4 Rebalancing (Exhaustive Engineering Spec)
 
+Stage 1 line sizing in this note is superseded by [logistics_stocking_strategy_1_5x_buffer_2_open_day_moving_average.md](logistics_stocking_strategy_1_5x_buffer_2_open_day_moving_average.md). Use that note for burn, target stock, the line amount, and the delivery gap. Warehouse handover, importer prime, and residual cross-family supply below stay in force where they do not set a line amount.
+
 ## 1. Executive Logistics Path (Day 0 $\rightarrow$ Stage 4 Sequence)
 
 * **Day 1 (Store #1 Initial Contract Seed):**
   * Gate contract creation on `StoreOpsBridge.HasItems(registration) == true` (never sign a contract on an unfurnished bare lot).
   * Sign one Wholesaler `DeliveryContract` (`Dialogs.WholesaleStoreManagerDialog.StartContract`) from `ba:street_firststreet 37` to Store #1 covering all $5$ `GiftShopWholesalers` items (`ba:itemname_cheapgift`, `ba:itemname_cheapflower`, `ba:itemname_sodacan`, `ba:itemname_paperbag`, `ba:itemname_umbrella`).
-  * Size Day-1 lines using **SeedBurn** $= 25$ units/day $\times$ **CoverOpenDays** $= 2 \implies 50$ units per sellable item and $100$ units for `ba:itemname_paperbag`, capped by each fixture's **ShelfHeadroom**, with `nextDeliveryDay = currentDay + 1`.
+  * Size the Day-1 lines and every later morning from [logistics_stocking_strategy_1_5x_buffer_2_open_day_moving_average.md](logistics_stocking_strategy_1_5x_buffer_2_open_day_moving_average.md). A closed day does not push the truck.
 * **Days 2+ (Daily Closed-Loop Reforecast on `day.rolled`):**
-  * Every morning on `day.rolled`, run `WholesalerBridge.Maintain` for each store with an active `DeliveryContract`.
-  * Compute per-store, per-item **MeasuredBurn** over the last **BurnLookbackDays** $= 3$ completed open days from `registration.orderHistory` (using **MinBurnFloor** $= 5$ when an item had $0$ sales so slow items stay stocked).
-  * Read physical units currently on fixtures (`OnHand`) and total fixture capacity (`FixtureCap`) for that item in that store to compute `ShelfHeadroom = max(0, FixtureCap - OnHand)`.
-  * Set `item.amount = LineAmount(OnHand, MeasuredBurn, FixtureCap)`—**both raising and lowering** contract quantities so a delivery never exceeds `ShelfHeadroom`.
-  * **Smart Cadence Control:** Pull `nextDeliveryDay` to `currentDay + 1` **only** when at least one item in that store has `OnHand < MeasuredBurn * CoverOpenDays` AND `ShelfHeadroom >= MinReplenishAmount` ($10$). When all items already have $\ge 2$ days of stock on hand (or `ShelfHeadroom < 10`), defer `nextDeliveryDay` to `max(contract.nextDeliveryDay, currentDay + HoldDeliveryDays)` ($2$ days out) so NY Distro never dumps boxes onto full shelves.
+  * Every morning on `day.rolled`, run `WholesalerBridge.Maintain` for each store with an active `DeliveryContract`, using that same note.
+  * `WholesalerBridge.Maintain` evaluates each contract against that store’s own `orderHistory` and `itemInstances`.
 * **Multi-Store Stage 1 (Stores #2 and #3):**
   * Each new store $N \in \{2, 3\}$ receives its own `DeliveryContract` only after its `layout`, `ops`, and `capacity` fit-out steps complete.
   * `WholesalerBridge.Maintain` evaluates each `DeliveryContract` strictly against `contract.businessAddress`'s own `BuildingRegistration` (`orderHistory` and `itemInstances`), never copying Store #1's burn onto Store #2.
@@ -61,6 +60,8 @@ To implement shelf-headroom capping and measured burn without guessing unverifie
 ---
 
 ## 4. Master Logistics Decision Tables
+
+Tables 4A and 4B below are the retired 3-day cover. Do not use them for a line amount. The 1.5× note is the Stage 1 rule.
 
 ### Table 4A — Wholesaler Line Sizing: Seed Burn vs. Measured Burn vs. Shelf Headroom
 

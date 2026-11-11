@@ -7,11 +7,11 @@
   2. Rent the lowest-rent available retail lot (`Rent.Choose` $\rightarrow$ `BuildingCommands.Command_RentBuilding`).
   3. Load starter layout `GiftShopWholesalers` (`Starter.Choose` $\rightarrow$ `LoadBusinessLayoutSet`), set hours `8–16` Monday–Saturday (Sunday closed), and clear `temporarilyClosed`.
   4. Assign Cleaner (`CleaningStationController.AssignEmployee` + `WorkShiftType.Cleaning`) and recalculate customer capacity from placed fixtures (`BusinessHelper.UpdateCustomerCapacity`).
-  5. Sign recurring Wholesaler `DeliveryContract` (`WholesaleStoreManagerDialog.StartContract`) to `ba:street_firststreet 37` covering all $5$ layout items (`ba:itemname_cheapgift`, `ba:itemname_cheapflower`, `ba:itemname_sodacan`, `ba:itemname_paperbag`, `ba:itemname_umbrella`) at initial **SeedBurn** $= 25 \times$ **CoverOpenDays** $= 2 \implies 50$ units ($100$ `paperbag`), scheduled for `nextDeliveryDay = currentDay + 1`.
+  5. Sign recurring Wholesaler `DeliveryContract` (`WholesaleStoreManagerDialog.StartContract`) to `ba:street_firststreet 37` covering all $5$ layout items (`ba:itemname_cheapgift`, `ba:itemname_cheapflower`, `ba:itemname_sodacan`, `ba:itemname_paperbag`, `ba:itemname_umbrella`). Line size is the Stage 1 rule in [logistics_stocking_strategy_1_5x_buffer_2_open_day_moving_average.md](logistics_stocking_strategy_1_5x_buffer_2_open_day_moving_average.md).
   6. Hire and schedule Cashier (`EmployeeHelper.HireCandidate` + `CashRegisterController.AssignEmployee` on `SelfServiceEmployee` station).
   7. Raise every item's retail price off default by **PriceStep** $= +5\%$ (`Prices.Decide`, respecting `MinViablePrice` for `specialty`/`food` in Stage 1).
 * **Days 2–5 (Store #1 Stabilization, Closed-Loop Reforecast & Ready Proof — Story `10.3`):**
-  1. On each `day.rolled`, run `WholesalerBridge.Maintain`: reforecast each item's `MeasuredBurn` from the last **BurnLookbackDays** $= 3$ completed open days (`MinBurnFloor = 5`), cap `item.amount` by **ShelfHeadroom** ($\text{FixtureCap} - \text{OnHand}$), and pull `nextDeliveryDay` to `day + 1` only when `OnHand < MeasuredBurn * CoverOpenDays` (otherwise defer to `day + HoldDeliveryDays` $= 2$).
+  1. On each `day.rolled`, run `WholesalerBridge.Maintain` with the Stage 1 line in [logistics_stocking_strategy_1_5x_buffer_2_open_day_moving_average.md](logistics_stocking_strategy_1_5x_buffer_2_open_day_moving_average.md). A closed day does not push the truck.
   2. Evaluate `StoreHealth.Assess` (G1 Open, G2 Stocked, G3 Staffed, G4 Selling, G5 Profitable) from **completed open days** (ignoring morning $00\text{:}00$ zeros and scheduled closed Sundays).
   3. Step retail prices up $+5\%$/day in local monopoly neighborhoods or undercut local neighborhood rivals down to `MinViablePrice`.
   4. Repay any initial $\$500$ bootstrap loan once `Available(cash, dailyCost) > RepayFloor` ($\$5,000$) while `!Ready`.
@@ -143,8 +143,8 @@
 | **Stage4Cash** | $\$2,000,000$ | `Stage.cs` | Cash gate (with `supplied == goods` and `emptySlots == 0`) for Stage 4 |
 | **ProfitProofDays** / **SatisfactionFloor** / **StuckDays** | $3$ / $50\%$ / $3$ | `StoreHealth.cs` / `Stall.cs` | G5 rolling open-day profit window, G3 staff satisfaction floor, and stall remedy window |
 | **BareLotMax** / **FitOutStuckDays** | $1$ / $3$ | `FitOut.cs` / `Stall.cs` | Max bare rented lots before blocking `open`/`where`, and days without fit-out progress before pause |
-| **CoverOpenDays** / **BurnLookbackDays** / **SeedBurn** / **MinBurnFloor** | $2$ / $3$ / $25$ / $5$ | `Wholesaler.cs` | Stage-1 delivery cover days, open-day burn lookback, Day-1 seed burn, and zero-sale burn floor |
-| **DefaultFixtureCap** / **PaperBagFixtureCap** / **MinReplenishAmount** / **HoldDeliveryDays** | $100$ / $200$ / $10$ / $2$ | `Wholesaler.cs` | Shelf capacity caps (`ShelfHeadroom`), minimum delivery batch, and cadence deferral days |
+| **LookbackOpenDays** / **SafetyMultiplier** / **SeedBurn** / **PaperBagSeedBurn** / **MinBurnFloor** / **DefaultGapDays** | $2$ / $1.5$ / $25$ / $50$ / $5$ / $2$ | 1.5× stocking note | Stage-1 open-day burn, surge buffer, seeds, zero-sale floor, and replacement gap |
+| **MinReplenishAmount** | $10$ | 1.5× stocking note | Smallest line when the shelf still has room |
 | **RefillDays** / **GarageSlots** / **TruckBusy** | $7$ / $2$ / $0.85$ | `Supply.cs` / `Trucks.cs` / `Open.cs` | Warehouse import cover days, trucks per warehouse, and truck load threshold for service/office pivot |
 | **ClusterMin** | $2$ | `Where.cs` | Same-family stores on a street to win site selection |
 | **PriceStep** / **PriceSatisfied** / **UndercutStep** | $0.05$ / $0.75$ / $0.02$ | `Prices.cs` | Daily price step ($+5\%$), satisfaction floor ($75\%$), and local neighborhood rival undercut step ($2\%$) |

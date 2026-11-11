@@ -109,19 +109,11 @@ namespace ChaoticCEO
                     continue;
                 }
 
-                var touched = false;
-                if (Wholesaler.NeedsReschedule(day, contract.nextDeliveryDay))
-                {
-                    var from = contract.nextDeliveryDay;
-                    contract.nextDeliveryDay = Wholesaler.RescheduleDay(day);
-                    touched = true;
-                    RecordReschedule(localAppData, day, contract, from);
-                }
-
-                if (EnsureAmounts(contract))
-                {
-                    touched = true;
-                }
+                var building = BuildingFor(
+                    current,
+                    contract.businessAddress.streetName,
+                    contract.businessAddress.streetNumber);
+                var touched = ApplyCover(localAppData, day, contract, building);
 
                 if (touched)
                 {
@@ -137,14 +129,19 @@ namespace ChaoticCEO
             return changed;
         }
 
-        private static bool EnsureAmounts(DeliveryContract contract)
+        private static bool ApplyCover(
+            string? localAppData,
+            int day,
+            DeliveryContract contract,
+            BuildingRegistration? building)
         {
-            if (contract.items == null)
+            if (contract.items == null || contract.businessAddress == null)
             {
                 return false;
             }
 
             var touched = false;
+            CoverPlan? replacement = null;
             foreach (var item in contract.items)
             {
                 if (item == null || string.IsNullOrEmpty(item.itemName))
@@ -152,15 +149,157 @@ namespace ChaoticCEO
                     continue;
                 }
 
-                var want = Wholesaler.ItemAmount(item.itemName, Wholesaler.StageOneDailyBurn);
-                if (item.amount < want)
+                var plan = Wholesaler.Cover(
+                    item.itemName,
+                    day,
+                    contract.nextDeliveryDay,
+                    Sales(building, item.itemName),
+                    UnitsOnHand(building, item.itemName),
+                    stands: Wholesaler.RetailStands(item.itemName));
+                if (!string.IsNullOrEmpty(localAppData))
                 {
-                    item.amount = want;
+                    Wholesaler.RecordCover(
+                        localAppData,
+                        plan,
+                        day,
+                        contract.businessAddress.streetName,
+                        contract.businessAddress.streetNumber);
+                }
+
+                if (item.amount != plan.Need)
+                {
+                    item.amount = plan.Need;
                     touched = true;
+                }
+
+                if (plan.Replace)
+                {
+                    replacement = plan;
                 }
             }
 
+            if (replacement != null && contract.nextDeliveryDay != replacement.NextDay)
+            {
+                var from = contract.nextDeliveryDay;
+                contract.nextDeliveryDay = replacement.NextDay;
+                touched = true;
+                RecordReschedule(localAppData, day, contract, from);
+            }
+
             return touched;
+        }
+
+        private static BuildingRegistration? BuildingFor(GameInstance current, string street, int number)
+        {
+            if (current.BuildingRegistrations == null || street.Length == 0 || number <= 0)
+            {
+                return null;
+            }
+
+            foreach (var building in current.BuildingRegistrations)
+            {
+                if (building != null
+                    && building.StreetName == street
+                    && building.StreetNumber == number)
+                {
+                    return building;
+                }
+            }
+
+            return null;
+        }
+
+        private static int UnitsOnHand(BuildingRegistration? building, string item)
+        {
+            if (building?.itemInstances == null || item.Length == 0)
+            {
+                return 0;
+            }
+
+            var total = 0;
+            foreach (var placed in building.itemInstances.Values)
+            {
+                if (placed?.cargoInstances == null)
+                {
+                    continue;
+                }
+
+                foreach (var box in placed.cargoInstances)
+                {
+                    if (box == null)
+                    {
+                        continue;
+                    }
+
+                    if (box.itemName == item)
+                    {
+                        total += box.amount;
+                    }
+
+                    if (box.nestedCargoInstances == null)
+                    {
+                        continue;
+                    }
+
+                    foreach (var nested in box.nestedCargoInstances)
+                    {
+                        if (nested != null && nested.itemName == item)
+                        {
+                            total += nested.amount;
+                        }
+                    }
+                }
+            }
+
+            return total;
+        }
+
+        private static List<CoverSale> Sales(BuildingRegistration? building, string item)
+        {
+            var rows = new List<CoverSale>();
+            if (building?.orderHistory == null)
+            {
+                return rows;
+            }
+
+            foreach (var entry in building.orderHistory)
+            {
+                if (entry == null)
+                {
+                    continue;
+                }
+
+                var sold = 0;
+                var any = false;
+                if (entry.itemSales != null)
+                {
+                    foreach (var sale in entry.itemSales)
+                    {
+                        if (sale == null)
+                        {
+                            continue;
+                        }
+
+                        if (sale.amountSold > 0)
+                        {
+                            any = true;
+                        }
+
+                        if (sale.itemName == item)
+                        {
+                            sold += sale.amountSold;
+                        }
+                    }
+                }
+
+                rows.Add(new CoverSale(
+                    entry.dayNumber,
+                    sold,
+                    entry.totalCustomers > 0 || any,
+                    entry.totalCustomers));
+            }
+
+            return rows;
         }
 
         private static void RecordReschedule(
@@ -195,10 +334,11 @@ namespace ChaoticCEO
             var items = new List<DeliveryContractItem>();
             foreach (var name in Catalog(businessType))
             {
+                var opening = Wholesaler.Cover(name, currentDay: 1, nextDeliveryDay: 2, days: null);
                 items.Add(new DeliveryContractItem
                 {
                     itemName = name,
-                    amount = Wholesaler.ItemAmount(name, Wholesaler.StageOneDailyBurn),
+                    amount = opening.Need,
                 });
             }
 
