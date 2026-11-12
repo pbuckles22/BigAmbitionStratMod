@@ -103,7 +103,7 @@
 | **`feature/chain-prefix`** | Kept after CMPH (template history) |
 | **`feature/handoff-receiver-framing`** | Kept after CMPH (template history) |
 
-**Last land:** `dab9de6` on `main`. Version 1.17.2.6. Branch `feature/14.4-cash-stage` kept. Repo: https://github.com/pbuckles22/BigAmbitionStratMod.
+**Last land:** `ad61326` on `main`. Version 1.17.3. Branch `feature/14.14-staff-watch` kept. Repo: https://github.com/pbuckles22/BigAmbitionStratMod.
 
 ---
 
