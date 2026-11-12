@@ -1,3 +1,4 @@
+using System.Reflection;
 using Timemachine;
 using UnityEngine;
 
@@ -5,6 +6,73 @@ namespace ChaoticCEO
 {
     public static class TimeAdvanceBridge
     {
+        private const int CurveSamples = 64;
+
+        private static readonly SleepSkip Gate = new SleepSkip();
+        private static readonly FieldInfo? DistanceField =
+            typeof(TimeMachine).GetField("_timeDistance", BindingFlags.Instance | BindingFlags.NonPublic);
+
+        private static TimeMachine? _machine;
+        private static GameSpeedController? _clock;
+
+        public static bool DesiredOn => Gate.DesiredOn;
+
+        public static bool Defer(TimeSkipPick pick)
+        {
+            _ = pick;
+            return false;
+        }
+
+        public static bool Skipping()
+        {
+            return Gate.Started && Running();
+        }
+
+        public static bool Toggle(string localAppData, string reason = "f6")
+        {
+            var on = Gate.Toggle();
+            if (!on)
+            {
+                var current = SaveGameManager.Current;
+                Cancel();
+                TimeAdvance.RecordSynced(localAppData, current == null ? 0 : current.Day, "stop", reason);
+            }
+
+            return on;
+        }
+
+        public static string Sync(string localAppData, bool allowed, string reason = "frame")
+        {
+            var current = SaveGameManager.Current;
+            var day = current == null ? 0 : current.Day;
+            var action = Gate.Sync(SceneReady(current), current, allowed, Running());
+            if (action == "start")
+            {
+                var rate = Start();
+                if (rate <= 0f)
+                {
+                    Gate.Release();
+                    return "hold";
+                }
+
+                TimeAdvance.RecordSynced(localAppData, day, "start", reason, rate);
+            }
+            else if (action == "ended")
+            {
+                ReleaseClock();
+                TimeAdvance.RecordSynced(localAppData, day, "stop", "esc");
+            }
+
+            return action;
+        }
+
+        public static bool Resume(string localAppData)
+        {
+            _ = localAppData;
+            Gate.Resume();
+            return Gate.DesiredOn;
+        }
+
         public static PlayerNeeds Read()
         {
             var current = SaveGameManager.Current;
@@ -61,38 +129,61 @@ namespace ChaoticCEO
             }
         }
 
-        public static bool Skip(TimeSkipPick? pick)
+        public static bool Stop()
         {
-            if (pick == null || !pick.Advanced || pick.Span.Length == 0)
-            {
-                return false;
-            }
-
-            try
-            {
-                // FastForward before SkipTime — the (span, useConstantSpeed) overload stalled soak.
-                BoostForSkip();
-                TimeMachine.SkipTime(pick.Span);
-                return true;
-            }
-            catch (System.Exception)
-            {
-                return false;
-            }
+            Gate.Stop();
+            return Cancel();
         }
 
-        public static bool CancelRunning()
+        private static float Start()
         {
             try
             {
-                var machine = Object.FindObjectOfType<TimeMachine>();
-                if (machine == null || !machine.isRunning)
+                var machine = Machine();
+                if (machine == null)
                 {
-                    return false;
+                    return 0f;
                 }
 
-                machine.CancelTimeMachine();
-                return true;
+                var rate = TimeAdvance.SleepRate(Sample(machine.timeSpeedCurve));
+                TimeMachine.SkipTime(TimeAdvance.SoakSpan, TimeAdvance.ConstantSkip);
+                if (!machine.isRunning)
+                {
+                    return 0f;
+                }
+
+                // Constant speed is _timeDistance minutes per second. Pin it to sleep's speed.
+                DistanceField?.SetValue(machine, rate);
+                return rate;
+            }
+            catch (System.Exception)
+            {
+                return 0f;
+            }
+        }
+
+        private static float[] Sample(AnimationCurve? curve)
+        {
+            if (curve == null || curve.length == 0)
+            {
+                return System.Array.Empty<float>();
+            }
+
+            var samples = new float[CurveSamples + 1];
+            for (var i = 0; i <= CurveSamples; i++)
+            {
+                samples[i] = curve.Evaluate(i / (float)CurveSamples);
+            }
+
+            return samples;
+        }
+
+        private static bool Running()
+        {
+            try
+            {
+                var machine = Machine();
+                return machine != null && machine.isRunning;
             }
             catch (System.Exception)
             {
@@ -100,27 +191,87 @@ namespace ChaoticCEO
             }
         }
 
-        public static bool BoostForSkip()
+        private static bool Cancel()
+        {
+            var cancelled = false;
+            try
+            {
+                var machine = Machine();
+                if (machine != null && machine.isRunning)
+                {
+                    machine.CancelTimeMachine();
+                    cancelled = true;
+                }
+            }
+            catch (System.Exception)
+            {
+            }
+
+            ReleaseClock();
+            return cancelled;
+        }
+
+        private static bool SceneReady(object? current)
+        {
+            if (current == null)
+            {
+                return false;
+            }
+
+            try
+            {
+                var screenUp = InstanceBehavior<UI.Load.LoadingScreen>.Instance != null;
+                return TimeAdvance.CityReady(UI.Load.LoadScene.isLoading, screenUp);
+            }
+            catch (System.Exception)
+            {
+                return false;
+            }
+        }
+
+        private static TimeMachine? Machine()
+        {
+            if (_machine == null)
+            {
+                var uis = InstanceBehavior<UI.UIs>.Instance;
+                _machine = uis == null ? null : uis.timeMachine;
+            }
+
+            return _machine;
+        }
+
+        private static GameSpeedController? Clock()
+        {
+            if (_clock == null)
+            {
+                _clock = Object.FindObjectOfType<GameSpeedController>();
+            }
+
+            return _clock;
+        }
+
+        private static void ReleaseClock()
         {
             try
             {
-                var clock = Object.FindObjectOfType<GameSpeedController>();
+                var clock = Clock();
                 if (clock == null)
                 {
-                    return false;
+                    return;
                 }
 
+                clock.isFastForwarding = false;
+                clock.isTimeControlDisabled = false;
+                clock.DisableTimeControl(false);
                 if (clock.Paused)
                 {
                     clock.SetPlayerPause(false, false);
                 }
 
-                clock.Set(new GameSpeed(false, TimeSpeed.FastForward, false));
-                return !clock.Paused;
+                clock.Set(new GameSpeed(false, TimeSpeed.Normal, false));
             }
             catch (System.Exception)
             {
-                return false;
             }
         }
 

@@ -3,6 +3,7 @@ using System.IO;
 using System.Threading.Tasks;
 using BAModAPI;
 using BAModAPI.Services;
+using UnityEngine;
 using UnityEngine.InputSystem;
 
 [assembly: RegisterModClass(typeof(ChaoticCEO.ChaoticCeoMod))]
@@ -43,10 +44,11 @@ namespace ChaoticCEO
             _localAppData = localAppData;
             Controls.OnResumeSkip = () =>
             {
+                TimeAdvanceBridge.Resume(_localAppData);
+                Autopilot.Enabled = true;
                 _time.ClearWait();
-                TimeAdvanceBridge.CancelRunning();
-                TimeAdvanceBridge.BoostForSkip();
             };
+            Controls.MeasureBoost = () => false;
             if (!_hooked)
             {
                 UnityLifecycleProvider.OnUpdate += OnFrame;
@@ -59,6 +61,7 @@ namespace ChaoticCEO
         public Task OnUnloadAsync()
         {
             Controls.OnResumeSkip = null;
+            Controls.MeasureBoost = null;
             if (_hooked)
             {
                 UnityLifecycleProvider.OnUpdate -= OnFrame;
@@ -88,6 +91,7 @@ namespace ChaoticCEO
             }
 
             StopOnHotkey();
+            ResumeOnHotkey();
             LiveDump.HoldNeeds(_needs, _localAppData);
             LiveDump.TryRent(_rents, _localAppData);
             LiveDump.TryLayout(_layouts, _localAppData);
@@ -107,7 +111,7 @@ namespace ChaoticCEO
                 LiveDump.ConnectStores(_stores, _localAppData);
                 LiveDump.AssignPlans(_plans, _localAppData);
                 LiveDump.RestockWarehouses(_restock, _localAppData);
-                // Fit-out once per day roll — never per frame (scene scans stalled SkipTime).
+                // Fit-out once per day roll — never per frame (scene scans stall the clock).
                 LiveDump.TryFitOut(_localAppData);
                 if (Autopilot.Enabled)
                 {
@@ -127,6 +131,32 @@ namespace ChaoticCEO
             LiveDump.Dump(_localAppData);
         }
 
+        private void ResumeOnHotkey()
+        {
+            var keyboard = Keyboard.current;
+            var pressed = keyboard != null && keyboard.f6Key.wasPressedThisFrame;
+            if (!pressed && !Input.GetKeyDown(KeyCode.F6))
+            {
+                return;
+            }
+
+            var on = TimeAdvanceBridge.Toggle(_localAppData);
+            if (on)
+            {
+                Autopilot.Enabled = true;
+            }
+            else
+            {
+                Controls.Pause();
+                _time.ClearWait();
+            }
+
+            File.AppendAllText(
+                LoadLog.CeoLogPath(_localAppData),
+                "controls.pressed version=" + LoadLog.Version
+                    + " action=toggle-skip key=f6 on=" + (on ? "true" : "false") + Environment.NewLine);
+        }
+
         private void StopOnHotkey()
         {
             var keyboard = Keyboard.current;
@@ -136,6 +166,15 @@ namespace ChaoticCEO
             }
 
             Controls.Pause();
+            if (TimeAdvanceBridge.DesiredOn)
+            {
+                TimeAdvanceBridge.Toggle(_localAppData, "f10");
+            }
+            else
+            {
+                TimeAdvanceBridge.Stop();
+            }
+
             File.AppendAllText(
                 LoadLog.CeoLogPath(_localAppData),
                 "autopilot.paused version=" + LoadLog.Version + " reason=f10" + Environment.NewLine);

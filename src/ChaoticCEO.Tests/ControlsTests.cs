@@ -84,8 +84,30 @@ public class ControlsTests
         finally
         {
             Controls.OnResumeSkip = null;
+            Controls.MeasureBoost = null;
             Autopilot.Enabled = true;
             Autopilot.DryRun = false;
+        }
+    }
+
+    [Fact]
+    public void Controls_ResumeSkip_records_a_failed_boost()
+    {
+        // Harvest: time.resumed boost=true was the constant, while the bar stayed Speed 1.
+        Autopilot.Enabled = false;
+        Controls.MeasureBoost = () => false;
+        try
+        {
+            using var dir = new ControlsTempDir();
+            Assert.True(Controls.ResumeSkip(dir.Path));
+            var text = File.ReadAllText(LoadLog.CeoLogPath(dir.Path));
+            Assert.Contains("time.resumed version=" + LoadLog.Version + " boost=false", text);
+            Assert.DoesNotContain("boost=true", text);
+        }
+        finally
+        {
+            Controls.MeasureBoost = null;
+            Autopilot.Enabled = true;
         }
     }
 

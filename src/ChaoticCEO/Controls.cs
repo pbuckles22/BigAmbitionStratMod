@@ -36,6 +36,8 @@ namespace ChaoticCEO
 
         public static Action? OnResumeSkip;
 
+        public static Func<bool>? MeasureBoost;
+
         private static string _seen = "";
 
         public static IReadOnlyList<ExecuteButton> Execute(IReadOnlyList<PanelLine>? lines)
@@ -103,8 +105,9 @@ namespace ChaoticCEO
         {
             Autopilot.Enabled = true;
             OnResumeSkip?.Invoke();
+            var boosted = MeasureBoost == null ? TimeAdvance.SoakBoostsGameSpeed : MeasureBoost();
             var line = "time.resumed version=" + LoadLog.Version
-                + " boost=" + (TimeAdvance.SoakBoostsGameSpeed ? "true" : "false");
+                + " boost=" + (boosted ? "true" : "false");
             Append(localAppData ?? "", line);
             Append(localAppData ?? "", Pressed("action=resume-skip"));
             return true;

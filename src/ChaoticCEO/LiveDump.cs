@@ -401,7 +401,7 @@ namespace ChaoticCEO
                 TimeAdvanceBridge.Read(),
                 HudLine(),
                 Health.Latest(localAppData),
-                timeBridge: TimeAdvanceBridge.Skip,
+                timeBridge: TimeAdvanceBridge.Defer,
                 actionBridge: (step, call) => ExecutePlaybook(localAppData, step, call));
             return day.Loop;
         }
@@ -1281,26 +1281,19 @@ namespace ChaoticCEO
             }
 
             var current = SaveGameManager.Current;
-            // Keep Skipping even after WeekDays / a stale Finished mark so soak stays on SkipTime, not game speed.
+            // Keep the watch due after WeekDays. The clock is activity speed, and it stays on across days.
             if (current == null || !TimeAdvance.KeepSkipping(watch, current))
             {
                 return null;
             }
 
-            if (!HasLoan(localAppData))
+            // A loaded save is a new object. A wait aimed at the previous save's next day must not block start.
+            if (watch.Bind(current))
             {
-                return null;
+                _loanScanned = false;
             }
 
-            if (watch.Waiting(current.Day))
-            {
-                return null;
-            }
-
-            if (watch.Arrive(current.Day))
-            {
-                return "";
-            }
+            watch.Arrive(current.Day);
 
             var needs = TimeAdvanceBridge.Read();
             if (TimeAdvance.BelowFloor(needs))
@@ -1314,39 +1307,52 @@ namespace ChaoticCEO
                 return TimeAdvance.RecordCare(localAppData, care, current.Day);
             }
 
-            if (!Autopilot.Enabled)
+            var allowed = Autopilot.Enabled && ReadyToSkip(localAppData, current.Day);
+            var action = TimeAdvanceBridge.Sync(localAppData, allowed, "frame");
+            if ((action == "start" || TimeAdvanceBridge.Skipping()) && !watch.Waiting(current.Day))
             {
-                return null;
+                watch.WaitFor(current.Day + 1);
             }
 
-            var advanced = TimeAdvance.Skip(needs, alreadyAdvanced: false, GameApi.Live());
-            if (!advanced.Advanced || !TimeAdvanceBridge.Skip(advanced))
-            {
-                return null;
-            }
+            return action == "hold" ? null : action;
+        }
 
-            watch.WaitFor(current.Day + 1);
-            return TimeAdvance.RecordSkip(localAppData, advanced, current.Day);
+        private static bool _loanScanned;
+        private static bool _loanLogged;
+
+        private static bool ReadyToSkip(string localAppData, int day)
+        {
+            _ = localAppData;
+            return TimeAdvance.ReadyToSkip(saveHasLoan: false, logRecorded: false, day);
         }
 
         private static bool HasLoan(string localAppData)
         {
+            if (BankLoanBridge.HasLoan())
+            {
+                return true;
+            }
+
+            if (_loanScanned)
+            {
+                return _loanLogged;
+            }
+
+            _loanScanned = true;
             var path = LoadLog.CeoLogPath(localAppData);
-            var logRecorded = false;
             if (File.Exists(path))
             {
                 foreach (var line in File.ReadAllLines(path))
                 {
                     if (line.StartsWith("loan.taken ", System.StringComparison.Ordinal))
                     {
-                        logRecorded = true;
+                        _loanLogged = true;
                         break;
                     }
                 }
             }
 
-            // Save already borrowed: session log may lack loan.taken after StartSession wipe.
-            return BankLoan.SoakUnlocked(BankLoanBridge.HasLoan(), logRecorded);
+            return _loanLogged;
         }
 
         private static bool LastContract(string localAppData, out string street, out int number, out bool skipped)
