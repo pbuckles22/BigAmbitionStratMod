@@ -77,9 +77,9 @@ public class ShelfGoodsTests
     }
 
     [Fact]
-    public void Cover_22_7th_day_42_paper_bags_keep_the_full_line()
+    public void Cover_22_7th_day_42_paper_bags_cut_to_the_register()
     {
-        // Harvest: 1.17.2.1 clipped this register to need=23. The line stays target minus on hand.
+        // Harvest: day 42 on hand 177 against a 200 register. The line is the 23 that still fit.
         var fixtures = new[]
         {
             new ShelfFixture("ba:itemname_cashregister", PaperBag, 0),
@@ -105,14 +105,14 @@ public class ShelfGoodsTests
         Assert.Equal(0, Wholesaler.FixtureCapacity(Umbrella, fixtures));
         Assert.Equal(0, Wholesaler.FixtureCapacity(CheapGift, fixtures));
         Assert.Equal(372, plan.Target);
-        Assert.Equal(195, plan.Need);
-        Assert.Equal(200, plan.FixtureCap);
+        Assert.Equal(23, plan.Need);
+        Assert.Equal(23, plan.FixtureCap);
     }
 
     [Fact]
-    public void Cover_22_7th_day_56_cheap_gifts_keep_the_deficit_above_a_full_shelf()
+    public void Cover_22_7th_day_56_cheap_gifts_over_the_shelf_order_nothing()
     {
-        // Harvest: 1.17.2.1 day 56 ordered need=10 with onHand=184, target=344, cap=100.
+        // Harvest: day 56 on hand 184 already past a 100 shelf. The line is 0.
         var plan = Wholesaler.Cover(
             CheapGift,
             currentDay: 56,
@@ -127,7 +127,8 @@ public class ShelfGoodsTests
             stands: Wholesaler.RetailStands(CheapGift));
 
         Assert.Equal(344, plan.Target);
-        Assert.Equal(160, plan.Need);
+        Assert.Equal(0, plan.Need);
+        Assert.Equal(0, plan.FixtureCap);
     }
 
     [Fact]
@@ -150,7 +151,7 @@ public class ShelfGoodsTests
     }
 
     [Fact]
-    public void Chain_open_type_catalog_line_ignores_a_smaller_shelf()
+    public void Chain_open_type_catalog_line_cuts_to_the_shelf()
     {
         // Chain: open type → catalog → line
         var open = Open.Decide(
@@ -182,7 +183,7 @@ public class ShelfGoodsTests
         Assert.Equal(PaperBag, item);
         Assert.Equal(80, cap);
         Assert.Equal(80, plan.FixtureCap);
-        Assert.Equal(300, plan.Need);
+        Assert.Equal(80, plan.Need);
     }
 
     [Fact]
@@ -233,14 +234,132 @@ public class ShelfGoodsTests
         Assert.Equal(Florist, open.Type);
         Assert.Equal("ba:itemname_expensiveflower", item);
         Assert.Equal(40, cap);
-        Assert.Equal(250, plan.Need);
+        Assert.Equal(40, plan.Need);
         Assert.NotNull(gap);
         Assert.Equal("short", gap.Reason);
         Assert.Equal(plan.Need, gap.Target);
         Assert.Equal(
             "contract.short version=" + LoadLog.Version
                 + " day=2 street=ba:street_seventhavenue number=22 item=" + item
-                + " amount=12 line=250",
+                + " amount=12 line=40",
             line);
+    }
+
+    [Fact]
+    public void Cover_cuts_the_line_to_free_space()
+    {
+        var days = new[]
+        {
+            new CoverSale(3, 16, open: true),
+            new CoverSale(4, 20, open: true),
+        };
+
+        var open = Wholesaler.Cover(
+            Umbrella,
+            currentDay: 5,
+            nextDeliveryDay: 7,
+            days,
+            onHand: 10,
+            fixtureCap: 30);
+        var over = Wholesaler.Cover(
+            Umbrella,
+            currentDay: 5,
+            nextDeliveryDay: 7,
+            days,
+            onHand: 40,
+            fixtureCap: 30);
+
+        Assert.Equal(20, open.Need);
+        Assert.Equal(20, open.FixtureCap);
+        Assert.Equal(0, over.Need);
+        Assert.Equal(0, over.FixtureCap);
+    }
+
+    [Fact]
+    public void Chain_on_hand_free_space_line_cuts_the_order()
+    {
+        // Chain: on hand → free space → line
+        var days = new[]
+        {
+            new CoverSale(3, 16, open: true),
+            new CoverSale(4, 20, open: true),
+        };
+        var onHand = 0;
+        var capacity = Wholesaler.FixtureCapacity(
+            Umbrella,
+            new[] { new ShelfFixture("ba:itemname_productpanel", Umbrella, 22) });
+        var space = Wholesaler.FreeSpace(onHand, capacity);
+        var plan = Wholesaler.Cover(
+            Umbrella,
+            currentDay: 5,
+            nextDeliveryDay: 7,
+            days,
+            onHand,
+            capacity);
+
+        Assert.Equal(22, capacity);
+        Assert.Equal(22, space);
+        Assert.Equal(space, plan.Need);
+        Assert.Equal(space, plan.FixtureCap);
+    }
+
+    [Fact]
+    public void Cover_keeps_a_line_that_fits_and_a_space_under_the_minimum()
+    {
+        var days = new[]
+        {
+            new CoverSale(3, 16, open: true),
+            new CoverSale(4, 20, open: true),
+        };
+
+        var fits = Wholesaler.Cover(
+            Umbrella,
+            currentDay: 5,
+            nextDeliveryDay: 7,
+            days,
+            onHand: 20,
+            fixtureCap: 150);
+        var shortSpace = Wholesaler.Cover(
+            Umbrella,
+            currentDay: 5,
+            nextDeliveryDay: 7,
+            days,
+            onHand: 0,
+            fixtureCap: 4);
+
+        Assert.Equal(16, fits.Need);
+        Assert.Equal(130, fits.FixtureCap);
+        Assert.Equal(4, shortSpace.Need);
+        Assert.Equal(4, shortSpace.FixtureCap);
+    }
+
+    [Fact]
+    public void Chain_day_1519_paper_over_the_register_is_not_offered()
+    {
+        // Chain: on hand → register → free space → line
+        var onHand = 265;
+        var capacity = Wholesaler.FixtureCapacity(
+            PaperBag,
+            new[]
+            {
+                new ShelfFixture("ba:itemname_cashregister", PaperBag, Wholesaler.Hold("ba:itemname_cashregister", PaperBag)),
+                new ShelfFixture("ba:itemname_productpanel", PaperBag, Wholesaler.Hold("ba:itemname_productpanel", PaperBag)),
+            });
+        var space = Wholesaler.FreeSpace(onHand, capacity);
+        var plan = Wholesaler.Cover(
+            PaperBag,
+            currentDay: 1519,
+            nextDeliveryDay: 1520,
+            days: null,
+            onHand: onHand,
+            fixtureCap: capacity,
+            stands: Wholesaler.RetailStands(PaperBag));
+        var gap = Wholesaler.ShortLine("ba:street_seventhavenue 22", PaperBag, contractAmount: 10, plan.Need);
+
+        Assert.Equal(Wholesaler.RegisterCap, capacity);
+        Assert.Equal(0, space);
+        Assert.Equal(space, plan.Need);
+        Assert.Equal(space, plan.FixtureCap);
+        Assert.Null(gap);
     }
 }

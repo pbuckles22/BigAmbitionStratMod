@@ -149,6 +149,40 @@ namespace ChaoticCEO
             return registers * RegisterCap;
         }
 
+        public static int Hold(string? fixture, string? item)
+        {
+            if (string.IsNullOrEmpty(item))
+            {
+                return 0;
+            }
+
+            var register = !string.IsNullOrEmpty(fixture)
+                && fixture.IndexOf("cashregister", StringComparison.OrdinalIgnoreCase) >= 0;
+            if (item == PaperBag)
+            {
+                return register ? RegisterCap : 0;
+            }
+
+            if (register)
+            {
+                return 0;
+            }
+
+            return StandCap;
+        }
+
+        public static int FreeSpace(int onHand, int fixtureCap)
+        {
+            if (fixtureCap <= 0)
+            {
+                return 0;
+            }
+
+            var stock = onHand < 0 ? 0 : onHand;
+            var room = fixtureCap - stock;
+            return room > 0 ? room : 0;
+        }
+
         public static CoverPlan Cover(
             string? item,
             int currentDay,
@@ -278,7 +312,10 @@ namespace ChaoticCEO
             var floor = name == PaperBag ? RegisterFloor(stands) : StandFloor(stands);
             var target = floor + salesTarget;
             var raw = target - stock;
-            var need = raw < MinLineAmount ? MinLineAmount : raw;
+            var line = raw < MinLineAmount ? MinLineAmount : raw;
+            // An unread fixture (cap 0) does not cut. A known fixture cuts to the units it can still hold.
+            var room = fixtureCap > 0 ? FreeSpace(stock, fixtureCap) : line;
+            var need = line > room ? room : line;
 
             return new CoverPlan(
                 name,
@@ -294,7 +331,7 @@ namespace ChaoticCEO
                 need,
                 stock,
                 target,
-                fixtureCap);
+                fixtureCap > 0 ? room : 0);
         }
 
         private static int CeilUnits(decimal value)

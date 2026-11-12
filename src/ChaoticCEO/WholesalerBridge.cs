@@ -103,6 +103,7 @@ namespace ChaoticCEO
             }
 
             var changed = 0;
+            var cash = Cash();
             foreach (var contract in current.DeliveryContracts)
             {
                 if (contract == null || contract.businessAddress == null || !contract.enabled)
@@ -114,7 +115,7 @@ namespace ChaoticCEO
                     current,
                     contract.businessAddress.streetName,
                     contract.businessAddress.streetNumber);
-                var touched = ApplyCover(localAppData, day, contract, building);
+                var touched = ApplyCover(localAppData, day, contract, building, cash);
 
                 if (touched)
                 {
@@ -134,7 +135,8 @@ namespace ChaoticCEO
             string? localAppData,
             int day,
             DeliveryContract contract,
-            BuildingRegistration? building)
+            BuildingRegistration? building,
+            decimal cash)
         {
             if (contract.items == null || contract.businessAddress == null)
             {
@@ -142,6 +144,7 @@ namespace ChaoticCEO
             }
 
             var touched = false;
+            var full = false;
             CoverPlan? replacement = null;
             var shelves = Shelves(building);
             foreach (var item in contract.items)
@@ -193,10 +196,20 @@ namespace ChaoticCEO
                     touched = true;
                 }
 
+                if (plan.Need == 0 && plan.OnHand > 0)
+                {
+                    full = true;
+                }
+
                 if (plan.Replace)
                 {
                     replacement = plan;
                 }
+            }
+
+            if (full && OrderShelf(localAppData, day, contract, cash))
+            {
+                touched = true;
             }
 
             if (replacement != null && contract.nextDeliveryDay != replacement.NextDay)
@@ -208,6 +221,99 @@ namespace ChaoticCEO
             }
 
             return touched;
+        }
+
+        private static bool OrderShelf(string? localAppData, int day, DeliveryContract contract, decimal cash)
+        {
+            var current = SaveGameManager.Current;
+            if (current == null || contract.businessAddress == null)
+            {
+                return false;
+            }
+
+            var street = contract.businessAddress.streetName;
+            var number = contract.businessAddress.streetNumber;
+            var pick = StorageShelf.Order(
+                street,
+                number,
+                freeSpace: 0,
+                cash,
+                ShelfPending(current, street, number),
+                GameApi.Live());
+            if (!pick.Ordered)
+            {
+                return false;
+            }
+
+            if (current.FurnitureDeliveryContracts == null)
+            {
+                current.FurnitureDeliveryContracts = new List<FurnitureDeliveryContract>();
+            }
+
+            var row = new FurnitureDeliveryItem
+            {
+                itemName = pick.Item,
+                amount = pick.Amount,
+                pricePerUnit = pick.Price,
+            };
+            current.FurnitureDeliveryContracts.Add(new FurnitureDeliveryContract
+            {
+                fromAddress = new Address(pick.FromStreet, pick.FromNumber),
+                toAddress = new Address(pick.Street, pick.Number),
+                itemsToDeliver = new List<FurnitureDeliveryItem> { row },
+                dayOfDelivery = day + 1,
+                hourOfDelivery = 8,
+                deliveryFee = 0f,
+            });
+            SaveGameManager.MarkChange();
+            if (!string.IsNullOrEmpty(localAppData))
+            {
+                StorageShelf.Record(localAppData, pick, day);
+            }
+
+            return true;
+        }
+
+        private static bool ShelfPending(GameInstance current, string street, int number)
+        {
+            if (current.FurnitureDeliveryContracts == null)
+            {
+                return false;
+            }
+
+            foreach (var contract in current.FurnitureDeliveryContracts)
+            {
+                if (contract?.toAddress == null
+                    || contract.toAddress.streetName != street
+                    || contract.toAddress.streetNumber != number
+                    || contract.itemsToDeliver == null)
+                {
+                    continue;
+                }
+
+                foreach (var item in contract.itemsToDeliver)
+                {
+                    if (item != null && item.itemName == StorageShelf.Item)
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
+
+        private static decimal Cash()
+        {
+            try
+            {
+                var wealth = Helpers.PlayerHelper.GetPersonalWealth();
+                return System.Convert.ToDecimal(wealth.cash, CultureInfo.InvariantCulture);
+            }
+            catch (System.Exception)
+            {
+                return 0m;
+            }
         }
 
         private static BuildingRegistration? BuildingFor(GameInstance current, string street, int number)
@@ -258,7 +364,7 @@ namespace ChaoticCEO
                     continue;
                 }
 
-                rows.Add(new ShelfFixture(placed.itemName, sold, 0));
+                rows.Add(new ShelfFixture(placed.itemName, sold, Wholesaler.Hold(placed.itemName, sold)));
             }
 
             return rows;

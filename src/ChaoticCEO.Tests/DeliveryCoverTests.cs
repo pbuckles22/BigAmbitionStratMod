@@ -376,13 +376,13 @@ public class DeliveryCoverTests
         var step = Playbook.Decide(null, null, null, null, supply, null, null, null, null, null, null, null);
 
         Assert.Equal(280, plan.Target);
-        Assert.Equal(249, plan.Need);
+        Assert.Equal(219, plan.Need);
         Assert.Equal(7, plan.NextDay);
         Assert.Contains("sold=40|40", line);
         Assert.Contains("gap=6", line);
         Assert.Contains("window=2", line);
         Assert.Contains("onHand=31", line);
-        Assert.Contains("need=249", line);
+        Assert.Contains("need=219", line);
         Assert.Contains("replace=true", line);
         Assert.Contains("next=7", line);
         Assert.DoesNotContain("need=10", line);
@@ -426,7 +426,7 @@ public class DeliveryCoverTests
     }
 
     [Fact]
-    public void Cover_keeps_the_full_line_when_the_shelf_is_smaller()
+    public void Cover_cuts_to_the_shelf_when_the_line_is_larger()
     {
         var plan = Wholesaler.Cover(
             Umbrella,
@@ -441,7 +441,8 @@ public class DeliveryCoverTests
             fixtureCap: 30);
 
         Assert.Equal(36, plan.Target);
-        Assert.Equal(26, plan.Need);
+        Assert.Equal(20, plan.Need);
+        Assert.Equal(20, plan.FixtureCap);
     }
 
     [Fact]

@@ -807,4 +807,18 @@ Human check. This slice is the order on the gift shop at 22 7th Avenue. It does 
 
 Human PASS 2026-11-11 on 1.17.2.2 at 22 7th Avenue. Days 106–111: `mod.loaded version=1.17.2.2`, and every cover with on-hand below the target had `need` equal to `target` minus `onHand`. Morning fills stayed at or above half the last shelf reading. A mid-day yellow on one fixture is not in the log.
 
+## Story 14.15 — Fixture space, then one storage shelf
+
+Tier 1: `Cover_cuts_the_line_to_free_space` and `Cover_keeps_a_line_that_fits_and_a_space_under_the_minimum`. Chain: `on hand → free space → line` and `on hand → register → free space → line`. A known fixture cuts `need` to the units it can still hold. `cap` on `contract.cover` is that free space. Stock already over the fixture is `need=0`, so a full shelf is not offered a delivery. A paper bag’s space is one cash register (200). A goods shelf is 100. A line that fits is left as it is. A free space under 10 stays that space. An unread fixture, capacity 0, does not cut the line. A full fixture orders one storage shelf (`ba:itemname_storageshelf`, 16 boxes, $1,200) from Hampton Supplies at 13 7th Avenue. A second order waits while that delivery is still open. Cash under $1,200 orders nothing.
+
+Human check. The gift shop at 22 7th Avenue, one morning. The shelf arrives as a furniture delivery. Place it in the store when it shows up. This does not hire the cleaner again.
+
+1. Restart Big Ambitions so this build loads. Continue the same save at 22 7th Avenue. Let one morning pass.
+2. Open `%LocalAppData%\ChaoticCEO\ceo.log`. Find `mod.loaded` and `shelf.ordered`.
+3. **PASS if** `mod.loaded version=1.17.5` and one `shelf.ordered` line names `item=ba:itemname_storageshelf`, `amount=1`, `price=1200`, `number=22`, and `fromNumber=13`. **FAIL if** the version is still 1.17.4, or that morning has no `shelf.ordered` line.
+4. Evidence: `shelf.ordered`. Day 1520 covers were `need=0` `cap=0` for every gift item. The day-1495 wholesaler notes are the boxes that did not fit.
+5. Version marker: public `1.17.5`.
+
+Human PASS 2026-11-12 on 1.17.5 at 22 7th Avenue. `mod.loaded version=1.17.5 build=3682`. `shelf.ordered` day 1519 and day 1521, `amount=1` `price=1200` `fromNumber=13`. Day 1520 did not order while that delivery was open. Day 1521 paper `onHand=192` `need=8` `cap=8`. Gifts stayed `need=0` `cap=0`. `ready=true`, 73 customers, revenue 2230, profit 1546.88. The shelf was bought and not placed.
+
 **Long run:** A batch or soak is not Tier 1. When it trips a gate, extract that decision and add a named Tier 1 test before the next long run. See `.cursor/rules/testing.mdc`.

@@ -98,6 +98,7 @@ namespace ChaoticCEO
                 ["marketing stop"] = "UI.Smartphone.Apps.BizMan.BizManMarketing.CancelAllCampaignsFromAgency",
                 ["rival takeover decline"] = "UI.Smartphone.Apps.BizMan.RealEstateSettings.CancelForSale",
                 ["capacity fixtures"] = "Helpers.BusinessHelper.UpdateCustomerCapacity",
+                ["storage shelf"] = "Entities.FurnitureDeliveryContract",
             };
             return new ApiNote(
                 LoadLog.PinnedBuild,
