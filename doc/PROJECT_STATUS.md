@@ -17,7 +17,7 @@
 | Branch | Role |
 |--------|------|
 | **`main`** | Integration branch. Version 1.17.2.7. Cashier replace. Human PASS 2026-11-12. Story 14.3 goods list stays. |
-| **`fix/empty-register`** | Empty register hire. Version 1.17.2.7. Human PASS 2026-11-12. Kept after CMPH. |
+| **`fix/empty-register`** | Empty register hire. Version 1.17.2.7. Human PASS 2026-11-12. Land `2f81e7e`. Kept after CMPH. |
 | **`feature/14.4-cash-stage`** | Sleep skip. Version 1.17.2.6. Human PASS 2026-11-12. Kept after CMPH. Not story 14.4. |
 | **`feature/14.3-shelf-goods`** | Story 14.3 goods list. Version 1.17.2.2. Human PASS 2026-11-11. Kept after CMPH. |
 | **`feature/14.2-delivery-cover`** | Story 14.2 delivery cover. Version 1.17.1. Human PASS 2026-11-10. Lands with the 14.3 CMPH. |
