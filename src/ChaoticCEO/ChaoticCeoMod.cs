@@ -99,6 +99,7 @@ namespace ChaoticCEO
             LiveDump.TryCapacity(_capacity, _localAppData);
             LiveDump.TryWholesaler(_contracts, _localAppData);
             LiveDump.TryCashier(_cashiers, _localAppData);
+            LiveDump.TryRestaff(_cashiers, _localAppData);
             LiveDump.TryLoan(_loans, _localAppData);
             LiveDump.TryDemand(_demands, _localAppData);
             LiveDump.TryTax(_taxes, _localAppData);

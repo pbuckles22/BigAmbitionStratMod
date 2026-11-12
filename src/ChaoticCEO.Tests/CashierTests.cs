@@ -104,4 +104,91 @@ public class CashierTests
         Assert.False(noCall.Hired);
         Assert.Equal(Cashier.Skill, "ba:skill_customerservice");
     }
+
+    [Fact]
+    public void Cashier_a_retired_register_is_not_called_a_quit()
+    {
+        Assert.Equal("retired", CashierCover.Reason(resigned: true, retired: true, poached: true));
+        Assert.Equal("retired", CashierCover.Reason(resigned: false, retired: true, poached: false));
+        Assert.Equal("quit", CashierCover.Reason(resigned: true, retired: false, poached: false));
+        Assert.Equal("poached", CashierCover.Reason(resigned: false, retired: false, poached: true));
+        Assert.Equal("absent", CashierCover.Reason(resigned: false, retired: false, poached: false));
+        var absent = Cashier.Cover(
+            "ba:street_seventhavenue 22",
+            registerStaffed: false,
+            resigned: false,
+            retired: false,
+            poached: false,
+            GameApi.Live());
+        Assert.True(absent.Hire);
+        Assert.Equal("absent", absent.Reason);
+        Assert.Equal(22, absent.Pick.Number);
+    }
+
+    [Fact]
+    public void Cashier_load_day_roll_store_health_cover_audit_hires_an_empty_register()
+    {
+        // Chain: load → day roll → store health → cashier cover → audit hire
+        var facts = new StoreFacts(
+            "ba:street_seventhavenue 22",
+            temporarilyClosed: false,
+            neededItems: new[] { "ba:itemname_cheapgift" },
+            cargoOnHand: new Dictionary<string, int> { ["ba:itemname_cheapgift"] = 10 },
+            registerStaffed: false,
+            cleanerStaffed: true,
+            staffSatisfaction: 100f,
+            scheduledOpen: true,
+            dailyCustomers: 0,
+            dailyRevenue: 0m,
+            recentOpenDayProfits: new[] { 10m, 10m, 10m });
+        var health = StoreHealth.Assess(facts);
+        var api = GameApi.Live();
+        var gap = Cashier.Cover(
+            health.Place,
+            facts.RegisterStaffed,
+            resigned: false,
+            retired: true,
+            poached: false,
+            api);
+        var dir = Directory.CreateDirectory(Path.Combine(Path.GetTempPath(), "ceo-cashier-gap-" + Guid.NewGuid().ToString("N")));
+        try
+        {
+            var line = Cashier.Replaced(dir.FullName, gap.Pick, 1496, gap.Reason);
+            var staffed = facts.RegisterStaffed
+                ? new[] { health.Place }
+                : Array.Empty<string>();
+            var report = Audit.Check(
+                dir.FullName,
+                1496,
+                api,
+                new AuditWorld(
+                    null, null, null, null, null, null, null, true, null, null,
+                    new[] { health.Place },
+                    staffed),
+                new AuditGuard(true, false, 0m, 0m, 0, LoadLog.PinnedBuild),
+                _ => HealFate.Done);
+            var kept = Cashier.Cover(health.Place, registerStaffed: true, resigned: false, retired: true, poached: false, api);
+
+            Assert.False(facts.RegisterStaffed);
+            Assert.False(health.Staffed);
+            Assert.True(gap.Hire);
+            Assert.Equal("retired", gap.Reason);
+            Assert.True(gap.Pick.Hired);
+            Assert.Equal("ba:street_seventhavenue", gap.Pick.Street);
+            Assert.Equal(22, gap.Pick.Number);
+            Assert.Equal(api.Call("hire"), gap.Pick.Call);
+            Assert.Equal(api.Call("cashier"), gap.Pick.StationCall);
+            Assert.Contains("reason=retired", line);
+            var written = string.Join("\n", report.Lines);
+            Assert.Contains(
+                "audit.healed version=" + LoadLog.Version + " day=1496 action=hire store=" + health.Place,
+                written);
+            Assert.False(kept.Hire);
+            Assert.Equal("", kept.Reason);
+        }
+        finally
+        {
+            Directory.Delete(dir.FullName, true);
+        }
+    }
 }

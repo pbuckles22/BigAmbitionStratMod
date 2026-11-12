@@ -353,7 +353,13 @@ namespace ChaoticCEO
                 dailyCost: 0m,
                 truckCost: 0,
                 LoadLog.PinnedBuild);
-            Audit.Check(localAppData, current.Day, GameApi.Live(), world, guard, LiveHeal);
+            Audit.Check(
+                localAppData,
+                current.Day,
+                GameApi.Live(),
+                world,
+                guard,
+                heal => LiveHeal(localAppData, heal));
         }
 
         public static AutopilotDay RunAutopilot(string localAppData)
@@ -396,7 +402,7 @@ namespace ChaoticCEO
                 GameApi.Live(),
                 world,
                 guard,
-                LiveHeal,
+                heal => LiveHeal(localAppData, heal),
                 NextPlaybook(localAppData),
                 TimeAdvanceBridge.Read(),
                 HudLine(),
@@ -568,6 +574,7 @@ namespace ChaoticCEO
             var arranged = Restock.Arrange(holds, shelves);
             var demanded = Restock.WithBurn(arranged.Homes, plans, sales, ordered);
             var overflow = Restock.Overflow(demanded, null);
+            RegisterLists(current, out var stores, out var staffed);
             return new AuditWorld(
                 plans,
                 holds,
@@ -579,8 +586,52 @@ namespace ChaoticCEO
                 PricingPlan(current),
                 Seats(current),
                 Hired(current),
-                new string[0],
-                new string[0]);
+                stores,
+                staffed);
+        }
+
+        private static void RegisterLists(
+            GameInstance current,
+            out List<string> stores,
+            out List<string> staffed)
+        {
+            stores = new List<string>();
+            staffed = new List<string>();
+            if (current?.BuildingRegistrations == null)
+            {
+                return;
+            }
+
+            foreach (var building in current.BuildingRegistrations)
+            {
+                if (building == null
+                    || !building.RentedByPlayer
+                    || string.IsNullOrEmpty(building.StreetName)
+                    || building.StreetNumber <= 0
+                    || !GoodsStore(building)
+                    || !CashierBridge.HasRegister(building))
+                {
+                    continue;
+                }
+
+                var place = building.StreetName
+                    + " "
+                    + building.StreetNumber.ToString(CultureInfo.InvariantCulture);
+                stores.Add(place);
+                if (SenseStaff(building).RegisterStaffed)
+                {
+                    staffed.Add(place);
+                }
+            }
+        }
+
+        private static bool GoodsStore(BuildingRegistration building)
+        {
+            var family = StoreFamily.For(building.businessTypeName ?? "");
+            return family == "specialty"
+                || family == "food"
+                || family == "durables"
+                || family == "service";
         }
 
         public static string? TryRent(RentWatch watch, string localAppData)
@@ -1837,14 +1888,140 @@ namespace ChaoticCEO
             }
         }
 
-        private static HealFate LiveHeal(AuditHeal heal)
+        private static HealFate LiveHeal(string localAppData, AuditHeal heal)
         {
-            if (heal == null || heal.Kind != "connect")
+            if (heal == null)
+            {
+                return HealFate.Skip;
+            }
+
+            if (heal.Kind == "hire")
+            {
+                return ReplaceCashier(localAppData, heal) ? HealFate.Done : HealFate.Failed;
+            }
+
+            if (heal.Kind != "connect")
             {
                 return HealFate.Skip;
             }
 
             return AuditBridge.Live(heal) ? HealFate.Done : HealFate.Failed;
+        }
+
+        private static bool ReplaceCashier(string localAppData, AuditHeal heal)
+        {
+            var current = SaveGameManager.Current;
+            if (current == null || !SplitPlace(heal.Store, out var street, out var number))
+            {
+                return false;
+            }
+
+            var registration = FindOwned(current, street, number);
+            if (registration == null)
+            {
+                return false;
+            }
+
+            if (SenseStaff(registration).RegisterStaffed)
+            {
+                return true;
+            }
+
+            CashierBridge.Departure(registration, out var resigned, out var retired, out var poached);
+            var gap = Cashier.Cover(heal.Store, registerStaffed: false, resigned, retired, poached, GameApi.Live());
+            if (!gap.Hire)
+            {
+                return false;
+            }
+
+            if (!CashierBridge.Fill(registration, gap.Pick, out var reason))
+            {
+                Cashier.Missed(localAppData, gap.Pick, current.Day, reason);
+                return false;
+            }
+
+            Cashier.Replaced(localAppData, gap.Pick, current.Day, gap.Reason);
+            return true;
+        }
+
+        public static string? TryRestaff(CashierWatch watch, string localAppData)
+        {
+            if (watch == null || string.IsNullOrEmpty(localAppData) || !InCity() || Autopilot.DryRun)
+            {
+                return null;
+            }
+
+            var manager = InstanceBehavior<BuildingManager>.Instance;
+            var registration = manager == null ? null : manager.buildingRegistration;
+            if (registration == null || !registration.RentedByPlayer || !GoodsStore(registration))
+            {
+                watch.ClearFill();
+                return null;
+            }
+
+            var place = (registration.StreetName ?? "")
+                + " "
+                + registration.StreetNumber.ToString(CultureInfo.InvariantCulture);
+            if (watch.Filled(place) || !watch.RestaffAgain(place))
+            {
+                return null;
+            }
+
+            if (CashierBridge.HasCashier(registration))
+            {
+                watch.Fill(place);
+                return null;
+            }
+
+            var current = SaveGameManager.Current;
+            CashierBridge.Departure(registration, out var resigned, out var retired, out var poached);
+            var gap = Cashier.Cover(
+                place,
+                registerStaffed: false,
+                resigned,
+                retired,
+                poached,
+                GameApi.Live());
+            if (!gap.Hire || current == null)
+            {
+                return null;
+            }
+
+            if (!CashierBridge.Fill(registration, gap.Pick, out var reason))
+            {
+                if (Cashier.Retry(reason))
+                {
+                    watch.RestaffNote();
+                    return null;
+                }
+
+                watch.Fill(place);
+                return Cashier.Missed(localAppData, gap.Pick, current.Day, reason);
+            }
+
+            watch.Fill(place);
+            return Cashier.Replaced(localAppData, gap.Pick, current.Day, gap.Reason);
+        }
+
+        private static BuildingRegistration? FindOwned(GameInstance current, string street, int number)
+        {
+            if (current?.BuildingRegistrations == null)
+            {
+                return null;
+            }
+
+            foreach (var building in current.BuildingRegistrations)
+            {
+                if (building != null
+                    && building.RentedByPlayer
+                    && building.StreetName == street
+                    && building.StreetNumber == number)
+                {
+                    return building;
+                }
+            }
+
+            return null;
         }
 
         private static HashSet<string> OrderedWarehouses(GameInstance current, IReadOnlyList<WarehouseHold> holds)

@@ -418,6 +418,20 @@ public class StoreHealthTests
                 new[] { health }).Chosen);
     }
 
+    [Fact]
+    public void StoreHealth_a_selling_day_with_an_unseen_register_stays_unstaffed()
+    {
+        // Harvest: day 1497 served 82 customers after cashier.replaced and g3 stayed false.
+        var health = StoreHealth.Assess(Facts(
+            registerStaffed: false,
+            cleanerStaffed: true,
+            customers: 82,
+            revenue: 2441m));
+        Assert.False(health.Staffed);
+        Assert.True(health.Selling);
+        Assert.Equal(82, health.Customers);
+    }
+
     private static StoreFacts Facts(
         bool temporarilyClosed = false,
         IReadOnlyDictionary<string, int>? cargo = null,

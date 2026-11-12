@@ -42,6 +42,45 @@ namespace ChaoticCEO
         public string StationCall { get; }
     }
 
+    public sealed class CashierGap
+    {
+        public CashierGap(bool hire, string reason, CashierPick pick)
+        {
+            Hire = hire;
+            Reason = reason ?? "";
+            Pick = pick;
+        }
+
+        public bool Hire { get; }
+
+        public string Reason { get; }
+
+        public CashierPick Pick { get; }
+    }
+
+    public static class CashierCover
+    {
+        public static string Reason(bool resigned, bool retired, bool poached)
+        {
+            if (retired)
+            {
+                return "retired";
+            }
+
+            if (resigned)
+            {
+                return "quit";
+            }
+
+            if (poached)
+            {
+                return "poached";
+            }
+
+            return "absent";
+        }
+    }
+
     public static class Cashier
     {
         public const string Skill = "ba:skill_customerservice";
@@ -112,6 +151,66 @@ namespace ChaoticCEO
                 stationCall);
         }
 
+        public static CashierGap Cover(
+            string? place,
+            bool registerStaffed,
+            bool resigned,
+            bool retired,
+            bool poached,
+            ApiNote? api)
+        {
+            var reason = CashierCover.Reason(resigned, retired, poached);
+            var call = api == null ? "" : api.Call("hire");
+            var stationCall = api == null ? "" : api.Call("cashier");
+            if (registerStaffed
+                || !Split(place, out var street, out var number)
+                || call.Length == 0
+                || stationCall.Length == 0)
+            {
+                return new CashierGap(false, "", None());
+            }
+
+            return new CashierGap(
+                true,
+                reason,
+                new CashierPick(true, RoleName, Skill, GiftType, street, number, call, stationCall));
+        }
+
+        public static string Replaced(string localAppData, CashierPick? pick, int day, string? reason)
+        {
+            if (pick == null || !pick.Hired)
+            {
+                return "";
+            }
+
+            var why = string.IsNullOrEmpty(reason) ? "absent" : reason;
+            var line = "cashier.replaced version=" + LoadLog.Version
+                + " day=" + day.ToString(CultureInfo.InvariantCulture)
+                + " street=" + pick.Street
+                + " number=" + pick.Number.ToString(CultureInfo.InvariantCulture)
+                + " reason=" + why
+                + " role=" + pick.Role
+                + " skill=" + pick.Skill
+                + " call=" + pick.Call
+                + " stationCall=" + pick.StationCall;
+            return AppendOnce(localAppData, line);
+        }
+
+        public static string Missed(string localAppData, CashierPick? pick, int day, string? reason)
+        {
+            if (pick == null || pick.Street.Length == 0 || pick.Number <= 0)
+            {
+                return "";
+            }
+
+            var line = "cashier.missed version=" + LoadLog.Version
+                + " day=" + day.ToString(CultureInfo.InvariantCulture)
+                + " street=" + pick.Street
+                + " number=" + pick.Number.ToString(CultureInfo.InvariantCulture)
+                + " reason=" + (string.IsNullOrEmpty(reason) ? "absent" : reason);
+            return AppendOnce(localAppData, line);
+        }
+
         public static string Record(string localAppData, CashierPick? pick, int day)
         {
             if (pick == null || !pick.Hired)
@@ -171,6 +270,31 @@ namespace ChaoticCEO
             return line;
         }
 
+        private static bool Split(string? place, out string street, out int number)
+        {
+            street = "";
+            number = 0;
+            if (string.IsNullOrEmpty(place))
+            {
+                return false;
+            }
+
+            var at = place.LastIndexOf(' ');
+            if (at <= 0 || at >= place.Length - 1)
+            {
+                return false;
+            }
+
+            street = place.Substring(0, at);
+            return int.TryParse(
+                    place.Substring(at + 1),
+                    NumberStyles.Integer,
+                    CultureInfo.InvariantCulture,
+                    out number)
+                && street.Length > 0
+                && number > 0;
+        }
+
         private static CashierPick None()
         {
             return new CashierPick(false, "", "", "", "", 0, "", "");
@@ -181,10 +305,54 @@ namespace ChaoticCEO
     {
         private object? _seen;
         private int _tries;
+        private string _place = "";
+        private bool _done;
+        private int _restaffTries;
 
         public bool Due(object? save)
         {
             return save != null && !ReferenceEquals(_seen, save);
+        }
+
+        public bool Filled(string? place)
+        {
+            return _done && place != null && place.Length > 0 && _place == place;
+        }
+
+        public void Fill(string? place)
+        {
+            _place = place ?? "";
+            _done = _place.Length > 0;
+            _restaffTries = 0;
+        }
+
+        public void ClearFill()
+        {
+            _place = "";
+            _done = false;
+            _restaffTries = 0;
+        }
+
+        public bool RestaffAgain(string? place)
+        {
+            if (string.IsNullOrEmpty(place) || Filled(place))
+            {
+                return false;
+            }
+
+            if (_place != place)
+            {
+                _place = place;
+                _done = false;
+                _restaffTries = 0;
+            }
+
+            return _restaffTries < 300;
+        }
+
+        public void RestaffNote()
+        {
+            _restaffTries++;
         }
 
         public bool Waiting()

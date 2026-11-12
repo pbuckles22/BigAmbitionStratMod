@@ -20,6 +20,7 @@ This is the durable home for technical debt across sessions. Handoff notes can m
 (High ROI; frequent pain; not blocking.)
 
 - Day-roll blip: `store.health` can briefly show `customers=0 revenue=0 ready=false` (and a trailing `-100` profit) even after Ready days, then recover. The open **10.4** tree harvests this. Drop this line when that tree commits. It is not an Epic 14 story.
+- Morning `g3` stays false after `cashier.replaced`. Day 1497 at 7th Avenue 22 served 82 customers and `g3` was still false. Sales do not flip the register flag. The live shift read is what misses the hired person.
 - Day 1 `ops.verified` on **1.16.7.7** logged cleaner `shift=false person=false uniform=nopreset`. Uniforms stay accepted below. The missing cleaner shift belongs to the **10.4** fit-out, not Epic 14.
 
 ## Owned by a story

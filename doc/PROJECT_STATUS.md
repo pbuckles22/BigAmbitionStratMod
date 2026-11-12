@@ -8,7 +8,7 @@
 
 ## Summary
 
-**BigAmbitionStratMod** — Sleep skip **1.17.2.6** is on `main` (human PASS 2026-11-12). Story **14.3** goods list stays. The line is target minus on hand. Fixture space does not cut it. Epic 10 stays open. **10.4** still waits on **14.4**. The **10.4** code stays stashed. **7.9–7.12** stay. **7.13** is **14.6**. Rules: [requirements/strategy.md](requirements/strategy.md).
+**BigAmbitionStratMod** — Cashier replace **1.17.2.7** is on `main` (human PASS 2026-11-12). An empty register is hired again. Day 1496 at 7th Avenue 22 logged `reason=absent`, then day 1497 served 82 customers. Story **14.3** goods list stays. Epic 10 stays open. **10.4** still waits on **14.4**. The **10.4** code stays stashed. **7.9–7.12** stay. **7.13** is **14.6**. Rules: [requirements/strategy.md](requirements/strategy.md).
 
 ---
 
@@ -16,7 +16,8 @@
 
 | Branch | Role |
 |--------|------|
-| **`main`** | Integration branch. Version 1.17.2.6. Sleep skip. Human PASS 2026-11-12. Story 14.3 goods list stays. |
+| **`main`** | Integration branch. Version 1.17.2.7. Cashier replace. Human PASS 2026-11-12. Story 14.3 goods list stays. |
+| **`fix/empty-register`** | Empty register hire. Version 1.17.2.7. Human PASS 2026-11-12. Kept after CMPH. |
 | **`feature/14.4-cash-stage`** | Sleep skip. Version 1.17.2.6. Human PASS 2026-11-12. Kept after CMPH. Not story 14.4. |
 | **`feature/14.3-shelf-goods`** | Story 14.3 goods list. Version 1.17.2.2. Human PASS 2026-11-11. Kept after CMPH. |
 | **`feature/14.2-delivery-cover`** | Story 14.2 delivery cover. Version 1.17.1. Human PASS 2026-11-10. Lands with the 14.3 CMPH. |
