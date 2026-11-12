@@ -384,7 +384,6 @@ namespace ChaoticCEO
                 truckCost: 0,
                 LoadLog.PinnedBuild);
             var wealth = Helpers.PlayerHelper.GetPersonalWealth();
-            WholesalerBridge.Maintain(localAppData, current.Day);
             var ownedHealth = OwnedStoreHealth(current);
             foreach (var row in ownedHealth)
             {
@@ -2001,6 +2000,95 @@ namespace ChaoticCEO
 
             watch.Fill(place);
             return Cashier.Replaced(localAppData, gap.Pick, current.Day, gap.Reason);
+        }
+
+        public static void ReleaseCleaner(CashierWatch watch, MorningWatch morning)
+        {
+            var current = SaveGameManager.Current;
+            if (watch == null || morning == null || current == null || morning.Day == 0 || current.Day == morning.Day)
+            {
+                return;
+            }
+
+            watch.ClearFill();
+        }
+
+        public static string? TryCleaner(CashierWatch watch, string localAppData)
+        {
+            if (watch == null || string.IsNullOrEmpty(localAppData) || !InCity() || Autopilot.DryRun)
+            {
+                return null;
+            }
+
+            var manager = InstanceBehavior<BuildingManager>.Instance;
+            var registration = manager == null ? null : manager.buildingRegistration;
+            if (registration == null || !registration.RentedByPlayer || !GoodsStore(registration))
+            {
+                watch.ClearFill();
+                return null;
+            }
+
+            var place = (registration.StreetName ?? "")
+                + " "
+                + registration.StreetNumber.ToString(CultureInfo.InvariantCulture);
+            if (watch.Filled(place) || !watch.RestaffAgain(place))
+            {
+                return null;
+            }
+
+            if (StoreOpsBridge.HasCleaner(registration))
+            {
+                watch.Fill(place);
+                return null;
+            }
+
+            var current = SaveGameManager.Current;
+            CashierBridge.Departure(registration, out var resigned, out var retired, out var poached);
+            var gap = Cleaner.Cover(place, cleanerStaffed: false, resigned, retired, poached, GameApi.Live());
+            if (!gap.Hire || current == null)
+            {
+                return null;
+            }
+
+            var ops = new StoreOpsPick(true, gap.Pick.Role, "", false, gap.Pick.StationCall, "", "");
+            if (!StoreOpsBridge.Live(registration, ops, out var reason, out _))
+            {
+                if (Cashier.Retry(reason))
+                {
+                    watch.RestaffNote();
+                    return null;
+                }
+
+                watch.Fill(place);
+                return Cleaner.Missed(localAppData, gap.Pick, current.Day, reason);
+            }
+
+            watch.Fill(place);
+            return Cleaner.Replaced(localAppData, gap.Pick, current.Day, gap.Reason);
+        }
+
+        public static int TryCover(MorningWatch watch, string localAppData)
+        {
+            if (watch == null || string.IsNullOrEmpty(localAppData) || !InCity())
+            {
+                return 0;
+            }
+
+            var current = SaveGameManager.Current;
+            if (current == null)
+            {
+                return 0;
+            }
+
+            var day = Morning.CoverDay(null, Autopilot.Enabled, current.Day, watch.Day);
+            if (day == 0)
+            {
+                return 0;
+            }
+
+            var changed = WholesalerBridge.Maintain(localAppData, day);
+            watch.Mark(day);
+            return changed;
         }
 
         private static BuildingRegistration? FindOwned(GameInstance current, string street, int number)

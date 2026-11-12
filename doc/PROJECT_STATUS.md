@@ -8,7 +8,7 @@
 
 ## Summary
 
-**BigAmbitionStratMod** — Cashier replace **1.17.2.7** is on `main` (human PASS 2026-11-12). An empty register is hired again. Day 1496 at 7th Avenue 22 logged `reason=absent`, then day 1497 served 82 customers. Story **14.3** goods list stays. Epic 10 stays open. **10.4** still waits on **14.4**. The **10.4** code stays stashed. **7.9–7.12** stay. **7.13** is **14.6**. Rules: [requirements/strategy.md](requirements/strategy.md).
+**BigAmbitionStratMod** — Morning staff watch **1.17.3** is on `main` (human PASS 2026-11-12). An empty cleaning station is hired again, and a paused morning still covers the bag line. Day 1519 at 7th Avenue 22 was ready, 93 customers, profit $1,824.57. **Next** is **14.15** fixture space: free space cuts the line so a full shelf is not offered a delivery. Then **14.16**, then **14.9**. **14.4** waits. Epic 10 stays open. **10.4** still waits on **14.4**. The **10.4** code stays stashed. **7.9–7.12** stay. **7.13** is **14.6**. Rules: [requirements/strategy.md](requirements/strategy.md).
 
 ---
 
@@ -16,7 +16,8 @@
 
 | Branch | Role |
 |--------|------|
-| **`main`** | Integration branch. Version 1.17.2.7. Cashier replace. Human PASS 2026-11-12. Story 14.3 goods list stays. |
+| **`main`** | Integration branch. Version 1.17.3. Morning staff watch. Human PASS 2026-11-12. Story 14.3 goods list stays. |
+| **`feature/14.14-staff-watch`** | Story 14.14 cleaner hire and paused bag cover. Version 1.17.3. Human PASS 2026-11-12. Kept after CMPH. |
 | **`fix/empty-register`** | Empty register hire. Version 1.17.2.7. Human PASS 2026-11-12. Land `2f81e7e`. Kept after CMPH. |
 | **`feature/14.4-cash-stage`** | Sleep skip. Version 1.17.2.6. Human PASS 2026-11-12. Kept after CMPH. Not story 14.4. |
 | **`feature/14.3-shelf-goods`** | Story 14.3 goods list. Version 1.17.2.2. Human PASS 2026-11-11. Kept after CMPH. |

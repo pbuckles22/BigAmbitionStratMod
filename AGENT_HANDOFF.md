@@ -138,9 +138,9 @@ When shipping: update **PM_PLAN**, **doc/PROJECT_STATUS.md**, and **Current stat
 
 ## Current state
 
-- **Product:** Version **1.17.2.7** cashier replace is on `main` (human PASS 2026-11-12). An empty register is hired again. Story **14.3** goods list stays. Epic 10 stays open. Ladder: [PM_PLAN.md](PM_PLAN.md). Handoff: [doc/handoff/0097-HANDOFF-2026-11-12_1348.md](doc/handoff/0097-HANDOFF-2026-11-12_1348.md).
-- **On:** `origin/main @ 2f81e7e`. **10.4** code stays stashed. https://github.com/pbuckles22/BigAmbitionStratMod
-- **Next:** Start **14.4** when asked. No `$100M` soak until **10.7**.
+- **Product:** Version **1.17.3** morning staff watch is on `main` (human PASS 2026-11-12). An empty cleaning station is hired again, and a paused morning still covers the bag line. Story **14.3** goods list stays. Epic 10 stays open. Ladder: [PM_PLAN.md](PM_PLAN.md). Handoff: [doc/handoff/0098-HANDOFF-2026-11-12_1445.md](doc/handoff/0098-HANDOFF-2026-11-12_1445.md).
+- **On:** `origin/main` after the **14.14** land. **10.4** code stays stashed. https://github.com/pbuckles22/BigAmbitionStratMod
+- **Next:** Start **14.15** fixture space from updated `main`, on `feature/14.15-fixture-space`. Then **14.16**, then **14.9**. **14.4** waits. No `$100M` soak until **10.7**.
 - **Blockers:** Do not pop the **10.4** stash. **7.9** blocks **14.10**. Unstaged code-only dump lines in `.cursor/rules/gemini-handoff.mdc` and `doc/gemini/README.md` are not in git.
 
 ## Run and test

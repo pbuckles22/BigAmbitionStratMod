@@ -140,8 +140,8 @@ A gate that stays false for **StuckDays** = 3 open days runs that gate’s *If f
 **The player.** During time advance the player sleeps and eats before energy, hunger, or happiness reach **NeedFloor** = 20%.
 
 **Staff.**
-- An employee demand that is unmet for **DemandDays** = 3 days is met (story 13.4) or that employee is replaced (story 11.0). Insurance, wages, and hours are not cleared with a bonus.
-- A sick, retired, quitting, or poached employee is replaced through the headhunter.
+- Each morning, an unmet employee demand is logged. One open for **DemandDays** = 3 days is cleared with a bonus when the game allows it (story **14.14**). Insurance, wages, and hours are not cleared with a bonus (story **14.10**).
+- An empty cleaning station is hired again (story **14.14**). A sick, retired, quitting, or poached employee is replaced through the headhunter.
 - Training targets full skill (story 11.0).
 
 **Store operation.** Story 13.2 assigns the cleaner, the guard, uniforms, and capacity fixtures.
@@ -170,7 +170,7 @@ A gate that stays false for **StuckDays** = 3 open days runs that gate’s *If f
 - cash below reserve
 - pin mismatch
 
-Each count is a pure function with a Tier 1 test.
+Each count is a pure function with a Tier 1 test. An empty cleaning station is hired again (story **14.14**). A paused autopilot still covers the wholesaler contracts that morning. Free space on the register or the shelf cuts the line (story **14.15**). The eight counts stay the audit line.
 
 **Self-heal.** Each finding maps to one action through the existing confirm, bridge, and record pattern:
 - connect the store

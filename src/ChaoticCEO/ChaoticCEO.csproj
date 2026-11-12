@@ -6,9 +6,9 @@
     <LangVersion>latest</LangVersion>
     <RootNamespace>ChaoticCEO</RootNamespace>
     <AssemblyName>ChaoticCEO</AssemblyName>
-    <Version>1.17.2.7</Version>
-    <AssemblyVersion>1.17.2.7</AssemblyVersion>
-    <FileVersion>1.17.2.7</FileVersion>
+    <Version>1.17.3</Version>
+    <AssemblyVersion>1.17.3</AssemblyVersion>
+    <FileVersion>1.17.3</FileVersion>
     <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
     <GameManaged Condition="'$(GameManaged)' == ''">C:\Program Files (x86)\Steam\steamapps\common\Big Ambitions\Big Ambitions_Data\Managed</GameManaged>
   </PropertyGroup>

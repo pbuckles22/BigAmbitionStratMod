@@ -25,6 +25,8 @@ namespace ChaoticCEO
         private readonly CapacityWatch _capacity = new CapacityWatch();
         private readonly WholesalerWatch _contracts = new WholesalerWatch();
         private readonly CashierWatch _cashiers = new CashierWatch();
+        private readonly CashierWatch _cleaners = new CashierWatch();
+        private readonly MorningWatch _mornings = new MorningWatch();
         private readonly BankLoanWatch _loans = new BankLoanWatch();
         private readonly StaffDemandWatch _demands = new StaffDemandWatch();
         private readonly TaxBillWatch _taxes = new TaxBillWatch();
@@ -100,6 +102,9 @@ namespace ChaoticCEO
             LiveDump.TryWholesaler(_contracts, _localAppData);
             LiveDump.TryCashier(_cashiers, _localAppData);
             LiveDump.TryRestaff(_cashiers, _localAppData);
+            LiveDump.ReleaseCleaner(_cleaners, _mornings);
+            LiveDump.TryCleaner(_cleaners, _localAppData);
+            LiveDump.TryCover(_mornings, _localAppData);
             LiveDump.TryLoan(_loans, _localAppData);
             LiveDump.TryDemand(_demands, _localAppData);
             LiveDump.TryTax(_taxes, _localAppData);
