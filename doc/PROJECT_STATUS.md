@@ -2,13 +2,13 @@
 
 **Human-readable current state.** Keep in sync with [AGENT_HANDOFF.md](../AGENT_HANDOFF.md) → *Current state* when milestones ship.
 
-**Last updated:** 2026-11-11
+**Last updated:** 2026-11-12
 
 ---
 
 ## Summary
 
-**BigAmbitionStratMod** — Story **14.3** goods list is on `main` at **1.17.2.2**. The line is target minus on hand. Fixture space does not cut it. Epic 10 stays open. **10.4** still waits on **14.4**. The **10.4** code stays stashed. **7.9–7.12** stay. **7.13** is **14.6**. Rules: [requirements/strategy.md](requirements/strategy.md).
+**BigAmbitionStratMod** — Sleep skip **1.17.2.6** is on `main` (human PASS 2026-11-12). Story **14.3** goods list stays. The line is target minus on hand. Fixture space does not cut it. Epic 10 stays open. **10.4** still waits on **14.4**. The **10.4** code stays stashed. **7.9–7.12** stay. **7.13** is **14.6**. Rules: [requirements/strategy.md](requirements/strategy.md).
 
 ---
 
@@ -16,7 +16,8 @@
 
 | Branch | Role |
 |--------|------|
-| **`main`** | Integration branch. Version 1.17.2.2. Story 14.3 goods list. Human PASS 2026-11-11. |
+| **`main`** | Integration branch. Version 1.17.2.6. Sleep skip. Human PASS 2026-11-12. Story 14.3 goods list stays. |
+| **`feature/14.4-cash-stage`** | Sleep skip. Version 1.17.2.6. Human PASS 2026-11-12. Kept after CMPH. Not story 14.4. |
 | **`feature/14.3-shelf-goods`** | Story 14.3 goods list. Version 1.17.2.2. Human PASS 2026-11-11. Kept after CMPH. |
 | **`feature/14.2-delivery-cover`** | Story 14.2 delivery cover. Version 1.17.1. Human PASS 2026-11-10. Lands with the 14.3 CMPH. |
 | **`feature/14.1-rulebook`** | Epic 14 docs. Story 14.1. No mod change. |
@@ -100,7 +101,7 @@
 | **`feature/chain-prefix`** | Kept after CMPH (template history) |
 | **`feature/handoff-receiver-framing`** | Kept after CMPH (template history) |
 
-**Last land:** `a57df96` on `main`. Version 1.17.2.2. Branch `feature/14.3-shelf-goods` kept. Repo: https://github.com/pbuckles22/BigAmbitionStratMod.
+**Last land:** `dab9de6` on `main`. Version 1.17.2.6. Branch `feature/14.4-cash-stage` kept. Repo: https://github.com/pbuckles22/BigAmbitionStratMod.
 
 ---
 

@@ -182,11 +182,11 @@ Starts after Epic **8**. Crossing **WinNetWorth** is a milestone. The autopilot 
 - **10.6** `[ ]` Stage 3 — clusters + truck pressure. Starts after **14.13**. ≥5 healthy supplied stores; the **14.8** district cap; TruckBusy → service/office; Close after FixDays+RedDays. Stall covers Stage 3 gates. **Out:** Real-estate buy.
 - **10.7** `[ ]` Stage 4 → win. Stage4Cash + all Ready + emptySlots=0; live buy by payback; `win.reached` once; telemetry still advances. Stall covers Stage 4 gates. **Out:** LLM / RL. Rival property buyout stays here, not in **14.8**.
 
-**Next:** **14.3** is on `main` at **1.17.2.2**. Start **14.4** when asked. The **10.4** tree stays stashed. No `$100M` soak until **10.7**.
+**Next:** Sleep skip **1.17.2.6** is on `main` (human PASS 2026-11-12). Start **14.4** when asked. The **10.4** tree stays stashed. No `$100M` soak until **10.7**.
 
 ## Epic 14 — Live readings
 
-**Status:** 14.3 goods list is on `main` at 1.17.2.2. The line is target minus on hand. Fixture space does not cut it.
+**Status:** 14.3 goods list is on `main`. Sleep skip **1.17.2.6** is on `main` (human PASS 2026-11-12). The line is target minus on hand. Fixture space does not cut it.
 
 There is no separate “update the strategy” epic. The notes in `doc/requirements/strategy/` are the source. Stage 1 line sizing is `logistics_stocking_strategy_1_5x_buffer_2_open_day_moving_average.md`. The older logistics note keeps warehouse handover where it does not set a line amount. `strategy.md` keeps one sentence per rule. Epic **8** does not tune every number. Epic **10** stays open. **10.4** still ends at three healthy goods stores. **Out:** machine learning, LLM, RL. Public versions start at `1.17.1`. One decision per story. A later story adds its own playbook pick. It does not redo an earlier story’s reading.
 
@@ -204,7 +204,7 @@ There is no separate “update the strategy” epic. The notes in `doc/requireme
 - **14.12** `[ ]` Truck load, payback, and run facts. Truck load is the garage cargo fraction, so **TruckBusy** can open a service or office. Repay uses the live best payback, not 0. Dirt, theft, sales, and unmet demand come from the building, and a remedy runs only when that reading says so. Playbook gains those picks. Chain: `garage → truck load → open`, `buildings → payback → repay`, and `building → run facts → remedy`. **Out:** cash and stage (**14.4**), shelves (**14.2**).
 - **14.13** `[ ]` One stage sim. After **14.2–14.12** and before **10.6**. `World` is not a second empire. The sim steps close and tax through the same decides as the live morning. Stubbed wholesaler supply, the fixed wage and rent cost, and `ClosePick.None` / `RunPick.None` go away. Chain: `day step → live decides → close → tax`. **Out:** a search over every threshold.
 
-**Next:** Start **14.4** when asked. Do not stack onto the stashed **10.4** tree.
+**Next:** Start **14.4** when asked, from updated `main`, on a new branch. `feature/14.4-cash-stage` is the sleep skip and stays. Do not stack onto the stashed **10.4** tree.
 
 Operating model (keep these when you replace this plan): `.cursor/rules/` ship commands (UCPH, CMPH, SWAT), human check, plan-coordinate versioning, long-run harvest (`testing.mdc`), and the chain harness and prefix (`integration-chain.mdc`). Do not delete them to “clean up” a new clone.
 
