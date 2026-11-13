@@ -8,7 +8,7 @@
 
 ## Summary
 
-**BigAmbitionStratMod** — Staffed cleaner **1.17.6** is on `main` (human PASS 2026-11-12). A later morning leaves a cleaner who is still on the schedule and does not log `cleaner.replaced`. Days 1520–1528 at 22 7th Avenue stayed `g3=true` with no cleaner hire. Day 1528 was ready, 74 customers, profit $1,600.11. **Next** is **14.9**: place the shelf so an unplaced one does not order another, then the 85% rack. **14.4** waits. Epic 10 stays open. **10.4** still waits on **14.4**. The **10.4** code stays stashed. **7.9–7.12** stay. **7.13** is **14.6**. Rules: [requirements/strategy.md](requirements/strategy.md).
+**BigAmbitionStratMod** — Version **1.17.8.1**. A cargo storage shelf places on the storage row, touching the shelves already there. Human PASS 2026-11-12. **14.9** still needs the 85% rack and the capacity-miss log. **14.4** waits. Epic 10 stays open. **10.4** still waits on **14.4**. The **10.4** code stays stashed. **7.9–7.12** stay. **7.13** is **14.6**. Rules: [requirements/strategy.md](requirements/strategy.md).
 
 ---
 
@@ -16,7 +16,8 @@
 
 | Branch | Role |
 |--------|------|
-| **`main`** | Integration branch. Version 1.17.6. A later morning leaves a staffed cleaner. Human PASS 2026-11-12. |
+| **`main`** | Integration branch. Version 1.17.8.1. Cargo shelf place on the storage row. Human PASS 2026-11-12. |
+| **`feature/14.9-place-shelf`** | Story 14.9 place slice. Version 1.17.8.1. Human PASS 2026-11-12. Kept after CMPH. 85% rack still open. |
 | **`feature/14.16-staffed-cleaner`** | Story 14.16. Version 1.17.6. Human PASS 2026-11-12. Kept after CMPH. |
 | **`feature/14.15-fixture-space`** | Story 14.15. Version 1.17.5. Human PASS 2026-11-12. Kept after CMPH. |
 | **`feature/14.14-staff-watch`** | Story 14.14 cleaner hire and paused bag cover. Version 1.17.3. Human PASS 2026-11-12. Kept after CMPH. |
@@ -105,7 +106,7 @@
 | **`feature/chain-prefix`** | Kept after CMPH (template history) |
 | **`feature/handoff-receiver-framing`** | Kept after CMPH (template history) |
 
-**Last land:** `6468913` on `main`. Version 1.17.6. Branch `feature/14.16-staffed-cleaner` kept. Repo: https://github.com/pbuckles22/BigAmbitionStratMod.
+**Last land:** pending CMPH sha. Version 1.17.8.1. Branch `feature/14.9-place-shelf` kept. Repo: https://github.com/pbuckles22/BigAmbitionStratMod.
 
 ---
 

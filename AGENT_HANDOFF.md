@@ -138,10 +138,10 @@ When shipping: update **PM_PLAN**, **doc/PROJECT_STATUS.md**, and **Current stat
 
 ## Current state
 
-- **Product:** Version **1.17.6** leaves a staffed cleaner (human PASS 2026-11-12). A later morning logs nothing when the cleaning shift is still filled. Story **14.3** goods list stays. Epic 10 stays open. Ladder: [PM_PLAN.md](PM_PLAN.md). Handoff: [doc/handoff/0100-HANDOFF-2026-11-12_1635.md](doc/handoff/0100-HANDOFF-2026-11-12_1635.md).
-- **On:** `origin/main @ 6468913`. **10.4** code stays stashed. https://github.com/pbuckles22/BigAmbitionStratMod
-- **Next:** Start **14.9** from updated `main`, on `feature/14.9-place-shelf`. Place the shelf. An unplaced shelf already in cargo must not order another. **14.4** waits. No `$100M` soak until **10.7**.
-- **Blockers:** Do not pop the **10.4** stash. **7.9** blocks **14.10**. Unstaged code-only dump lines in `.cursor/rules/gemini-handoff.mdc` and `doc/gemini/README.md` are not in git.
+- **Product:** Version **1.17.8.1**. A cargo storage shelf places on the storage row, touching the shelves already there. Epic 10 stays open. Ladder: [PM_PLAN.md](PM_PLAN.md). Handoff: [doc/handoff/0102-HANDOFF-2026-11-12_2015.md](doc/handoff/0102-HANDOFF-2026-11-12_2015.md).
+- **On:** `origin/main` after this CMPH (version 1.17.8.1). **10.4** code stays stashed. https://github.com/pbuckles22/BigAmbitionStratMod
+- **Next:** Continue **14.9** for the 85% rack and the capacity-miss log when asked. **14.4** waits. No `$100M` soak until **10.7**.
+- **Blockers:** Do not pop the **10.4** stash. **7.9** blocks **14.10**. Unstaged lines in `.cursor/rules/gemini-handoff.mdc` and `doc/gemini/README.md` are not in git.
 
 ## Run and test
 

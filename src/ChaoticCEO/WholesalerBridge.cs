@@ -207,7 +207,7 @@ namespace ChaoticCEO
                 }
             }
 
-            if (full && OrderShelf(localAppData, day, contract, cash))
+            if (AttendShelf(localAppData, day, contract, building, full, cash))
             {
                 touched = true;
             }
@@ -223,7 +223,13 @@ namespace ChaoticCEO
             return touched;
         }
 
-        private static bool OrderShelf(string? localAppData, int day, DeliveryContract contract, decimal cash)
+        private static bool AttendShelf(
+            string? localAppData,
+            int day,
+            DeliveryContract contract,
+            BuildingRegistration? building,
+            bool full,
+            decimal cash)
         {
             var current = SaveGameManager.Current;
             if (current == null || contract.businessAddress == null)
@@ -233,13 +239,58 @@ namespace ChaoticCEO
 
             var street = contract.businessAddress.streetName;
             var number = contract.businessAddress.streetNumber;
-            var pick = StorageShelf.Order(
-                street,
-                number,
-                freeSpace: 0,
-                cash,
-                ShelfPending(current, street, number),
-                GameApi.Live());
+            var pending = ShelfPending(current, street, number);
+            var placed = 0;
+            for (var tries = 0; tries < StorageShelf.Boxes; tries++)
+            {
+                var inCargo = StorageShelfBridge.InCargo(building);
+                if (!inCargo && (placed > 0 || !full || pending))
+                {
+                    return placed > 0;
+                }
+
+                var attend = StorageShelf.Attend(
+                    street,
+                    number,
+                    full,
+                    inCargo,
+                    pending,
+                    cash,
+                    StorageShelfBridge.Seat(building),
+                    GameApi.Live());
+                if (attend.Action == ShelfAction.Place && building != null)
+                {
+                    if (!StorageShelfBridge.Place(building, attend.Seat, out var reason))
+                    {
+                        attend = new ShelfAttend(ShelfAction.Hold, street, number, true, attend.Seat, attend.Pick, "", reason);
+                        Note(localAppData, attend, day);
+                        return placed > 0;
+                    }
+
+                    placed++;
+                    Note(localAppData, attend, day);
+                    continue;
+                }
+
+                Note(localAppData, attend, day);
+                return attend.Action == ShelfAction.Order
+                    ? OrderShelf(localAppData, day, current, attend.Pick) || placed > 0
+                    : placed > 0;
+            }
+
+            return placed > 0;
+        }
+
+        private static void Note(string? localAppData, ShelfAttend attend, int day)
+        {
+            if (!string.IsNullOrEmpty(localAppData))
+            {
+                StorageShelf.RecordAttend(localAppData, attend, day);
+            }
+        }
+
+        private static bool OrderShelf(string? localAppData, int day, GameInstance current, ShelfPick pick)
+        {
             if (!pick.Ordered)
             {
                 return false;

@@ -835,4 +835,19 @@ Human check. The gift shop at 22 7th Avenue, the next morning, with the cleaner 
 
 Human PASS 2026-11-12 on 1.17.6 at 22 7th Avenue. `mod.loaded version=1.17.6 build=3682`. Days 1520–1528: no `cleaner.replaced`, and `g3=true`. Day 1528 ready, 74 customers, revenue 2303, profit 1600.11. Day 1520 still logged `cashier.replaced` `reason=absent`. That hire is outside this story.
 
+## Story 14.9 — Place the cargo shelf in the storage room, touching the row
+
+Tier 1: `Shelf_an_unplaced_shelf_does_not_order_another`, `Shelf_a_full_storage_room_orders_nothing`, the `Seat_*` cases, and the `Attend_*` cases in `StorageShelfTests`. Chain: `day roll → full fixture → shelf in cargo → no order`, `day roll → full fixture → storage room full → hold, no order`, and `day roll → full fixture → order → shelf in cargo → storage seat → placed → next morning seat`. The seat comes from the interior's own placement grid (`GridGenerator` ground cells, wall cells occupied) plus the footprint of every placed item. A seat touches the end of the storage-shelf row, or fills a gap in it, with the same facing. It never crosses a wall, never stands on another item, and never opens a second rank. A shelf in cargo is placed and orders nothing. No seat holds the shelf in cargo and logs `shelf.held`. A full fixture orders only while a seat is open. Nothing is sold. This does not add the 85% rack or the capacity-miss log.
+
+Human check. The gift shop at 22 7th Avenue, the next morning. The Storage Shelf now in cargo moves into the storage room, flush against the end of the existing storage shelves.
+
+1. Restart Big Ambitions so this build loads. Continue the same save. Stand outside the shop (at home is fine) and let one morning pass.
+2. Walk into the shop. Open the delivery-spot cargo. Then walk into the storage room and the bathroom.
+3. Open `%LocalAppData%\ChaoticCEO\ceo.log` and find `mod.loaded` and the newest `shelf.` line.
+4. **PASS if** `mod.loaded version=1.17.8.1`, that morning has `shelf.placed` for `number=22`, cargo has no Storage Shelf, and the new shelf stands in the storage room touching the existing storage shelves with no gap, facing the same way, with nothing in the bathroom or outside. **FAIL if** the version is still 1.17.8, the cargo still shows a Storage Shelf, a shelf stands anywhere but flush against the storage row, or that morning logs `shelf.ordered`.
+5. Evidence: `shelf.placed ... x= z= yaw=`. `shelf.held reason=nogrid`, `offgrid`, or `full` names why a shelf stayed in cargo.
+6. Version marker: public `1.17.8.1`.
+
+Human PASS 2026-11-12 on 1.17.8.1 at 22 7th Avenue. `mod.loaded version=1.17.8.1 build=3682`. Day 1571 `shelf.held reason=nogrid` (outside). Day 1572 `shelf.placed x=997.50 z=54.50 yaw=90`. Day 1573 `shelf.ordered` after cargo was empty. Day 1575 `shelf.placed x=998.00 z=54.50 yaw=90`. Save shows storage shelves at (997, 54.5) and (997.5, 54.5). No sell. The 85% rack and the capacity-miss log stay open on **14.9**.
+
 **Long run:** A batch or soak is not Tier 1. When it trips a gate, extract that decision and add a named Tier 1 test before the next long run. See `.cursor/rules/testing.mdc`.
