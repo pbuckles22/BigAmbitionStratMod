@@ -67,11 +67,11 @@ namespace ChaoticCEO
         /// </summary>
         public const int UnitCapacity = 100;
 
-        /// <summary>Live footprint along local X (long face). Matches the prefab, not half-extents.</summary>
-        public const float FootprintWidth = 2.0f;
+        /// <summary>Live footprint along local X (long face). Matches the prefab (~2.97), not half-extents.</summary>
+        public const float FootprintWidth = 3.0f;
 
-        /// <summary>Live footprint along local Z (depth / short ends).</summary>
-        public const float FootprintDepth = 1.0f;
+        /// <summary>Live footprint along local Z (depth / short ends). Live collider is ~0.50.</summary>
+        public const float FootprintDepth = 0.5f;
 
         /// <summary>
         /// Clear floor between facing shelf fronts so NavMesh can reach the long side.
@@ -267,11 +267,38 @@ namespace ChaoticCEO
         }
 
         /// <summary>
-        /// Sell cargo first, then empty placed shells. Stocked placed shelves are held, never sold.
+        /// Keep surveyed/live collider size when it is already the full shelf.
+        /// Only rewrite undersized half-extents up to <see cref="FootprintWidth"/> × <see cref="FootprintDepth"/>.
         /// </summary>
-        public static ShelfSellPlan DecideSell(int excess, int cargo, int emptyPlaced, int stockedPlaced)
+        public static (float Width, float Depth) ResolveFootprint(float width, float depth)
+        {
+            if (width < FootprintWidth - 0.1f)
+            {
+                return (FootprintWidth, FootprintDepth);
+            }
+
+            return (width, depth);
+        }
+
+        /// <summary>
+        /// Sell cargo first, then empty placed shells. Stocked placed shelves are held, never sold.
+        /// Sell only after Place has reached <paramref name="keep"/> on the floor.
+        /// </summary>
+        public static ShelfSellPlan DecideSell(
+            int excess,
+            int cargo,
+            int emptyPlaced,
+            int stockedPlaced,
+            int placed,
+            int keep)
         {
             if (excess <= 0)
+            {
+                return ShelfSellPlan.None();
+            }
+
+            // Do not sell freshly packed cargo (or empty shells) until Place has reseated keep.
+            if (placed < keep)
             {
                 return ShelfSellPlan.None();
             }

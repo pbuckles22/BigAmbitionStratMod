@@ -246,9 +246,9 @@ public class StorageShelfTests
     [Fact]
     public void Layout_constants_match_the_long_face_aisle_stack()
     {
-        // Harvest: half-extent Size made 0.5 m packs; long face needs AisleWidth in front.
-        Assert.Equal(2.0f, StorageShelf.FootprintWidth);
-        Assert.Equal(1.0f, StorageShelf.FootprintDepth);
+        // Harvest: live Size ~2.97×0.50; long face needs AisleWidth in front.
+        Assert.Equal(3.0f, StorageShelf.FootprintWidth);
+        Assert.Equal(0.5f, StorageShelf.FootprintDepth);
         Assert.Equal(1.0f, StorageShelf.AisleWidth);
         Assert.Equal(1.0f, StorageShelf.HeaderLane);
         Assert.Equal(2, StorageShelf.MaxBackToBack);
@@ -689,7 +689,8 @@ public class StorageShelfTests
     [Fact]
     public void Sell_prefers_cargo_before_placed()
     {
-        var plan = StorageShelf.DecideSell(excess: 34, cargo: 32, emptyPlaced: 4, stockedPlaced: 0);
+        var plan = StorageShelf.DecideSell(
+            excess: 34, cargo: 32, emptyPlaced: 4, stockedPlaced: 0, placed: 4, keep: 2);
         Assert.Equal(32, plan.Cargo);
         Assert.Equal(2, plan.EmptyPlaced);
         Assert.False(plan.HoldStocked);
@@ -698,10 +699,75 @@ public class StorageShelfTests
     [Fact]
     public void Stocked_placed_is_held_not_sold()
     {
-        var plan = StorageShelf.DecideSell(excess: 2, cargo: 0, emptyPlaced: 0, stockedPlaced: 3);
+        var plan = StorageShelf.DecideSell(
+            excess: 2, cargo: 0, emptyPlaced: 0, stockedPlaced: 3, placed: 3, keep: 1);
         Assert.Equal(0, plan.Cargo);
         Assert.Equal(0, plan.EmptyPlaced);
         Assert.True(plan.HoldStocked);
+    }
+
+    [Fact]
+    public void Attend_does_not_sell_packed_cargo_before_place_reaches_keep()
+    {
+        // Harvest day 1588: pack then sell ate the spare — placed=1 while keep=2.
+        var keep = 2;
+        var placed = 1;
+        var cargo = 2;
+        var plan = StorageShelf.DecideSell(
+            StorageShelf.Excess(StorageShelf.Have(placed, cargo, pending: 0), keep),
+            cargo,
+            emptyPlaced: placed,
+            stockedPlaced: 0,
+            placed,
+            keep);
+
+        Assert.Equal(0, plan.Cargo);
+        Assert.Equal(0, plan.EmptyPlaced);
+        Assert.False(plan.HoldStocked);
+    }
+
+    [Fact]
+    public void Attend_sells_excess_cargo_after_place_reaches_keep()
+    {
+        var keep = 2;
+        var placed = 2;
+        var cargo = 3;
+        var plan = StorageShelf.DecideSell(
+            StorageShelf.Excess(StorageShelf.Have(placed, cargo, pending: 0), keep),
+            cargo,
+            emptyPlaced: placed,
+            stockedPlaced: 0,
+            placed,
+            keep);
+
+        Assert.Equal(3, plan.Cargo);
+        Assert.Equal(0, plan.EmptyPlaced);
+        Assert.False(plan.HoldStocked);
+    }
+
+    [Fact]
+    public void Seat_accept_uses_live_half_depth_for_aisle_partner()
+    {
+        // Harvest: live Size ~2.97×0.50; aisle center step = depth + AisleWidth = 1.5 m.
+        var wall = new ShelfSpot(995.5f, 54.5f, 90f, width: 2.97f, depth: 0.50f);
+        var seat = StorageShelf.Seat(Shop(), new[] { wall }, Array.Empty<ShelfSpot>());
+        var partner = new ShelfSpot(seat.X, seat.Z, seat.Yaw, width: 2.97f, depth: 0.50f);
+
+        Assert.True(seat.Found);
+        Assert.Equal(997.0f, seat.X, 3);
+        Assert.Equal(54.5f, seat.Z, 3);
+        Assert.Equal(270f, seat.Yaw, 3);
+        Assert.True(StorageShelf.Accessible(Shop(), wall, new[] { partner }));
+        Assert.True(StorageShelf.Accessible(Shop(), partner, new[] { wall }));
+    }
+
+    [Fact]
+    public void ResolveFootprint_keeps_live_storage_shelf_half_depth()
+    {
+        // Live collider is ~3×0.5 — do not rewrite it to the old 2×1 constants.
+        var (width, depth) = StorageShelf.ResolveFootprint(2.97f, 0.50f);
+        Assert.Equal(2.97f, width);
+        Assert.Equal(0.50f, depth);
     }
 
     [Fact]
@@ -748,6 +814,60 @@ public class StorageShelfTests
     }
 
     [Fact]
+    public void Chain_keep_pack_place_sell_leaves_placed_at_keep()
+    {
+        // Chain: keep → pack → place → sell
+        var keep = StorageShelf.KeepTarget(need: 1, roomCanSpare: true);
+        var placed = 4;
+        var cargo = 0;
+
+        var packed = placed - keep;
+        placed -= packed;
+        cargo += packed;
+
+        while (placed < keep && cargo > 0)
+        {
+            placed++;
+            cargo--;
+        }
+
+        var have = StorageShelf.Have(placed, cargo, pending: 0);
+        var sell = StorageShelf.DecideSell(
+            StorageShelf.Excess(have, keep), cargo, emptyPlaced: placed, stockedPlaced: 0, placed, keep);
+        placed -= sell.EmptyPlaced;
+        cargo -= sell.Cargo;
+
+        Assert.Equal(2, keep);
+        Assert.Equal(keep, placed);
+        Assert.Equal(0, cargo);
+        Assert.Equal(keep, StorageShelf.Have(placed, cargo, pending: 0));
+    }
+
+    [Fact]
+    public void Chain_keep_pack_below_keep_place_then_sell_restores_placed()
+    {
+        // Chain: keep → pack (blocked drops under keep) → place → sell
+        var keep = StorageShelf.KeepTarget(need: 1, roomCanSpare: true);
+        var placed = 1;
+        var cargo = 2;
+
+        while (placed < keep && cargo > 0)
+        {
+            placed++;
+            cargo--;
+        }
+
+        var have = StorageShelf.Have(placed, cargo, pending: 0);
+        var sell = StorageShelf.DecideSell(
+            StorageShelf.Excess(have, keep), cargo, emptyPlaced: placed, stockedPlaced: 0, placed, keep);
+        placed -= sell.EmptyPlaced;
+        cargo -= sell.Cargo;
+
+        Assert.Equal(keep, placed);
+        Assert.Equal(0, cargo);
+    }
+
+    [Fact]
     public void Chain_day_roll_cover_box_math_keep_sell_reseat_no_order_when_have_covers_keep()
     {
         // Chain: day roll → cover → box math → keep → sell excess → reseat → attend (no order when have>=keep)
@@ -759,7 +879,8 @@ public class StorageShelfTests
         var need = StorageShelf.NeedShelves(boxes, units, placedCap: 30);
         var keep = StorageShelf.KeepTarget(need, roomCanSpare: true);
         var have = StorageShelf.Have(placed: 4, cargo: 0, pending: 0);
-        var sell = StorageShelf.DecideSell(StorageShelf.Excess(have, keep), cargo: 0, emptyPlaced: 4, stockedPlaced: 0);
+        var sell = StorageShelf.DecideSell(
+            StorageShelf.Excess(have, keep), cargo: 0, emptyPlaced: 4, stockedPlaced: 0, placed: 4, keep: keep);
         var afterSell = have - sell.Cargo - sell.EmptyPlaced;
         var order = StorageShelf.OrderForKeep(keep, afterSell);
         var attend = StorageShelf.Attend(Street, 22, order, inCargo: false, pending: false, cash: 292000m, OpenSeat(), GameApi.Live());
@@ -776,6 +897,24 @@ public class StorageShelfTests
         Assert.EndsWith(
             "verdict=enough",
             StorageShelf.NeedLine(day, Street, 22, boxes, placedShelves: 4, usedSlots: boxes, keep));
+    }
+
+    [Fact]
+    public void Chain_live_half_depth_wall_aisle_partner_is_walkable_then_attend_places()
+    {
+        // Chain: cover → boxed → live-depth aisle seat → place
+        var day = Morning.CoverDay(null, autopilotOn: true, day: 1588, coveredDay: 1587);
+        var plan = FullFixture(day);
+        var wall = new ShelfSpot(995.5f, 54.5f, 90f, width: 2.97f, depth: 0.50f);
+        var seat = StorageShelf.Seat(Shop(), new[] { wall }, Array.Empty<ShelfSpot>());
+        var shelvesNeeded = ShelvesNeededFrom(plan, displayCap: 30, placedShelves: 1, boxedShelves: 1);
+        var attend = StorageShelf.Attend(Street, 22, shelvesNeeded, inCargo: true, pending: false, cash: 292000m, seat, GameApi.Live());
+        var partner = new ShelfSpot(seat.X, seat.Z, seat.Yaw, width: 2.97f, depth: 0.50f);
+
+        Assert.Equal(ShelfAction.Place, attend.Action);
+        Assert.Equal(997.0f, attend.Seat.X, 3);
+        Assert.Equal(270f, attend.Seat.Yaw, 3);
+        Assert.True(StorageShelf.Accessible(Shop(), wall, new[] { partner }));
     }
 
     [Fact]

@@ -1005,14 +1005,18 @@ namespace ChaoticCEO
                         var depth = Mathf.Abs(extent.z);
                         var offsetX = center.x;
                         var offsetZ = center.z;
-                        // Harvest: half-extents (~1×0.5) made Seat step 0.5 m and bury fronts.
-                        if (item.itemName == StorageShelf.Item
-                            && width < StorageShelf.FootprintWidth - 0.1f)
+                        if (item.itemName == StorageShelf.Item)
                         {
-                            width = StorageShelf.FootprintWidth;
-                            depth = StorageShelf.FootprintDepth;
-                            offsetX *= 2f;
-                            offsetZ *= 2f;
+                            var resolved = StorageShelf.ResolveFootprint(width, depth);
+                            if (resolved.Width != width || resolved.Depth != depth)
+                            {
+                                // Half-extents were doubled into the live footprint — scale the center the same way.
+                                offsetX *= resolved.Width / System.Math.Max(width, 0.01f);
+                                offsetZ *= resolved.Depth / System.Math.Max(depth, 0.01f);
+                            }
+
+                            width = resolved.Width;
+                            depth = resolved.Depth;
                         }
 
                         size = new ShelfSpot(0f, 0f, 0f, width, depth, offsetX, offsetZ);

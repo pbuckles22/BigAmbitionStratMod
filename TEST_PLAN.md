@@ -925,3 +925,17 @@ Human check. Gift shop at 22 7th Avenue (same save; no new game).
 Not in this slice: staff hold; second register; changing live collider constants.
 
 **Human FAIL 2026-11-13** on 1.17.9.9 at 22 7th Avenue (UCPH park). `mod.loaded version=1.17.9.9`. Day 1588: `need=1 keep=2` correct; `shelf.sold` cargo then `shelf.packed` excess ×2 then sold packed cargo + one placed → `haveAfter=2` on paper, but day 1589+ stays `placed=1` (never reseated the spare). Cover spam during F6 logged dozens of `shelf.keep` with cargo ticking down before the batch sell. New-game did place `keep=2` but aisle not walkable (seat still uses 2×1 constants vs live ~3×0.5). Log shows `cashier.replaced reason=absent` (not cleaner quit). Next: do not sell freshly packed shelves before Place reaches `keep`; lock aisle with live footprint; optional staff-hold branch for resign.
+
+## 14.9 pack-before-sell + live-footprint aisle (1.17.9.10)
+
+Tier 1: `Attend_does_not_sell_packed_cargo_before_place_reaches_keep`, `Attend_sells_excess_cargo_after_place_reaches_keep`, `Seat_accept_uses_live_half_depth_for_aisle_partner`, `ResolveFootprint_keeps_live_storage_shelf_half_depth`. Chains: `keep → pack → place → sell`, `keep → pack (under keep) → place → sell`, `cover → boxed → live-depth aisle seat → place`.
+
+Human check. Gift shop at 22 7th Avenue (same save; optional new-game for aisle).
+
+1. Restart Big Ambitions so **1.17.9.10** loads. Continue the save. Confirm `mod.loaded version=1.17.9.10`.
+2. Let one morning roll (F6). Open `%LocalAppData%\ChaoticCEO\ceo.log`.
+3. Check `shelf.keep` / `shelf.packed` / `shelf.placed` / `shelf.sold` order for that day, and that `placed` on later mornings stays at `keep`.
+4. **PASS if** sell runs only after place reaches `keep` (`placed` stays = `keep`, not 1 while `keep=2`); `shelf.surveyed` keeps ~`width=2.97 depth=0.50`; aisle pair is walkable (restocker stocks both faces). **FAIL if** packed cargo is sold while `placed < keep`, or the 1+1 aisle blocks walking.
+5. Evidence: `shelf.keep`, `shelf.packed`, `shelf.placed`, `shelf.sold`, `shelf.surveyed`. Version marker: public `1.17.9.10`.
+
+Not in this slice: staff hold; second register; CMPH of the prior FAIL.

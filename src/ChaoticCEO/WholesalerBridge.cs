@@ -283,35 +283,6 @@ namespace ChaoticCEO
             var have = StorageShelf.Have(placedCount, cargo, pendingAmount);
             RecordKeep(localAppData, day, street, number, boxesNeeded, need, keep, placedCount, cargo, pendingAmount, have, spareSeats);
 
-            var excess = StorageShelf.Excess(have, keep);
-            var sellPlan = StorageShelf.DecideSell(
-                excess,
-                cargo,
-                StorageShelfBridge.EmptyPlacedCount(building),
-                StorageShelfBridge.StockedPlacedCount(building));
-
-            if (sellPlan.Cargo > 0)
-            {
-                var sold = StorageShelfBridge.SellCargo(building, sellPlan.Cargo, out var price);
-                if (sold > 0)
-                {
-                    cargo = StorageShelfBridge.BoxedCount(building);
-                    placedCount = StorageShelfBridge.PlacedCount(building);
-                    have = StorageShelf.Have(placedCount, cargo, pendingAmount);
-                    RecordSold(
-                        localAppData,
-                        day,
-                        street,
-                        number,
-                        "cargo",
-                        sold,
-                        price,
-                        keep,
-                        have,
-                        "ICargoHolder.RemoveFromCargo+GameManager.ChangeMoneySafe");
-                }
-            }
-
             var packed = StorageShelfBridge.PackForReseat(building, keep, out var packedRows);
             foreach (var row in packedRows)
             {
@@ -361,12 +332,14 @@ namespace ChaoticCEO
             cargo = StorageShelfBridge.BoxedCount(building);
             placedCount = StorageShelfBridge.PlacedCount(building);
             have = StorageShelf.Have(placedCount, cargo, pendingAmount);
-            excess = StorageShelf.Excess(have, keep);
-            sellPlan = StorageShelf.DecideSell(
+            var excess = StorageShelf.Excess(have, keep);
+            var sellPlan = StorageShelf.DecideSell(
                 excess,
                 cargo,
                 StorageShelfBridge.EmptyPlacedCount(building),
-                StorageShelfBridge.StockedPlacedCount(building));
+                StorageShelfBridge.StockedPlacedCount(building),
+                placedCount,
+                keep);
             if (sellPlan.Cargo > 0)
             {
                 var sold = StorageShelfBridge.SellCargo(building, sellPlan.Cargo, out var price);
