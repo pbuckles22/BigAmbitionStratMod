@@ -145,6 +145,8 @@ namespace ChaoticCEO
 
             var touched = false;
             var full = false;
+            var rackTarget = 0;
+            var rackCap = 0;
             CoverPlan? replacement = null;
             var shelves = Shelves(building);
             foreach (var item in contract.items)
@@ -201,6 +203,14 @@ namespace ChaoticCEO
                     full = true;
                 }
 
+                if (cap > 0
+                    && plan.Target >= cap * StorageRack.RackTriggerRatio
+                    && (rackCap == 0 || plan.Target > rackTarget))
+                {
+                    rackTarget = plan.Target;
+                    rackCap = cap;
+                }
+
                 if (plan.Replace)
                 {
                     replacement = plan;
@@ -208,6 +218,11 @@ namespace ChaoticCEO
             }
 
             if (AttendShelf(localAppData, day, contract, building, full, cash))
+            {
+                touched = true;
+            }
+
+            if (AttendRack(localAppData, day, contract, building, rackTarget, rackCap, cash))
             {
                 touched = true;
             }
@@ -291,6 +306,16 @@ namespace ChaoticCEO
 
         private static bool OrderShelf(string? localAppData, int day, GameInstance current, ShelfPick pick)
         {
+            return OrderFurniture(localAppData, day, current, pick, StorageShelf.Record);
+        }
+
+        private static bool OrderFurniture(
+            string? localAppData,
+            int day,
+            GameInstance current,
+            ShelfPick pick,
+            System.Func<string, ShelfPick?, int, string> record)
+        {
             if (!pick.Ordered)
             {
                 return false;
@@ -319,13 +344,55 @@ namespace ChaoticCEO
             SaveGameManager.MarkChange();
             if (!string.IsNullOrEmpty(localAppData))
             {
-                StorageShelf.Record(localAppData, pick, day);
+                record(localAppData, pick, day);
             }
 
             return true;
         }
 
+        private static bool AttendRack(
+            string? localAppData,
+            int day,
+            DeliveryContract contract,
+            BuildingRegistration? building,
+            int target,
+            int fixtureCap,
+            decimal cash)
+        {
+            var current = SaveGameManager.Current;
+            if (current == null || contract.businessAddress == null || fixtureCap <= 0 || target <= 0)
+            {
+                return false;
+            }
+
+            var street = contract.businessAddress.streetName;
+            var number = contract.businessAddress.streetNumber;
+            var pending = FurniturePending(current, street, number, StorageRack.Item);
+            var floorRoom = StorageShelfBridge.Seat(building).Found;
+            var spendRoom = Money.SpendRoom(cash, dailyCost: 0m);
+            var pick = StorageRack.Order(
+                street,
+                number,
+                target,
+                fixtureCap,
+                spendRoom,
+                pending,
+                floorRoom,
+                GameApi.Live());
+            if (!pick.Ordered)
+            {
+                return false;
+            }
+
+            return OrderFurniture(localAppData, day, current, pick, StorageRack.Record);
+        }
+
         private static bool ShelfPending(GameInstance current, string street, int number)
+        {
+            return FurniturePending(current, street, number, StorageShelf.Item);
+        }
+
+        private static bool FurniturePending(GameInstance current, string street, int number, string itemName)
         {
             if (current.FurnitureDeliveryContracts == null)
             {
@@ -344,7 +411,7 @@ namespace ChaoticCEO
 
                 foreach (var item in contract.itemsToDeliver)
                 {
-                    if (item != null && item.itemName == StorageShelf.Item)
+                    if (item != null && item.itemName == itemName)
                     {
                         return true;
                     }

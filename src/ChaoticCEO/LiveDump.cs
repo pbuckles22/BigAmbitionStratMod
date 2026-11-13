@@ -875,7 +875,8 @@ namespace ChaoticCEO
 
             if (!CapacityBridge.Live(registration, matched))
             {
-                return null;
+                watch.Mark(current);
+                return Capacity.Miss(localAppData, matched, current.Day);
             }
 
             watch.Mark(current);
@@ -1762,7 +1763,7 @@ namespace ChaoticCEO
 
                     if (!CapacityBridge.Live(registration, matched))
                     {
-                        return null;
+                        return Capacity.Miss(localAppData, matched, current.Day);
                     }
 
                     return Capacity.Record(localAppData, matched, current.Day);

@@ -8,7 +8,7 @@
 
 ## Summary
 
-**BigAmbitionStratMod** — Version **1.17.8.3**. Paper-bag cover uses register floor **1000** and never clips to free space. Human PASS 2026-11-12. **14.9** still needs the 85% rack and the capacity-miss log. **14.4** waits. Epic 10 stays open. **10.4** still waits on **14.4**. The **10.4** code stays stashed. **7.9–7.12** stay. **7.13** is **14.6**. Rules: [requirements/strategy.md](requirements/strategy.md).
+**BigAmbitionStratMod** — Version **1.17.9**. 85% rack order and capacity-miss log are live. Human PASS 2026-11-12. **14.9** still needs the Stage 2 second register. **14.4** waits. Epic 10 stays open. **10.4** still waits on **14.4**. The **10.4** code stays stashed. **7.9–7.12** stay. **7.13** is **14.6**. Rules: [requirements/strategy.md](requirements/strategy.md).
 
 ---
 
@@ -16,9 +16,10 @@
 
 | Branch | Role |
 |--------|------|
-| **`main`** | Integration branch. Version 1.17.8.3. Land `046ec2f`. Paper register floor 1000; no paper free-space clip. Human PASS 2026-11-12. |
+| **`main`** | Integration branch. Version 1.17.9. Land sha after CMPH. 85% rack + capacity-miss. Human PASS 2026-11-12. |
+| **`feature/14.9-rack-capacity-miss`** | Story 14.9 rack + capacity-miss. Version 1.17.9. Human PASS 2026-11-12. Kept after CMPH. |
 | **`bug/register-display-paper-supply`** | Paper register under-supply fix. Version 1.17.8.3. Human PASS 2026-11-12. Kept after CMPH. |
-| **`feature/14.9-place-shelf`** | Story 14.9 place slice. Version 1.17.8.1. Human PASS 2026-11-12. Kept after CMPH. 85% rack still open. |
+| **`feature/14.9-place-shelf`** | Story 14.9 place slice. Version 1.17.8.1. Human PASS 2026-11-12. Kept after CMPH. |
 | **`feature/14.16-staffed-cleaner`** | Story 14.16. Version 1.17.6. Human PASS 2026-11-12. Kept after CMPH. |
 | **`feature/14.15-fixture-space`** | Story 14.15. Version 1.17.5. Human PASS 2026-11-12. Kept after CMPH. |
 | **`feature/14.14-staff-watch`** | Story 14.14 cleaner hire and paused bag cover. Version 1.17.3. Human PASS 2026-11-12. Kept after CMPH. |

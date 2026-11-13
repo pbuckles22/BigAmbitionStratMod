@@ -61,6 +61,21 @@ namespace ChaoticCEO
             return AppendOnce(localAppData, line);
         }
 
+        public static string Miss(string localAppData, CapacityPick? pick, int day)
+        {
+            if (pick == null || !pick.Matched)
+            {
+                return "";
+            }
+
+            var line = "capacity.missed version=" + LoadLog.Version
+                + " day=" + day.ToString(CultureInfo.InvariantCulture)
+                + " street=" + pick.Street
+                + " number=" + pick.Number.ToString(CultureInfo.InvariantCulture)
+                + " call=" + pick.Call;
+            return AppendOnce(localAppData, line);
+        }
+
         private static string AppendOnce(string localAppData, string line)
         {
             var path = LoadLog.CeoLogPath(localAppData ?? "");

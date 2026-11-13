@@ -235,6 +235,7 @@ public class GameApiTests
             api.Call("rival takeover decline"));
         Assert.Equal("Helpers.BusinessHelper.UpdateCustomerCapacity", api.Call("capacity fixtures"));
         var live = GameApi.Live();
+        Assert.Equal("Entities.FurnitureDeliveryContract", live.Call("storage rack"));
         Assert.Equal(api.Call("cashier"), live.Call("cashier"));
         Assert.Equal(api.Call("loan"), live.Call("loan"));
         Assert.Equal(api.Call("loan repay"), live.Call("loan repay"));

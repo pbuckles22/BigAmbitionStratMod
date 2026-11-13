@@ -857,3 +857,17 @@ Human PASS 2026-11-12 on 1.17.8.1 at 22 7th Avenue. `mod.loaded version=1.17.8.1
 Tier 1: `Cover_day_1575_register_1000_keeps_the_display_above_half`, `Cover_day_1571_paper_keeps_the_full_line_past_register_free_space`. Chain: `open days → burn → register floor → full line → playbook`. RegisterCap is 1000. Paper need is target − onHand with cap=0. Goods still cut to free space.
 
 Human PASS 2026-11-12 on 1.17.8.3 at 22 7th Avenue. Day 1575 `target=1166` `need=1050`. Day 1576 `onHand=1166` `target=1166` `need=10`. Days 1577–1579 stayed above 1000 on hand.
+
+## Story 14.9 — 85% rack and capacity-miss log
+
+Tier 1: `Rack_orders_when_spend_room_and_target_reach_eighty_five_percent_of_fixture_space`, `Rack_leaves_the_store_alone_when_spend_room_target_or_floor_block_it`, `Capacity_a_failed_call_logs_one_miss_and_does_not_spam`, `Capacity_miss_skips_an_unmatched_pick`. Chain: `target vs cap → rack`, `spend room → target vs cap → rack`, and `layout → capacity match → miss`. Spend room at least **RackSpendRoom** = $2,500 and target at least **RackTriggerRatio** = 85% of fixture space orders one `ba:itemname_storagerack` from Hampton. A failed capacity call logs one `capacity.missed` line and marks the watch so it does not retry every frame. This does not add a second register.
+
+Human check. The gift shop at 22 7th Avenue, the next morning, with spend room at least $2,500 and a goods target at or above 85% of that item’s fixture space.
+
+1. Restart Big Ambitions so this build loads. Continue the same save at 22 7th Avenue. Let one morning pass.
+2. Open `%LocalAppData%\ChaoticCEO\ceo.log`. Find `mod.loaded` and any new `rack.ordered` or `capacity.missed` line.
+3. **PASS if** `mod.loaded version=1.17.9`, and either that morning has `rack.ordered` for `item=ba:itemname_storagerack` `number=22`, or no goods target is at 85% yet and the morning still has no frame-spam of `capacity.missed`. **FAIL if** the version is still 1.17.8.3, or `capacity.missed` repeats every frame for the same day.
+4. Evidence: at most one `capacity.missed` per day/street/number/call. `rack.ordered ... item=ba:itemname_storagerack` when the 85% trigger fired.
+5. Version marker: public `1.17.9`.
+
+Human PASS 2026-11-12 on 1.17.9 at 22 7th Avenue. `mod.loaded version=1.17.9 build=3682`. Day 1579 `rack.ordered` `item=ba:itemname_storagerack` `amount=1` `price=1200` `number=22` `fromNumber=13`. No `capacity.missed` frame spam.

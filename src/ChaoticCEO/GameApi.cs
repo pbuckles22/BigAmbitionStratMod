@@ -99,6 +99,7 @@ namespace ChaoticCEO
                 ["rival takeover decline"] = "UI.Smartphone.Apps.BizMan.RealEstateSettings.CancelForSale",
                 ["capacity fixtures"] = "Helpers.BusinessHelper.UpdateCustomerCapacity",
                 ["storage shelf"] = "Entities.FurnitureDeliveryContract",
+                ["storage rack"] = "Entities.FurnitureDeliveryContract",
                 ["place shelf"] = "BuildingRegistration.AddItemInstanceToBuilding",
             };
             return new ApiNote(
