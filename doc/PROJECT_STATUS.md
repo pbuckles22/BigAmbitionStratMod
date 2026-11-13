@@ -106,7 +106,7 @@
 | **`feature/chain-prefix`** | Kept after CMPH (template history) |
 | **`feature/handoff-receiver-framing`** | Kept after CMPH (template history) |
 
-**Last land:** pending CMPH sha. Version 1.17.8.1. Branch `feature/14.9-place-shelf` kept. Repo: https://github.com/pbuckles22/BigAmbitionStratMod.
+**Last land:** `42978e4` on `main`. Version 1.17.8.1. Branch `feature/14.9-place-shelf` kept. Repo: https://github.com/pbuckles22/BigAmbitionStratMod.
 
 ---
 
