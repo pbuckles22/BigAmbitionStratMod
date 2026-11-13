@@ -16,7 +16,7 @@
 
 | Branch | Role |
 |--------|------|
-| **`main`** | Integration branch. Version 1.17.8.3. Paper register floor 1000; no paper free-space clip. Human PASS 2026-11-12. |
+| **`main`** | Integration branch. Version 1.17.8.3. Land `046ec2f`. Paper register floor 1000; no paper free-space clip. Human PASS 2026-11-12. |
 | **`bug/register-display-paper-supply`** | Paper register under-supply fix. Version 1.17.8.3. Human PASS 2026-11-12. Kept after CMPH. |
 | **`feature/14.9-place-shelf`** | Story 14.9 place slice. Version 1.17.8.1. Human PASS 2026-11-12. Kept after CMPH. 85% rack still open. |
 | **`feature/14.16-staffed-cleaner`** | Story 14.16. Version 1.17.6. Human PASS 2026-11-12. Kept after CMPH. |
