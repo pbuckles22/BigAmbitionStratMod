@@ -16,7 +16,7 @@
 
 | Branch | Role |
 |--------|------|
-| **`main`** | Integration branch. Version 1.17.9. Land `4f98165`. 85% rack + capacity-miss. Human PASS 2026-11-12. |
+| **`main`** | Integration branch. Version 1.17.9. Land `55114a5`. 85% rack + capacity-miss. Human PASS 2026-11-12. |
 | **`feature/14.9-rack-capacity-miss`** | Story 14.9 rack + capacity-miss. Version 1.17.9. Human PASS 2026-11-12. Kept after CMPH. |
 | **`bug/register-display-paper-supply`** | Paper register under-supply fix. Version 1.17.8.3. Human PASS 2026-11-12. Kept after CMPH. |
 | **`feature/14.9-place-shelf`** | Story 14.9 place slice. Version 1.17.8.1. Human PASS 2026-11-12. Kept after CMPH. |
