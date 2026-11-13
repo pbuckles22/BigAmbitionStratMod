@@ -149,6 +149,7 @@ namespace ChaoticCEO
             var rackTarget = 0;
             var rackCap = 0;
             CoverPlan? replacement = null;
+            var stocks = new List<ShelfStock>();
             var shelves = Shelves(building);
             foreach (var item in contract.items)
             {
@@ -204,8 +205,14 @@ namespace ChaoticCEO
                 // Paper bags live on the register, not storage shelves.
                 if (item.itemName != Wholesaler.PaperBag)
                 {
-                    spacesNeeded += StorageShelf.SpacesNeeded(onHand, plan.Need);
+                    var units = StorageShelf.SpacesNeeded(onHand, plan.Need);
+                    spacesNeeded += units;
                     displayCap += sellingCap;
+                    stocks.Add(new ShelfStock(
+                        item.itemName,
+                        units,
+                        StorageShelfBridge.DisplayCapacity(building, item.itemName),
+                        StorageShelfBridge.BoxSize(item.itemName)));
                 }
 
                 if (sellingCap > 0
@@ -222,7 +229,9 @@ namespace ChaoticCEO
                 }
             }
 
-            if (AttendShelf(localAppData, day, contract, building, spacesNeeded, displayCap, cash))
+            var boxesNeeded = StorageShelf.BoxesNeeded(stocks);
+            RecordBoxes(localAppData, day, contract, building, stocks, boxesNeeded);
+            if (AttendShelf(localAppData, day, contract, building, spacesNeeded, displayCap, boxesNeeded, cash))
             {
                 touched = true;
             }
@@ -250,78 +259,338 @@ namespace ChaoticCEO
             BuildingRegistration? building,
             int spacesNeeded,
             int displayCap,
+            int boxesNeeded,
             decimal cash)
         {
             var current = SaveGameManager.Current;
-            if (current == null || contract.businessAddress == null)
+            if (current == null || contract.businessAddress == null || building == null)
             {
                 return false;
             }
 
             var street = contract.businessAddress.streetName;
             var number = contract.businessAddress.streetNumber;
+            var pendingAmount = PendingShelfAmount(current, street, number);
             var pending = ShelfPending(current, street, number);
-            var placed = 0;
-            // Place loop: drain cargo first. Buy at most one shelf per morning so the next
-            // cover waits for delivery + place (no cargo pile while midnight races 08:00 truck).
+            var placedCap = displayCap
+                + EmptySellingCapacity(building)
+                + (StorageShelfBridge.PlacedCount(building) * StorageShelf.UnitCapacity);
+            var need = StorageShelf.NeedShelves(boxesNeeded, spacesNeeded, placedCap);
+            var spareSeats = StorageShelfBridge.CanSpare(building, need);
+            var keep = StorageShelf.KeepTarget(need, spareSeats);
+            var cargo = StorageShelfBridge.BoxedCount(building);
+            var placedCount = StorageShelfBridge.PlacedCount(building);
+            var have = StorageShelf.Have(placedCount, cargo, pendingAmount);
+            RecordKeep(localAppData, day, street, number, boxesNeeded, need, keep, placedCount, cargo, pendingAmount, have, spareSeats);
+
+            var excess = StorageShelf.Excess(have, keep);
+            var sellPlan = StorageShelf.DecideSell(
+                excess,
+                cargo,
+                StorageShelfBridge.EmptyPlacedCount(building),
+                StorageShelfBridge.StockedPlacedCount(building));
+
+            if (sellPlan.Cargo > 0)
+            {
+                var sold = StorageShelfBridge.SellCargo(building, sellPlan.Cargo, out var price);
+                if (sold > 0)
+                {
+                    cargo = StorageShelfBridge.BoxedCount(building);
+                    placedCount = StorageShelfBridge.PlacedCount(building);
+                    have = StorageShelf.Have(placedCount, cargo, pendingAmount);
+                    RecordSold(
+                        localAppData,
+                        day,
+                        street,
+                        number,
+                        "cargo",
+                        sold,
+                        price,
+                        keep,
+                        have,
+                        "ICargoHolder.RemoveFromCargo+GameManager.ChangeMoneySafe");
+                }
+            }
+
+            var packed = StorageShelfBridge.PackForReseat(building, keep, out var packedRows);
+            foreach (var row in packedRows)
+            {
+                RecordPacked(localAppData, day, street, number, row.x, row.z, row.yaw, row.reason);
+            }
+
+            var placedDone = 0;
             for (var tries = 0; tries < StorageShelf.Boxes; tries++)
             {
-                var inCargo = StorageShelfBridge.InCargo(building);
-                var boxed = StorageShelfBridge.BoxedCount(building);
-                var inboundShelves = boxed + PendingShelfAmount(current, street, number);
-                // displayCap is assigned selling fixtures; empty stands still hold units after unbox.
-                var placedCap = displayCap
-                    + EmptySellingCapacity(building)
-                    + (StorageShelfBridge.PlacedCount(building) * StorageShelf.UnitCapacity);
-                var shelvesNeeded = StorageShelf.ShelvesToOrder(spacesNeeded, placedCap, inboundShelves);
-                if (shelvesNeeded > 1)
+                if (StorageShelfBridge.PlacedCount(building) >= keep)
                 {
-                    shelvesNeeded = 1;
+                    break;
                 }
 
-                // Place every boxed shelf before buying another. Pending truck also blocks buy.
-                if (!inCargo && (placed > 0 || shelvesNeeded <= 0 || pending))
+                if (!StorageShelfBridge.InCargo(building))
                 {
-                    return placed > 0;
+                    break;
                 }
 
                 var seat = StorageShelfBridge.Seat(building);
                 var attend = StorageShelf.Attend(
                     street,
                     number,
-                    shelvesNeeded,
-                    inCargo,
-                    pending,
+                    shelvesNeeded: 0,
+                    inCargo: true,
+                    pending: false,
                     cash,
                     seat,
                     GameApi.Live());
-                if (attend.Action == ShelfAction.Place && building != null)
+                if (attend.Action != ShelfAction.Place)
                 {
-                    if (!StorageShelfBridge.Place(building, attend.Seat, out var reason))
-                    {
-                        attend = new ShelfAttend(ShelfAction.Hold, street, number, true, attend.Seat, attend.Pick, "", reason);
-                        Note(localAppData, attend, day);
-                        // Room full or cargo stuck — never order more into the pile.
-                        return placed > 0;
-                    }
-
-                    placed++;
                     Note(localAppData, attend, day);
-                    continue;
+                    break;
                 }
 
-                Note(localAppData, attend, day);
-                if (attend.Action == ShelfAction.Hold)
+                if (!StorageShelfBridge.Place(building, attend.Seat, out var reason))
                 {
-                    return placed > 0;
+                    attend = new ShelfAttend(ShelfAction.Hold, street, number, true, attend.Seat, ShelfPick.None(), "", reason);
+                    Note(localAppData, attend, day);
+                    break;
                 }
 
-                return attend.Action == ShelfAction.Order
-                    ? OrderShelf(localAppData, day, current, attend.Pick) || placed > 0
-                    : placed > 0;
+                placedDone++;
+                Note(localAppData, attend, day);
             }
 
-            return placed > 0;
+            cargo = StorageShelfBridge.BoxedCount(building);
+            placedCount = StorageShelfBridge.PlacedCount(building);
+            have = StorageShelf.Have(placedCount, cargo, pendingAmount);
+            excess = StorageShelf.Excess(have, keep);
+            sellPlan = StorageShelf.DecideSell(
+                excess,
+                cargo,
+                StorageShelfBridge.EmptyPlacedCount(building),
+                StorageShelfBridge.StockedPlacedCount(building));
+            if (sellPlan.Cargo > 0)
+            {
+                var sold = StorageShelfBridge.SellCargo(building, sellPlan.Cargo, out var price);
+                if (sold > 0)
+                {
+                    have = StorageShelf.Have(
+                        StorageShelfBridge.PlacedCount(building),
+                        StorageShelfBridge.BoxedCount(building),
+                        pendingAmount);
+                    RecordSold(
+                        localAppData,
+                        day,
+                        street,
+                        number,
+                        "cargo",
+                        sold,
+                        price,
+                        keep,
+                        have,
+                        "ICargoHolder.RemoveFromCargo+GameManager.ChangeMoneySafe");
+                }
+            }
+
+            if (sellPlan.EmptyPlaced > 0)
+            {
+                var sold = StorageShelfBridge.SellEmptyPlaced(building, sellPlan.EmptyPlaced, out var price);
+                if (sold > 0)
+                {
+                    have = StorageShelf.Have(
+                        StorageShelfBridge.PlacedCount(building),
+                        StorageShelfBridge.BoxedCount(building),
+                        pendingAmount);
+                    RecordSold(
+                        localAppData,
+                        day,
+                        street,
+                        number,
+                        "placed",
+                        sold,
+                        price,
+                        keep,
+                        have,
+                        "BuildingRegistration.RemoveItemInstanceFromBuilding+GameManager.ChangeMoneySafe");
+                }
+            }
+
+            if (sellPlan.HoldStocked)
+            {
+                var hold = new ShelfAttend(
+                    ShelfAction.Hold,
+                    street,
+                    number,
+                    false,
+                    ShelfSeat.None("stocked"),
+                    ShelfPick.None(),
+                    "",
+                    "stocked");
+                Note(localAppData, hold, day);
+            }
+
+            cargo = StorageShelfBridge.BoxedCount(building);
+            placedCount = StorageShelfBridge.PlacedCount(building);
+            have = StorageShelf.Have(placedCount, cargo, pendingAmount);
+            var orderAmount = StorageShelf.OrderForKeep(keep, have);
+            if (orderAmount <= 0 || pending)
+            {
+                return placedDone > 0 || packed > 0;
+            }
+
+            var pick = StorageShelf.Order(street, number, orderAmount, cash, pending, inCargo: false, seat: true, GameApi.Live());
+            if (!pick.Ordered)
+            {
+                var seat = StorageShelfBridge.Seat(building);
+                if (!seat.Found)
+                {
+                    Note(
+                        localAppData,
+                        new ShelfAttend(ShelfAction.Hold, street, number, false, seat, ShelfPick.None(), "", seat.Reason),
+                        day);
+                }
+
+                return placedDone > 0 || packed > 0;
+            }
+
+            var orderAttend = new ShelfAttend(
+                ShelfAction.Order,
+                street,
+                number,
+                false,
+                StorageShelfBridge.Seat(building),
+                pick,
+                pick.Call,
+                "");
+            Note(localAppData, orderAttend, day);
+            return OrderShelf(localAppData, day, current, pick) || placedDone > 0 || packed > 0;
+        }
+
+        private static void RecordBoxes(
+            string? localAppData,
+            int day,
+            DeliveryContract contract,
+            BuildingRegistration? building,
+            IReadOnlyList<ShelfStock> stocks,
+            int boxesNeeded)
+        {
+            if (string.IsNullOrEmpty(localAppData) || building == null || contract.businessAddress == null || stocks.Count == 0)
+            {
+                return;
+            }
+
+            var street = contract.businessAddress.streetName;
+            var number = contract.businessAddress.streetNumber;
+            var path = LoadLog.CeoLogPath(localAppData!);
+            var directory = Path.GetDirectoryName(path);
+            if (!string.IsNullOrEmpty(directory))
+            {
+                Directory.CreateDirectory(directory);
+            }
+
+            foreach (var stock in stocks)
+            {
+                File.AppendAllText(path, StorageShelf.BoxLine(stock, day, street, number) + System.Environment.NewLine);
+            }
+
+            var needShelves = StorageShelf.NeedShelves(boxesNeeded, spacesNeeded: 0, placedCap: 0);
+            var keep = StorageShelf.KeepTarget(needShelves, StorageShelfBridge.CanSpare(building, needShelves));
+            var need = StorageShelf.NeedLine(
+                day,
+                street,
+                number,
+                boxesNeeded,
+                StorageShelfBridge.PlacedCount(building),
+                StorageShelfBridge.UsedSlots(building),
+                keep);
+            File.AppendAllText(path, need + System.Environment.NewLine);
+        }
+
+        private static void RecordKeep(
+            string? localAppData,
+            int day,
+            string? street,
+            int number,
+            int boxes,
+            int need,
+            int keep,
+            int placed,
+            int cargo,
+            int pending,
+            int have,
+            bool spareSeats)
+        {
+            if (string.IsNullOrEmpty(localAppData))
+            {
+                return;
+            }
+
+            var path = LoadLog.CeoLogPath(localAppData!);
+            var directory = Path.GetDirectoryName(path);
+            if (!string.IsNullOrEmpty(directory))
+            {
+                Directory.CreateDirectory(directory);
+            }
+
+            File.AppendAllText(
+                path,
+                StorageShelf.KeepLine(day, street, number, boxes, need, keep, placed, cargo, pending, have, spareSeats)
+                    + System.Environment.NewLine);
+        }
+
+        private static void RecordSold(
+            string? localAppData,
+            int day,
+            string? street,
+            int number,
+            string where,
+            int amount,
+            float price,
+            int keep,
+            int haveAfter,
+            string call)
+        {
+            if (string.IsNullOrEmpty(localAppData) || amount <= 0)
+            {
+                return;
+            }
+
+            var path = LoadLog.CeoLogPath(localAppData!);
+            var directory = Path.GetDirectoryName(path);
+            if (!string.IsNullOrEmpty(directory))
+            {
+                Directory.CreateDirectory(directory);
+            }
+
+            File.AppendAllText(
+                path,
+                StorageShelf.SoldLine(day, street, number, where, amount, price, keep, haveAfter, call)
+                    + System.Environment.NewLine);
+        }
+
+        private static void RecordPacked(
+            string? localAppData,
+            int day,
+            string? street,
+            int number,
+            float x,
+            float z,
+            float yaw,
+            string reason)
+        {
+            if (string.IsNullOrEmpty(localAppData))
+            {
+                return;
+            }
+
+            var path = LoadLog.CeoLogPath(localAppData!);
+            var directory = Path.GetDirectoryName(path);
+            if (!string.IsNullOrEmpty(directory))
+            {
+                Directory.CreateDirectory(directory);
+            }
+
+            File.AppendAllText(
+                path,
+                StorageShelf.PackedLine(day, street, number, x, z, yaw, reason) + System.Environment.NewLine);
         }
 
         private static void Note(string? localAppData, ShelfAttend attend, int day)

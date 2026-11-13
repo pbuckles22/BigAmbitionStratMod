@@ -2,13 +2,13 @@
 
 **Human-readable current state.** Keep in sync with [AGENT_HANDOFF.md](../AGENT_HANDOFF.md) → *Current state* when milestones ship.
 
-**Last updated:** 2026-11-12
+**Last updated:** 2026-11-13
 
 ---
 
 ## Summary
 
-**BigAmbitionStratMod** — Version **1.17.9** on `main`. **14.9** layout WIP **1.17.9.7** parked on `bug/soda-display-free-space` after human FAIL (Size still `depth=0.50`). Still needs Size/place fix, then the Stage 2 second register. **14.4** waits. Epic 10 stays open. **10.4** code stays stashed. Rules: [requirements/strategy.md](requirements/strategy.md).
+**BigAmbitionStratMod** — Version **1.17.9** on `main`. **14.9** keep/sell/reseat WIP **1.17.9.9** parked on `bug/soda-display-free-space` after human FAIL (`keep=2` but `placed=1`; new-game aisle blocked). Next: pack-before-sell + live-footprint aisle. Stage 2 second register waits. **14.4** waits. Epic 10 stays open. **10.4** code stays stashed. Rules: [requirements/strategy.md](requirements/strategy.md).
 
 ---
 
@@ -17,7 +17,8 @@
 | Branch | Role |
 |--------|------|
 | **`main`** | Integration branch. Version 1.17.9. Land `55114a5`. 85% rack + capacity-miss. Human PASS 2026-11-12. |
-| **`bug/soda-display-free-space`** | 14.9 shelf layout 1.17.9.7. Human FAIL 2026-11-13 (Size `depth=0.50`). UCPH park. Not on `main`. |
+| **`bug/soda-display-free-space`** | 14.9 keep/sell/reseat 1.17.9.9. Human FAIL 2026-11-13 (placed under keep; aisle). UCPH park. Not on `main`. |
+| **`feature/staff-hold-cheat`** | Staff-hold test cheat parked off the shelf branch. Not wired. |
 | **`feature/14.9-rack-capacity-miss`** | Story 14.9 rack + capacity-miss. Version 1.17.9. Human PASS 2026-11-12. Kept after CMPH. |
 | **`bug/register-display-paper-supply`** | Paper register under-supply fix. Version 1.17.8.3. Human PASS 2026-11-12. Kept after CMPH. |
 | **`feature/14.9-place-shelf`** | Story 14.9 place slice. Version 1.17.8.1. Human PASS 2026-11-12. Kept after CMPH. |

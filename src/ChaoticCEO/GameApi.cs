@@ -101,6 +101,9 @@ namespace ChaoticCEO
                 ["storage shelf"] = "Entities.FurnitureDeliveryContract",
                 ["storage rack"] = "Entities.FurnitureDeliveryContract",
                 ["place shelf"] = "BuildingRegistration.AddItemInstanceToBuilding",
+                ["sell shelf cargo"] = "ICargoHolder.RemoveFromCargo+GameManager.ChangeMoneySafe",
+                ["sell shelf placed"] = "BuildingRegistration.RemoveItemInstanceFromBuilding+GameManager.ChangeMoneySafe",
+                ["pack shelf"] = "ItemInstance.ConvertToCargoInstance",
             };
             return new ApiNote(
                 LoadLog.PinnedBuild,

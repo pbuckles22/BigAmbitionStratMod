@@ -582,6 +582,229 @@ public class StorageShelfTests
     }
 
     [Fact]
+    public void StorageBoxes_counts_only_units_the_displays_cannot_hold_in_whole_boxes()
+    {
+        Assert.Equal(8, StorageShelf.StorageBoxes(units: 346, displayCap: 200, boxSize: 20));
+        Assert.Equal(1, StorageShelf.StorageBoxes(units: 201, displayCap: 200, boxSize: 20));
+        Assert.Equal(0, StorageShelf.StorageBoxes(units: 200, displayCap: 200, boxSize: 20));
+        Assert.Equal(0, StorageShelf.StorageBoxes(units: 50, displayCap: 200, boxSize: 20));
+        Assert.Equal(0, StorageShelf.StorageBoxes(units: 346, displayCap: 0, boxSize: 0));
+    }
+
+    [Fact]
+    public void BoxesNeeded_is_unknown_when_any_item_has_no_box_size()
+    {
+        var known = new[] { new ShelfStock("a", 346, 200, 20), new ShelfStock("b", 256, 96, 24) };
+        var blind = new[] { new ShelfStock("a", 346, 200, 20), new ShelfStock("b", 256, 96, 0) };
+
+        Assert.Equal(8 + 7, StorageShelf.BoxesNeeded(known));
+        Assert.Equal(-1, StorageShelf.BoxesNeeded(blind));
+        Assert.Equal(0, StorageShelf.BoxesNeeded(Array.Empty<ShelfStock>()));
+    }
+
+    [Fact]
+    public void ShelvesForBoxes_uses_sixteen_slots_per_shelf()
+    {
+        Assert.Equal(0, StorageShelf.ShelvesForBoxes(0));
+        Assert.Equal(1, StorageShelf.ShelvesForBoxes(1));
+        Assert.Equal(1, StorageShelf.ShelvesForBoxes(16));
+        Assert.Equal(2, StorageShelf.ShelvesForBoxes(17));
+        Assert.Equal(4, StorageShelf.ShelvesForBoxes(64));
+    }
+
+    [Fact]
+    public void ShelvesToOrderByBoxes_counts_placed_and_inbound_shelves_first()
+    {
+        Assert.Equal(1, StorageShelf.ShelvesToOrderByBoxes(boxesNeeded: 20, placedShelves: 1, inboundShelves: 0));
+        Assert.Equal(0, StorageShelf.ShelvesToOrderByBoxes(boxesNeeded: 20, placedShelves: 1, inboundShelves: 1));
+        Assert.Equal(0, StorageShelf.ShelvesToOrderByBoxes(boxesNeeded: 12, placedShelves: 4, inboundShelves: 0));
+        Assert.Equal(2, StorageShelf.ShelvesToOrderByBoxes(boxesNeeded: 40, placedShelves: 1, inboundShelves: 0));
+    }
+
+    [Fact]
+    public void ShelvesNeeded_box_math_wins_over_unit_math_when_box_sizes_are_known()
+    {
+        // Unit math (100/shelf) says 3 short; 12 boxes fit the one placed shelf.
+        Assert.Equal(3, StorageShelf.ShelvesToOrder(spacesNeeded: 400, placedCapacity: 100, boxedShelves: 0));
+        Assert.Equal(0, StorageShelf.ShelvesNeeded(boxesNeeded: 12, placedShelves: 1, inboundShelves: 0, spacesNeeded: 400, placedCap: 100));
+        // Unknown box size falls back to the unit math.
+        Assert.Equal(3, StorageShelf.ShelvesNeeded(boxesNeeded: -1, placedShelves: 1, inboundShelves: 0, spacesNeeded: 400, placedCap: 100));
+    }
+
+    [Fact]
+    public void Need_line_names_boxes_shelves_spare_and_the_verdict()
+    {
+        Assert.Equal(
+            "shelf.need version=" + LoadLog.Version
+                + " day=1597 street=ba:street_seventhavenue number=22 boxes=12 shelves=1 keep=2 placed=4 slots=64 used=11 spare=3 verdict=enough",
+            StorageShelf.NeedLine(1597, Street, 22, boxesNeeded: 12, placedShelves: 4, usedSlots: 11, keep: 2));
+        Assert.EndsWith(
+            "boxes=40 shelves=3 keep=4 placed=1 slots=16 used=16 spare=-2 verdict=short",
+            StorageShelf.NeedLine(1597, Street, 22, boxesNeeded: 40, placedShelves: 1, usedSlots: 16, keep: 4));
+        Assert.EndsWith(
+            "boxes=-1 shelves=0 keep=0 placed=4 slots=64 used=11 spare=0 verdict=unknown",
+            StorageShelf.NeedLine(1597, Street, 22, boxesNeeded: -1, placedShelves: 4, usedSlots: 11, keep: 0));
+    }
+
+    [Fact]
+    public void KeepTarget_is_need_plus_one_when_room_has_spare_seat()
+    {
+        Assert.Equal(2, StorageShelf.KeepTarget(need: 1, roomCanSpare: true));
+        Assert.Equal(3, StorageShelf.KeepTarget(need: 2, roomCanSpare: true));
+    }
+
+    [Fact]
+    public void KeepTarget_stays_need_when_room_full_at_need()
+    {
+        Assert.Equal(1, StorageShelf.KeepTarget(need: 1, roomCanSpare: false));
+        Assert.Equal(2, StorageShelf.KeepTarget(need: 2, roomCanSpare: false));
+    }
+
+    [Fact]
+    public void KeepTarget_is_zero_when_need_is_zero()
+    {
+        Assert.Equal(0, StorageShelf.KeepTarget(need: 0, roomCanSpare: true));
+        Assert.Equal(0, StorageShelf.KeepTarget(need: -3, roomCanSpare: true));
+    }
+
+    [Fact]
+    public void Excess_counts_cargo_and_placed_above_keep()
+    {
+        Assert.Equal(34, StorageShelf.Excess(have: StorageShelf.Have(placed: 4, cargo: 32, pending: 0), keep: 2));
+        Assert.Equal(0, StorageShelf.Excess(have: 2, keep: 2));
+        Assert.Equal(0, StorageShelf.Excess(have: 1, keep: 2));
+    }
+
+    [Fact]
+    public void Order_uses_keep_not_bare_need()
+    {
+        // need=1, placed=1, spare seat → keep=2 → order 1
+        Assert.Equal(1, StorageShelf.OrderForKeep(keep: 2, have: 1));
+        // placed already at keep → order 0
+        Assert.Equal(0, StorageShelf.OrderForKeep(keep: 2, have: 2));
+        // far short still caps at one per morning
+        Assert.Equal(1, StorageShelf.OrderForKeep(keep: 4, have: 0));
+    }
+
+    [Fact]
+    public void Sell_prefers_cargo_before_placed()
+    {
+        var plan = StorageShelf.DecideSell(excess: 34, cargo: 32, emptyPlaced: 4, stockedPlaced: 0);
+        Assert.Equal(32, plan.Cargo);
+        Assert.Equal(2, plan.EmptyPlaced);
+        Assert.False(plan.HoldStocked);
+    }
+
+    [Fact]
+    public void Stocked_placed_is_held_not_sold()
+    {
+        var plan = StorageShelf.DecideSell(excess: 2, cargo: 0, emptyPlaced: 0, stockedPlaced: 3);
+        Assert.Equal(0, plan.Cargo);
+        Assert.Equal(0, plan.EmptyPlaced);
+        Assert.True(plan.HoldStocked);
+    }
+
+    [Fact]
+    public void Keep_line_names_need_keep_have_and_spare_seats()
+    {
+        Assert.Equal(
+            "shelf.keep version=" + LoadLog.Version
+                + " day=1588 street=ba:street_seventhavenue number=22 boxes=11 need=1 keep=2 placed=4 cargo=32 pending=0 have=36 spareSeats=true",
+            StorageShelf.KeepLine(1588, Street, 22, boxes: 11, need: 1, keep: 2, placed: 4, cargo: 32, pending: 0, have: 36, spareSeats: true));
+    }
+
+    [Fact]
+    public void Box_line_names_units_display_cap_box_size_and_boxes()
+    {
+        Assert.Equal(
+            "shelf.box version=" + LoadLog.Version
+                + " day=1597 street=ba:street_seventhavenue number=22 item=ba:itemname_cheapgift units=346 displayCap=200 boxSize=20 boxes=8",
+            StorageShelf.BoxLine(new ShelfStock("ba:itemname_cheapgift", 346, 200, 20), 1597, Street, 22));
+    }
+
+    [Fact]
+    public void Storage_four_item_gift_shop_day_1597_needs_two_of_four_placed_shelves()
+    {
+        // Harvest day 1597: units after truck = onHand + need per item; four shelves placed.
+        // Display caps and box sizes are illustrative until shelf.box logs the live values.
+        var stocks = new[]
+        {
+            new ShelfStock("ba:itemname_cheapgift", 187 + 159, 200, 20),
+            new ShelfStock("ba:itemname_cheapflower", 198 + 40, 160, 20),
+            new ShelfStock("ba:itemname_sodacan", 201 + 55, 192, 24),
+            new ShelfStock("ba:itemname_umbrella", 192 + 60, 200, 10),
+        };
+
+        var boxes = StorageShelf.BoxesNeeded(stocks);
+
+        Assert.Equal(8 + 4 + 3 + 6, boxes);
+        Assert.Equal(2, StorageShelf.ShelvesForBoxes(boxes));
+        Assert.Equal(0, StorageShelf.ShelvesToOrderByBoxes(boxes, placedShelves: 4, inboundShelves: 0));
+        var keep = StorageShelf.KeepTarget(StorageShelf.ShelvesForBoxes(boxes), roomCanSpare: true);
+        Assert.Equal(3, keep);
+        Assert.EndsWith(
+            "spare=2 verdict=enough",
+            StorageShelf.NeedLine(1597, Street, 22, boxes, placedShelves: 4, usedSlots: boxes, keep));
+    }
+
+    [Fact]
+    public void Chain_day_roll_cover_box_math_keep_sell_reseat_no_order_when_have_covers_keep()
+    {
+        // Chain: day roll → cover → box math → keep → sell excess → reseat → attend (no order when have>=keep)
+        var day = Morning.CoverDay(null, autopilotOn: true, day: 1597, coveredDay: 1596);
+        var plan = FullFixture(day);
+        var units = StorageShelf.SpacesNeeded(plan.OnHand, plan.Need);
+        var stock = new ShelfStock(Umbrella, units, displayCap: 30, boxSize: 10);
+        var boxes = StorageShelf.BoxesNeeded(new[] { stock });
+        var need = StorageShelf.NeedShelves(boxes, units, placedCap: 30);
+        var keep = StorageShelf.KeepTarget(need, roomCanSpare: true);
+        var have = StorageShelf.Have(placed: 4, cargo: 0, pending: 0);
+        var sell = StorageShelf.DecideSell(StorageShelf.Excess(have, keep), cargo: 0, emptyPlaced: 4, stockedPlaced: 0);
+        var afterSell = have - sell.Cargo - sell.EmptyPlaced;
+        var order = StorageShelf.OrderForKeep(keep, afterSell);
+        var attend = StorageShelf.Attend(Street, 22, order, inCargo: false, pending: false, cash: 292000m, OpenSeat(), GameApi.Live());
+
+        Assert.Equal(1597, day);
+        Assert.True(plan.Need > 0);
+        Assert.True(boxes > 0 && boxes <= 4 * StorageShelf.Boxes);
+        Assert.Equal(need + 1, keep);
+        Assert.True(sell.EmptyPlaced >= 0);
+        Assert.True(afterSell >= keep || sell.HoldStocked);
+        Assert.Equal(0, order);
+        Assert.Equal(ShelfAction.None, attend.Action);
+        Assert.False(attend.Pick.Ordered);
+        Assert.EndsWith(
+            "verdict=enough",
+            StorageShelf.NeedLine(day, Street, 22, boxes, placedShelves: 4, usedSlots: boxes, keep));
+    }
+
+    [Fact]
+    public void Chain_day_roll_cover_box_math_overflowing_one_shelf_orders_toward_keep()
+    {
+        // Chain: day roll → cover → box math → keep → attend (order one toward keep)
+        var day = Morning.CoverDay(null, autopilotOn: true, day: 1598, coveredDay: 1597);
+        var plan = FullFixture(day);
+        var units = StorageShelf.SpacesNeeded(plan.OnHand, plan.Need);
+        // Box size 1 makes every overflow unit its own box — more than 16 slots.
+        var boxes = StorageShelf.BoxesNeeded(new[] { new ShelfStock(Umbrella, units, displayCap: 30, boxSize: 1) });
+        var need = StorageShelf.NeedShelves(boxes, units, placedCap: 30);
+        var keep = StorageShelf.KeepTarget(need, roomCanSpare: true);
+        var have = StorageShelf.Have(placed: 1, cargo: 0, pending: 0);
+        var order = StorageShelf.OrderForKeep(keep, have);
+        var attend = StorageShelf.Attend(Street, 22, order, inCargo: false, pending: false, cash: 292000m, OpenSeat(), GameApi.Live());
+
+        Assert.True(boxes > StorageShelf.Boxes);
+        Assert.True(need >= 2);
+        Assert.Equal(need + 1, keep);
+        Assert.Equal(1, order);
+        Assert.Equal(ShelfAction.Order, attend.Action);
+        Assert.True(attend.Pick.Ordered);
+        Assert.EndsWith(
+            "verdict=short",
+            StorageShelf.NeedLine(day, Street, 22, boxes, placedShelves: 1, usedSlots: 16, keep));
+    }
+
+    [Fact]
     public void Chain_day_roll_short_capacity_order_place_then_the_next_seat_is_the_back_to_back_partner()
     {
         // Chain: day roll → capacity short → order → shelf in cargo → aisle seat → placed → next morning seat

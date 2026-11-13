@@ -907,3 +907,21 @@ Human check. Gift shop at 22 7th Avenue.
 5. Evidence: `shelf.surveyed`, `shelf.placed … yaw=`, `shelf.held reason=full`. Version marker: public `1.17.9.7`.
 
 **Human FAIL 2026-11-13** on 1.17.9.7 at 22 7th Avenue (UCPH park, not CMPH). `mod.loaded version=1.17.9.7`. Day 1588 `shelf.surveyed` lines show `width=2.97 depth=0.50` (half-depth still live — Size fix keyed on small width and missed). All surveyed shelves `yaw=90`. Days 1588–1593: `shelf.held` (`nogrid` once, then `full`); **no** `shelf.placed`; **no** `shelf.ordered` (buy-stop worked). Next: fix Size when depth is about 0.5 (or always force FootprintWidth x FootprintDepth for storage shelves), then re-smoke place.
+
+## 14.9 storage keep = need+1, sell excess, reseat (1.17.9.9)
+
+Finding: live Size `width=2.97 depth=0.50` is the full collider. Buy math uses storage boxes = ceil((units after truck − display cap) / boxSize), 16 slots per shelf. Keep target is `need + 1` when the library row still has a spare seat. Excess cargo and empty placed shelves are sold; blocked shelves pack to cargo and reseat into the 1–aisle–2 stack. Staff hold cheat is parked on `feature/staff-hold-cheat`, not this ship.
+
+Tier 1: box-math tests plus `KeepTarget_*`, `Excess_counts_cargo_and_placed_above_keep`, `Order_uses_keep_not_bare_need`, `Sell_prefers_cargo_before_placed`, `Stocked_placed_is_held_not_sold`, `Keep_line_names_*`. Chains: `day roll → cover → box math → keep → sell excess → reseat → attend` (no order when have≥keep; order one toward keep when short).
+
+Human check. Gift shop at 22 7th Avenue (same save; no new game).
+
+1. Restart Big Ambitions so **1.17.9.9** loads. Continue the save. Confirm `mod.loaded version=1.17.9.9`.
+2. Open cargo if shelves are piled (e.g. 32). Let one morning roll (F6).
+3. Open `%LocalAppData%\ChaoticCEO\ceo.log`.
+4. **PASS if** `shelf.keep` shows `need` and `keep=need` or `need+1`; `have` falls to `keep`; `shelf.sold` accounts for excess cargo/placed; remaining placed shelves are aisle-reachable; no new `shelf.ordered` while `have >= keep`. **FAIL if** cargo stays at 32, `keep` is ignored, a fifth+ shelf stays when `need<=1`, or `shelf.need verdict=unknown` / `boxSize=0`.
+5. Evidence: `shelf.keep`, `shelf.sold`, `shelf.need`, optional `shelf.packed` / `shelf.held reason=stocked`. Version marker: public `1.17.9.9`.
+
+Not in this slice: staff hold; second register; changing live collider constants.
+
+**Human FAIL 2026-11-13** on 1.17.9.9 at 22 7th Avenue (UCPH park). `mod.loaded version=1.17.9.9`. Day 1588: `need=1 keep=2` correct; `shelf.sold` cargo then `shelf.packed` excess ×2 then sold packed cargo + one placed → `haveAfter=2` on paper, but day 1589+ stays `placed=1` (never reseated the spare). Cover spam during F6 logged dozens of `shelf.keep` with cargo ticking down before the batch sell. New-game did place `keep=2` but aisle not walkable (seat still uses 2×1 constants vs live ~3×0.5). Log shows `cashier.replaced reason=absent` (not cleaner quit). Next: do not sell freshly packed shelves before Place reaches `keep`; lock aisle with live footprint; optional staff-hold branch for resign.

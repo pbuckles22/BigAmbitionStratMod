@@ -160,6 +160,276 @@ namespace ChaoticCEO
             return (shortfall + UnitCapacity - 1) / UnitCapacity;
         }
 
+        /// <summary>
+        /// Storage slots one item fills after the truck: units the displays cannot hold, in whole boxes.
+        /// Delivery tops up displays first, then fills boxes of <paramref name="boxSize"/> on storage shelves.
+        /// </summary>
+        public static int StorageBoxes(int units, int displayCap, int boxSize)
+        {
+            if (boxSize <= 0)
+            {
+                return 0;
+            }
+
+            var overflow = units - (displayCap < 0 ? 0 : displayCap);
+            return overflow <= 0 ? 0 : (overflow + boxSize - 1) / boxSize;
+        }
+
+        /// <summary>Sum of <see cref="StorageBoxes"/>, or -1 when any item has no box size (fall back to unit math).</summary>
+        public static int BoxesNeeded(IReadOnlyList<ShelfStock>? stocks)
+        {
+            if (stocks == null)
+            {
+                return 0;
+            }
+
+            var total = 0;
+            foreach (var stock in stocks)
+            {
+                if (stock.BoxSize <= 0)
+                {
+                    return -1;
+                }
+
+                total += stock.Boxes;
+            }
+
+            return total;
+        }
+
+        public static int ShelvesForBoxes(int boxes, int slotsPerShelf = Boxes)
+        {
+            if (boxes <= 0)
+            {
+                return 0;
+            }
+
+            var slots = slotsPerShelf <= 0 ? Boxes : slotsPerShelf;
+            return (boxes + slots - 1) / slots;
+        }
+
+        /// <summary>Shelves to buy so every storage box has a slot. Boxed or pending shelves count as placed.</summary>
+        public static int ShelvesToOrderByBoxes(int boxesNeeded, int placedShelves, int inboundShelves)
+        {
+            var have = (placedShelves < 0 ? 0 : placedShelves) + (inboundShelves < 0 ? 0 : inboundShelves);
+            var missing = ShelvesForBoxes(boxesNeeded) - have;
+            return missing > 0 ? missing : 0;
+        }
+
+        /// <summary>Box math when every box size is known; otherwise the older unit math.</summary>
+        public static int ShelvesNeeded(int boxesNeeded, int placedShelves, int inboundShelves, int spacesNeeded, int placedCap)
+        {
+            return boxesNeeded >= 0
+                ? ShelvesToOrderByBoxes(boxesNeeded, placedShelves, inboundShelves)
+                : ShelvesToOrder(spacesNeeded, placedCap, inboundShelves);
+        }
+
+        /// <summary>
+        /// Shelves to keep on the floor: <c>need</c>, plus one spare when the room still has a seat.
+        /// </summary>
+        public static int KeepTarget(int need, bool roomCanSpare)
+        {
+            if (need <= 0)
+            {
+                return 0;
+            }
+
+            return need + (roomCanSpare ? 1 : 0);
+        }
+
+        /// <summary>Placed + cargo + pending furniture trucks.</summary>
+        public static int Have(int placed, int cargo, int pending)
+        {
+            var p = placed < 0 ? 0 : placed;
+            var c = cargo < 0 ? 0 : cargo;
+            var d = pending < 0 ? 0 : pending;
+            return p + c + d;
+        }
+
+        /// <summary>How many shelves sit above the keep target.</summary>
+        public static int Excess(int have, int keep)
+        {
+            var h = have < 0 ? 0 : have;
+            var k = keep < 0 ? 0 : keep;
+            return h > k ? h - k : 0;
+        }
+
+        /// <summary>Buy at most one shelf per morning toward <paramref name="keep"/>.</summary>
+        public static int OrderForKeep(int keep, int have)
+        {
+            var missing = (keep < 0 ? 0 : keep) - (have < 0 ? 0 : have);
+            if (missing <= 0)
+            {
+                return 0;
+            }
+
+            return missing > 1 ? 1 : missing;
+        }
+
+        /// <summary>
+        /// Sell cargo first, then empty placed shells. Stocked placed shelves are held, never sold.
+        /// </summary>
+        public static ShelfSellPlan DecideSell(int excess, int cargo, int emptyPlaced, int stockedPlaced)
+        {
+            if (excess <= 0)
+            {
+                return ShelfSellPlan.None();
+            }
+
+            var fromCargo = excess < cargo ? excess : (cargo < 0 ? 0 : cargo);
+            if (fromCargo < 0)
+            {
+                fromCargo = 0;
+            }
+
+            var left = excess - fromCargo;
+            var empty = emptyPlaced < 0 ? 0 : emptyPlaced;
+            var fromEmpty = left < empty ? left : empty;
+            if (fromEmpty < 0)
+            {
+                fromEmpty = 0;
+            }
+
+            left -= fromEmpty;
+            var holdStocked = left > 0 && stockedPlaced > 0;
+            return new ShelfSellPlan(fromCargo, fromEmpty, holdStocked);
+        }
+
+        /// <summary>Need in shelves from box math, or unit math when box sizes are unknown.</summary>
+        public static int NeedShelves(int boxesNeeded, int spacesNeeded, int placedCap)
+        {
+            if (boxesNeeded >= 0)
+            {
+                return ShelvesForBoxes(boxesNeeded);
+            }
+
+            return ShelvesToOrder(spacesNeeded, placedCap, boxedShelves: 0);
+        }
+
+        public static string BoxLine(ShelfStock stock, int day, string? street, int number)
+        {
+            return "shelf.box version=" + LoadLog.Version
+                + " day=" + day.ToString(CultureInfo.InvariantCulture)
+                + " street=" + (street ?? "")
+                + " number=" + number.ToString(CultureInfo.InvariantCulture)
+                + " item=" + stock.Item
+                + " units=" + stock.Units.ToString(CultureInfo.InvariantCulture)
+                + " displayCap=" + stock.DisplayCap.ToString(CultureInfo.InvariantCulture)
+                + " boxSize=" + stock.BoxSize.ToString(CultureInfo.InvariantCulture)
+                + " boxes=" + stock.Boxes.ToString(CultureInfo.InvariantCulture);
+        }
+
+        /// <summary>
+        /// Daily verdict: boxes the store needs in storage vs shelves placed. <c>keep</c> is need (+1 spare).
+        /// <c>spare</c> is placed shelves beyond bare need; <c>verdict=short</c> means a delivery can be refunded.
+        /// </summary>
+        public static string NeedLine(int day, string? street, int number, int boxesNeeded, int placedShelves, int usedSlots, int keep)
+        {
+            var shelves = ShelvesForBoxes(boxesNeeded);
+            var known = boxesNeeded >= 0;
+            var verdict = !known ? "unknown" : shelves > placedShelves ? "short" : "enough";
+            var spare = known ? placedShelves - shelves : 0;
+            return "shelf.need version=" + LoadLog.Version
+                + " day=" + day.ToString(CultureInfo.InvariantCulture)
+                + " street=" + (street ?? "")
+                + " number=" + number.ToString(CultureInfo.InvariantCulture)
+                + " boxes=" + boxesNeeded.ToString(CultureInfo.InvariantCulture)
+                + " shelves=" + shelves.ToString(CultureInfo.InvariantCulture)
+                + " keep=" + keep.ToString(CultureInfo.InvariantCulture)
+                + " placed=" + placedShelves.ToString(CultureInfo.InvariantCulture)
+                + " slots=" + (placedShelves * Boxes).ToString(CultureInfo.InvariantCulture)
+                + " used=" + usedSlots.ToString(CultureInfo.InvariantCulture)
+                + " spare=" + spare.ToString(CultureInfo.InvariantCulture)
+                + " verdict=" + verdict;
+        }
+
+        public static string KeepLine(
+            int day,
+            string? street,
+            int number,
+            int boxes,
+            int need,
+            int keep,
+            int placed,
+            int cargo,
+            int pending,
+            int have,
+            bool spareSeats)
+        {
+            return "shelf.keep version=" + LoadLog.Version
+                + " day=" + day.ToString(CultureInfo.InvariantCulture)
+                + " street=" + (street ?? "")
+                + " number=" + number.ToString(CultureInfo.InvariantCulture)
+                + " boxes=" + boxes.ToString(CultureInfo.InvariantCulture)
+                + " need=" + need.ToString(CultureInfo.InvariantCulture)
+                + " keep=" + keep.ToString(CultureInfo.InvariantCulture)
+                + " placed=" + placed.ToString(CultureInfo.InvariantCulture)
+                + " cargo=" + cargo.ToString(CultureInfo.InvariantCulture)
+                + " pending=" + pending.ToString(CultureInfo.InvariantCulture)
+                + " have=" + have.ToString(CultureInfo.InvariantCulture)
+                + " spareSeats=" + (spareSeats ? "true" : "false");
+        }
+
+        public static string SoldLine(
+            int day,
+            string? street,
+            int number,
+            string where,
+            int amount,
+            float price,
+            int keep,
+            int haveAfter,
+            string call)
+        {
+            return "shelf.sold version=" + LoadLog.Version
+                + " day=" + day.ToString(CultureInfo.InvariantCulture)
+                + " street=" + (street ?? "")
+                + " number=" + number.ToString(CultureInfo.InvariantCulture)
+                + " where=" + (where ?? "")
+                + " amount=" + amount.ToString(CultureInfo.InvariantCulture)
+                + " price=" + price.ToString("0.##", CultureInfo.InvariantCulture)
+                + " keep=" + keep.ToString(CultureInfo.InvariantCulture)
+                + " haveAfter=" + haveAfter.ToString(CultureInfo.InvariantCulture)
+                + " call=" + (call ?? "");
+        }
+
+        public static string PackedLine(int day, string? street, int number, float x, float z, float yaw, string reason)
+        {
+            return "shelf.packed version=" + LoadLog.Version
+                + " day=" + day.ToString(CultureInfo.InvariantCulture)
+                + " street=" + (street ?? "")
+                + " number=" + number.ToString(CultureInfo.InvariantCulture)
+                + " x=" + x.ToString("0.00", CultureInfo.InvariantCulture)
+                + " z=" + z.ToString("0.00", CultureInfo.InvariantCulture)
+                + " yaw=" + yaw.ToString("0", CultureInfo.InvariantCulture)
+                + " reason=" + (reason ?? "");
+        }
+
+        public static string ReseatLine(
+            int day,
+            string? street,
+            int number,
+            float fromX,
+            float fromZ,
+            float fromYaw,
+            float toX,
+            float toZ,
+            float toYaw,
+            int keep)
+        {
+            return "shelf.reseat version=" + LoadLog.Version
+                + " day=" + day.ToString(CultureInfo.InvariantCulture)
+                + " street=" + (street ?? "")
+                + " number=" + number.ToString(CultureInfo.InvariantCulture)
+                + " fromX=" + fromX.ToString("0.00", CultureInfo.InvariantCulture)
+                + " fromZ=" + fromZ.ToString("0.00", CultureInfo.InvariantCulture)
+                + " fromYaw=" + fromYaw.ToString("0", CultureInfo.InvariantCulture)
+                + " toX=" + toX.ToString("0.00", CultureInfo.InvariantCulture)
+                + " toZ=" + toZ.ToString("0.00", CultureInfo.InvariantCulture)
+                + " toYaw=" + toYaw.ToString("0", CultureInfo.InvariantCulture)
+                + " keep=" + keep.ToString(CultureInfo.InvariantCulture);
+        }
+
         public static ShelfPick Order(
             string? street,
             int number,
@@ -579,6 +849,17 @@ namespace ChaoticCEO
             return count;
         }
 
+        /// <summary>True when the long face has a clear aisle so a restocker can reach the shelf.</summary>
+        public static bool Accessible(ShelfFloor? floor, ShelfSpot seat, IReadOnlyList<ShelfSpot>? blockers)
+        {
+            if (floor == null)
+            {
+                return false;
+            }
+
+            return FrontAisleClear(floor, seat, blockers ?? System.Array.Empty<ShelfSpot>());
+        }
+
         private static bool FrontAisleClear(ShelfFloor floor, ShelfSpot seat, IReadOnlyList<ShelfSpot> blockers)
         {
             var (fx, fz) = Facing(seat.Yaw);
@@ -922,6 +1203,50 @@ namespace ChaoticCEO
 
             File.AppendAllText(path, line + System.Environment.NewLine);
         }
+    }
+
+    public sealed class ShelfSellPlan
+    {
+        public ShelfSellPlan(int cargo, int emptyPlaced, bool holdStocked)
+        {
+            Cargo = cargo < 0 ? 0 : cargo;
+            EmptyPlaced = emptyPlaced < 0 ? 0 : emptyPlaced;
+            HoldStocked = holdStocked;
+        }
+
+        public int Cargo { get; }
+
+        public int EmptyPlaced { get; }
+
+        public bool HoldStocked { get; }
+
+        public static ShelfSellPlan None()
+        {
+            return new ShelfSellPlan(0, 0, false);
+        }
+    }
+
+    public sealed class ShelfStock
+    {
+        public ShelfStock(string? item, int units, int displayCap, int boxSize)
+        {
+            Item = item ?? "";
+            Units = units < 0 ? 0 : units;
+            DisplayCap = displayCap < 0 ? 0 : displayCap;
+            BoxSize = boxSize;
+        }
+
+        public string Item { get; }
+
+        /// <summary>Units in the store right after the next truck (on hand + inbound).</summary>
+        public int Units { get; }
+
+        /// <summary>Units the selling fixtures hold: ceil(boxSize × fixture cargoCapacityMultiplier) each.</summary>
+        public int DisplayCap { get; }
+
+        public int BoxSize { get; }
+
+        public int Boxes => StorageShelf.StorageBoxes(Units, DisplayCap, BoxSize);
     }
 
     public enum ShelfAction
