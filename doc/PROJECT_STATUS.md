@@ -2,13 +2,13 @@
 
 **Human-readable current state.** Keep in sync with [AGENT_HANDOFF.md](../AGENT_HANDOFF.md) → *Current state* when milestones ship.
 
-**Last updated:** 2026-11-12
+**Last updated:** 2026-11-13
 
 ---
 
 ## Summary
 
-**BigAmbitionStratMod** — Version **1.17.9**. 85% rack order and capacity-miss log are live. Human PASS 2026-11-12. **14.9** still needs the Stage 2 second register. **14.4** waits. Epic 10 stays open. **10.4** still waits on **14.4**. The **10.4** code stays stashed. **7.9–7.12** stay. **7.13** is **14.6**. Rules: [requirements/strategy.md](requirements/strategy.md).
+**BigAmbitionStratMod** — Version **1.17.10**. Per-frame I/O throttle and F9 refresh cache are live. Human PASS 2026-11-13. Open WIP: **14.9** aisle on `bug/soda-display-free-space`. **14.4** waits. Epic 10 stays open. **10.4** still waits on **14.4**. The **10.4** code stays stashed. **7.9–7.12** stay. **7.13** is **14.6**. Rules: [requirements/strategy.md](requirements/strategy.md).
 
 ---
 
@@ -16,7 +16,9 @@
 
 | Branch | Role |
 |--------|------|
-| **`main`** | Integration branch. Version 1.17.9. Land `55114a5`. 85% rack + capacity-miss. Human PASS 2026-11-12. |
+| **`main`** | Integration branch. Version 1.17.10. Per-frame I/O throttle. Human PASS 2026-11-13. |
+| **`fix/per-frame-io-throttle`** | Lag fix. Version 1.17.10. Human PASS 2026-11-13. Kept after CMPH. |
+| **`bug/soda-display-free-space`** | Story 14.9 aisle WIP. Version 1.17.9.10. Not merged. Only remote branch ahead of main. |
 | **`feature/14.9-rack-capacity-miss`** | Story 14.9 rack + capacity-miss. Version 1.17.9. Human PASS 2026-11-12. Kept after CMPH. |
 | **`bug/register-display-paper-supply`** | Paper register under-supply fix. Version 1.17.8.3. Human PASS 2026-11-12. Kept after CMPH. |
 | **`feature/14.9-place-shelf`** | Story 14.9 place slice. Version 1.17.8.1. Human PASS 2026-11-12. Kept after CMPH. |

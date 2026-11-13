@@ -1,6 +1,6 @@
 # PM_PLAN — BigAmbitionStratMod
 
-In-game advisor for one Big Ambitions save, then a new-game guide and autopilot. Version scheme `MAJOR.EPIC.COUNTER`. Current public version **1.17.8.3**. The first ship of a new epic phase is `1.N.1`. When an epic runs after a higher-numbered epic, **EPIC** is `max(shipped_epic) + 1` (Epic 9 after 1.13.x → 1.14.1). Never go backwards.
+In-game advisor for one Big Ambitions save, then a new-game guide and autopilot. Version scheme `MAJOR.EPIC.COUNTER`. Current public version **1.17.10**. The first ship of a new epic phase is `1.N.1`. When an epic runs after a higher-numbered epic, **EPIC** is `max(shipped_epic) + 1` (Epic 9 after 1.13.x → 1.14.1). Never go backwards.
 
 ## Context
 
@@ -182,7 +182,7 @@ Starts after Epic **8**. Crossing **WinNetWorth** is a milestone. The autopilot 
 - **10.6** `[ ]` Stage 3 — clusters + truck pressure. Starts after **14.13**. ≥5 healthy supplied stores; the **14.8** district cap; TruckBusy → service/office; Close after FixDays+RedDays. Stall covers Stage 3 gates. **Out:** Real-estate buy.
 - **10.7** `[ ]` Stage 4 → win. Stage4Cash + all Ready + emptySlots=0; live buy by payback; `win.reached` once; telemetry still advances. Stall covers Stage 4 gates. **Out:** LLM / RL. Rival property buyout stays here, not in **14.8**.
 
-**Next:** **14.9** stays open for the Stage 2 second register. Rack and capacity-miss shipped as **1.17.9**. Place shipped as **1.17.8.1**. Paper register floor fix shipped as **1.17.8.3**. **14.4** waits. The **10.4** tree stays stashed. No `$100M` soak until **10.7**.
+**Next:** Resume **14.9** aisle on `bug/soda-display-free-space` when asked. Per-frame I/O throttle shipped as **1.17.10**. Rack and capacity-miss shipped as **1.17.9**. Place shipped as **1.17.8.1**. Paper register floor fix shipped as **1.17.8.3**. **14.4** waits. The **10.4** tree stays stashed. No `$100M` soak until **10.7**.
 
 ## Epic 14 — Live readings
 
@@ -207,7 +207,7 @@ There is no separate “update the strategy” epic. The notes in `doc/requireme
 - **14.15** `[x]` Fixture space, and one storage shelf when the fixture is full. Each morning the cover reads free space. A goods item’s space is what its shelves can still hold. `cap` is that free space. A goods line larger than free space is cut to it. Paper bags do not clip to register free space (floor **RegisterCap** = 1000). Stock already over the fixture is a line of 0. A full fixture orders one `ba:itemname_storageshelf` (16 boxes, $1,200) from Hampton Supplies at 13 7th Avenue. A pending delivery is not ordered again. Cash under $1,200 orders nothing. The shelf is not placed. Chain: `on hand → free space → line → shelf`. Human PASS 2026-11-12 on 1.17.5 at 22 7th Avenue. `mod.loaded version=1.17.5 build=3682`. `shelf.ordered` day 1519 and day 1521, `amount=1` `price=1200` `fromNumber=13`. Day 1520 did not order while that delivery was open. Day 1521 paper `onHand=192` `need=8` `cap=8`. Gifts stayed `need=0` `cap=0`. `ready=true`, 73 customers, revenue 2230, profit 1546.88. Version 1.17.5. **Out:** placing the shelf (**14.9**), the staffed cleaner (**14.16**).
 - **14.16** `[x]` A later morning leaves a staffed cleaner. A cleaning shift counts as the cleaner still on the station, the same reading as store health. That morning logs nothing. An empty station still logs `cleaner.replaced` `reason=absent`. Chain: `day roll → cleaner on station → no hire`. Human PASS 2026-11-12 on 1.17.6 at 22 7th Avenue. `mod.loaded version=1.17.6 build=3682`. Days 1520–1528: no `cleaner.replaced`, `g3=true`. Day 1528 ready, 74 customers, revenue 2303, profit 1600.11. Version 1.17.6. **Out:** the register hire, placing the shelf (**14.9**).
 
-**Next:** Continue **14.9** for the Stage 2 second register when asked. Rack and capacity-miss are on `main` as 1.17.9. Place is on `main` as 1.17.8.1. After those, the morning heals that are still only counts: guard and dirt (**14.12**), tax (**14.11**), the HR plan write (**14.10**, after **7.9**), and the skipped slot, order, drain, and plan heals (**10.5**). **14.4** waits. `feature/14.9-rack-capacity-miss` stays. Do not stack onto the stashed **10.4** tree.
+**Next:** Resume **14.9** new-game aisle on `bug/soda-display-free-space` when asked. Per-frame I/O throttle is on `main` as 1.17.10. Rack and capacity-miss are on `main` as 1.17.9. Place is on `main` as 1.17.8.1. After aisle, the morning heals that are still only counts: guard and dirt (**14.12**), tax (**14.11**), the HR plan write (**14.10**, after **7.9**), and the skipped slot, order, drain, and plan heals (**10.5**). **14.4** waits. Do not stack onto the stashed **10.4** tree.
 
 Operating model (keep these when you replace this plan): `.cursor/rules/` ship commands (UCPH, CMPH, SWAT), human check, plan-coordinate versioning, long-run harvest (`testing.mdc`), and the chain harness and prefix (`integration-chain.mdc`). Do not delete them to “clean up” a new clone.
 
