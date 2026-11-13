@@ -139,7 +139,7 @@ When shipping: update **PM_PLAN**, **doc/PROJECT_STATUS.md**, and **Current stat
 ## Current state
 
 - **Product:** Version **1.17.9.7** WIP on the feature branch (layout FAIL — Size still `depth=0.50`). Main stays **1.17.9**. Epic 10 stays open. Ladder: [PM_PLAN.md](PM_PLAN.md). Handoff: [doc/handoff/0105-HANDOFF-2026-11-13_1150.md](doc/handoff/0105-HANDOFF-2026-11-13_1150.md).
-- **On:** `bug/soda-display-free-space` (not merged). **10.4** code stays stashed. https://github.com/pbuckles22/BigAmbitionStratMod
+- **On:** `origin/bug/soda-display-free-space @ 08a16b6` (not merged). **10.4** code stays stashed. https://github.com/pbuckles22/BigAmbitionStratMod
 - **Next:** Fix **14.9** storage Size/place (half-depth) when asked. Second register waits. **14.4** waits. No `$100M` soak until **10.7**.
 - **Blockers:** Do not pop the **10.4** stash. **7.9** blocks **14.10**. Do not clip paper to register free space or drop RegisterCap to 200. Do not CMPH 1.17.9.7 until Size+place PASS.
 
