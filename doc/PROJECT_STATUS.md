@@ -16,8 +16,8 @@
 
 | Branch | Role |
 |--------|------|
-| **`main`** | Integration branch. Version 1.17.10. Per-frame I/O throttle. Human PASS 2026-11-13. |
-| **`fix/per-frame-io-throttle`** | Lag fix. Version 1.17.10. Human PASS 2026-11-13. Kept after CMPH. |
+| **`main`** | Integration branch. Version 1.17.10. Land `89b207e`. Per-frame I/O throttle. Human PASS 2026-11-13. |
+| **`fix/per-frame-io-throttle`** | Lag fix. Version 1.17.10. Land `89b207e`. Human PASS 2026-11-13. Kept after CMPH. |
 | **`bug/soda-display-free-space`** | Story 14.9 aisle WIP. Version 1.17.9.10. Not merged. Only remote branch ahead of main. |
 | **`feature/14.9-rack-capacity-miss`** | Story 14.9 rack + capacity-miss. Version 1.17.9. Human PASS 2026-11-12. Kept after CMPH. |
 | **`bug/register-display-paper-supply`** | Paper register under-supply fix. Version 1.17.8.3. Human PASS 2026-11-12. Kept after CMPH. |
