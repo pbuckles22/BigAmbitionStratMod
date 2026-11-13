@@ -1408,173 +1408,22 @@ namespace ChaoticCEO
 
         private static bool LastContract(string localAppData, out string street, out int number, out bool skipped)
         {
-            return LastNamed(localAppData, "contract.signed ", out street, out number, out skipped);
+            return CeoLedger.TryContract(localAppData, out street, out number, out skipped);
         }
 
         private static bool LastCashier(string localAppData, out string street, out int number, out bool skipped)
         {
-            return LastNamed(localAppData, "hire.cashier ", out street, out number, out skipped);
-        }
-
-        private static bool LastNamed(
-            string localAppData,
-            string prefix,
-            out string street,
-            out int number,
-            out bool skipped)
-        {
-            street = "";
-            number = 0;
-            skipped = false;
-            var path = LoadLog.CeoLogPath(localAppData);
-            if (!File.Exists(path))
-            {
-                return false;
-            }
-
-            var found = false;
-            foreach (var line in File.ReadAllLines(path))
-            {
-                if (!line.StartsWith(prefix, System.StringComparison.Ordinal))
-                {
-                    continue;
-                }
-
-                var streetAt = line.IndexOf(" street=", System.StringComparison.Ordinal);
-                var numberAt = line.IndexOf(" number=", System.StringComparison.Ordinal);
-                if (streetAt < 0 || numberAt <= streetAt)
-                {
-                    continue;
-                }
-
-                var parsedStreet = line.Substring(streetAt + " street=".Length, numberAt - (streetAt + " street=".Length));
-                var rest = line.Substring(numberAt + " number=".Length);
-                var stop = rest.IndexOf(' ');
-                var token = stop < 0 ? rest : rest.Substring(0, stop);
-                if (parsedStreet.Length == 0
-                    || !int.TryParse(token, NumberStyles.Integer, CultureInfo.InvariantCulture, out var parsedNumber)
-                    || parsedNumber <= 0)
-                {
-                    continue;
-                }
-
-                street = parsedStreet;
-                number = parsedNumber;
-                skipped = false;
-                found = true;
-            }
-
-            return found;
+            return CeoLedger.TryCashier(localAppData, out street, out number, out skipped);
         }
 
         private static bool LastOps(string localAppData, out string street, out int number, out bool skipped)
         {
-            street = "";
-            number = 0;
-            skipped = false;
-            var path = LoadLog.CeoLogPath(localAppData);
-            if (!File.Exists(path))
-            {
-                return false;
-            }
-
-            var found = false;
-            foreach (var line in File.ReadAllLines(path))
-            {
-                if (line.StartsWith("ops.skipped ", System.StringComparison.Ordinal))
-                {
-                    street = "";
-                    number = 0;
-                    skipped = true;
-                    found = true;
-                    continue;
-                }
-
-                if (!line.StartsWith("ops.assigned ", System.StringComparison.Ordinal))
-                {
-                    continue;
-                }
-
-                var streetAt = line.IndexOf(" street=", System.StringComparison.Ordinal);
-                var numberAt = line.IndexOf(" number=", System.StringComparison.Ordinal);
-                if (streetAt < 0 || numberAt <= streetAt)
-                {
-                    continue;
-                }
-
-                var parsedStreet = line.Substring(streetAt + " street=".Length, numberAt - (streetAt + " street=".Length));
-                var rest = line.Substring(numberAt + " number=".Length);
-                var stop = rest.IndexOf(' ');
-                var token = stop < 0 ? rest : rest.Substring(0, stop);
-                if (parsedStreet.Length == 0
-                    || !int.TryParse(token, NumberStyles.Integer, CultureInfo.InvariantCulture, out var parsedNumber)
-                    || parsedNumber <= 0)
-                {
-                    continue;
-                }
-
-                street = parsedStreet;
-                number = parsedNumber;
-                skipped = false;
-                found = true;
-            }
-
-            return found;
+            return CeoLedger.TryOps(localAppData, out street, out number, out skipped);
         }
 
         private static bool LastLayout(string localAppData, out string street, out int number, out bool skipped)
         {
-            street = "";
-            number = 0;
-            skipped = false;
-            var path = LoadLog.CeoLogPath(localAppData);
-            if (!File.Exists(path))
-            {
-                return false;
-            }
-
-            var found = false;
-            foreach (var line in File.ReadAllLines(path))
-            {
-                if (line.StartsWith("layout.skipped ", System.StringComparison.Ordinal))
-                {
-                    street = "";
-                    number = 0;
-                    skipped = true;
-                    found = true;
-                    continue;
-                }
-
-                if (!line.StartsWith("layout.loaded ", System.StringComparison.Ordinal))
-                {
-                    continue;
-                }
-
-                var streetAt = line.IndexOf(" street=", System.StringComparison.Ordinal);
-                var numberAt = line.IndexOf(" number=", System.StringComparison.Ordinal);
-                if (streetAt < 0 || numberAt <= streetAt)
-                {
-                    continue;
-                }
-
-                var parsedStreet = line.Substring(streetAt + " street=".Length, numberAt - (streetAt + " street=".Length));
-                var rest = line.Substring(numberAt + " number=".Length);
-                var stop = rest.IndexOf(' ');
-                var token = stop < 0 ? rest : rest.Substring(0, stop);
-                if (parsedStreet.Length == 0
-                    || !int.TryParse(token, NumberStyles.Integer, CultureInfo.InvariantCulture, out var parsedNumber)
-                    || parsedNumber <= 0)
-                {
-                    continue;
-                }
-
-                street = parsedStreet;
-                number = parsedNumber;
-                skipped = false;
-                found = true;
-            }
-
-            return found;
+            return CeoLedger.TryLayout(localAppData, out street, out number, out skipped);
         }
 
         private static BuildingRegistration? FindRented(GameInstance current, string street, int number)
@@ -1601,46 +1450,7 @@ namespace ChaoticCEO
 
         private static bool LastRent(string localAppData, out string street, out int number)
         {
-            street = "";
-            number = 0;
-            var path = LoadLog.CeoLogPath(localAppData);
-            if (!File.Exists(path))
-            {
-                return false;
-            }
-
-            var found = false;
-            foreach (var line in File.ReadAllLines(path))
-            {
-                if (!line.StartsWith("building.rented ", System.StringComparison.Ordinal))
-                {
-                    continue;
-                }
-
-                var streetAt = line.IndexOf(" street=", System.StringComparison.Ordinal);
-                var numberAt = line.IndexOf(" number=", System.StringComparison.Ordinal);
-                if (streetAt < 0 || numberAt <= streetAt)
-                {
-                    continue;
-                }
-
-                var parsedStreet = line.Substring(streetAt + " street=".Length, numberAt - (streetAt + " street=".Length));
-                var rest = line.Substring(numberAt + " number=".Length);
-                var stop = rest.IndexOf(' ');
-                var token = stop < 0 ? rest : rest.Substring(0, stop);
-                if (parsedStreet.Length == 0
-                    || !int.TryParse(token, NumberStyles.Integer, CultureInfo.InvariantCulture, out var parsedNumber)
-                    || parsedNumber <= 0)
-                {
-                    continue;
-                }
-
-                street = parsedStreet;
-                number = parsedNumber;
-                found = true;
-            }
-
-            return found;
+            return CeoLedger.TryRent(localAppData, out street, out number);
         }
 
         private static BuildingRegistration? FindLot(GameInstance current, string street, int number)

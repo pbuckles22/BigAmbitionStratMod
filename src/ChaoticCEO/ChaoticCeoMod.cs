@@ -36,6 +36,7 @@ namespace ChaoticCEO
         private bool _hooked;
         private bool _panelFailed;
         private string _localAppData = "";
+        private float _nextTickTime;
 
         public string[] RelativeAssetBundlePaths => Array.Empty<string>();
 
@@ -94,6 +95,12 @@ namespace ChaoticCEO
 
             StopOnHotkey();
             ResumeOnHotkey();
+            if (!FrameTick.Due(Time.unscaledTime, _nextTickTime))
+            {
+                return;
+            }
+
+            _nextTickTime = FrameTick.Next(Time.unscaledTime);
             LiveDump.HoldNeeds(_needs, _localAppData);
             LiveDump.TryRent(_rents, _localAppData);
             LiveDump.TryLayout(_layouts, _localAppData);

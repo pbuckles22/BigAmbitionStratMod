@@ -249,6 +249,7 @@ namespace ChaoticCEO
                 {
                     if (existing == line)
                     {
+                        CeoLedger.Ingest(line);
                         return line;
                     }
                 }
@@ -267,6 +268,7 @@ namespace ChaoticCEO
             }
 
             File.AppendAllText(path, line + System.Environment.NewLine);
+            CeoLedger.Ingest(line);
             return line;
         }
 

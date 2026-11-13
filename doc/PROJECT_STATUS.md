@@ -8,7 +8,7 @@
 
 ## Summary
 
-**BigAmbitionStratMod** — Version **1.17.9** on `main`. **14.9** WIP **1.17.9.10** on `bug/soda-display-free-space`: pack-before-sell + continued keep/aisle PASS; new-game aisle too close next. Then overhire cleaners; then new-game displays empty. Stage 2 second register waits. **14.4** waits. Epic 10 stays open. **10.4** code stays stashed. Rules: [requirements/strategy.md](requirements/strategy.md).
+**BigAmbitionStratMod** — Version **1.17.10** on `main` (I/O throttle PASS 2026-11-13). Open WIP: **14.9** aisle on `bug/soda-display-free-space` (merged onto 1.17.10; new-game aisle too close next). Then overhire; then displays. **14.4** waits. Epic 10 stays open. **10.4** code stays stashed. Rules: [requirements/strategy.md](requirements/strategy.md).
 
 ---
 
@@ -16,8 +16,9 @@
 
 | Branch | Role |
 |--------|------|
-| **`main`** | Integration branch. Version 1.17.9. Land `55114a5`. 85% rack + capacity-miss. Human PASS 2026-11-12. |
-| **`bug/soda-display-free-space`** | 14.9 keep/aisle 1.17.9.10. Continued PASS; new-game aisle FAIL. UCPH park. Not on `main`. |
+| **`main`** | Integration branch. Version 1.17.10. Land `89b207e`. Per-frame I/O throttle. Human PASS 2026-11-13. |
+| **`fix/per-frame-io-throttle`** | Lag fix. Version 1.17.10. Land `89b207e`. Human PASS 2026-11-13. Kept after CMPH. |
+| **`bug/soda-display-free-space`** | 14.9 aisle WIP, merged onto `origin/main` 1.17.10. New-game aisle still open. Not on `main`. |
 | **`feature/staff-hold-cheat`** | Staff-hold test cheat parked off the shelf branch. Not wired. |
 | **`feature/14.9-rack-capacity-miss`** | Story 14.9 rack + capacity-miss. Version 1.17.9. Human PASS 2026-11-12. Kept after CMPH. |
 | **`bug/register-display-paper-supply`** | Paper register under-supply fix. Version 1.17.8.3. Human PASS 2026-11-12. Kept after CMPH. |

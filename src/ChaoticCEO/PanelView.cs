@@ -59,6 +59,8 @@ namespace ChaoticCEO
 
         private string _playbook = "";
 
+        private float _nextRefresh;
+
         public static PanelView Ensure(string localAppData)
         {
             if (_instance == null)
@@ -103,7 +105,10 @@ namespace ChaoticCEO
                 _pendingStreet = "";
                 _pendingNumber = 0;
                 _pendingRedo = "";
+                return;
             }
+
+            RefreshBoard();
         }
 
         private void OnGUI()
@@ -146,6 +151,23 @@ namespace ChaoticCEO
             GUI.color = Color.white;
             GUI.contentColor = Color.white;
             GUI.backgroundColor = Color.white;
+            GUI.DrawTexture(_window, _backdrop);
+            _window = GUILayout.Window(WindowId, _window, DrawWindow, "ChaoticCEO", _windowStyle);
+            var pointer = Event.current == null ? Vector2.zero : Event.current.mousePosition;
+            _pointerInside = _window.Contains(pointer);
+            GUI.color = color;
+            GUI.contentColor = content;
+            GUI.backgroundColor = background;
+        }
+
+        private void RefreshBoard()
+        {
+            if (!LiveDump.InCity())
+            {
+                return;
+            }
+
+            _boardFrame = -1;
             _lines = _session.Draw(BoardNow());
             _draw = Panel.Text(_lines);
             _bar = LiveDump.HudLine();
@@ -156,13 +178,7 @@ namespace ChaoticCEO
             _playbook = Playbook.Line(playbook);
             Playbook.Record(_localAppData, playbook);
             Controls.Record(_localAppData, Controls.Row(Autopilot.Enabled, Autopilot.DryRun));
-            GUI.DrawTexture(_window, _backdrop);
-            _window = GUILayout.Window(WindowId, _window, DrawWindow, "ChaoticCEO", _windowStyle);
-            var pointer = Event.current == null ? Vector2.zero : Event.current.mousePosition;
-            _pointerInside = _window.Contains(pointer);
-            GUI.color = color;
-            GUI.contentColor = content;
-            GUI.backgroundColor = background;
+            _nextRefresh = FrameTick.Next(Time.unscaledTime);
         }
 
         private void Update()
@@ -190,6 +206,18 @@ namespace ChaoticCEO
             }
 
             _f9Held = f9;
+            if (_session.IsOpen && FrameTick.Due(Time.unscaledTime, _nextRefresh))
+            {
+                try
+                {
+                    RefreshBoard();
+                }
+                catch (Exception ex)
+                {
+                    Fail(ex);
+                }
+            }
+
             var held = Panel.HoldWheel(_session.IsOpen, _pointerInside, Input.mouseScrollDelta.y);
             if (held == 0f)
             {
