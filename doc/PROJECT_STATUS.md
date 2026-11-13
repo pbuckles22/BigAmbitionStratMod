@@ -105,7 +105,7 @@
 | **`feature/chain-prefix`** | Kept after CMPH (template history) |
 | **`feature/handoff-receiver-framing`** | Kept after CMPH (template history) |
 
-**Last land:** `SHA_LAND` on `main`. Version 1.17.6. Branch `feature/14.16-staffed-cleaner` kept. Repo: https://github.com/pbuckles22/BigAmbitionStratMod.
+**Last land:** `6468913` on `main`. Version 1.17.6. Branch `feature/14.16-staffed-cleaner` kept. Repo: https://github.com/pbuckles22/BigAmbitionStratMod.
 
 ---
 
