@@ -779,15 +779,15 @@ Human PASS 2026-10-29: `routes=4`, `warehouses=147`, cheap-gift day `1016`, W1 s
 
 ## Story 14.2 — Delivery cover
 
-Tier 1: `DeliveryCoverTests`. Chain: `open days → burn → stand floor → line → Maintain → playbook`. Burn is the last two completed open days. A closed day is skipped. No history uses seed 25. Paper bags with no sales use seed 50 on the first drop. A zero sale of that item stays at 5. A gap of 1 is sized as 2 days and the date stays. A gap of 2 or 3 stays when units on hand still cover burn × gap × 1.5. A thinner shelf pulls that truck to tomorrow and sizes it for 2 days. A truck due today stays today and is sized for 2 days. An open day below 5 units is left out when another open day sold at least 5. Target stock is 2 × the daily average, plus a stand floor of 200 on a retail line (2 stands × 100). The window does not multiply the sales piece. A paper bag uses one cash register. The register holds 200, and that capacity is the bag floor, plus 2 × the daily average. The truck-pull check stays burn × gap × 1.5. The line is that target minus units on hand, at least 10. Fixture space does not cut it. `contract.cover` records the open days, the average, the gap, on-hand, the target, and the line. Command: the Tier 1 `dotnet test` suite above.
+Tier 1: `DeliveryCoverTests`. Chain: `open days → burn → stand floor → line → Maintain → playbook`. Burn is the last two completed open days. A closed day is skipped. No history uses seed 25. Paper bags with no sales use seed 50 on the first drop. A zero sale of that item stays at 5. A gap of 1 is sized as 2 days and the date stays. A gap of 2 or 3 stays when units on hand still cover burn × gap × 1.5. A thinner shelf pulls that truck to tomorrow and sizes it for 2 days. A truck due today stays today and is sized for 2 days. An open day below 5 units is left out when another open day sold at least 5. Target stock is 2 × the daily average, plus a stand floor of 200 on a retail line (2 stands × 100). The window does not multiply the sales piece. A paper bag uses one cash register. The register holds 1000, and that capacity is the bag floor, plus 2 × the daily average. Paper never clips to register free space. The truck-pull check stays burn × gap × 1.5. The line is that target minus units on hand, at least 10. Fixture space does not cut it. `contract.cover` records the open days, the average, the gap, on-hand, the target, and the line. Command: the Tier 1 `dotnet test` suite above.
 
 The build checked is `1.17.1+403`. `1.17.1+399` still adds 450 and multiplies the sales piece by the window.
 
-Human check. This slice is the delivery amount on the store that already has a contract. It does not furnish a second building. Every retail item is treated as 2 stands of 100. A paper bag uses one cash register of 200.
+Human check. This slice is the delivery amount on the store that already has a contract. It does not furnish a second building. Every retail item is treated as 2 stands of 100. A paper bag uses one cash register of 1000.
 
 1. Restart Big Ambitions so that build loads. Continue the current shop or start a **new** game. Autopilot on. Let one morning pass.
 2. Open `%LocalAppData%\ChaoticCEO\ceo.log` and find that morning's `contract.cover` lines.
-3. **PASS if** `mod.loaded` is `version=1.17.1`, `multiplier=2.0`, a retail `target` is 200 plus 2 × `average`, and the paper-bag `target` is 200 plus 2 × its `average`. **FAIL if** a retail `target` is still about 500, or a paper-bag `target` is only 2 × its `average`.
+3. **PASS if** `mod.loaded` is `version=1.17.1`, `multiplier=2.0`, a retail `target` is 200 plus 2 × `average`, and the paper-bag `target` is 1000 plus 2 × its `average`. **FAIL if** a retail `target` is still about 500, or a paper-bag `target` is only 2 × its `average` or still uses floor 200.
 4. Evidence: `contract.cover`. Umbrella shape: average 25, target 250. Above that target the line drops to 10.
 5. Version marker: public `1.17.1`. The installed dll informational version is `1.17.1+403`.
 
@@ -809,7 +809,7 @@ Human PASS 2026-11-11 on 1.17.2.2 at 22 7th Avenue. Days 106–111: `mod.loaded 
 
 ## Story 14.15 — Fixture space, then one storage shelf
 
-Tier 1: `Cover_cuts_the_line_to_free_space` and `Cover_keeps_a_line_that_fits_and_a_space_under_the_minimum`. Chain: `on hand → free space → line` and `on hand → register → free space → line`. A known fixture cuts `need` to the units it can still hold. `cap` on `contract.cover` is that free space. Stock already over the fixture is `need=0`, so a full shelf is not offered a delivery. A paper bag’s space is one cash register (200). A goods shelf is 100. A line that fits is left as it is. A free space under 10 stays that space. An unread fixture, capacity 0, does not cut the line. A full fixture orders one storage shelf (`ba:itemname_storageshelf`, 16 boxes, $1,200) from Hampton Supplies at 13 7th Avenue. A second order waits while that delivery is still open. Cash under $1,200 orders nothing.
+Tier 1: `Cover_cuts_the_line_to_free_space` and `Cover_keeps_a_line_that_fits_and_a_space_under_the_minimum`. Chain: `on hand → free space → line` and `on hand → register → free space → line`. A known fixture cuts `need` to the units it can still hold. `cap` on `contract.cover` is that free space. Stock already over the fixture is `need=0`, so a full shelf is not offered a delivery. A paper bag’s space is one cash register (1000) for Hold/FixtureCapacity only; Cover does not clip paper to that free space. A goods shelf is 100. A line that fits is left as it is. A free space under 10 stays that space. An unread fixture, capacity 0, does not cut the line. A full fixture orders one storage shelf (`ba:itemname_storageshelf`, 16 boxes, $1,200) from Hampton Supplies at 13 7th Avenue. A second order waits while that delivery is still open. Cash under $1,200 orders nothing.
 
 Human check. The gift shop at 22 7th Avenue, one morning. The shelf arrives as a furniture delivery. Place it in the store when it shows up. This does not hire the cleaner again.
 
@@ -851,3 +851,9 @@ Human check. The gift shop at 22 7th Avenue, the next morning. The Storage Shelf
 Human PASS 2026-11-12 on 1.17.8.1 at 22 7th Avenue. `mod.loaded version=1.17.8.1 build=3682`. Day 1571 `shelf.held reason=nogrid` (outside). Day 1572 `shelf.placed x=997.50 z=54.50 yaw=90`. Day 1573 `shelf.ordered` after cargo was empty. Day 1575 `shelf.placed x=998.00 z=54.50 yaw=90`. Save shows storage shelves at (997, 54.5) and (997.5, 54.5). No sell. The 85% rack and the capacity-miss log stay open on **14.9**.
 
 **Long run:** A batch or soak is not Tier 1. When it trips a gate, extract that decision and add a named Tier 1 test before the next long run. See `.cursor/rules/testing.mdc`.
+
+## Bugfix — paper register floor 1000 (1.17.8.3)
+
+Tier 1: `Cover_day_1575_register_1000_keeps_the_display_above_half`, `Cover_day_1571_paper_keeps_the_full_line_past_register_free_space`. Chain: `open days → burn → register floor → full line → playbook`. RegisterCap is 1000. Paper need is target − onHand with cap=0. Goods still cut to free space.
+
+Human PASS 2026-11-12 on 1.17.8.3 at 22 7th Avenue. Day 1575 `target=1166` `need=1050`. Day 1576 `onHand=1166` `target=1166` `need=10`. Days 1577–1579 stayed above 1000 on hand.

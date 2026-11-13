@@ -17,8 +17,8 @@ public class DeliveryCoverTests
         Assert.Equal(50, Wholesaler.PaperBagSeed);
         Assert.Equal(50, gift.Target);
         Assert.Equal(50, gift.Need);
-        Assert.Equal(300, bags.Target);
-        Assert.Equal(300, bags.Need);
+        Assert.Equal(1100, bags.Target);
+        Assert.Equal(1100, bags.Need);
         Assert.True(gift.Guess);
         Assert.False(gift.Replace);
         Assert.Equal(2, gift.Window);
@@ -375,17 +375,19 @@ public class DeliveryCoverTests
         var supply = Supply.Decide(1, "ba:street_thirdstreet 35", PaperBag, null, null);
         var step = Playbook.Decide(null, null, null, null, supply, null, null, null, null, null, null, null);
 
-        Assert.Equal(280, plan.Target);
-        Assert.Equal(219, plan.Need);
+        Assert.Equal(1080, plan.Target);
+        Assert.Equal(1049, plan.Need);
+        Assert.Equal(0, plan.FixtureCap);
         Assert.Equal(7, plan.NextDay);
         Assert.Contains("sold=40|40", line);
         Assert.Contains("gap=6", line);
         Assert.Contains("window=2", line);
         Assert.Contains("onHand=31", line);
-        Assert.Contains("need=219", line);
+        Assert.Contains("need=1049", line);
+        Assert.Contains("cap=0", line);
         Assert.Contains("replace=true", line);
         Assert.Contains("next=7", line);
-        Assert.DoesNotContain("need=10", line);
+        Assert.DoesNotContain("need=10 ", line);
         Assert.Equal("wholesaler", step.Detail);
     }
 
@@ -421,8 +423,8 @@ public class DeliveryCoverTests
             });
 
         Assert.Equal(25m, plan.Average);
-        Assert.Equal(250, plan.Target);
-        Assert.Equal(250, plan.Need);
+        Assert.Equal(1050, plan.Target);
+        Assert.Equal(1050, plan.Need);
     }
 
     [Fact]
@@ -500,8 +502,8 @@ public class DeliveryCoverTests
             });
 
         Assert.Equal(10m, plan.Average);
-        Assert.Equal(220, plan.Target);
-        Assert.Equal(220, plan.Need);
+        Assert.Equal(1020, plan.Target);
+        Assert.Equal(1020, plan.Need);
     }
 
     [Fact]
@@ -656,8 +658,8 @@ public class DeliveryCoverTests
         var step = Playbook.Decide(null, null, null, null, supply, null, null, null, null, null, null, null);
 
         Assert.Equal(50m, plan.Average);
-        Assert.Equal(300, plan.Target);
-        Assert.Equal(300, plan.Need);
+        Assert.Equal(1100, plan.Target);
+        Assert.Equal(1100, plan.Need);
         Assert.True(plan.Guess);
         Assert.Equal("supply", step.Kind);
         Assert.Equal("wholesaler", step.Detail);
@@ -666,7 +668,7 @@ public class DeliveryCoverTests
     [Fact]
     public void Cover_a_cash_register_holds_the_bag_floor_plus_twice_the_sales()
     {
-        // Harvest: bags opened at 0. One register holds 200, then 2× the daily sales.
+        // Harvest: live register UI is Paper Bag N/1000. Floor is 1000, then 2× daily sales.
         var plan = Wholesaler.Cover(
             PaperBag,
             currentDay: 26,
@@ -679,13 +681,13 @@ public class DeliveryCoverTests
             onHand: 0,
             stands: Wholesaler.RetailStands(PaperBag));
 
-        Assert.Equal(200, Wholesaler.RegisterCap);
+        Assert.Equal(1000, Wholesaler.RegisterCap);
         Assert.Equal(0, Wholesaler.RegisterFloor(0));
-        Assert.Equal(200, Wholesaler.RegisterFloor(1));
+        Assert.Equal(1000, Wholesaler.RegisterFloor(1));
         Assert.Equal(1, Wholesaler.RetailStands(PaperBag));
         Assert.Equal(75m, plan.Average);
-        Assert.Equal(350, plan.Target);
-        Assert.Equal(350, plan.Need);
+        Assert.Equal(1150, plan.Target);
+        Assert.Equal(1150, plan.Need);
 
         var stocked = Wholesaler.Cover(
             PaperBag,
@@ -696,11 +698,36 @@ public class DeliveryCoverTests
                 new CoverSale(24, 76, open: true),
                 new CoverSale(25, 73, open: true),
             },
-            onHand: 360,
+            onHand: 1160,
             stands: Wholesaler.RetailStands(PaperBag));
 
-        Assert.Equal(350, stocked.Target);
+        Assert.Equal(1150, stocked.Target);
         Assert.Equal(10, stocked.Need);
+    }
+
+    [Fact]
+    public void Cover_day_1575_register_1000_keeps_the_display_above_half()
+    {
+        // Harvest: 1.17.8.2 day 1575 evening showed Paper Bag 366/1000 (yellow).
+        // Old floor 200 targeted 366. Real register holds 1000 — do not use 200 again.
+        var plan = Wholesaler.Cover(
+            PaperBag,
+            currentDay: 1575,
+            nextDeliveryDay: 1575,
+            new[]
+            {
+                new CoverSale(1573, 82, open: true),
+                new CoverSale(1574, 84, open: true),
+            },
+            onHand: 366,
+            fixtureCap: 1000,
+            stands: Wholesaler.RetailStands(PaperBag));
+
+        Assert.Equal(1000, Wholesaler.RegisterCap);
+        Assert.Equal(1166, plan.Target);
+        Assert.Equal(800, plan.Need);
+        Assert.Equal(0, plan.FixtureCap);
+        Assert.True(plan.Target > Wholesaler.RegisterCap / 2);
     }
 
     [Fact]
@@ -724,8 +751,8 @@ public class DeliveryCoverTests
 
         Assert.Equal(1, stands);
         Assert.Equal(75m, plan.Average);
-        Assert.Equal(350, plan.Target);
-        Assert.Equal(350, plan.Need);
+        Assert.Equal(1150, plan.Target);
+        Assert.Equal(1150, plan.Need);
         Assert.Equal("supply", step.Kind);
         Assert.Equal("wholesaler", step.Detail);
     }

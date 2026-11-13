@@ -74,8 +74,12 @@ namespace ChaoticCEO
         /// <summary>Units one selling stand holds. Two stands are the retail floor of 200.</summary>
         public const int StandCap = 100;
 
-        /// <summary>Units one cash register holds. That capacity is the paper-bag floor.</summary>
-        public const int RegisterCap = 200;
+        /// <summary>
+        /// Units one cash register holds (live UI: Paper Bag N/1000). That capacity is the
+        /// paper-bag floor only. Cover must not clip the paper line to register free space
+        /// (see Cover). Do not drop this back to 200 — that left the display yellow at ~1/3 full.
+        /// </summary>
+        public const int RegisterCap = 1000;
 
         public static int ContractAmount(int dailyBurn)
         {
@@ -156,6 +160,8 @@ namespace ChaoticCEO
                 return 0;
             }
 
+            // RegisterCap here is the paper floor for FixtureCapacity reads only.
+            // Cover must ignore that capacity for paper (never clip to free space).
             var register = !string.IsNullOrEmpty(fixture)
                 && fixture.IndexOf("cashregister", StringComparison.OrdinalIgnoreCase) >= 0;
             if (item == PaperBag)
@@ -313,8 +319,14 @@ namespace ChaoticCEO
             var target = floor + salesTarget;
             var raw = target - stock;
             var line = raw < MinLineAmount ? MinLineAmount : raw;
-            // An unread fixture (cap 0) does not cut. A known fixture cuts to the units it can still hold.
-            var room = fixtureCap > 0 ? FreeSpace(stock, fixtureCap) : line;
+            // Paper bags: NEVER clip to register free space. 14.15 did that (need = 200 − onHand)
+            // and starved the cash-register display while burn stayed ~80/day. Bags sit in cargo
+            // until the register pulls them. Do not put that cut back — do not "fix" paper by
+            // buying shelves because the register math looks full.
+            // Goods shelves: an unread fixture (cap 0) does not cut. A known fixture cuts to the
+            // units it can still hold.
+            var cut = name != PaperBag && fixtureCap > 0;
+            var room = cut ? FreeSpace(stock, fixtureCap) : line;
             var need = line > room ? room : line;
 
             return new CoverPlan(
@@ -331,7 +343,7 @@ namespace ChaoticCEO
                 need,
                 stock,
                 target,
-                fixtureCap > 0 ? room : 0);
+                cut ? room : 0);
         }
 
         private static int CeilUnits(decimal value)
