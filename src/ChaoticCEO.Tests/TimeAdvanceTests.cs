@@ -571,7 +571,7 @@ public class TimeAdvanceTests
     [Fact]
     public void TimeAdvance_a_not_ready_frame_holds_a_wanted_skip()
     {
-        // Harvest: 1.17.5 logged time.stopped reason=frame on the frame after F6 turned it on.
+        // Harvest: 1.17.6 logged time.stopped reason=frame on the frame after F6 turned it on.
         var skip = new SleepSkip();
         var save = new object();
         Assert.Equal("hold", skip.Sync(sceneReady: false, save, allowed: true, running: false));

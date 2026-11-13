@@ -2036,7 +2036,10 @@ namespace ChaoticCEO
                 return null;
             }
 
-            if (StoreOpsBridge.HasCleaner(registration))
+            var shiftStaffed = StoreStaff.FromShifts(
+                ReadStaffShifts(registration),
+                registration.warnedLastHourAboutNoEmployee).CleanerStaffed;
+            if (Cleaner.OnStation(shiftStaffed, StoreOpsBridge.HasCleaner(registration)))
             {
                 watch.Fill(place);
                 return null;

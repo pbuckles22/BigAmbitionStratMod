@@ -60,6 +60,37 @@ namespace ChaoticCEO
 
         public const string RoleName = "Cleaner";
 
+        public static bool OnStation(bool shiftStaffed, bool controllerStaffed)
+        {
+            return shiftStaffed || controllerStaffed;
+        }
+
+        public static string Leave(
+            string localAppData,
+            int day,
+            bool shiftStaffed,
+            bool controllerStaffed,
+            string? place,
+            bool resigned,
+            bool retired,
+            bool poached,
+            ApiNote? api)
+        {
+            var gap = Cover(
+                place,
+                OnStation(shiftStaffed, controllerStaffed),
+                resigned,
+                retired,
+                poached,
+                api);
+            if (!gap.Hire)
+            {
+                return "";
+            }
+
+            return Replaced(localAppData, gap.Pick, day, gap.Reason);
+        }
+
         public static CleanerGap Cover(
             string? place,
             bool cleanerStaffed,

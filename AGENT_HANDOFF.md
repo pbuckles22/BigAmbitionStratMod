@@ -138,9 +138,9 @@ When shipping: update **PM_PLAN**, **doc/PROJECT_STATUS.md**, and **Current stat
 
 ## Current state
 
-- **Product:** Version **1.17.5** fixture space is on `main` (human PASS 2026-11-12). Free space cuts the line. A full fixture orders one storage shelf and does not place it. Story **14.3** goods list stays. Epic 10 stays open. Ladder: [PM_PLAN.md](PM_PLAN.md). Handoff: [doc/handoff/0099-HANDOFF-2026-11-12_1556.md](doc/handoff/0099-HANDOFF-2026-11-12_1556.md).
-- **On:** `origin/main @ c778aab`. **10.4** code stays stashed. https://github.com/pbuckles22/BigAmbitionStratMod
-- **Next:** Start **14.16** from updated `main`, on `feature/14.16-staffed-cleaner`. Then **14.9**. **14.4** waits. No `$100M` soak until **10.7**.
+- **Product:** Version **1.17.6** leaves a staffed cleaner (human PASS 2026-11-12). A later morning logs nothing when the cleaning shift is still filled. Story **14.3** goods list stays. Epic 10 stays open. Ladder: [PM_PLAN.md](PM_PLAN.md). Handoff: [doc/handoff/0100-HANDOFF-2026-11-12_1635.md](doc/handoff/0100-HANDOFF-2026-11-12_1635.md).
+- **On:** `origin/main @ SHA_LAND`. **10.4** code stays stashed. https://github.com/pbuckles22/BigAmbitionStratMod
+- **Next:** Start **14.9** from updated `main`, on `feature/14.9-place-shelf`. Place the shelf. An unplaced shelf already in cargo must not order another. **14.4** waits. No `$100M` soak until **10.7**.
 - **Blockers:** Do not pop the **10.4** stash. **7.9** blocks **14.10**. Unstaged code-only dump lines in `.cursor/rules/gemini-handoff.mdc` and `doc/gemini/README.md` are not in git.
 
 ## Run and test

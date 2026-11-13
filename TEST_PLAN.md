@@ -821,4 +821,18 @@ Human check. The gift shop at 22 7th Avenue, one morning. The shelf arrives as a
 
 Human PASS 2026-11-12 on 1.17.5 at 22 7th Avenue. `mod.loaded version=1.17.5 build=3682`. `shelf.ordered` day 1519 and day 1521, `amount=1` `price=1200` `fromNumber=13`. Day 1520 did not order while that delivery was open. Day 1521 paper `onHand=192` `need=8` `cap=8`. Gifts stayed `need=0` `cap=0`. `ready=true`, 73 customers, revenue 2230, profit 1546.88. The shelf was bought and not placed.
 
+## Story 14.16 — A later morning leaves a staffed cleaner
+
+Tier 1: `Cleaner_a_later_morning_leaves_a_staffed_station` and `Cleaner_a_later_morning_hires_an_empty_station`. Chain: `day roll → cleaner on station → no hire` and `day roll → empty station → hire`. A cleaning shift, or a cleaner already on the station, logs nothing on the next morning. An empty station still logs `cleaner.replaced` `reason=absent`. Days 1520 and 1521 are both locked. This does not place the storage shelf and does not add the 85% rack.
+
+Human check. The gift shop at 22 7th Avenue, the next morning, with the cleaner still on the station.
+
+1. Restart Big Ambitions so this build loads. Continue the same save at 22 7th Avenue. Let one morning pass.
+2. Open `%LocalAppData%\ChaoticCEO\ceo.log`. Find `mod.loaded` and the newest `cleaner.replaced` line.
+3. **PASS if** `mod.loaded version=1.17.6` and that new morning has no `cleaner.replaced` line. **FAIL if** the version is still 1.17.5, or that morning appends `cleaner.replaced` `reason=absent`.
+4. Evidence: no new `cleaner.replaced` for the morning under test. Older `cleaner.replaced` lines from days 1514–1521 stay in the file.
+5. Version marker: public `1.17.6`.
+
+Human PASS 2026-11-12 on 1.17.6 at 22 7th Avenue. `mod.loaded version=1.17.6 build=3682`. Days 1520–1528: no `cleaner.replaced`, and `g3=true`. Day 1528 ready, 74 customers, revenue 2303, profit 1600.11. Day 1520 still logged `cashier.replaced` `reason=absent`. That hire is outside this story.
+
 **Long run:** A batch or soak is not Tier 1. When it trips a gate, extract that decision and add a named Tier 1 test before the next long run. See `.cursor/rules/testing.mdc`.
