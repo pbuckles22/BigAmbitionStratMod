@@ -17,11 +17,84 @@ namespace ChaoticCEO
 
         public static bool InCargo(BuildingRegistration? building)
         {
-            return Box(building, out _, out _);
+            return BoxedCount(building) > 0;
+        }
+
+        public static int BoxedCount(BuildingRegistration? building)
+        {
+            if (building?.itemInstances == null)
+            {
+                return 0;
+            }
+
+            var total = 0;
+            foreach (var item in building.itemInstances.Values)
+            {
+                // Placed storage shelves hold product, not boxed furniture — skip those holders.
+                // Closed boxes / hand trucks / crates may nest a Storage Shelf under cargo.
+                if (item?.cargoInstances == null || item.itemName == StorageShelf.Item)
+                {
+                    continue;
+                }
+
+                foreach (var cargo in item.cargoInstances)
+                {
+                    if (cargo == null)
+                    {
+                        continue;
+                    }
+
+                    if (cargo.itemName == StorageShelf.Item && cargo.amount > 0)
+                    {
+                        total += cargo.amount;
+                    }
+
+                    if (cargo.nestedCargoInstances == null)
+                    {
+                        continue;
+                    }
+
+                    foreach (var nested in cargo.nestedCargoInstances)
+                    {
+                        if (nested != null && nested.itemName == StorageShelf.Item && nested.amount > 0)
+                        {
+                            total += nested.amount;
+                        }
+                    }
+                }
+            }
+
+            return total;
+        }
+
+        public static int PlacedCount(BuildingRegistration? building)
+        {
+            if (building?.itemInstances == null)
+            {
+                return 0;
+            }
+
+            var total = 0;
+            foreach (var item in building.itemInstances.Values)
+            {
+                if (item != null
+                    && item.itemName == StorageShelf.Item
+                    && string.IsNullOrEmpty(item.parentId))
+                {
+                    total++;
+                }
+            }
+
+            return total;
         }
 
         public static ShelfSeat Seat(BuildingRegistration? building)
         {
+            if (!StorageShelf.PlaceEnabled)
+            {
+                return ShelfSeat.None("hold-spike");
+            }
+
             if (building?.itemInstances == null)
             {
                 return ShelfSeat.None("nobuilding");
@@ -54,6 +127,98 @@ namespace ChaoticCEO
             }
 
             return StorageShelf.Seat(floor, shelves, others);
+        }
+
+        private static bool _surveyed;
+
+        public static int Survey(string? localAppData, BuildingRegistration? building, int day)
+        {
+            if (_surveyed || string.IsNullOrEmpty(localAppData) || building?.itemInstances == null)
+            {
+                return 0;
+            }
+
+            _surveyed = true;
+            var written = 0;
+            var floor = Floor(building, out _);
+            if (floor != null && floor.Count > 0)
+            {
+                float xMin = 0f, xMax = 0f, zMin = 0f, zMax = 0f;
+                var first = true;
+                foreach (var item in building.itemInstances.Values)
+                {
+                    var spot = Footprint(item);
+                    if (spot == null)
+                    {
+                        continue;
+                    }
+
+                    var (cx, cz) = spot.Center();
+                    if (first)
+                    {
+                        xMin = xMax = cx;
+                        zMin = zMax = cz;
+                        first = false;
+                    }
+                    else
+                    {
+                        xMin = Mathf.Min(xMin, cx);
+                        xMax = Mathf.Max(xMax, cx);
+                        zMin = Mathf.Min(zMin, cz);
+                        zMax = Mathf.Max(zMax, cz);
+                    }
+                }
+
+                if (!first)
+                {
+                    StorageShelf.RecordSurvey(
+                        localAppData,
+                        StorageShelf.RoomLine(0.25f, xMin, xMax, zMin, zMax, day));
+                    written++;
+                }
+            }
+
+            foreach (var item in building.itemInstances.Values)
+            {
+                if (item == null
+                    || item.itemName != StorageShelf.Item
+                    || !string.IsNullOrEmpty(item.parentId))
+                {
+                    continue;
+                }
+
+                var size = Size(item) ?? new ShelfSpot(0f, 0f, 0f, StorageShelf.FootprintWidth, StorageShelf.FootprintDepth);
+                var boxes = 0;
+                if (item.cargoInstances != null)
+                {
+                    foreach (var cargo in item.cargoInstances)
+                    {
+                        if (cargo != null && cargo.amount > 0)
+                        {
+                            boxes += cargo.amount;
+                        }
+                    }
+                }
+
+                StorageShelf.RecordSurvey(
+                    localAppData,
+                    StorageShelf.SurveyLine(
+                        item.position.x,
+                        item.position.z,
+                        item.yRotation,
+                        size.Width,
+                        size.Depth,
+                        boxes,
+                        day));
+                written++;
+            }
+
+            return written;
+        }
+
+        public static void ResetSurvey()
+        {
+            _surveyed = false;
         }
 
         public static bool Place(BuildingRegistration building, ShelfSeat seat, out string reason)
@@ -148,6 +313,31 @@ namespace ChaoticCEO
                     {
                         holder = item;
                         box = cargo;
+                        return true;
+                    }
+                }
+
+                // Furniture truck often nests the shelf under a closed box. Promote once for Place.
+                foreach (var cargo in item.cargoInstances)
+                {
+                    if (cargo?.nestedCargoInstances == null)
+                    {
+                        continue;
+                    }
+
+                    for (var i = 0; i < cargo.nestedCargoInstances.Count; i++)
+                    {
+                        var nested = cargo.nestedCargoInstances[i];
+                        if (nested == null || nested.itemName != StorageShelf.Item || nested.amount <= 0)
+                        {
+                            continue;
+                        }
+
+                        var promoted = nested.ConvertToCargoInstance();
+                        cargo.nestedCargoInstances.RemoveAt(i);
+                        item.AddToCargo(promoted);
+                        holder = item;
+                        box = promoted;
                         return true;
                     }
                 }
@@ -258,13 +448,32 @@ namespace ChaoticCEO
                     var args = new object?[] { controller, item, null, null };
                     if (_colliderSize.Invoke(null, args) is bool ok && ok && args[2] is Vector3 extent && args[3] is Vector3 center)
                     {
-                        size = new ShelfSpot(0f, 0f, 0f, Mathf.Abs(extent.x), Mathf.Abs(extent.z), center.x, center.z);
+                        var width = Mathf.Abs(extent.x);
+                        var depth = Mathf.Abs(extent.z);
+                        var offsetX = center.x;
+                        var offsetZ = center.z;
+                        // Harvest: half-extents (~1×0.5) made Seat step 0.5 m and bury fronts.
+                        if (item.itemName == StorageShelf.Item
+                            && width < StorageShelf.FootprintWidth - 0.1f)
+                        {
+                            width = StorageShelf.FootprintWidth;
+                            depth = StorageShelf.FootprintDepth;
+                            offsetX *= 2f;
+                            offsetZ *= 2f;
+                        }
+
+                        size = new ShelfSpot(0f, 0f, 0f, width, depth, offsetX, offsetZ);
                     }
                 }
             }
             catch (System.Exception)
             {
                 size = null;
+            }
+
+            if (size == null && item.itemName == StorageShelf.Item)
+            {
+                size = new ShelfSpot(0f, 0f, 0f, StorageShelf.FootprintWidth, StorageShelf.FootprintDepth);
             }
 
             Sizes[item.itemName] = size;

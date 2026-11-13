@@ -76,8 +76,8 @@ namespace ChaoticCEO
 
         /// <summary>
         /// Units one cash register holds (live UI: Paper Bag N/1000). That capacity is the
-        /// paper-bag floor only. Cover must not clip the paper line to register free space
-        /// (see Cover). Do not drop this back to 200 — that left the display yellow at ~1/3 full.
+        /// paper-bag floor only. Cover must not clip any buy line to free space (see Cover).
+        /// Do not drop this back to 200 — that left the display yellow at ~1/3 full.
         /// </summary>
         public const int RegisterCap = 1000;
 
@@ -174,6 +174,14 @@ namespace ChaoticCEO
                 return 0;
             }
 
+            // Storage shelves: retail unit capacity for buy math. Racks keep StandCap.
+            // Do not return Boxes (16 slots) — that made PlacedCount×16 look like unit capacity.
+            if (!string.IsNullOrEmpty(fixture)
+                && fixture.IndexOf("storageshelf", StringComparison.OrdinalIgnoreCase) >= 0)
+            {
+                return StorageShelf.UnitCapacity;
+            }
+
             return StandCap;
         }
 
@@ -187,6 +195,22 @@ namespace ChaoticCEO
             var stock = onHand < 0 ? 0 : onHand;
             var room = fixtureCap - stock;
             return room > 0 ? room : 0;
+        }
+
+        public static bool FixtureFull(int onHand, int fixtureCap)
+        {
+            return fixtureCap > 0 && onHand > 0 && FreeSpace(onHand, fixtureCap) == 0;
+        }
+
+        public static bool IsStorageFixture(string? fixture)
+        {
+            if (string.IsNullOrEmpty(fixture))
+            {
+                return false;
+            }
+
+            return fixture.IndexOf("storageshelf", StringComparison.OrdinalIgnoreCase) >= 0
+                || fixture.IndexOf("storagerack", StringComparison.OrdinalIgnoreCase) >= 0;
         }
 
         public static CoverPlan Cover(
@@ -318,16 +342,13 @@ namespace ChaoticCEO
             var floor = name == PaperBag ? RegisterFloor(stands) : StandFloor(stands);
             var target = floor + salesTarget;
             var raw = target - stock;
-            var line = raw < MinLineAmount ? MinLineAmount : raw;
-            // Paper bags: NEVER clip to register free space. 14.15 did that (need = 200 − onHand)
-            // and starved the cash-register display while burn stayed ~80/day. Bags sit in cargo
-            // until the register pulls them. Do not put that cut back — do not "fix" paper by
-            // buying shelves because the register math looks full.
-            // Goods shelves: an unread fixture (cap 0) does not cut. A known fixture cuts to the
-            // units it can still hold.
-            var cut = name != PaperBag && fixtureCap > 0;
-            var room = cut ? FreeSpace(stock, fixtureCap) : line;
-            var need = line > room ? room : line;
+            // HARD LOCK — Cover buy amount. Do not clip need to free space for paper OR goods.
+            // 14.15 clipped goods to shelf room and starved displays (paper yellow, then soda empty
+            // while stock sat in storage). 1.17.8.3 restored paper; 1.17.9.1 restores goods.
+            // Free space is for FixtureFull / storage-shelf orders only — never for this line.
+            // fixtureCap stays on the signature for callers; it must not change need.
+            _ = fixtureCap;
+            var need = raw < MinLineAmount ? MinLineAmount : raw;
 
             return new CoverPlan(
                 name,
@@ -343,7 +364,7 @@ namespace ChaoticCEO
                 need,
                 stock,
                 target,
-                cut ? room : 0);
+                0);
         }
 
         private static int CeilUnits(decimal value)
@@ -533,7 +554,10 @@ namespace ChaoticCEO
             return starterType ?? "";
         }
 
-        public static int FixtureCapacity(string? item, IReadOnlyList<ShelfFixture?>? fixtures)
+        public static int FixtureCapacity(
+            string? item,
+            IReadOnlyList<ShelfFixture?>? fixtures,
+            bool sellingOnly = false)
         {
             if (string.IsNullOrEmpty(item) || fixtures == null)
             {
@@ -544,6 +568,11 @@ namespace ChaoticCEO
             foreach (var fixture in fixtures)
             {
                 if (fixture == null || fixture.Item != item)
+                {
+                    continue;
+                }
+
+                if (sellingOnly && IsStorageFixture(fixture.Fixture))
                 {
                     continue;
                 }

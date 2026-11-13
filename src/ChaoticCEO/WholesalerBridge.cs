@@ -144,7 +144,8 @@ namespace ChaoticCEO
             }
 
             var touched = false;
-            var full = false;
+            var spacesNeeded = 0;
+            var displayCap = 0;
             var rackTarget = 0;
             var rackCap = 0;
             CoverPlan? replacement = null;
@@ -156,14 +157,15 @@ namespace ChaoticCEO
                     continue;
                 }
 
-                var cap = Wholesaler.FixtureCapacity(item.itemName, shelves);
+                var onHand = UnitsOnHand(building, item.itemName);
+                var sellingCap = Wholesaler.FixtureCapacity(item.itemName, shelves, sellingOnly: true);
                 var plan = Wholesaler.Cover(
                     item.itemName,
                     day,
                     contract.nextDeliveryDay,
                     Sales(building, item.itemName),
-                    UnitsOnHand(building, item.itemName),
-                    cap,
+                    onHand,
+                    sellingCap,
                     Wholesaler.RetailStands(item.itemName));
                 var gap = Wholesaler.ShortLine(
                     contract.businessAddress.streetName
@@ -198,17 +200,20 @@ namespace ChaoticCEO
                     touched = true;
                 }
 
-                if (plan.Need == 0 && plan.OnHand > 0)
+                // Shelf buy: leftover + inbound vs placed capacity. Never use "display looks full."
+                // Paper bags live on the register, not storage shelves.
+                if (item.itemName != Wholesaler.PaperBag)
                 {
-                    full = true;
+                    spacesNeeded += StorageShelf.SpacesNeeded(onHand, plan.Need);
+                    displayCap += sellingCap;
                 }
 
-                if (cap > 0
-                    && plan.Target >= cap * StorageRack.RackTriggerRatio
+                if (sellingCap > 0
+                    && plan.Target >= sellingCap * StorageRack.RackTriggerRatio
                     && (rackCap == 0 || plan.Target > rackTarget))
                 {
                     rackTarget = plan.Target;
-                    rackCap = cap;
+                    rackCap = sellingCap;
                 }
 
                 if (plan.Replace)
@@ -217,7 +222,7 @@ namespace ChaoticCEO
                 }
             }
 
-            if (AttendShelf(localAppData, day, contract, building, full, cash))
+            if (AttendShelf(localAppData, day, contract, building, spacesNeeded, displayCap, cash))
             {
                 touched = true;
             }
@@ -243,7 +248,8 @@ namespace ChaoticCEO
             int day,
             DeliveryContract contract,
             BuildingRegistration? building,
-            bool full,
+            int spacesNeeded,
+            int displayCap,
             decimal cash)
         {
             var current = SaveGameManager.Current;
@@ -256,22 +262,38 @@ namespace ChaoticCEO
             var number = contract.businessAddress.streetNumber;
             var pending = ShelfPending(current, street, number);
             var placed = 0;
+            // Place loop: drain cargo first. Buy at most one shelf per morning so the next
+            // cover waits for delivery + place (no cargo pile while midnight races 08:00 truck).
             for (var tries = 0; tries < StorageShelf.Boxes; tries++)
             {
                 var inCargo = StorageShelfBridge.InCargo(building);
-                if (!inCargo && (placed > 0 || !full || pending))
+                var boxed = StorageShelfBridge.BoxedCount(building);
+                var inboundShelves = boxed + PendingShelfAmount(current, street, number);
+                // displayCap is assigned selling fixtures; empty stands still hold units after unbox.
+                var placedCap = displayCap
+                    + EmptySellingCapacity(building)
+                    + (StorageShelfBridge.PlacedCount(building) * StorageShelf.UnitCapacity);
+                var shelvesNeeded = StorageShelf.ShelvesToOrder(spacesNeeded, placedCap, inboundShelves);
+                if (shelvesNeeded > 1)
+                {
+                    shelvesNeeded = 1;
+                }
+
+                // Place every boxed shelf before buying another. Pending truck also blocks buy.
+                if (!inCargo && (placed > 0 || shelvesNeeded <= 0 || pending))
                 {
                     return placed > 0;
                 }
 
+                var seat = StorageShelfBridge.Seat(building);
                 var attend = StorageShelf.Attend(
                     street,
                     number,
-                    full,
+                    shelvesNeeded,
                     inCargo,
                     pending,
                     cash,
-                    StorageShelfBridge.Seat(building),
+                    seat,
                     GameApi.Live());
                 if (attend.Action == ShelfAction.Place && building != null)
                 {
@@ -279,6 +301,7 @@ namespace ChaoticCEO
                     {
                         attend = new ShelfAttend(ShelfAction.Hold, street, number, true, attend.Seat, attend.Pick, "", reason);
                         Note(localAppData, attend, day);
+                        // Room full or cargo stuck — never order more into the pile.
                         return placed > 0;
                     }
 
@@ -288,6 +311,11 @@ namespace ChaoticCEO
                 }
 
                 Note(localAppData, attend, day);
+                if (attend.Action == ShelfAction.Hold)
+                {
+                    return placed > 0;
+                }
+
                 return attend.Action == ShelfAction.Order
                     ? OrderShelf(localAppData, day, current, attend.Pick) || placed > 0
                     : placed > 0;
@@ -389,16 +417,27 @@ namespace ChaoticCEO
 
         private static bool ShelfPending(GameInstance current, string street, int number)
         {
-            return FurniturePending(current, street, number, StorageShelf.Item);
+            return PendingShelfAmount(current, street, number) > 0;
+        }
+
+        private static int PendingShelfAmount(GameInstance current, string street, int number)
+        {
+            return FurniturePendingAmount(current, street, number, StorageShelf.Item);
         }
 
         private static bool FurniturePending(GameInstance current, string street, int number, string itemName)
         {
+            return FurniturePendingAmount(current, street, number, itemName) > 0;
+        }
+
+        private static int FurniturePendingAmount(GameInstance current, string street, int number, string itemName)
+        {
             if (current.FurnitureDeliveryContracts == null)
             {
-                return false;
+                return 0;
             }
 
+            var total = 0;
             foreach (var contract in current.FurnitureDeliveryContracts)
             {
                 if (contract?.toAddress == null
@@ -411,14 +450,14 @@ namespace ChaoticCEO
 
                 foreach (var item in contract.itemsToDeliver)
                 {
-                    if (item != null && item.itemName == itemName)
+                    if (item != null && item.itemName == itemName && item.amount > 0)
                     {
-                        return true;
+                        total += item.amount;
                     }
                 }
             }
 
-            return false;
+            return total;
         }
 
         private static decimal Cash()
@@ -464,7 +503,7 @@ namespace ChaoticCEO
 
             foreach (var placed in building.itemInstances.Values)
             {
-                if (placed == null)
+                if (placed == null || !string.IsNullOrEmpty(placed.parentId))
                 {
                     continue;
                 }
@@ -486,6 +525,70 @@ namespace ChaoticCEO
             }
 
             return rows;
+        }
+
+        /// <summary>
+        /// Unassigned selling fixtures (no purchaser item / no cargo yet). After opening every box
+        /// they would otherwise vanish from displayCap and force a fake shelf shortfall.
+        /// </summary>
+        private static int EmptySellingCapacity(BuildingRegistration? building)
+        {
+            if (building?.itemInstances == null)
+            {
+                return 0;
+            }
+
+            var total = 0;
+            foreach (var placed in building.itemInstances.Values)
+            {
+                if (placed == null || !string.IsNullOrEmpty(placed.parentId))
+                {
+                    continue;
+                }
+
+                if (Wholesaler.IsStorageFixture(placed.itemName)
+                    || placed.itemName.IndexOf("cashregister", System.StringComparison.OrdinalIgnoreCase) >= 0)
+                {
+                    continue;
+                }
+
+                var sold = placed.playerItemPurchaserSettings == null
+                    ? ""
+                    : placed.playerItemPurchaserSettings.itemName;
+                if (string.IsNullOrEmpty(sold))
+                {
+                    sold = FirstCargo(placed);
+                }
+
+                if (!string.IsNullOrEmpty(sold))
+                {
+                    continue;
+                }
+
+                if (!IsSellingFurniture(placed.itemName))
+                {
+                    continue;
+                }
+
+                total += Wholesaler.StandCap;
+            }
+
+            return total;
+        }
+
+        private static bool IsSellingFurniture(string? fixture)
+        {
+            if (string.IsNullOrEmpty(fixture))
+            {
+                return false;
+            }
+
+            return fixture.IndexOf("productpanel", System.StringComparison.OrdinalIgnoreCase) >= 0
+                || fixture.IndexOf("fridge", System.StringComparison.OrdinalIgnoreCase) >= 0
+                || fixture.IndexOf("display", System.StringComparison.OrdinalIgnoreCase) >= 0
+                || fixture.IndexOf("counter", System.StringComparison.OrdinalIgnoreCase) >= 0
+                || fixture.IndexOf("rack", System.StringComparison.OrdinalIgnoreCase) >= 0
+                    && fixture.IndexOf("storage", System.StringComparison.OrdinalIgnoreCase) < 0;
         }
 
         private static string FirstCargo(ItemInstance placed)
@@ -519,7 +622,10 @@ namespace ChaoticCEO
             return "";
         }
 
-        private static int UnitsOnHand(BuildingRegistration? building, string item)
+        private static int UnitsOnHand(
+            BuildingRegistration? building,
+            string item,
+            bool sellingOnly = false)
         {
             if (building?.itemInstances == null || item.Length == 0)
             {
@@ -530,6 +636,11 @@ namespace ChaoticCEO
             foreach (var placed in building.itemInstances.Values)
             {
                 if (placed?.cargoInstances == null)
+                {
+                    continue;
+                }
+
+                if (sellingOnly && Wholesaler.IsStorageFixture(placed.itemName))
                 {
                     continue;
                 }
