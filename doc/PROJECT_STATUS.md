@@ -16,7 +16,7 @@
 
 | Branch | Role |
 |--------|------|
-| **`main`** | Integration branch. Version 1.17.11.12. Sick hold. Human PASS 2026-11-14. |
+| **`main`** | Integration branch. Version 1.17.11.12. Land `d2072fb`. Sick hold. Human PASS 2026-11-14. |
 | **`feature/sick-hold`** | Sick hold. Version 1.17.11.12. Human PASS 2026-11-14. Kept after CMPH. |
 | **`feature/staff-hold`** | Staff hold cheat, wired. Version 1.17.11.11. Human PASS 2026-11-14. Kept after CMPH. |
 | **`feature/14.9-second-pod`** | 14.9 facing gap. Version 1.17.11.10. Human PASS 2026-11-14. Kept after CMPH. |
