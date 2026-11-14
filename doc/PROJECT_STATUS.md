@@ -16,7 +16,7 @@
 
 | Branch | Role |
 |--------|------|
-| **`main`** | Integration branch. Version 1.17.11.11. Staff hold. Human PASS 2026-11-14. |
+| **`main`** | Integration branch. Version 1.17.11.11. Land `ad84971`. Staff hold. Human PASS 2026-11-14. |
 | **`feature/staff-hold`** | Staff hold cheat, wired. Version 1.17.11.11. Human PASS 2026-11-14. Kept after CMPH. |
 | **`feature/14.9-second-pod`** | 14.9 facing gap. Version 1.17.11.10. Human PASS 2026-11-14. Kept after CMPH. |
 | **`fix/per-frame-io-throttle`** | Lag fix. Version 1.17.10. Land `89b207e`. Human PASS 2026-11-13. Kept after CMPH. |

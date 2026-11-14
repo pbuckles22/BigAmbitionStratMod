@@ -138,8 +138,8 @@ When shipping: update **PM_PLAN**, **doc/PROJECT_STATUS.md**, and **Current stat
 
 ## Current state
 
-- **Product:** Version **1.17.11.11** (staff hold: satisfaction 100, complaints cleared, poach cancelled, age held before retirement; human PASS 2026-11-14). Sick calls are not held. **14.9** stays open for the second pod. Epic 14 open. Ladder: [PM_PLAN.md](PM_PLAN.md). Handoff: [doc/handoff/0113-HANDOFF-2026-11-14_1045.md](doc/handoff/0113-HANDOFF-2026-11-14_1045.md).
-- **On:** `origin/main` version 1.17.11.11. **10.4** code stays stashed. https://github.com/pbuckles22/BigAmbitionStratMod
+- **Product:** Version **1.17.11.11** (staff hold: satisfaction 100, complaints cleared, poach cancelled, age held before retirement; human PASS 2026-11-14). Sick calls are not held. **14.9** stays open for the second pod. Epic 14 open. Ladder: [PM_PLAN.md](PM_PLAN.md). Handoff: [doc/handoff/0113-HANDOFF-2026-11-14_1048.md](doc/handoff/0113-HANDOFF-2026-11-14_1048.md).
+- **On:** `origin/main @ ad84971` (version 1.17.11.11). **10.4** code stays stashed. https://github.com/pbuckles22/BigAmbitionStratMod
 - **Next:** The sick hold when asked. Then the **14.9** second pod. Then overhire and displays. **14.4** waits. No `$100M` soak until **10.7**.
 - **Blockers:** Do not pop the **10.4** stash. Do not pop the old staff-hold stash. **7.9** blocks **14.10**. Do not clip paper to register free space or drop RegisterCap to 200. Turn `StaffHold.Enabled` off before tuning HR.
 
