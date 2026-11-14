@@ -15,6 +15,7 @@ namespace ChaoticCEO
     {
         private readonly DayWatch _days = new DayWatch();
         private readonly NeedsWatch _needs = new NeedsWatch();
+        private readonly StaffHoldWatch _staff = new StaffHoldWatch();
         private readonly SlotWatch _slots = new SlotWatch();
         private readonly ConnectWatch _stores = new ConnectWatch();
         private readonly PlanWatch _plans = new PlanWatch();
@@ -102,6 +103,7 @@ namespace ChaoticCEO
 
             _nextTickTime = FrameTick.Next(Time.unscaledTime);
             LiveDump.HoldNeeds(_needs, _localAppData);
+            StaffHoldBridge.Hold(_staff, _localAppData);
             LiveDump.TryRent(_rents, _localAppData);
             LiveDump.TryLayout(_layouts, _localAppData);
             LiveDump.TryOps(_ops, _localAppData);

@@ -4,6 +4,25 @@ Define **Tier 1** (fast feedback: unit, headless, or local) and **Tier 2** (inte
 
 ---
 
+## Staff hold cheat (1.17.11.11)
+
+The parked employee hold is on, on the same tick as the player needs hold. Satisfaction stays at 100, an open complaint is cleared, the next complaint is a game year out, a rival poach is cancelled, and age resets to 60 at 65. Sick calls and walking off a shift are not held. Switch: `StaffHold.Enabled`.
+
+Tier 1: `StaffHoldTests`. Chain: `day roll → staff hold → leaving reason → register cover (no hire)`.
+
+Human check. Gift shop at 22 7th Avenue.
+
+1. Restart Big Ambitions so this build loads. Continue the same save. Confirm `mod.loaded version=1.17.11.11`.
+2. Let one morning finish. Do not cancel the time skip.
+3. **PASS if** `ceo.log` has `staff.held` that morning and nobody quits, retires, or is poached. **FAIL if** there is no `staff.held`, or a cashier or cleaner leaves with `reason=quit`, `reason=retired`, or `reason=poached`.
+4. Evidence: `staff.held`. Version marker: public `1.17.11.11`.
+
+A sick call or someone leaving the shift for another reason is outside this cheat. Note it; do not fail the build for it.
+
+Human PASS 2026-11-14 on 1.17.11.11 at 22 7th Avenue. Days 1588–1593: six `staff.held`, employees=8, raised=0, aged=0, complaints=0, poach=0. No `reason=quit`, `reason=retired`, or `reason=poached`. Day 1588 one `cashier.replaced reason=absent`. Days 1592–1593 ready, customers 78 then 76, revenue 2295 then 2228.
+
+---
+
 ## Tier 1: Fast feedback
 
 ```bash

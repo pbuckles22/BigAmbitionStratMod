@@ -6,9 +6,9 @@
     <LangVersion>latest</LangVersion>
     <RootNamespace>ChaoticCEO</RootNamespace>
     <AssemblyName>ChaoticCEO</AssemblyName>
-    <Version>1.17.11.10</Version>
-    <AssemblyVersion>1.17.11.10</AssemblyVersion>
-    <FileVersion>1.17.11.10</FileVersion>
+    <Version>1.17.11.11</Version>
+    <AssemblyVersion>1.17.11.11</AssemblyVersion>
+    <FileVersion>1.17.11.11</FileVersion>
     <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
     <GameManaged Condition="'$(GameManaged)' == ''">C:\Program Files (x86)\Steam\steamapps\common\Big Ambitions\Big Ambitions_Data\Managed</GameManaged>
   </PropertyGroup>
@@ -105,6 +105,8 @@
       <_NeedsBump Condition="Exists('$(TargetPath)') and $([System.IO.File]::GetLastWriteTime('$(MSBuildThisFileDirectory)PanelView.cs').Ticks) &gt; $(_DllTime)">true</_NeedsBump>
       <_NeedsBump Condition="Exists('$(TargetPath)') and $([System.IO.File]::GetLastWriteTime('$(MSBuildThisFileDirectory)StoreFamily.cs').Ticks) &gt; $(_DllTime)">true</_NeedsBump>
       <_NeedsBump Condition="Exists('$(TargetPath)') and $([System.IO.File]::GetLastWriteTime('$(MSBuildThisFileDirectory)Needs.cs').Ticks) &gt; $(_DllTime)">true</_NeedsBump>
+      <_NeedsBump Condition="Exists('$(TargetPath)') and $([System.IO.File]::GetLastWriteTime('$(MSBuildThisFileDirectory)StaffHold.cs').Ticks) &gt; $(_DllTime)">true</_NeedsBump>
+      <_NeedsBump Condition="Exists('$(TargetPath)') and $([System.IO.File]::GetLastWriteTime('$(MSBuildThisFileDirectory)StaffHoldBridge.cs').Ticks) &gt; $(_DllTime)">true</_NeedsBump>
       <_NeedsBump Condition="Exists('$(TargetPath)') and $([System.IO.File]::GetLastWriteTime('$(MSBuildThisFileDirectory)Slots.cs').Ticks) &gt; $(_DllTime)">true</_NeedsBump>
       <_NeedsBump Condition="Exists('$(TargetPath)') and $([System.IO.File]::GetLastWriteTime('$(MSBuildThisFileDirectory)HqPlans.cs').Ticks) &gt; $(_DllTime)">true</_NeedsBump>
       <_NeedsBump Condition="Exists('$(TargetPath)') and $([System.IO.File]::GetLastWriteTime('$(MSBuildThisFileDirectory)Restock.cs').Ticks) &gt; $(_DllTime)">true</_NeedsBump>

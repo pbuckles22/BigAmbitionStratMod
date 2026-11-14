@@ -738,7 +738,7 @@ public class SupplyTests
         Assert.Equal("W11", salon.Warehouse);
         Assert.Equal(Hair, salon.Item);
         var shot = File.ReadAllText(SupplyNight.SnapshotPath(dir.Path));
-        Assert.Contains("snapshot.taken version=1.17.11.10", shot);
+        Assert.Contains("snapshot.taken version=1.17.11.11", shot);
         Assert.Contains(before, shot);
         Assert.DoesNotContain(Salon, shot);
         var again = Assert.Single(night.Recheck.Unsupplied, gap => gap.Store == Salon);
