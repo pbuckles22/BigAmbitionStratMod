@@ -16,7 +16,7 @@
 
 | Branch | Role |
 |--------|------|
-| **`main`** | Integration branch. Version 1.17.11.4. Aisle 1.25 bodies and even shelf buyback. Human PASS 2026-11-13. |
+| **`main`** | Integration branch. Version 1.17.11.4. Land `a8b5744`. Aisle 1.25 bodies and even shelf buyback. Human PASS 2026-11-13. |
 | **`fix/per-frame-io-throttle`** | Lag fix. Version 1.17.10. Land `89b207e`. Human PASS 2026-11-13. Kept after CMPH. |
 | **`bug/soda-display-free-space`** | 14.9 aisle. Version 1.17.11.4. Human PASS 2026-11-13. Kept after CMPH. |
 | **`feature/staff-hold-cheat`** | Staff-hold test cheat parked off the shelf branch. Not wired. |
