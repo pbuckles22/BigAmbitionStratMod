@@ -41,9 +41,21 @@ public class StorageShelfTests
         return new ShelfSpot(x, z, yaw, width: 2f, depth: 1f);
     }
 
+    private static ShelfSpot[] PackedShop()
+    {
+        return new[]
+        {
+            Rack(995.5f),
+            Rack(996.5f, yaw: 270f),
+            Rack(997.5f),
+            Rack(998.5f, yaw: 270f),
+            Rack(999.5f),
+        };
+    }
+
     private static ShelfSeat OpenSeat()
     {
-        // Wall shelf + facing partner across a 1 m aisle — next seat is the back-to-back half.
+        // Wall shelf and the shelf 2 m away. The flush seat is the hole between them.
         return StorageShelf.Seat(Shop(), new[] { Rack(995.5f), Rack(997.5f, yaw: 270f) }, Array.Empty<ShelfSpot>());
     }
 
@@ -162,12 +174,11 @@ public class StorageShelfTests
     [Fact]
     public void Seat_after_a_wall_shelf_leaves_a_one_meter_aisle_then_faces_it()
     {
-        // Harvest: same-yaw ΔX=1 packed fronts under each other; NPCs only stock the exposed end.
-        // Wall → 1.25 shelf-bodies, facing shelf (yaw flipped).
+        // The facing partner sits one body away. The faces touch.
         var seat = StorageShelf.Seat(Shop(), new[] { Rack(995.5f) }, Array.Empty<ShelfSpot>());
 
         Assert.True(seat.Found);
-        Assert.Equal(996.75f, seat.X, 3);
+        Assert.Equal(996.5f, seat.X, 3);
         Assert.Equal(54.5f, seat.Z, 3);
         Assert.Equal(270f, seat.Yaw, 3);
     }
@@ -181,18 +192,15 @@ public class StorageShelfTests
             Array.Empty<ShelfSpot>());
 
         Assert.True(seat.Found);
-        Assert.Equal(998.5f, seat.X, 3);
+        Assert.Equal(996.5f, seat.X, 3);
         Assert.Equal(54.5f, seat.Z, 3);
-        Assert.Equal(90f, seat.Yaw, 3);
+        Assert.Equal(270f, seat.Yaw, 3);
     }
 
     [Fact]
     public void Seat_never_crosses_the_wall_into_the_bathroom()
     {
-        var seat = StorageShelf.Seat(
-            Shop(),
-            new[] { Rack(995.5f), Rack(997.5f, yaw: 270f), Rack(998.5f) },
-            Array.Empty<ShelfSpot>());
+        var seat = StorageShelf.Seat(Shop(), PackedShop(), Array.Empty<ShelfSpot>());
 
         Assert.False(seat.Found);
         Assert.Equal("full", seat.Reason);
@@ -201,10 +209,7 @@ public class StorageShelfTests
     [Fact]
     public void Seat_a_full_storage_room_has_no_seat()
     {
-        var seat = StorageShelf.Seat(
-            Shop(),
-            new[] { Rack(995.5f), Rack(997.5f, yaw: 270f), Rack(998.5f) },
-            Array.Empty<ShelfSpot>());
+        var seat = StorageShelf.Seat(Shop(), PackedShop(), Array.Empty<ShelfSpot>());
 
         Assert.False(seat.Found);
         Assert.Equal("full", seat.Reason);
@@ -213,10 +218,10 @@ public class StorageShelfTests
     [Fact]
     public void Seat_extends_along_width_after_the_aisle_row_is_full()
     {
-        // Slice 4: when 1-2-2 X pattern is full, step a column along Width and keep HeaderLane.
+        // A flush pair fills the depth run. The next shelf steps along the width.
         var seat = StorageShelf.Seat(
             Shop(roomZLow: 50f, roomZHigh: 59f),
-            new[] { Rack(995.5f), Rack(997.5f, yaw: 270f), Rack(998.5f) },
+            new[] { Rack(995.5f), Rack(996.5f, yaw: 270f) },
             Array.Empty<ShelfSpot>());
 
         Assert.True(seat.Found);
@@ -228,10 +233,7 @@ public class StorageShelfTests
     [Fact]
     public void Seat_a_full_pair_never_gets_a_third_shelf_touching_along_depth()
     {
-        var seat = StorageShelf.Seat(
-            Shop(),
-            new[] { Rack(995.5f), Rack(997.5f, yaw: 270f), Rack(998.5f) },
-            Array.Empty<ShelfSpot>());
+        var seat = StorageShelf.Seat(Shop(), PackedShop(), Array.Empty<ShelfSpot>());
 
         Assert.False(seat.Found);
         Assert.Equal("full", seat.Reason);
@@ -251,12 +253,87 @@ public class StorageShelfTests
     }
 
     [Fact]
+    public void Facing_gap_is_zero_so_the_partner_sits_one_body_away()
+    {
+        var wall = new ShelfSpot(996.75f, 55f, 90f, width: 2.97f, depth: 0.50f);
+        var body = StorageShelf.ShelfBody(wall.Depth);
+        var seat = StorageShelf.Seat(OpenRoom(994f, 1006f, 50f, 60f), new[] { wall }, Array.Empty<ShelfSpot>());
+
+        Assert.Equal(0f, StorageShelf.FacingGap);
+        Assert.Equal(body, StorageShelf.AisleCenterStep(wall.Depth));
+        Assert.True(seat.Found, seat.Reason);
+        Assert.Equal(270f, seat.Yaw, 3);
+        Assert.Equal(55f, seat.Z, 3);
+        Assert.Equal(wall.X + body, seat.X, 3);
+    }
+
+    [Fact]
+    public void Shelf_gap_file_uses_zero_as_touching_and_one_point_two_five_as_the_old_spacing()
+    {
+        try
+        {
+            Assert.Equal(0f, StorageShelf.ParseGap(null));
+            Assert.Equal(0f, StorageShelf.ParseGap("not json"));
+            Assert.Equal(0f, StorageShelf.ParseGap("{ \"facingGap\": 0, \"note\": \"faces touch\" }"));
+            Assert.Equal(1.25f, StorageShelf.ParseGap("{ \"facingGap\": 1.25 }"));
+            Assert.Equal(1.25f, StorageShelf.ParseGap("1.25"));
+            Assert.Equal(-1f, StorageShelf.ParseGap("{ \"facingGap\": -1 }"));
+
+            Assert.Equal(1f, StorageShelf.ApplyGap(0f));
+            Assert.Equal(1f, StorageShelf.AislePitch);
+            Assert.Equal(1.25f, StorageShelf.ApplyGap(1.25f));
+            Assert.Equal(1.25f, StorageShelf.AislePitch);
+
+            var wall = new ShelfSpot(996.75f, 55f, 90f, width: 2.97f, depth: 0.50f);
+            var body = StorageShelf.ShelfBody(wall.Depth);
+            var seat = StorageShelf.Seat(OpenRoom(994f, 1006f, 50f, 60f), new[] { wall }, Array.Empty<ShelfSpot>());
+            Assert.True(seat.Found, seat.Reason);
+            Assert.Equal(wall.X + (body * 1.25f), seat.X, 3);
+            Assert.Equal(270f, seat.Yaw, 3);
+        }
+        finally
+        {
+            StorageShelf.ApplyGap(0f);
+        }
+    }
+
+    [Fact]
+    public void Shelf_gap_file_is_created_when_missing_and_keeps_a_later_edit()
+    {
+        var root = Path.Combine(Path.GetTempPath(), "chaoticceo-gap-" + Guid.NewGuid().ToString("N"));
+        try
+        {
+            var created = StorageShelf.LoadGap(root);
+            var path = StorageShelf.GapPath(root);
+
+            Assert.Equal(1f, created);
+            Assert.Equal(0f, StorageShelf.FacingGap);
+            Assert.True(File.Exists(path));
+
+            File.WriteAllText(path, "{ \"facingGap\": 1.25 }" + Environment.NewLine);
+            Assert.Equal(1.25f, StorageShelf.LoadGap(root));
+            Assert.Equal(
+                "shelf.gap version=" + LoadLog.Version + " day=1594 facingGap=1.25 pitch=1.25",
+                StorageShelf.GapLine(1594));
+        }
+        finally
+        {
+            StorageShelf.ApplyGap(0f);
+            if (Directory.Exists(root))
+            {
+                Directory.Delete(root, true);
+            }
+        }
+    }
+
+    [Fact]
     public void Layout_constants_match_the_long_face_aisle_stack()
     {
         // Harvest: live Size ~2.97×0.50; long face needs AisleWidth in front.
         Assert.Equal(3.0f, StorageShelf.FootprintWidth);
         Assert.Equal(0.5f, StorageShelf.FootprintDepth);
-        Assert.Equal(1.25f, StorageShelf.AislePitch);
+        Assert.Equal(0f, StorageShelf.FacingGap);
+        Assert.Equal(1f, StorageShelf.AislePitch);
         Assert.Equal(1.0f, StorageShelf.AisleWidth);
         Assert.Equal(1200f, StorageShelf.Buyback(960f));
         Assert.Equal(1200f, StorageShelf.Buyback(1200f));
@@ -272,7 +349,7 @@ public class StorageShelfTests
         var seat = StorageShelf.Seat(Shop(), new[] { Rack(995.5f), Rack(998.5f) }, Array.Empty<ShelfSpot>());
 
         Assert.True(seat.Found);
-        Assert.Equal(996.75f, seat.X, 3);
+        Assert.Equal(996.5f, seat.X, 3);
         Assert.Equal(54.5f, seat.Z, 3);
         Assert.Equal(270f, seat.Yaw, 3);
     }
@@ -280,21 +357,23 @@ public class StorageShelfTests
     [Fact]
     public void Seat_skips_a_spot_another_item_already_stands_on()
     {
-        var box = new ShelfSpot(998.5f, 54.5f, 0f, width: 0.6f, depth: 0.6f);
+        var box = new ShelfSpot(996.5f, 54.5f, 0f, width: 0.6f, depth: 0.6f);
 
         var seat = StorageShelf.Seat(
             Shop(),
             new[] { Rack(995.5f), Rack(997.5f, yaw: 270f) },
             new[] { box });
 
-        Assert.False(seat.Found);
+        Assert.True(seat.Found, seat.Reason);
+        Assert.Equal(998.5f, seat.X, 3);
+        Assert.Equal(90f, seat.Yaw, 3);
     }
 
     [Fact]
     public void Seat_ignores_an_item_that_only_touches_the_seat_edge()
     {
         // Touch the long-side edge (along Z), not the front aisle the restocker needs.
-        var flush = new ShelfSpot(998.5f, 53.2f, 0f, width: 0.4f, depth: 0.4f);
+        var flush = new ShelfSpot(996.5f, 53.2f, 0f, width: 0.4f, depth: 0.4f);
 
         var seat = StorageShelf.Seat(
             Shop(),
@@ -302,8 +381,8 @@ public class StorageShelfTests
             new[] { flush });
 
         Assert.True(seat.Found);
-        Assert.Equal(998.5f, seat.X, 3);
-        Assert.Equal(90f, seat.Yaw, 3);
+        Assert.Equal(996.5f, seat.X, 3);
+        Assert.Equal(270f, seat.Yaw, 3);
     }
 
     [Fact]
@@ -334,7 +413,7 @@ public class StorageShelfTests
             Array.Empty<ShelfSpot>());
 
         Assert.True(seat.Found, seat.Reason);
-        Assert.Equal(998.25f, seat.X, 3);
+        Assert.Equal(998f, seat.X, 3);
         Assert.Equal(54.5f, seat.Z, 3);
         Assert.Equal(270f, seat.Yaw, 3);
     }
@@ -348,7 +427,7 @@ public class StorageShelfTests
         var seat = StorageShelf.Seat(Shop(), new[] { Rack(997f) }, new[] { handTruck });
 
         Assert.True(seat.Found);
-        Assert.Equal(998.25f, seat.X, 3);
+        Assert.Equal(998f, seat.X, 3);
         Assert.Equal(54.5f, seat.Z, 3);
         Assert.Equal(270f, seat.Yaw, 3);
     }
@@ -367,7 +446,7 @@ public class StorageShelfTests
 
         Assert.Equal(ShelfAction.Place, attend.Action);
         Assert.False(attend.Pick.Ordered);
-        Assert.Equal(998.25f, attend.Seat.X, 3);
+        Assert.Equal(998f, attend.Seat.X, 3);
         Assert.Equal(54.5f, attend.Seat.Z, 3);
         Assert.Equal(270f, attend.Seat.Yaw, 3);
     }
@@ -383,8 +462,8 @@ public class StorageShelfTests
             Array.Empty<ShelfSpot>());
 
         Assert.True(seat.Found);
-        Assert.Equal(998.5f, seat.X, 3);
-        Assert.Equal(90f, seat.Yaw, 3);
+        Assert.Equal(996.5f, seat.X, 3);
+        Assert.Equal(270f, seat.Yaw, 3);
     }
 
     [Fact]
@@ -400,9 +479,9 @@ public class StorageShelfTests
         var seat = StorageShelf.Seat(Shop(), shifted, Array.Empty<ShelfSpot>());
 
         Assert.True(seat.Found, seat.Reason);
-        Assert.Equal(998.5f, seat.X, 3);
+        Assert.Equal(996.5f, seat.X, 3);
         Assert.Equal(54.3f, seat.Z, 3);
-        Assert.Equal(90f, seat.Yaw, 3);
+        Assert.Equal(270f, seat.Yaw, 3);
     }
 
     [Fact]
@@ -414,8 +493,8 @@ public class StorageShelfTests
 
         Assert.Equal(ShelfAction.Place, attend.Action);
         Assert.False(attend.Pick.Ordered);
-        Assert.Equal(998.5f, attend.Seat.X, 3);
-        Assert.Equal(90f, attend.Seat.Yaw, 3);
+        Assert.Equal(996.5f, attend.Seat.X, 3);
+        Assert.Equal(270f, attend.Seat.Yaw, 3);
         Assert.Equal("BuildingRegistration.AddItemInstanceToBuilding", attend.Call);
     }
 
@@ -456,7 +535,7 @@ public class StorageShelfTests
         Assert.Equal(
             "shelf.placed version=" + LoadLog.Version
                 + " day=1571 street=ba:street_seventhavenue number=22 item=ba:itemname_storageshelf"
-                + " x=998.50 z=54.50 yaw=90 call=BuildingRegistration.AddItemInstanceToBuilding",
+                + " x=996.50 z=54.50 yaw=270 call=BuildingRegistration.AddItemInstanceToBuilding",
             line);
     }
 
@@ -548,7 +627,7 @@ public class StorageShelfTests
         Assert.False(attend.Pick.Ordered);
         Assert.Equal("", StorageShelf.Line(attend.Pick, day));
         Assert.Equal(ShelfAction.Place, attend.Action);
-        Assert.Equal(998.5f, attend.Seat.X, 3);
+        Assert.Equal(996.5f, attend.Seat.X, 3);
     }
 
     [Fact]
@@ -558,7 +637,7 @@ public class StorageShelfTests
         var day = Morning.CoverDay(null, autopilotOn: true, day: 1571, coveredDay: 1570);
         var plan = FullFixture(day);
         var shelvesNeeded = ShelvesNeededFrom(plan, displayCap: 30, placedShelves: 0, boxedShelves: 0);
-        var row = new[] { Rack(995.5f), Rack(997.5f, yaw: 270f), Rack(998.5f) };
+        var row = PackedShop();
         var seat = StorageShelf.Seat(Shop(), row, Array.Empty<ShelfSpot>());
 
         var empty = StorageShelf.Attend(Street, 22, shelvesNeeded, inCargo: false, pending: false, cash: 292000m, seat, GameApi.Live());
@@ -804,7 +883,7 @@ public class StorageShelfTests
         var partner = new ShelfSpot(seat.X, seat.Z, seat.Yaw, width: 2.97f, depth: 0.50f);
 
         Assert.True(seat.Found);
-        Assert.Equal(996.75f, seat.X, 3);
+        Assert.Equal(996.5f, seat.X, 3);
         Assert.Equal(54.5f, seat.Z, 3);
         Assert.Equal(270f, seat.Yaw, 3);
         Assert.True(StorageShelf.Accessible(Shop(), wall, new[] { partner }));
@@ -917,6 +996,81 @@ public class StorageShelfTests
     }
 
     [Fact]
+    public void Seat_live_pair_puts_the_third_shelf_against_the_spare()
+    {
+        // Day 1589 at 22 7th Avenue: stocked shelf 996.75 yaw 90, spare placed 998.00 yaw 270.
+        // The room is open on both backs. List order must not put the third shelf behind the stocked one.
+        var floor = OpenRoom(994f, 1006f, 50f, 60f);
+        var stocked = new ShelfSpot(996.75f, 55f, 90f, width: 2.97f, depth: 0.50f);
+        var spare = new ShelfSpot(998f, 55f, 270f, width: 2.97f, depth: 0.50f);
+        var body = StorageShelf.ShelfBody(stocked.Depth);
+
+        var spareFirst = StorageShelf.Seat(floor, new[] { spare, stocked }, Array.Empty<ShelfSpot>());
+        var stockedFirst = StorageShelf.Seat(floor, new[] { stocked, spare }, Array.Empty<ShelfSpot>());
+
+        Assert.True(spareFirst.Found, spareFirst.Reason);
+        Assert.Equal(spare.X + body, spareFirst.X, 3);
+        Assert.Equal(55f, spareFirst.Z, 3);
+        Assert.Equal(90f, spareFirst.Yaw, 3);
+        Assert.Equal(spareFirst.X, stockedFirst.X, 3);
+        Assert.Equal(spareFirst.Yaw, stockedFirst.Yaw, 3);
+        Assert.Equal(body, Math.Abs(spareFirst.X - spare.X), 3);
+    }
+
+    [Fact]
+    public void Seat_a_west_facing_stocked_shelf_keeps_the_third_against_the_spare()
+    {
+        // The stocked shelf faces west and its back is the wall. The spare is the aisle partner.
+        var floor = OpenRoom(990f, 998.5f, 50f, 60f);
+        var stocked = new ShelfSpot(998f, 55f, 270f, width: 2.97f, depth: 0.50f);
+        var spare = StorageShelf.Seat(floor, new[] { stocked }, Array.Empty<ShelfSpot>());
+        var partner = new ShelfSpot(spare.X, spare.Z, spare.Yaw, stocked.Width, stocked.Depth);
+        var body = StorageShelf.ShelfBody(stocked.Depth);
+
+        var spareFirst = StorageShelf.Seat(floor, new[] { partner, stocked }, Array.Empty<ShelfSpot>());
+        var stockedFirst = StorageShelf.Seat(floor, new[] { stocked, partner }, Array.Empty<ShelfSpot>());
+
+        Assert.True(spare.Found, spare.Reason);
+        Assert.Equal(998f - StorageShelf.AisleCenterStep(stocked.Depth), spare.X, 3);
+        Assert.Equal(90f, spare.Yaw, 3);
+        Assert.True(spareFirst.Found, spareFirst.Reason);
+        Assert.Equal(partner.X - body, spareFirst.X, 3);
+        Assert.Equal(270f, spareFirst.Yaw, 3);
+        Assert.Equal(spareFirst.X, stockedFirst.X, 3);
+        Assert.Equal(spareFirst.Yaw, stockedFirst.Yaw, 3);
+    }
+
+    [Fact]
+    public void Order_does_not_buy_when_ninety_shipping_shelves_already_cover_keep()
+    {
+        // The spare was already in the shipping area. That shelf is the keep. Do not buy another.
+        var keep = StorageShelf.KeepTarget(need: 1, roomCanSpare: true);
+        var have = StorageShelf.Have(placed: 1, cargo: 0, pending: 0, shipping: 90);
+        Assert.Equal(2, keep);
+        Assert.Equal(0, StorageShelf.OrderForKeep(keep, have));
+        Assert.Equal(0, StorageShelf.OrderForKeep(keep, StorageShelf.Have(placed: 1, cargo: 0, pending: 0, shipping: 1)));
+    }
+
+    [Fact]
+    public void ContractDue_day_1605_still_owes_the_shelf_ordered_for_day_1602()
+    {
+        // The game skips a contract on a later morning that is still before the delivery hour.
+        Assert.True(StorageShelf.ContractDue(day: 1605, deliveryDay: 1602));
+        Assert.True(StorageShelf.ContractDue(day: 1602, deliveryDay: 1602));
+        Assert.False(StorageShelf.ContractDue(day: 1601, deliveryDay: 1602));
+        Assert.False(StorageShelf.ContractDue(day: 1605, deliveryDay: 0));
+    }
+
+    [Fact]
+    public void ShippingToSell_waits_until_the_floor_reaches_keep_then_clears_the_pile()
+    {
+        var keep = StorageShelf.KeepTarget(need: 1, roomCanSpare: true);
+        Assert.Equal(0, StorageShelf.ShippingToSell(placed: 1, cargo: 0, pending: 0, shipping: 90, keep));
+        Assert.Equal(89, StorageShelf.ShippingToSell(placed: 2, cargo: 0, pending: 0, shipping: 89, keep));
+        Assert.Equal(0, StorageShelf.ShippingToSell(placed: 2, cargo: 0, pending: 0, shipping: 0, keep));
+    }
+
+    [Fact]
     public void ResolveFootprint_keeps_live_storage_shelf_half_depth()
     {
         // Live collider is ~3×0.5 — do not rewrite it to the old 2×1 constants.
@@ -930,7 +1084,7 @@ public class StorageShelfTests
     {
         Assert.Equal(
             "shelf.keep version=" + LoadLog.Version
-                + " day=1588 street=ba:street_seventhavenue number=22 boxes=11 need=1 keep=2 placed=4 cargo=32 pending=0 have=36 spareSeats=true",
+                + " day=1588 street=ba:street_seventhavenue number=22 boxes=11 need=1 keep=2 placed=4 cargo=32 pending=0 have=36 shipping=0 spareSeats=true",
             StorageShelf.KeepLine(1588, Street, 22, boxes: 11, need: 1, keep: 2, placed: 4, cargo: 32, pending: 0, have: 36, spareSeats: true));
     }
 
@@ -1067,7 +1221,7 @@ public class StorageShelfTests
         var partner = new ShelfSpot(seat.X, seat.Z, seat.Yaw, width: 2.97f, depth: 0.50f);
 
         Assert.Equal(ShelfAction.Place, attend.Action);
-        Assert.Equal(996.75f, attend.Seat.X, 3);
+        Assert.Equal(996.5f, attend.Seat.X, 3);
         Assert.Equal(270f, attend.Seat.Yaw, 3);
         Assert.True(StorageShelf.Accessible(Shop(), wall, new[] { partner }));
     }
@@ -1213,6 +1367,122 @@ public class StorageShelfTests
     }
 
     [Fact]
+    public void Chain_cover_place_live_pair_keep_three_puts_the_third_against_the_spare()
+    {
+        // Chain: cover → place live 1+1 → keep 3 → third against the spare
+        var day = Morning.CoverDay(null, autopilotOn: true, day: 1590, coveredDay: 1589);
+        var floor = OpenRoom(994f, 1006f, 50f, 60f);
+        var stocked = new ShelfSpot(996.75f, 55f, 90f, width: 2.97f, depth: 0.50f);
+        var aisle = StorageShelf.Seat(floor, new[] { stocked }, Array.Empty<ShelfSpot>());
+        var spare = new ShelfSpot(aisle.X, aisle.Z, aisle.Yaw, stocked.Width, stocked.Depth);
+        var keep = StorageShelf.KeepTarget(need: 2, roomCanSpare: aisle.Found);
+        var third = StorageShelf.Seat(floor, new[] { spare, stocked }, Array.Empty<ShelfSpot>());
+        var body = StorageShelf.ShelfBody(stocked.Depth);
+
+        Assert.Equal(1590, day);
+        Assert.True(aisle.Found, aisle.Reason);
+        Assert.Equal(270f, aisle.Yaw, 3);
+        Assert.Equal(55f, aisle.Z, 3);
+        Assert.Equal(stocked.X + StorageShelf.AisleCenterStep(stocked.Depth), aisle.X, 3);
+        Assert.Equal(3, keep);
+        Assert.True(third.Found, third.Reason);
+        Assert.Equal(90f, third.Yaw, 3);
+        Assert.Equal(55f, third.Z, 3);
+        Assert.Equal(aisle.X + body, third.X, 3);
+    }
+
+    [Fact]
+    public void Chain_cover_need_plus_one_shipping_spare_does_not_order()
+    {
+        // Chain: cover → box need → keep is need+1 → shipping holds the spare → no order → sell the pile once the floor is at keep
+        var day = Morning.CoverDay(null, autopilotOn: true, day: 1605, coveredDay: 1604);
+        var boxes = StorageShelf.BoxesNeeded(new[]
+        {
+            new ShelfStock("ba:itemname_cheapgift", 352, 300, 300),
+            new ShelfStock("ba:itemname_cheapflower", 234, 40, 100),
+            new ShelfStock("ba:itemname_sodacan", 262, 120, 500),
+            new ShelfStock("ba:itemname_umbrella", 252, 200, 300),
+        });
+        var need = StorageShelf.NeedShelves(boxes, spacesNeeded: 0, placedCap: 0);
+        var keep = StorageShelf.KeepTarget(need, roomCanSpare: true);
+        var owned = StorageShelf.Have(placed: 1, cargo: 0, pending: 0, shipping: 90);
+        var order = StorageShelf.OrderForKeep(keep, owned);
+        var beforeSeat = StorageShelf.ShippingToSell(placed: 1, cargo: 0, pending: 0, shipping: 90, keep);
+        var afterSeat = StorageShelf.ShippingToSell(placed: keep, cargo: 0, pending: 0, shipping: 90 - (keep - 1), keep);
+        var due = StorageShelf.ContractDue(day, deliveryDay: 1602);
+
+        Assert.Equal(1605, day);
+        Assert.Equal(5, boxes);
+        Assert.Equal(1, need);
+        Assert.Equal(need + 1, keep);
+        Assert.Equal(0, order);
+        Assert.Equal(0, beforeSeat);
+        Assert.Equal(89, afterSeat);
+        Assert.True(due);
+    }
+
+    [Fact]
+    public void Chain_cover_live_stocked_shelf_faces_a_partner_with_no_air_then_the_third()
+    {
+        // Chain: cover → place live 1+1 → facing gap 0 → third against that partner
+        var day = Morning.CoverDay(null, autopilotOn: true, day: 1594, coveredDay: 1593);
+        var floor = OpenRoom(994f, 1006f, 50f, 60f);
+        var stocked = new ShelfSpot(996.75f, 55f, 90f, width: 2.97f, depth: 0.50f);
+        var oldSpare = new ShelfSpot(998f, 55f, 270f, width: 2.97f, depth: 0.50f);
+        var packed = StorageShelf.ShelvesToReseat(
+            floor,
+            new[] { stocked, oldSpare },
+            Array.Empty<ShelfSpot>(),
+            new[] { 373, 0 });
+        var aisle = StorageShelf.Seat(floor, new[] { stocked }, Array.Empty<ShelfSpot>());
+        var spare = new ShelfSpot(aisle.X, aisle.Z, aisle.Yaw, stocked.Width, stocked.Depth);
+        var third = StorageShelf.Seat(floor, new[] { spare, stocked }, Array.Empty<ShelfSpot>());
+        var body = StorageShelf.ShelfBody(stocked.Depth);
+
+        Assert.Equal(1594, day);
+        Assert.Equal(0f, StorageShelf.FacingGap);
+        Assert.Single(packed);
+        Assert.Equal(998f, packed[0].X, 3);
+        Assert.True(aisle.Found, aisle.Reason);
+        Assert.Equal(270f, aisle.Yaw, 3);
+        Assert.Equal(stocked.X + body, aisle.X, 3);
+        Assert.True(third.Found, third.Reason);
+        Assert.Equal(90f, third.Yaw, 3);
+        Assert.Equal(aisle.X + body, third.X, 3);
+    }
+
+    [Fact]
+    public void Chain_cover_shelf_gap_file_then_the_facing_seat()
+    {
+        // Chain: cover → shelf gap file → facing seat
+        var day = Morning.CoverDay(null, autopilotOn: true, day: 1594, coveredDay: 1593);
+        var floor = OpenRoom(994f, 1006f, 50f, 60f);
+        var stocked = new ShelfSpot(996.75f, 55f, 90f, width: 2.97f, depth: 0.50f);
+        var body = StorageShelf.ShelfBody(stocked.Depth);
+        try
+        {
+            var flush = StorageShelf.ApplyGap(StorageShelf.ParseGap("{ \"facingGap\": 0 }"));
+            var touching = StorageShelf.Seat(floor, new[] { stocked }, Array.Empty<ShelfSpot>());
+            var wide = StorageShelf.ApplyGap(StorageShelf.ParseGap("{ \"facingGap\": 1.25 }"));
+            var spaced = StorageShelf.Seat(floor, new[] { stocked }, Array.Empty<ShelfSpot>());
+
+            Assert.Equal(1594, day);
+            Assert.Equal(1f, flush);
+            Assert.True(touching.Found, touching.Reason);
+            Assert.Equal(stocked.X + body, touching.X, 3);
+            Assert.Equal(270f, touching.Yaw, 3);
+            Assert.Equal(1.25f, wide);
+            Assert.True(spaced.Found, spaced.Reason);
+            Assert.Equal(stocked.X + (body * wide), spaced.X, 3);
+            Assert.Equal(270f, spaced.Yaw, 3);
+        }
+        finally
+        {
+            StorageShelf.ApplyGap(0f);
+        }
+    }
+
+    [Fact]
     public void Chain_cover_place_live_one_plus_one_then_the_back_to_back_seat()
     {
         // Chain: cover → place live 1+1 → back-to-back seat
@@ -1228,9 +1498,9 @@ public class StorageShelfTests
         Assert.Equal(4, day);
         Assert.True(plan.Need > 0);
         Assert.Equal(ShelfAction.Place, attend.Action);
-        Assert.Equal(996.75f, attend.Seat.X, 3);
+        Assert.Equal(996.5f, attend.Seat.X, 3);
         Assert.True(next.Found, next.Reason);
-        Assert.Equal(997.75f, next.X, 3);
+        Assert.Equal(997.5f, next.X, 3);
         Assert.Equal(90f, next.Yaw, 3);
         Assert.True(StorageShelf.Accessible(Shop(), wall, new[] { across }));
     }
@@ -1285,10 +1555,11 @@ public class StorageShelfTests
 
         Assert.Equal(ShelfAction.Order, ordered.Action);
         Assert.Equal(ShelfAction.Place, placed.Action);
-        Assert.Equal(998.5f, placed.Seat.X, 3);
-        Assert.Equal(90f, placed.Seat.Yaw, 3);
+        Assert.Equal(996.5f, placed.Seat.X, 3);
+        Assert.Equal(270f, placed.Seat.Yaw, 3);
         Assert.Equal(1573, nextDay);
-        Assert.False(next.Found);
-        Assert.Equal("full", next.Reason);
+        Assert.True(next.Found, next.Reason);
+        Assert.Equal(998.5f, next.X, 3);
+        Assert.Equal(90f, next.Yaw, 3);
     }
 }

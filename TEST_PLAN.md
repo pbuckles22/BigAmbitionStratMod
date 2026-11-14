@@ -940,6 +940,82 @@ Human check. Gift shop at 22 7th Avenue (same save; optional new-game for aisle)
 
 Not in this slice: staff hold; second register; CMPH of the prior FAIL.
 
+## 14.9 second pod — third shelf against the spare (1.17.11.5)
+
+Tier 1: `Seat_live_pair_puts_the_third_shelf_against_the_spare`, `Seat_a_west_facing_stocked_shelf_keeps_the_third_against_the_spare`. Chain: `cover → place live 1+1 → keep 3 → third against the spare`.
+
+Human check. Gift shop at 22 7th Avenue, the save from the 1.17.11.4 pass. The stocked shelf is near x=996.75 yaw 90. The spare faces it near x=998.00 yaw 270. This morning places a third shelf only when `keep` is 3. A morning that stays at `keep=2` is not a fail of this slice.
+
+1. Restart Big Ambitions so this build loads. Continue the same save. Confirm `mod.loaded version=1.17.11.5`.
+2. Let mornings finish until `shelf.keep` shows `keep=3` (need has risen to 2 and a shelf is in cargo or arrives). Do not cancel the time skip.
+3. **PASS if** that morning logs `shelf.placed` at about x=999.00 z=55.00 yaw=90, backs touching the spare (about 1.00 m between centers, not 1.25). **FAIL if** the new shelf is behind the stocked one (about x=995.75 yaw=270) or an aisle gap is left on the spare's back.
+4. Evidence: `shelf.keep`, `shelf.placed`. Version marker: public `1.17.11.5`.
+
+Not in this slice: the second register, overhire, displays.
+
+## 14.9 need+1 and shipping shelves (1.17.11.9)
+
+Keep is need + 1 when the room has a spare seat. A shelf already in the shipping area counts as owned, is seated before another is bought, and the extras are sold once the floor is at keep. A furniture contract whose delivery day has arrived is delivered on that morning even when the clock is still before 8:00.
+
+Tier 1: `Order_does_not_buy_when_ninety_shipping_shelves_already_cover_keep`, `ContractDue_day_1605_still_owes_the_shelf_ordered_for_day_1602`, `ShippingToSell_waits_until_the_floor_reaches_keep_then_clears_the_pile`. Chain: `cover → box need → keep is need+1 → shipping holds the spare → no order → sell the pile once the floor is at keep`.
+
+Human check. Gift shop at 22 7th Avenue, the day 1605 save. One storage shelf is on the floor. One shelf order has been pending since day 1601. `shelf-gap.json` can stay at `facingGap` 0.
+
+1. Restart Big Ambitions so this build loads. Continue the same save. Confirm `mod.loaded version=1.17.11.9`.
+2. Let one morning finish. Do not cancel the time skip. Then look at the storage row and the shipping area.
+3. **PASS if** `shelf.keep` shows `need=1 keep=2` (not 3), the pending shelf arrives (`shelf.arrived`) and is placed so `placed=2`, and there is no new `shelf.ordered` while shipping plus placed plus cargo already covers `keep`. **FAIL if** `keep` is 3, the extra shelf stays pending with `cargo=0` and `placed=1`, or another shelf is ordered while shelves are already sitting in shipping.
+4. Evidence: `shelf.keep`, `shelf.arrived`, `shelf.placed`, `shelf.ordered`, `shelf.sold where=shipping`. Version marker: public `1.17.11.9`.
+
+Not in this slice: the third shelf (the second pod). Keep stays at need + 1. The `facingGap` file is read (`pitch=1` when the file says 0) and was not part of this pass.
+
+Human PASS 2026-11-14 at 22 7th Avenue on 1.17.11.9. Day 1606: `need=1 keep=2`, `shelf.arrived amount=1`, `shelf.placed x=997.75 z=55.00 yaw=270`. Days 1607–1608: `placed=2`, no new `shelf.ordered`.
+
+## 14.9 shelf gap file (1.17.11.8)
+
+`%LocalAppData%\ChaoticCEO\shelf-gap.json` sets `facingGap`. `0` means the faces touch. Any number above 0 is the center spacing in shelf bodies. `1.25` is the previous layout. The file is created on the first morning if it is missing. A later edit is read on the next morning. An existing file is not overwritten.
+
+Tier 1: `Shelf_gap_file_uses_zero_as_touching_and_one_point_two_five_as_the_old_spacing`, `Shelf_gap_file_is_created_when_missing_and_keeps_a_later_edit`. Chain: `cover → shelf gap file → facing seat`.
+
+Human check. Gift shop at 22 7th Avenue.
+
+1. Restart Big Ambitions so this build loads. Continue the same save. Confirm `mod.loaded version=1.17.11.8`.
+2. Open `%LocalAppData%\ChaoticCEO\shelf-gap.json`. Leave `facingGap` at 0, or set it to 1.25 if you want the previous spacing. Save the file.
+3. Let one morning finish. Do not cancel the time skip.
+4. **PASS if** `shelf.gap` shows the number you saved (`facingGap=0 pitch=1`, or `facingGap=1.25 pitch=1.25`) and the facing shelves sit that far apart (about 1.00 m when the pitch is 1, about 1.25 m when the pitch is 1.25). **FAIL if** `shelf.gap` does not match the file, or the shelves stay at the other spacing.
+5. Evidence: `shelf.gap`, `shelf.placed`. Version marker: public `1.17.11.8`.
+
+Not in this slice: collapsing the aisle and back-to-back code into one path.
+
+## 14.9 facing gap zero (1.17.11.7)
+
+`FacingGap` is 0. Facing centers are one shelf body apart, so the faces touch. The aisle-versus-back-to-back split stays until this look is confirmed. An empty spare that still sits a quarter-body away is packed and seated flush.
+
+Tier 1: `Facing_gap_is_zero_so_the_partner_sits_one_body_away`. Chain: `cover → place live 1+1 → facing gap 0 → third against that partner`.
+
+Human check. Gift shop at 22 7th Avenue. The stocked shelf is near x=996.75 yaw 90. The spare from the last build is near x=998.00 yaw 270, a quarter-body of air away.
+
+1. Restart Big Ambitions so this build loads. Continue the same save. Confirm `mod.loaded version=1.17.11.7`.
+2. Let one morning finish. Do not cancel the time skip.
+3. **PASS if** the spare is packed and the seated shelf is about x=997.75 z=55 yaw 270 (centers 1.00 m apart, faces touching). If `keep=3` and cargo is on hand, the next shelf is about x=998.75 z=55 yaw 90, also touching. **FAIL if** a facing pair stays about 1.25 m apart (the spare left at x=998).
+4. Evidence: `shelf.packed`, `shelf.placed`, `shelf.keep`. Version marker: public `1.17.11.7`.
+
+Not in this slice: collapsing the aisle and back-to-back code into one path. That cleanup waits until this layout is confirmed.
+
+## 14.9 second pod — debug keep 3, no resign, no sick (1.17.11.6)
+
+Temporary. `DebugKeep` lifts a positive keep below 3 up to 3 so the second pod can place. Remove it after that shelf is seen. `StaffHold` sets satisfaction to 100, clears the quit warning, clears absent, and sets the next sick day to never. It runs on the same tick as the needs hold.
+
+Tier 1: `DebugKeep_lifts_a_positive_keep_below_three_and_leaves_the_rest`, `Staff_each_fault_is_due`, `Staff_hold_sets_satisfaction_and_clears_sick_and_quit`. Chains: `cover → place live 1+1 → keep 2 → debug keep 3 → third against the spare`, `needs hold → staff hold`.
+
+Human check. Gift shop at 22 7th Avenue. Two shelves are already placed (stocked near x=996.75 yaw 90, spare near x=998.00 yaw 270). Cargo is still on hand from the mornings that sold nothing because keep stayed 2.
+
+1. Restart Big Ambitions so this build loads. Continue the same save. Confirm `mod.loaded version=1.17.11.6`.
+2. Let one morning finish. Do not cancel the time skip.
+3. **PASS if** that morning logs `shelf.keep` with `keep=3` and `shelf.placed` near x=999.00 z=55.00 yaw=90, and no employee resigns or calls in sick. **FAIL if** keep stays 2, the new shelf is behind the stocked one (about x=995.75 yaw 270), or someone resigns or calls in sick.
+4. Evidence: `shelf.keep`, `shelf.placed`, `staff.held`. Version marker: public `1.17.11.6`.
+
+Not in this slice: the second register, overhire, displays. The debug keep comes out after this pod is confirmed.
+
 ## 14.9 closer aisle and even sellback (1.17.11.4)
 
 Tier 1: facing centers are `AisleCenterStep` (1.25 shelf bodies). `Buyback(960)` is the purchase price 1200. Chain: `cover → reseat same-yaw spare across the aisle → third is back-to-back` uses that step.

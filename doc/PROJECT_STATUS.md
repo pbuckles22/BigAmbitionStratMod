@@ -2,13 +2,13 @@
 
 **Human-readable current state.** Keep in sync with [AGENT_HANDOFF.md](../AGENT_HANDOFF.md) → *Current state* when milestones ship.
 
-**Last updated:** 2026-11-13
+**Last updated:** 2026-11-14
 
 ---
 
 ## Summary
 
-**BigAmbitionStratMod** — Version **1.17.11.4** on `main` (aisle 1.25 bodies and even shelf buyback, human PASS 2026-11-13). **14.9** stays open for the second pod. Then overhire; then displays. **14.4** waits. Epic 10 stays open. **10.4** code stays stashed. Rules: [requirements/strategy.md](requirements/strategy.md).
+**BigAmbitionStratMod** — Version **1.17.11.9** on `main` (need + 1 keep and no extra shipping shelves, human PASS 2026-11-14). **14.9** stays open for the second pod. Then overhire; then displays. **14.4** waits. Epic 10 stays open. **10.4** code stays stashed. Rules: [requirements/strategy.md](requirements/strategy.md).
 
 ---
 
@@ -16,7 +16,8 @@
 
 | Branch | Role |
 |--------|------|
-| **`main`** | Integration branch. Version 1.17.11.4. Land `a8b5744`. Aisle 1.25 bodies and even shelf buyback. Human PASS 2026-11-13. |
+| **`main`** | Integration branch. Version 1.17.11.9. Need + 1 keep and shipping shelves. Human PASS 2026-11-14. |
+| **`feature/14.9-second-pod`** | 14.9 need + 1 and shipping shelves. Version 1.17.11.9. Human PASS 2026-11-14. Kept after CMPH. |
 | **`fix/per-frame-io-throttle`** | Lag fix. Version 1.17.10. Land `89b207e`. Human PASS 2026-11-13. Kept after CMPH. |
 | **`bug/soda-display-free-space`** | 14.9 aisle. Version 1.17.11.4. Human PASS 2026-11-13. Kept after CMPH. |
 | **`feature/staff-hold-cheat`** | Staff-hold test cheat parked off the shelf branch. Not wired. |

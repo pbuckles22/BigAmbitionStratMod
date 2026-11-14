@@ -1,0 +1,4 @@
+{
+  "facingGap": 0,
+  "note": "0 = faces touch. 1.25 = centers 1.25 shelf-bodies apart (the previous layout). Any number above 0 is that center spacing."
+}

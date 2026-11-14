@@ -74,10 +74,17 @@ namespace ChaoticCEO
         public const float FootprintDepth = 0.5f;
 
         /// <summary>
-        /// Facing shelves, center to center, in shelf bodies. A body is the full depth.
-        /// 1.25 leaves a quarter-body of air. Back-to-back pods stay one body apart, with no air.
+        /// Center spacing of facing shelves, in shelf bodies, from shelf-gap.json.
+        /// Zero means the faces touch. Any number above zero is that center spacing
+        /// (1.25 is the previous layout). The aisle-versus-back-to-back split stays
+        /// until the packed layout is proven.
         /// </summary>
-        public const float AislePitch = 1.25f;
+        public static float FacingGap { get; private set; }
+
+        /// <summary>Facing centers, in shelf bodies. Zero in the file means 1 (faces touch).</summary>
+        public static float AislePitch => FacingGap > 0f ? FacingGap : 1f;
+
+        public const string GapFileName = "shelf-gap.json";
 
         /// <summary>Older clear-floor sample. Facing pitch is <see cref="AislePitch"/>.</summary>
         public const float AisleWidth = 1.0f;
@@ -249,13 +256,54 @@ namespace ChaoticCEO
             return need;
         }
 
-        /// <summary>Placed + cargo + pending furniture trucks.</summary>
-        public static int Have(int placed, int cargo, int pending)
+        /// <summary>
+        /// Placed + cargo + pending trucks + shelves already in the shipping area.
+        /// A shelf in shipping is owned. It is not another purchase.
+        /// </summary>
+        public static int Have(int placed, int cargo, int pending, int shipping = 0)
         {
             var p = placed < 0 ? 0 : placed;
             var c = cargo < 0 ? 0 : cargo;
             var d = pending < 0 ? 0 : pending;
-            return p + c + d;
+            var s = shipping < 0 ? 0 : shipping;
+            return p + c + d + s;
+        }
+
+        /// <summary>
+        /// The game only hands over a furniture contract when the clock hour is at or past
+        /// the delivery hour. A later morning, still before that hour, never matches, so the
+        /// contract sits forever. Once the delivery day has arrived, our morning owes it.
+        /// </summary>
+        public static bool ContractDue(int day, int deliveryDay)
+        {
+            return deliveryDay > 0 && day >= deliveryDay;
+        }
+
+        /// <summary>
+        /// Empty shelves in the shipping area above <paramref name="keep"/>, after cargo
+        /// excess is sold. Nothing is sold until the floor itself has reached <paramref name="keep"/>.
+        /// </summary>
+        public static int ShippingToSell(int placed, int cargo, int pending, int shipping, int keep)
+        {
+            if (shipping <= 0 || placed < keep)
+            {
+                return 0;
+            }
+
+            var excess = Excess(Have(placed, cargo, pending, shipping), keep);
+            var fromCargo = cargo < 0 ? 0 : cargo;
+            if (fromCargo > excess)
+            {
+                fromCargo = excess;
+            }
+
+            var rest = excess - fromCargo;
+            if (rest < 0)
+            {
+                return 0;
+            }
+
+            return rest < shipping ? rest : shipping;
         }
 
         /// <summary>How many shelves sit above the keep target.</summary>
@@ -443,6 +491,124 @@ namespace ChaoticCEO
             return ShelfBody(depth) * AislePitch;
         }
 
+        public static float ParseGap(string? text)
+        {
+            if (string.IsNullOrWhiteSpace(text))
+            {
+                return 0f;
+            }
+
+            var trimmed = text.Trim();
+            if (float.TryParse(trimmed, NumberStyles.Float, CultureInfo.InvariantCulture, out var bare))
+            {
+                return bare;
+            }
+
+            var key = trimmed.IndexOf("facingGap", System.StringComparison.OrdinalIgnoreCase);
+            if (key < 0)
+            {
+                return 0f;
+            }
+
+            var colon = trimmed.IndexOf(':', key);
+            if (colon < 0)
+            {
+                return 0f;
+            }
+
+            var start = colon + 1;
+            while (start < trimmed.Length && char.IsWhiteSpace(trimmed[start]))
+            {
+                start++;
+            }
+
+            var end = start;
+            if (end < trimmed.Length && (trimmed[end] == '-' || trimmed[end] == '+'))
+            {
+                end++;
+            }
+
+            var sawDigit = false;
+            while (end < trimmed.Length && (char.IsDigit(trimmed[end]) || trimmed[end] == '.'))
+            {
+                if (char.IsDigit(trimmed[end]))
+                {
+                    sawDigit = true;
+                }
+
+                end++;
+            }
+
+            if (!sawDigit)
+            {
+                return 0f;
+            }
+
+            if (float.TryParse(trimmed.Substring(start, end - start), NumberStyles.Float, CultureInfo.InvariantCulture, out var value))
+            {
+                return value;
+            }
+
+            return 0f;
+        }
+
+        /// <summary>Sets the file value and returns the pitch the seats will use.</summary>
+        public static float ApplyGap(float facingGap)
+        {
+            FacingGap = facingGap;
+            return AislePitch;
+        }
+
+        public static string GapPath(string? localAppData)
+        {
+            return Path.Combine(localAppData ?? "", LoadLog.ModId, GapFileName);
+        }
+
+        public static string DefaultGapText()
+        {
+            return "{" + System.Environment.NewLine
+                + "  \"facingGap\": 0," + System.Environment.NewLine
+                + "  \"note\": \"0 = faces touch. 1.25 = centers 1.25 shelf-bodies apart (the previous layout). Any number above 0 is that center spacing.\"" + System.Environment.NewLine
+                + "}" + System.Environment.NewLine;
+        }
+
+        public static float LoadGap(string? localAppData)
+        {
+            if (string.IsNullOrEmpty(localAppData))
+            {
+                return ApplyGap(0f);
+            }
+
+            var path = GapPath(localAppData);
+            try
+            {
+                if (!File.Exists(path))
+                {
+                    var directory = Path.GetDirectoryName(path);
+                    if (!string.IsNullOrEmpty(directory))
+                    {
+                        Directory.CreateDirectory(directory);
+                    }
+
+                    File.WriteAllText(path, DefaultGapText());
+                }
+
+                return ApplyGap(ParseGap(File.ReadAllText(path)));
+            }
+            catch (System.Exception)
+            {
+                return ApplyGap(0f);
+            }
+        }
+
+        public static string GapLine(int day)
+        {
+            return "shelf.gap version=" + LoadLog.Version
+                + " day=" + day.ToString(CultureInfo.InvariantCulture)
+                + " facingGap=" + FacingGap.ToString("0.##", CultureInfo.InvariantCulture)
+                + " pitch=" + AislePitch.ToString("0.##", CultureInfo.InvariantCulture);
+        }
+
         /// <summary>
         /// What we get back for one shelf. The game resale is below the purchase price.
         /// Crediting the purchase price makes a buy-then-return even.
@@ -592,7 +758,8 @@ namespace ChaoticCEO
             int cargo,
             int pending,
             int have,
-            bool spareSeats)
+            bool spareSeats,
+            int shipping = 0)
         {
             return "shelf.keep version=" + LoadLog.Version
                 + " day=" + day.ToString(CultureInfo.InvariantCulture)
@@ -605,7 +772,18 @@ namespace ChaoticCEO
                 + " cargo=" + cargo.ToString(CultureInfo.InvariantCulture)
                 + " pending=" + pending.ToString(CultureInfo.InvariantCulture)
                 + " have=" + have.ToString(CultureInfo.InvariantCulture)
+                + " shipping=" + shipping.ToString(CultureInfo.InvariantCulture)
                 + " spareSeats=" + (spareSeats ? "true" : "false");
+        }
+
+        public static string ArrivedLine(int day, string? street, int number, int amount)
+        {
+            return "shelf.arrived version=" + LoadLog.Version
+                + " day=" + day.ToString(CultureInfo.InvariantCulture)
+                + " street=" + (street ?? "")
+                + " number=" + number.ToString(CultureInfo.InvariantCulture)
+                + " item=" + Item
+                + " amount=" + amount.ToString(CultureInfo.InvariantCulture);
         }
 
         public static string SoldLine(
@@ -919,6 +1097,18 @@ namespace ChaoticCEO
                 return ShelfSeat.None("full");
             }
 
+            // An opposite pair cancels the facing vote. Start from the shelf whose back is
+            // buried (the wall side). When both backs are open, start from the lower corner
+            // so the spare — the shelf across the aisle — gets the next one against it.
+            if (row.Count == 2 && OppositeYawPair(row[0].Yaw, row[1].Yaw))
+            {
+                var start = PairStart(floor, row, blockers);
+                if (!SameSpot(row[0], start))
+                {
+                    (row[0], row[1]) = (row[1], row[0]);
+                }
+            }
+
             var facing = FacingAxis(row);
             row.Sort((a, b) => Project(a, facing.x, facing.z).CompareTo(Project(b, facing.x, facing.z)));
 
@@ -1014,7 +1204,7 @@ namespace ChaoticCEO
 
         /// <summary>
         /// Next seat along the grow axis: a space when the face would be buried, otherwise back-to-back.
-        /// The space puts centers <see cref="AislePitch"/> shelf-bodies apart. Back-to-back centers stay one body apart.
+        /// Facing centers sit <see cref="AislePitch"/> shelf-bodies apart. Back-to-back centers stay one body apart.
         /// </summary>
         internal static ShelfSpot AisleStep(ShelfSpot from, float growX, float growZ)
         {
@@ -1117,7 +1307,10 @@ namespace ChaoticCEO
             var body = ShelfBody(seat.Depth);
             var air = AisleCenterStep(seat.Depth) - body;
             var face = body / 2f;
-            for (var along = Sample; along <= air - Sample + Touch; along += Sample)
+            // No air left: still sample the face, so a shelf standing on it stays blocked.
+            var start = air > Sample ? Sample : 0f;
+            var limit = air > Sample ? air - Sample + Touch : Touch;
+            for (var along = start; along <= limit; along += Sample)
             {
                 var depth = face + along;
                 foreach (var lateral in Steps(halfWidth))
@@ -1179,6 +1372,43 @@ namespace ChaoticCEO
             }
 
             return false;
+        }
+
+        private static ShelfSpot PairStart(ShelfFloor floor, List<ShelfSpot> row, IReadOnlyList<ShelfSpot> blockers)
+        {
+            var buried = new List<ShelfSpot>();
+            foreach (var shelf in row)
+            {
+                if (BackBuried(floor, shelf, blockers, row))
+                {
+                    buried.Add(shelf);
+                }
+            }
+
+            if (buried.Count == 1)
+            {
+                return buried[0];
+            }
+
+            var start = row[0];
+            for (var i = 1; i < row.Count; i++)
+            {
+                var shelf = row[i];
+                if (shelf.X < start.X - Touch || (System.Math.Abs(shelf.X - start.X) <= Touch && shelf.Z < start.Z))
+                {
+                    start = shelf;
+                }
+            }
+
+            return start;
+        }
+
+        /// <summary>True when a back-to-back partner on this shelf's back does not fit.</summary>
+        private static bool BackBuried(ShelfFloor floor, ShelfSpot shelf, IReadOnlyList<ShelfSpot> blockers, IReadOnlyList<ShelfSpot> row)
+        {
+            var (fx, fz) = Facing(shelf.Yaw);
+            var behind = AisleStep(shelf, -fx, -fz);
+            return !Accept(floor, behind, blockers, row);
         }
 
         private static (float x, float z) FacingAxis(List<ShelfSpot> row)

@@ -89,6 +89,131 @@ namespace ChaoticCEO
             return total;
         }
 
+        /// <summary>Storage shelves parented to the shipping pallet. They are owned and not on the floor.</summary>
+        public static int ShippingCount(BuildingRegistration? building)
+        {
+            if (building?.itemInstances == null)
+            {
+                return 0;
+            }
+
+            var total = 0;
+            foreach (var item in building.itemInstances.Values)
+            {
+                if (item != null
+                    && item.itemName == StorageShelf.Item
+                    && !string.IsNullOrEmpty(item.parentId))
+                {
+                    total++;
+                }
+            }
+
+            return total;
+        }
+
+        /// <summary>Move one shipping-area shelf onto <paramref name="seat"/> and clear its parent.</summary>
+        public static bool MoveShipping(BuildingRegistration building, ShelfSeat seat, out string reason)
+        {
+            reason = "";
+            if (!seat.Found)
+            {
+                reason = seat.Reason;
+                return false;
+            }
+
+            if (building.itemInstances == null)
+            {
+                reason = "noshipping";
+                return false;
+            }
+
+            ItemInstance? shelf = null;
+            foreach (var item in building.itemInstances.Values)
+            {
+                if (item != null
+                    && item.itemName == StorageShelf.Item
+                    && !string.IsNullOrEmpty(item.parentId))
+                {
+                    shelf = item;
+                    break;
+                }
+            }
+
+            if (shelf == null)
+            {
+                reason = "noshipping";
+                return false;
+            }
+
+            try
+            {
+                shelf.parentId = "";
+                shelf.position = new SerializableVector3(seat.X, RowHeight(building, shelf), seat.Z);
+                shelf.yRotation = seat.Yaw;
+                Show(building, shelf);
+                GameEvent.Invoke("ba:gameevent_itemcargochanged");
+                SaveGameManager.MarkChange();
+                return true;
+            }
+            catch (System.Exception ex)
+            {
+                reason = "error:" + ex.GetType().Name;
+                return false;
+            }
+        }
+
+        public static int SellShipping(BuildingRegistration? building, int amount, out float price)
+        {
+            price = 0f;
+            if (building?.itemInstances == null || amount <= 0)
+            {
+                return 0;
+            }
+
+            var sold = 0;
+            var doomed = new List<ItemInstance>();
+            foreach (var item in building.itemInstances.Values)
+            {
+                if (sold + doomed.Count >= amount)
+                {
+                    break;
+                }
+
+                if (item == null
+                    || item.itemName != StorageShelf.Item
+                    || string.IsNullOrEmpty(item.parentId)
+                    || (item.cargoInstances != null && item.cargoInstances.Count > 0))
+                {
+                    continue;
+                }
+
+                doomed.Add(item);
+            }
+
+            foreach (var item in doomed)
+            {
+                if (sold >= amount)
+                {
+                    break;
+                }
+
+                var credit = StorageShelf.Buyback(item.GetSellingPrice());
+                Hide(building, item);
+                building.RemoveItemInstanceFromBuilding(item, true);
+                price += credit;
+                sold++;
+                Credit(credit, "ba:transaction_itemsold");
+            }
+
+            if (sold > 0)
+            {
+                GameEvent.Invoke("ba:gameevent_itemcargochanged");
+                SaveGameManager.MarkChange();
+            }
+
+            return sold;
+        }
+
         /// <summary>Units per delivered box for one product, or 0 when the item is unknown.</summary>
         public static int BoxSize(string? item)
         {
