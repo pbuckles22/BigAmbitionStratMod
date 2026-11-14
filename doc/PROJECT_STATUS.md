@@ -16,7 +16,7 @@
 
 | Branch | Role |
 |--------|------|
-| **`main`** | Integration branch. Version 1.17.11.9. Need + 1 keep and shipping shelves. Human PASS 2026-11-14. |
+| **`main`** | Integration branch. Version 1.17.11.9. Land `59ab01e`. Need + 1 keep and shipping shelves. Human PASS 2026-11-14. |
 | **`feature/14.9-second-pod`** | 14.9 need + 1 and shipping shelves. Version 1.17.11.9. Human PASS 2026-11-14. Kept after CMPH. |
 | **`fix/per-frame-io-throttle`** | Lag fix. Version 1.17.10. Land `89b207e`. Human PASS 2026-11-13. Kept after CMPH. |
 | **`bug/soda-display-free-space`** | 14.9 aisle. Version 1.17.11.4. Human PASS 2026-11-13. Kept after CMPH. |
@@ -112,7 +112,7 @@
 | **`feature/chain-prefix`** | Kept after CMPH (template history) |
 | **`feature/handoff-receiver-framing`** | Kept after CMPH (template history) |
 
-**Last land:** `42978e4` on `main`. Version 1.17.8.1. Branch `feature/14.9-place-shelf` kept. Repo: https://github.com/pbuckles22/BigAmbitionStratMod.
+**Last land:** `59ab01e` on `main`. Version 1.17.11.9. Branch `feature/14.9-second-pod` kept. Repo: https://github.com/pbuckles22/BigAmbitionStratMod.
 
 ---
 
