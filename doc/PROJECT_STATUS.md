@@ -16,7 +16,7 @@
 
 | Branch | Role |
 |--------|------|
-| **`main`** | Integration branch. Version 1.17.11.10. Facing gap uses the surveyed depth. Human PASS 2026-11-14. |
+| **`main`** | Integration branch. Version 1.17.11.10. Land `6ca446f`. Facing gap uses the surveyed depth. Human PASS 2026-11-14. |
 | **`feature/14.9-second-pod`** | 14.9 facing gap. Version 1.17.11.10. Human PASS 2026-11-14. Kept after CMPH. |
 | **`fix/per-frame-io-throttle`** | Lag fix. Version 1.17.10. Land `89b207e`. Human PASS 2026-11-13. Kept after CMPH. |
 | **`bug/soda-display-free-space`** | 14.9 aisle. Version 1.17.11.4. Human PASS 2026-11-13. Kept after CMPH. |
@@ -112,7 +112,7 @@
 | **`feature/chain-prefix`** | Kept after CMPH (template history) |
 | **`feature/handoff-receiver-framing`** | Kept after CMPH (template history) |
 
-**Last land:** `59ab01e` on `main`. Version 1.17.11.9. Branch `feature/14.9-second-pod` kept. Repo: https://github.com/pbuckles22/BigAmbitionStratMod.
+**Last land:** `6ca446f` on `main`. Version 1.17.11.10. Branch `feature/14.9-second-pod` kept. Repo: https://github.com/pbuckles22/BigAmbitionStratMod.
 
 ---
 
