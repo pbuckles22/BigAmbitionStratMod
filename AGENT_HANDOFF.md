@@ -138,8 +138,8 @@ When shipping: update **PM_PLAN**, **doc/PROJECT_STATUS.md**, and **Current stat
 
 ## Current state
 
-- **Product:** Version **1.17.10** on `main` (I/O throttle). This branch has **14.9** aisle WIP merged onto that tip. Epic 10 stays open. Ladder: [PM_PLAN.md](PM_PLAN.md). Handoff: [doc/handoff/0108-HANDOFF-2026-11-13_1540.md](doc/handoff/0108-HANDOFF-2026-11-13_1540.md).
-- **On:** `bug/soda-display-free-space` (merged `origin/main` 1.17.10; not on main). **10.4** code stays stashed. https://github.com/pbuckles22/BigAmbitionStratMod
+- **Product:** Version **1.17.10** on `main` (I/O throttle). Epic 14 open; next ship is **14.9** aisle. Ladder: [PM_PLAN.md](PM_PLAN.md). Handoff: [doc/handoff/0109-HANDOFF-2026-11-13_1603.md](doc/handoff/0109-HANDOFF-2026-11-13_1603.md).
+- **On:** `origin/bug/soda-display-free-space @ d21865d` (not merged; includes main 1.17.10). **10.4** code stays stashed. https://github.com/pbuckles22/BigAmbitionStratMod
 - **Next:** Fix **14.9** new-game storage 1+1 aisle too close when asked. Then overhire; then displays. **14.4** waits. No `$100M` soak until **10.7**.
 - **Blockers:** Do not pop the **10.4** stash. **7.9** blocks **14.10**. Do not CMPH until new-game aisle PASS. Do not clip paper to register free space or drop RegisterCap to 200.
 
