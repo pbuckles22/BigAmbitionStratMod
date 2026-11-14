@@ -22,7 +22,7 @@ namespace ChaoticCEO
             }
 
             var year = current.gameVariables.daysPerYear;
-            int employees = 0, raised = 0, aged = 0, complaints = 0, poach = 0;
+            int employees = 0, raised = 0, aged = 0, complaints = 0, poach = 0, sick = 0;
             foreach (var employee in current.EmployeeInstances)
             {
                 if (employee == null || employee.IsCandidate || employee.characterData == null)
@@ -38,7 +38,9 @@ namespace ChaoticCEO
                     employee.characterData.ageInDays,
                     complaint != null && complaint.isComplaining,
                     complaint == null ? int.MaxValue : complaint.hoursUntilNextComplaint,
-                    deadline > 0);
+                    deadline > 0,
+                    employee.nextSickDay,
+                    employee.isAbsent);
                 var plan = StaffHold.Decide(state, year);
                 if (!plan.Any)
                 {
@@ -75,9 +77,24 @@ namespace ChaoticCEO
                     employee.poachedByRivalId = string.Empty;
                     poach++;
                 }
+
+                if (plan.SickDay >= 0)
+                {
+                    employee.nextSickDay = plan.SickDay;
+                }
+
+                if (plan.ClearAbsent)
+                {
+                    employee.isAbsent = false;
+                }
+
+                if (plan.SickDay >= 0 || plan.ClearAbsent)
+                {
+                    sick++;
+                }
             }
 
-            watch.Tick(localAppData, current.Day, current.Hour, employees, raised, aged, complaints, poach);
+            watch.Tick(localAppData, current.Day, current.Hour, employees, raised, aged, complaints, poach, sick);
         }
     }
 }

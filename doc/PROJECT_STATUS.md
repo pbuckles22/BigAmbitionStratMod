@@ -8,7 +8,7 @@
 
 ## Summary
 
-**BigAmbitionStratMod** — Version **1.17.11.11** on `main` (staff hold keeps satisfaction, complaints, poach, and retirement from churning the register; human PASS 2026-11-14). Sick calls are not held. **14.9** stays open for the second pod. Then overhire; then displays. **14.4** waits. Epic 10 stays open. **10.4** code stays stashed. Rules: [requirements/strategy.md](requirements/strategy.md).
+**BigAmbitionStratMod** — Version **1.17.11.12** on `main` (sick hold clears a scheduled sick day and an absence that already landed; human PASS 2026-11-14). **14.9** stays open for the second pod. Then overhire; then displays. **14.4** waits. Epic 10 stays open. **10.4** code stays stashed. Rules: [requirements/strategy.md](requirements/strategy.md).
 
 ---
 
@@ -16,7 +16,8 @@
 
 | Branch | Role |
 |--------|------|
-| **`main`** | Integration branch. Version 1.17.11.11. Land `ad84971`. Staff hold. Human PASS 2026-11-14. |
+| **`main`** | Integration branch. Version 1.17.11.12. Sick hold. Human PASS 2026-11-14. |
+| **`feature/sick-hold`** | Sick hold. Version 1.17.11.12. Human PASS 2026-11-14. Kept after CMPH. |
 | **`feature/staff-hold`** | Staff hold cheat, wired. Version 1.17.11.11. Human PASS 2026-11-14. Kept after CMPH. |
 | **`feature/14.9-second-pod`** | 14.9 facing gap. Version 1.17.11.10. Human PASS 2026-11-14. Kept after CMPH. |
 | **`fix/per-frame-io-throttle`** | Lag fix. Version 1.17.10. Land `89b207e`. Human PASS 2026-11-13. Kept after CMPH. |

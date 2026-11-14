@@ -5,13 +5,22 @@ namespace ChaoticCEO
 {
     public sealed class StaffState
     {
-        public StaffState(float satisfaction, int ageInDays, bool complaining, int hoursUntilNextComplaint, bool poachPending)
+        public StaffState(
+            float satisfaction,
+            int ageInDays,
+            bool complaining,
+            int hoursUntilNextComplaint,
+            bool poachPending,
+            int nextSickDay = int.MaxValue,
+            bool absent = false)
         {
             Satisfaction = satisfaction;
             AgeInDays = ageInDays;
             Complaining = complaining;
             HoursUntilNextComplaint = hoursUntilNextComplaint;
             PoachPending = poachPending;
+            NextSickDay = nextSickDay;
+            Absent = absent;
         }
 
         public float Satisfaction { get; }
@@ -23,17 +32,31 @@ namespace ChaoticCEO
         public int HoursUntilNextComplaint { get; }
 
         public bool PoachPending { get; }
+
+        /// <summary>Game day they will call in sick. <see cref="StaffHold.NeverDay"/> means they will not.</summary>
+        public int NextSickDay { get; }
+
+        public bool Absent { get; }
     }
 
     public sealed class StaffHoldPlan
     {
-        public StaffHoldPlan(bool raise, int age, bool clearComplaint, int complaintHours, bool clearPoach)
+        public StaffHoldPlan(
+            bool raise,
+            int age,
+            bool clearComplaint,
+            int complaintHours,
+            bool clearPoach,
+            int sickDay = -1,
+            bool clearAbsent = false)
         {
             Raise = raise;
             Age = age;
             ClearComplaint = clearComplaint;
             ComplaintHours = complaintHours;
             ClearPoach = clearPoach;
+            SickDay = sickDay;
+            ClearAbsent = clearAbsent;
         }
 
         public bool Raise { get; }
@@ -48,12 +71,18 @@ namespace ChaoticCEO
 
         public bool ClearPoach { get; }
 
-        public bool Any => Raise || Age >= 0 || ClearComplaint || ComplaintHours >= 0 || ClearPoach;
+        /// <summary>New sick day, or -1 to keep. <see cref="StaffHold.NeverDay"/> means they will not call in.</summary>
+        public int SickDay { get; }
+
+        public bool ClearAbsent { get; }
+
+        public bool Any => Raise || Age >= 0 || ClearComplaint || ComplaintHours >= 0 || ClearPoach || SickDay >= 0 || ClearAbsent;
     }
 
     /// <summary>
     /// TEST CHEAT (doc/TEST_CHEATS.md): employees stay at full satisfaction, never complain-resign,
-    /// never take a rival poach, and never reach the retirement notice. Turn off before balancing HR (14.10).
+    /// never take a rival poach, never reach the retirement notice, and never call in sick.
+    /// Turn off before balancing HR (14.10).
     /// </summary>
     public static class StaffHold
     {
@@ -70,13 +99,20 @@ namespace ChaoticCEO
         /// <summary>One year under the retirement notice.</summary>
         public const int CeilingYears = RetirementAge - 2;
 
+        /// <summary>
+        /// A sick day the daily check never reaches. The game calls them in when
+        /// <c>nextSickDay</c> is today or earlier, and only skips the call when it is later.
+        /// </summary>
+        public const int NeverDay = int.MaxValue;
+
         public static StaffHoldPlan Decide(StaffState state, int daysPerYear)
         {
             var year = daysPerYear > 0 ? daysPerYear : 1;
             var raise = state.Satisfaction < Satisfaction;
             var age = state.AgeInDays >= CeilingYears * year ? HoldAgeYears * year : -1;
             var hours = state.HoursUntilNextComplaint < year * 24 ? year * 24 : -1;
-            return new StaffHoldPlan(raise, age, state.Complaining, hours, state.PoachPending);
+            var sick = state.NextSickDay >= NeverDay ? -1 : NeverDay;
+            return new StaffHoldPlan(raise, age, state.Complaining, hours, state.PoachPending, sick, state.Absent);
         }
 
         public static StaffState Apply(StaffState state, StaffHoldPlan plan)
@@ -86,7 +122,9 @@ namespace ChaoticCEO
                 plan.Age >= 0 ? plan.Age : state.AgeInDays,
                 !plan.ClearComplaint && state.Complaining,
                 plan.ComplaintHours >= 0 ? plan.ComplaintHours : state.HoursUntilNextComplaint,
-                !plan.ClearPoach && state.PoachPending);
+                !plan.ClearPoach && state.PoachPending,
+                plan.SickDay >= 0 ? plan.SickDay : state.NextSickDay,
+                !plan.ClearAbsent && state.Absent);
         }
 
         /// <summary>
@@ -107,7 +145,7 @@ namespace ChaoticCEO
             return CashierCover.Reason(quit, retired, state.PoachPending);
         }
 
-        public static string Line(int day, int employees, int raised, int aged, int complaints, int poach)
+        public static string Line(int day, int employees, int raised, int aged, int complaints, int poach, int sick)
         {
             return "staff.held version=" + LoadLog.Version
                 + " day=" + day.ToString(CultureInfo.InvariantCulture)
@@ -115,7 +153,8 @@ namespace ChaoticCEO
                 + " raised=" + raised.ToString(CultureInfo.InvariantCulture)
                 + " aged=" + aged.ToString(CultureInfo.InvariantCulture)
                 + " complaints=" + complaints.ToString(CultureInfo.InvariantCulture)
-                + " poach=" + poach.ToString(CultureInfo.InvariantCulture);
+                + " poach=" + poach.ToString(CultureInfo.InvariantCulture)
+                + " sick=" + sick.ToString(CultureInfo.InvariantCulture);
         }
     }
 
@@ -130,17 +169,17 @@ namespace ChaoticCEO
             return day != _day || hour != _hour;
         }
 
-        public string Tick(string? localAppData, int day, int hour, int employees, int raised, int aged, int complaints, int poach)
+        public string Tick(string? localAppData, int day, int hour, int employees, int raised, int aged, int complaints, int poach, int sick)
         {
             var newDay = day != _day;
             _day = day;
             _hour = hour;
-            if (!newDay && aged == 0 && complaints == 0 && poach == 0)
+            if (!newDay && aged == 0 && complaints == 0 && poach == 0 && sick == 0)
             {
                 return "";
             }
 
-            var line = StaffHold.Line(day, employees, raised, aged, complaints, poach);
+            var line = StaffHold.Line(day, employees, raised, aged, complaints, poach, sick);
             if (!string.IsNullOrEmpty(localAppData))
             {
                 var path = LoadLog.CeoLogPath(localAppData!);

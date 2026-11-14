@@ -4,20 +4,22 @@ Define **Tier 1** (fast feedback: unit, headless, or local) and **Tier 2** (inte
 
 ---
 
-## Staff hold cheat (1.17.11.11)
+## Staff hold cheat (1.17.11.12)
 
-The parked employee hold is on, on the same tick as the player needs hold. Satisfaction stays at 100, an open complaint is cleared, the next complaint is a game year out, a rival poach is cancelled, and age resets to 60 at 65. Sick calls and walking off a shift are not held. Switch: `StaffHold.Enabled`.
+The parked employee hold is on, on the same tick as the player needs hold. Satisfaction stays at 100, an open complaint is cleared, the next complaint is a game year out, a rival poach is cancelled, and age resets to 60 at 65. A sick day on the calendar, due or later, becomes never, and an absence from a call that already landed is cleared. Walking off a shift for another reason is not held. Switch: `StaffHold.Enabled`.
 
 Tier 1: `StaffHoldTests`. Chain: `day roll → staff hold → leaving reason → register cover (no hire)`.
 
 Human check. Gift shop at 22 7th Avenue.
 
-1. Restart Big Ambitions so this build loads. Continue the same save. Confirm `mod.loaded version=1.17.11.11`.
+1. Restart Big Ambitions so this build loads. Continue the same save. Confirm `mod.loaded version=1.17.11.12`.
 2. Let one morning finish. Do not cancel the time skip.
-3. **PASS if** `ceo.log` has `staff.held` that morning and nobody quits, retires, or is poached. **FAIL if** there is no `staff.held`, or a cashier or cleaner leaves with `reason=quit`, `reason=retired`, or `reason=poached`.
-4. Evidence: `staff.held`. Version marker: public `1.17.11.11`.
+3. **PASS if** `ceo.log` has `staff.held` that morning, with `sick=` on the line, and nobody quits, retires, is poached, or calls in sick. **FAIL if** the version is still `1.17.11.11`, there is no `staff.held`, a cashier or cleaner leaves with `reason=quit`, `reason=retired`, or `reason=poached`, or someone calls in sick.
+4. Evidence: `staff.held` (`sick=`). Version marker: public `1.17.11.12`.
 
-A sick call or someone leaving the shift for another reason is outside this cheat. Note it; do not fail the build for it.
+The first morning may show `sick` above 0 while scheduled sick days are cleared. A later morning of the same save stays at `sick=0`. Walking off a shift for a reason other than a sick call is outside this cheat.
+
+Human PASS 2026-11-14 on 1.17.11.12 at 22 7th Avenue. Days 1588–1644: 57 `staff.held`, employees=8. Day 1588 `sick=8` and one `cashier.replaced reason=absent`. Days 1589–1644 `sick=0`. No `reason=quit`, `reason=retired`, or `reason=poached`. Day 1643 ready, 75 customers, revenue 2351. Day 1642 profit 1641.70.
 
 Human PASS 2026-11-14 on 1.17.11.11 at 22 7th Avenue. Days 1588–1593: six `staff.held`, employees=8, raised=0, aged=0, complaints=0, poach=0. No `reason=quit`, `reason=retired`, or `reason=poached`. Day 1588 one `cashier.replaced reason=absent`. Days 1592–1593 ready, customers 78 then 76, revenue 2295 then 2228.
 

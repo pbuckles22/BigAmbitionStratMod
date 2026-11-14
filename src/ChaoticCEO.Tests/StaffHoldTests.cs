@@ -13,6 +13,55 @@ public class StaffHoldTests
     }
 
     [Fact]
+    public void Decide_a_due_sick_day_becomes_never()
+    {
+        var due = new StaffState(100f, 30 * Year, false, Year * 48, false, nextSickDay: 1600, absent: true);
+        var earlier = new StaffState(100f, 30 * Year, false, Year * 48, false, nextSickDay: 1599);
+
+        var plan = StaffHold.Decide(due, Year);
+        var past = StaffHold.Decide(earlier, Year);
+
+        Assert.Equal(StaffHold.NeverDay, plan.SickDay);
+        Assert.True(plan.ClearAbsent);
+        Assert.Equal(StaffHold.NeverDay, past.SickDay);
+        Assert.False(past.ClearAbsent);
+    }
+
+    [Fact]
+    public void Decide_a_scheduled_sick_day_becomes_never_before_it_is_due()
+    {
+        var later = new StaffState(100f, 30 * Year, false, Year * 48, false, nextSickDay: 1690);
+
+        var plan = StaffHold.Decide(later, Year);
+
+        Assert.Equal(StaffHold.NeverDay, plan.SickDay);
+        Assert.True(plan.Any);
+    }
+
+    [Fact]
+    public void Decide_leaves_a_worker_who_will_not_call_in_sick()
+    {
+        var plan = StaffHold.Decide(Happy(), Year);
+
+        Assert.Equal(-1, plan.SickDay);
+        Assert.False(plan.ClearAbsent);
+    }
+
+    [Fact]
+    public void Apply_clears_a_call_that_already_landed_and_a_second_pass_stays_clear()
+    {
+        var called = new StaffState(100f, 30 * Year, false, Year * 48, false, nextSickDay: 1690, absent: true);
+
+        var held = StaffHold.Apply(called, StaffHold.Decide(called, Year));
+        var again = StaffHold.Decide(held, Year);
+
+        Assert.Equal(StaffHold.NeverDay, held.NextSickDay);
+        Assert.False(held.Absent);
+        Assert.Equal(-1, again.SickDay);
+        Assert.False(again.ClearAbsent);
+    }
+
+    [Fact]
     public void Decide_leaves_a_happy_young_worker_alone()
     {
         var plan = StaffHold.Decide(Happy(), Year);
@@ -102,8 +151,8 @@ public class StaffHoldTests
     public void Line_names_every_count()
     {
         Assert.Equal(
-            "staff.held version=" + LoadLog.Version + " day=1600 employees=3 raised=2 aged=1 complaints=0 poach=1",
-            StaffHold.Line(1600, employees: 3, raised: 2, aged: 1, complaints: 0, poach: 1));
+            "staff.held version=" + LoadLog.Version + " day=1600 employees=3 raised=2 aged=1 complaints=0 poach=1 sick=2",
+            StaffHold.Line(1600, employees: 3, raised: 2, aged: 1, complaints: 0, poach: 1, sick: 2));
     }
 
     [Fact]
@@ -111,17 +160,19 @@ public class StaffHoldTests
     {
         var watch = new StaffHoldWatch();
 
-        var first = watch.Tick(null, day: 1600, hour: 8, employees: 3, raised: 3, aged: 0, complaints: 0, poach: 0);
+        var first = watch.Tick(null, day: 1600, hour: 8, employees: 3, raised: 3, aged: 0, complaints: 0, poach: 0, sick: 0);
         var sameHour = watch.Due(1600, 8);
-        var plainHour = watch.Tick(null, day: 1600, hour: 9, employees: 3, raised: 1, aged: 0, complaints: 0, poach: 0);
-        var saved = watch.Tick(null, day: 1600, hour: 10, employees: 3, raised: 0, aged: 0, complaints: 1, poach: 0);
-        var nextDay = watch.Tick(null, day: 1601, hour: 0, employees: 3, raised: 0, aged: 0, complaints: 0, poach: 0);
+        var plainHour = watch.Tick(null, day: 1600, hour: 9, employees: 3, raised: 1, aged: 0, complaints: 0, poach: 0, sick: 0);
+        var saved = watch.Tick(null, day: 1600, hour: 10, employees: 3, raised: 0, aged: 0, complaints: 1, poach: 0, sick: 0);
+        var called = watch.Tick(null, day: 1600, hour: 11, employees: 3, raised: 0, aged: 0, complaints: 0, poach: 0, sick: 2);
+        var nextDay = watch.Tick(null, day: 1601, hour: 0, employees: 3, raised: 0, aged: 0, complaints: 0, poach: 0, sick: 0);
 
         Assert.StartsWith("staff.held", first);
         Assert.False(sameHour);
         Assert.True(watch.Due(1601, 1));
         Assert.Equal("", plainHour);
-        Assert.EndsWith("complaints=1 poach=0", saved);
+        Assert.EndsWith("complaints=1 poach=0 sick=0", saved);
+        Assert.EndsWith("sick=2", called);
         Assert.Contains("day=1601", nextDay);
     }
 
@@ -156,5 +207,33 @@ public class StaffHoldTests
         Assert.False(gap.Hire);
         Assert.True(unheld.Hire);
         Assert.Equal("retired", unheld.Reason);
+    }
+
+    [Fact]
+    public void Chain_needs_hold_staff_hold_sick_stays_clear_and_the_register_stays_staffed()
+    {
+        // Chain: needs hold → staff hold → sick stays clear → register cover (no hire)
+        var drained = new PlayerNeeds(40f, 50f, 60f, energyOff: false, happinessOff: false);
+        var filled = Needs.Due(drained) ? Needs.Hold() : drained;
+        var due = new StaffState(100f, 30 * Year, false, Year * 48, false, nextSickDay: 1600, absent: true);
+        var held = StaffHold.Apply(due, StaffHold.Decide(due, Year));
+        var again = StaffHold.Decide(held, Year);
+        var cover = Cashier.Cover(
+            Place,
+            registerStaffed: !held.Absent && again.SickDay < 0,
+            resigned: false,
+            retired: false,
+            poached: false,
+            GameApi.Live());
+
+        Assert.Equal(100f, filled.Energy);
+        Assert.True(filled.EnergyOff);
+        Assert.True(filled.HappinessOff);
+        Assert.Equal(StaffHold.NeverDay, held.NextSickDay);
+        Assert.False(held.Absent);
+        Assert.Equal(-1, again.SickDay);
+        Assert.False(again.ClearAbsent);
+        Assert.False(cover.Hire);
+        Assert.Equal("", cover.Reason);
     }
 }
