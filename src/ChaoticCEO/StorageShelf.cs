@@ -74,15 +74,19 @@ namespace ChaoticCEO
         public const float FootprintDepth = 0.5f;
 
         /// <summary>
-        /// Center spacing of facing shelves, in shelf bodies, from shelf-gap.json.
-        /// Zero means the faces touch. Any number above zero is that center spacing
-        /// (1.25 is the previous layout). The aisle-versus-back-to-back split stays
-        /// until the packed layout is proven.
+        /// Center spacing of facing shelves, from shelf-gap.json.
+        /// Zero puts the long faces together: centers are one surveyed depth apart.
+        /// Any number above zero is that center spacing in shelf bodies
+        /// (1.25 is the previous layout). Back-to-back centers stay one shelf body apart.
+        /// A zero gap does not move the width end of a run.
         /// </summary>
         public static float FacingGap { get; private set; }
 
-        /// <summary>Facing centers, in shelf bodies. Zero in the file means 1 (faces touch).</summary>
-        public static float AislePitch => FacingGap > 0f ? FacingGap : 1f;
+        /// <summary>
+        /// Facing centers, in shelf bodies, when <see cref="FacingGap"/> is above zero.
+        /// Zero in the file leaves this at 0. <see cref="AisleCenterStep"/> then uses the surveyed depth.
+        /// </summary>
+        public static float AislePitch => FacingGap > 0f ? FacingGap : 0f;
 
         public const string GapFileName = "shelf-gap.json";
 
@@ -485,10 +489,25 @@ namespace ChaoticCEO
             return depth < 1f ? depth * 2f : depth;
         }
 
+        /// <summary>
+        /// Thickness used for a facing pair. Above zero, the doubled body.
+        /// Zero in the file uses the surveyed depth so the long faces meet.
+        /// </summary>
+        public static float FacingThickness(float depth)
+        {
+            if (depth < 0f)
+            {
+                return 0f;
+            }
+
+            return FacingGap > 0f ? ShelfBody(depth) : depth;
+        }
+
         /// <summary>Center-to-center distance of two shelves that face each other across the space.</summary>
         public static float AisleCenterStep(float depth)
         {
-            return ShelfBody(depth) * AislePitch;
+            var thickness = FacingThickness(depth);
+            return FacingGap > 0f ? thickness * FacingGap : thickness;
         }
 
         public static float ParseGap(string? text)
@@ -1204,7 +1223,8 @@ namespace ChaoticCEO
 
         /// <summary>
         /// Next seat along the grow axis: a space when the face would be buried, otherwise back-to-back.
-        /// Facing centers sit <see cref="AislePitch"/> shelf-bodies apart. Back-to-back centers stay one body apart.
+        /// Facing centers sit <see cref="AisleCenterStep"/> apart. Back-to-back centers stay one body apart.
+        /// The width end of a run steps by shelf width and does not use this.
         /// </summary>
         internal static ShelfSpot AisleStep(ShelfSpot from, float growX, float growZ)
         {
@@ -1304,9 +1324,9 @@ namespace ChaoticCEO
             var (cx, cz) = seat.Center();
             var (wx, wz) = ToWorld(1f, 0f, seat.Yaw);
             var halfWidth = System.Math.Max(0f, (seat.Width / 2f) - WallInset);
-            var body = ShelfBody(seat.Depth);
-            var air = AisleCenterStep(seat.Depth) - body;
-            var face = body / 2f;
+            var thickness = FacingThickness(seat.Depth);
+            var air = AisleCenterStep(seat.Depth) - thickness;
+            var face = thickness / 2f;
             // No air left: still sample the face, so a shelf standing on it stays blocked.
             var start = air > Sample ? Sample : 0f;
             var limit = air > Sample ? air - Sample + Touch : Touch;
@@ -1324,8 +1344,28 @@ namespace ChaoticCEO
 
                     foreach (var other in blockers)
                     {
-                        // Back-to-back partner sits behind the long face — not an aisle blocker.
-                        if (BehindOrBeside(seat, other) || !other.Contains(x, z, Touch))
+                        // The facing mate and a back-to-back partner are the run, not an aisle blocker.
+                        if (BehindOrBeside(seat, other) || FacingMate(seat, other) || !other.Contains(x, z, Touch))
+                        {
+                            continue;
+                        }
+
+                        return false;
+                    }
+                }
+            }
+
+            if (air <= Sample)
+            {
+                // A same-yaw shelf that starts on this face buries it. The facing mate does not.
+                var buried = face + (thickness / 4f);
+                foreach (var lateral in Steps(halfWidth))
+                {
+                    var x = cx + (fx * buried) + (wx * lateral);
+                    var z = cz + (fz * buried) + (wz * lateral);
+                    foreach (var other in blockers)
+                    {
+                        if (BehindOrBeside(seat, other) || FacingMate(seat, other) || !other.Contains(x, z, Touch))
                         {
                             continue;
                         }
@@ -1336,6 +1376,25 @@ namespace ChaoticCEO
             }
 
             return true;
+        }
+
+        /// <summary>Opposite shelf whose long face meets this one. Not an end-of-run neighbor.</summary>
+        private static bool FacingMate(ShelfSpot seat, ShelfSpot other)
+        {
+            if (!OppositeYawPair(seat.Yaw, other.Yaw))
+            {
+                return false;
+            }
+
+            var (cx, cz) = seat.Center();
+            var (ox, oz) = other.Center();
+            var (lx, lz) = ToLocal(ox - cx, oz - cz, seat.Yaw);
+            if (System.Math.Abs(lx) > Touch || lz <= 0f)
+            {
+                return false;
+            }
+
+            return System.Math.Abs(lz - AisleCenterStep(seat.Depth)) <= Touch;
         }
 
         private static bool BehindOrBeside(ShelfSpot seat, ShelfSpot other)

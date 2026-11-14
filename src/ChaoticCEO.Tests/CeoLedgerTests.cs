@@ -51,9 +51,9 @@ public class CeoLedgerTests
             Directory.CreateDirectory(Path.GetDirectoryName(path)!);
             File.WriteAllText(
                 path,
-                "building.rented version=1.17.11.9 day=1 street=ba:street_seventhavenue number=22 call=x"
+                "building.rented version=1.17.11.10 day=1 street=ba:street_seventhavenue number=22 call=x"
                     + Environment.NewLine
-                    + "layout.loaded version=1.17.11.9 day=1 street=ba:street_seventhavenue number=22 type=g layout=Gift call=y"
+                    + "layout.loaded version=1.17.11.10 day=1 street=ba:street_seventhavenue number=22 type=g layout=Gift call=y"
                     + Environment.NewLine);
 
             Assert.True(CeoLedger.TryRent(dir.FullName, out var street, out var number));
@@ -107,8 +107,8 @@ public class CeoLedgerTests
     public void CeoLedger_layout_skip_wins_over_an_earlier_load()
     {
         CeoLedger.Clear();
-        CeoLedger.Ingest("layout.loaded version=1.17.11.9 day=1 street=ba:street_a number=1 type=g layout=x call=y");
-        CeoLedger.Ingest("layout.skipped version=1.17.11.9 day=2 reason=open");
+        CeoLedger.Ingest("layout.loaded version=1.17.11.10 day=1 street=ba:street_a number=1 type=g layout=x call=y");
+        CeoLedger.Ingest("layout.skipped version=1.17.11.10 day=2 reason=open");
         Assert.True(CeoLedger.TryLayout(out _, out _, out var skipped));
         Assert.True(skipped);
     }

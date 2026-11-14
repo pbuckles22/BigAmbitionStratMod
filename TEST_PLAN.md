@@ -953,6 +953,24 @@ Human check. Gift shop at 22 7th Avenue, the save from the 1.17.11.4 pass. The s
 
 Not in this slice: the second register, overhire, displays.
 
+## 14.9 facing gap zero uses the surveyed depth (1.17.11.10)
+
+`facingGap` 0 places the long faces together. Centers are one surveyed depth apart (0.50 m on the live shelf, the spare near x=997.25). A number above 0 is still that many shelf bodies, so 1.25 stays the previous layout. The shelf at the width end of the run is not moved. Back-to-back stays one shelf body.
+
+Tier 1: `Day_1606_facing_gap_zero_puts_the_long_faces_together`, `Facing_gap_zero_leaves_the_width_end_one_shelf_apart`. Chain: `cover → shelf gap file → reseat the 1 m spare → facing seat on the surveyed depth`.
+
+Human check. Gift shop at 22 7th Avenue. The stocked shelf is at x=996.75 yaw 90. The spare from 1.17.11.9 is at x=997.75 yaw 270. `shelf-gap.json` stays at `facingGap` 0. This check is the gap between those two long faces. It does not move the shelf at the end of the run.
+
+1. Restart Big Ambitions so this build loads. Continue the same save. Confirm `mod.loaded version=1.17.11.10`.
+2. Open `%LocalAppData%\ChaoticCEO\shelf-gap.json` and leave `facingGap` at 0.
+3. Let one morning finish. Do not cancel the time skip. Look at the storage row.
+4. **PASS if** `shelf.gap` shows `facingGap=0 pitch=0` and the empty spare is seated at about x=997.25 z=55 yaw 270, long faces touching. **FAIL if** the spare stays at about x=997.75, or a shelf at the end of the run is pulled into that gap.
+5. Evidence: `shelf.gap`, `shelf.packed`, `shelf.placed`. Version marker: public `1.17.11.10`.
+
+Not in this slice: the back-to-back third shelf. That seat stays one shelf body behind the spare.
+
+Human PASS 2026-11-14 at 22 7th Avenue on 1.17.11.10. The save opened with two shelves already touching. After one was sold, the replacement was bought and seated at the zero gap. Editing `facingGap` to 1 while the game kept running opened the next seat to one shelf body.
+
 ## 14.9 need+1 and shipping shelves (1.17.11.9)
 
 Keep is need + 1 when the room has a spare seat. A shelf already in the shipping area counts as owned, is seated before another is bought, and the extras are sold once the floor is at keep. A furniture contract whose delivery day has arrived is delivered on that morning even when the clock is still before 8:00.
