@@ -809,7 +809,7 @@ Human PASS 2026-11-11 on 1.17.2.2 at 22 7th Avenue. Days 106–111: `mod.loaded 
 
 ## Story 14.15 — Fixture space, then one storage shelf
 
-Tier 1: `Cover_cuts_the_line_to_free_space` and `Cover_keeps_a_line_that_fits_and_a_space_under_the_minimum`. Chain: `on hand → free space → line` and `on hand → register → free space → line`. A known fixture cuts `need` to the units it can still hold. `cap` on `contract.cover` is that free space. Stock already over the fixture is `need=0`, so a full shelf is not offered a delivery. A paper bag’s space is one cash register (1000) for Hold/FixtureCapacity only; Cover does not clip paper to that free space. A goods shelf is 100. A line that fits is left as it is. A free space under 10 stays that space. An unread fixture, capacity 0, does not cut the line. A full fixture orders one storage shelf (`ba:itemname_storageshelf`, 16 boxes, $1,200) from Hampton Supplies at 13 7th Avenue. A second order waits while that delivery is still open. Cash under $1,200 orders nothing.
+Tier 1: `Cover_never_clips_the_line_to_free_space` (HARD LOCK). Chain: `on hand → free space → shelf` — Cover.Need stays the full line; free space only gates the storage-shelf order. `cap` on `contract.cover` is always 0. A full selling fixture (`FixtureFull`) orders one storage shelf (`ba:itemname_storageshelf`, 16 boxes, $1,200) from Hampton Supplies at 13 7th Avenue. A second order waits while that delivery is still open. Cash under $1,200 orders nothing.
 
 Human check. The gift shop at 22 7th Avenue, one morning. The shelf arrives as a furniture delivery. Place it in the store when it shows up. This does not hire the cleaner again.
 
@@ -854,7 +854,7 @@ Human PASS 2026-11-12 on 1.17.8.1 at 22 7th Avenue. `mod.loaded version=1.17.8.1
 
 ## Bugfix — paper register floor 1000 (1.17.8.3)
 
-Tier 1: `Cover_day_1575_register_1000_keeps_the_display_above_half`, `Cover_day_1571_paper_keeps_the_full_line_past_register_free_space`. Chain: `open days → burn → register floor → full line → playbook`. RegisterCap is 1000. Paper need is target − onHand with cap=0. Goods still cut to free space.
+Tier 1: `Cover_day_1575_register_1000_keeps_the_display_above_half`, `Cover_day_1571_paper_keeps_the_full_line_past_register_free_space`. Chain: `open days → burn → register floor → full line → playbook`. RegisterCap is 1000. Paper and goods need is target − onHand with cap=0. Free space never cuts Cover.
 
 Human PASS 2026-11-12 on 1.17.8.3 at 22 7th Avenue. Day 1575 `target=1166` `need=1050`. Day 1576 `onHand=1166` `target=1166` `need=10`. Days 1577–1579 stayed above 1000 on hand.
 
@@ -871,3 +871,119 @@ Human check. The gift shop at 22 7th Avenue, the next morning, with spend room a
 5. Version marker: public `1.17.9`.
 
 Human PASS 2026-11-12 on 1.17.9 at 22 7th Avenue. `mod.loaded version=1.17.9 build=3682`. Day 1579 `rack.ordered` `item=ba:itemname_storagerack` `amount=1` `price=1200` `number=22` `fromNumber=13`. No `capacity.missed` frame spam.
+
+## Bugfix — Cover never clips to free space (1.17.9.1)
+
+Tier 1 HARD LOCK: `Cover_never_clips_the_line_to_free_space`, `Cover_day_1579_soda_keeps_the_full_line_past_storage_free_space`, `Cover_day_1571_paper_keeps_the_full_line_past_register_free_space`. Chain: `storage on hand → empty fridge capacity → full cover line`. Cover.Need is always target − onHand (min 10). `fixtureCap` must not change Need.
+
+## Bugfix — shelf buy uses leftover + inbound (1.17.9.2)
+
+Tier 1: `SpacesNeeded_is_leftover_boxes_plus_boxes_on_the_truck`, `ShelvesToOrder_buys_only_the_shortfall_and_counts_boxed_shelves_first`, `Chain_leftover_plus_inbound_orders_shelves_only_when_placed_capacity_is_short`. Spaces needed = on-hand + inbound. Buy only when that exceeds display capacity + placed shelves × 16. Boxed shelves count as capacity and are placed before any buy.
+
+Human check. Gift shop at 22 7th Avenue with plenty of placed storage shelves and (if any) boxed shelves in cargo.
+
+1. Restart Big Ambitions so this build loads. Continue the same save. Let one morning pass.
+2. Open `%LocalAppData%\ChaoticCEO\ceo.log`. Find `mod.loaded` and any `shelf.ordered` / `shelf.placed` for that morning.
+3. **PASS if** `mod.loaded version=1.17.9.2`, and with placed storage covering leftover + inbound there is no new `shelf.ordered` (boxed shelves may `shelf.placed` first). **FAIL if** version is still 1.17.9.1, or the morning buys shelves while placed capacity already covers the stock.
+4. Evidence: no spurious `shelf.ordered`; optional `shelf.placed` when cargo had a boxed shelf.
+5. Version marker: public `1.17.9.2`.
+
+## Bug fix — shelf unit capacity + nested cargo + one-at-a-time (1.17.9.3)
+
+Tier 1: `ShelvesToOrder_does_not_treat_sixteen_box_slots_as_sixteen_retail_units`, `Hold_storage_shelf_uses_unit_capacity_not_box_slot_count`, `BoxedInHolder_counts_nested_cargo_and_skips_placed_shelves_as_holders`. Capacity uses `UnitCapacity` (100), not `Boxes` (16). Nested cargo and pending furniture count as inbound shelves. Buy at most one per morning; place or hold before another buy.
+
+## Bug fix — 14.9 storage layout 1-2-2-1 (1.17.9.7)
+
+Folds the buy-math stop, survey log, pair/wall seat, and room fill into one installable (slices .4–.6 folded; never go back from the live 1.17.9.3).
+
+Tier 1: `Attend_holds_with_hold_spike_and_orders_nothing`, `Seat_after_a_wall_shelf_leaves_a_one_meter_aisle_then_faces_it`, `Seat_after_an_aisle_pair_adds_the_back_to_back_partner`, `Seat_a_full_pair_never_gets_a_third_shelf_touching_along_depth`, `Seat_extends_along_width_after_the_aisle_row_is_full`, `Survey_line_names_the_footprint_and_boxes`, `Layout_constants_match_the_long_face_aisle_stack`. Chains: `day roll → cover → boxed in cargo → hold-spike → no order`, `day roll → short capacity → order → place → next seat`, `day roll → full storage → hold, no order`.
+
+Human check. Gift shop at 22 7th Avenue.
+
+1. Restart Big Ambitions so this build loads. Continue the same save. Confirm `mod.loaded version=1.17.9.7`.
+2. First city frame: open `%LocalAppData%\ChaoticCEO\ceo.log` and find `shelf.room` / `shelf.surveyed` (one per standing storage shelf).
+3. Sell empty standing shelves that are packed front-to-back if needed, leave cargo shelves, and fast-forward several mornings.
+4. **PASS if** cargo shelves `shelf.placed` into wall → aisle → pair (yaws 90/270, ~2.0 m across aisles, ~1.0 m back-to-back), restocker loads boxes onto both faces of a pair, and after the room is full mornings log `shelf.held reason=full` with **no** new `shelf.ordered`. **FAIL if** same-yaw 0.5 m packs return, only one face of a pair gets boxes, or buys continue into cargo after `full`.
+5. Evidence: `shelf.surveyed`, `shelf.placed … yaw=`, `shelf.held reason=full`. Version marker: public `1.17.9.7`.
+
+**Human FAIL 2026-11-13** on 1.17.9.7 at 22 7th Avenue (UCPH park, not CMPH). `mod.loaded version=1.17.9.7`. Day 1588 `shelf.surveyed` lines show `width=2.97 depth=0.50` (half-depth still live — Size fix keyed on small width and missed). All surveyed shelves `yaw=90`. Days 1588–1593: `shelf.held` (`nogrid` once, then `full`); **no** `shelf.placed`; **no** `shelf.ordered` (buy-stop worked). Next: fix Size when depth is about 0.5 (or always force FootprintWidth x FootprintDepth for storage shelves), then re-smoke place.
+
+## 14.9 storage keep = need+1, sell excess, reseat (1.17.9.9)
+
+Finding: live Size `width=2.97 depth=0.50` is the full collider. Buy math uses storage boxes = ceil((units after truck − display cap) / boxSize), 16 slots per shelf. Keep target is `need + 1` when the library row still has a spare seat. Excess cargo and empty placed shelves are sold; blocked shelves pack to cargo and reseat into the 1–aisle–2 stack. Staff hold cheat is parked on `feature/staff-hold-cheat`, not this ship.
+
+Tier 1: box-math tests plus `KeepTarget_*`, `Excess_counts_cargo_and_placed_above_keep`, `Order_uses_keep_not_bare_need`, `Sell_prefers_cargo_before_placed`, `Stocked_placed_is_held_not_sold`, `Keep_line_names_*`. Chains: `day roll → cover → box math → keep → sell excess → reseat → attend` (no order when have≥keep; order one toward keep when short).
+
+Human check. Gift shop at 22 7th Avenue (same save; no new game).
+
+1. Restart Big Ambitions so **1.17.9.9** loads. Continue the save. Confirm `mod.loaded version=1.17.9.9`.
+2. Open cargo if shelves are piled (e.g. 32). Let one morning roll (F6).
+3. Open `%LocalAppData%\ChaoticCEO\ceo.log`.
+4. **PASS if** `shelf.keep` shows `need` and `keep=need` or `need+1`; `have` falls to `keep`; `shelf.sold` accounts for excess cargo/placed; remaining placed shelves are aisle-reachable; no new `shelf.ordered` while `have >= keep`. **FAIL if** cargo stays at 32, `keep` is ignored, a fifth+ shelf stays when `need<=1`, or `shelf.need verdict=unknown` / `boxSize=0`.
+5. Evidence: `shelf.keep`, `shelf.sold`, `shelf.need`, optional `shelf.packed` / `shelf.held reason=stocked`. Version marker: public `1.17.9.9`.
+
+Not in this slice: staff hold; second register; changing live collider constants.
+
+**Human FAIL 2026-11-13** on 1.17.9.9 at 22 7th Avenue (UCPH park). `mod.loaded version=1.17.9.9`. Day 1588: `need=1 keep=2` correct; `shelf.sold` cargo then `shelf.packed` excess ×2 then sold packed cargo + one placed → `haveAfter=2` on paper, but day 1589+ stays `placed=1` (never reseated the spare). Cover spam during F6 logged dozens of `shelf.keep` with cargo ticking down before the batch sell. New-game did place `keep=2` but aisle not walkable (seat still uses 2×1 constants vs live ~3×0.5). Log shows `cashier.replaced reason=absent` (not cleaner quit). Next: do not sell freshly packed shelves before Place reaches `keep`; lock aisle with live footprint; optional staff-hold branch for resign.
+
+## 14.9 pack-before-sell + live-footprint aisle (1.17.9.10)
+
+Tier 1: `Attend_does_not_sell_packed_cargo_before_place_reaches_keep`, `Attend_sells_excess_cargo_after_place_reaches_keep`, `Seat_accept_uses_live_half_depth_for_aisle_partner`, `ResolveFootprint_keeps_live_storage_shelf_half_depth`. Chains: `keep → pack → place → sell`, `keep → pack (under keep) → place → sell`, `cover → boxed → live-depth aisle seat → place`.
+
+Human check. Gift shop at 22 7th Avenue (same save; optional new-game for aisle).
+
+1. Restart Big Ambitions so **1.17.9.10** loads. Continue the save. Confirm `mod.loaded version=1.17.9.10`.
+2. Let one morning roll (F6). Open `%LocalAppData%\ChaoticCEO\ceo.log`.
+3. Check `shelf.keep` / `shelf.packed` / `shelf.placed` / `shelf.sold` order for that day, and that `placed` on later mornings stays at `keep`.
+4. **PASS if** sell runs only after place reaches `keep` (`placed` stays = `keep`, not 1 while `keep=2`); `shelf.surveyed` keeps ~`width=2.97 depth=0.50`; aisle pair is walkable (restocker stocks both faces). **FAIL if** packed cargo is sold while `placed < keep`, or the 1+1 aisle blocks walking.
+5. Evidence: `shelf.keep`, `shelf.packed`, `shelf.placed`, `shelf.sold`, `shelf.surveyed`. Version marker: public `1.17.9.10`.
+
+Not in this slice: staff hold; second register; CMPH of the prior FAIL.
+
+## 14.9 closer aisle and even sellback (1.17.11.4)
+
+Tier 1: facing centers are `AisleCenterStep` (1.25 shelf bodies). `Buyback(960)` is the purchase price 1200. Chain: `cover → reseat same-yaw spare across the aisle → third is back-to-back` uses that step.
+
+Human check. Gift shop at 22 7th Avenue. The two storage shelves face each other with a wide gap.
+
+1. Restart Big Ambitions so this build loads. Continue the same save. Confirm `mod.loaded version=1.17.11.4`.
+2. Let one morning finish. Do not cancel the time skip.
+3. **PASS if** the shelves sit closer (centers about 1.25 m apart; the moved shelf is near x=998.00, not 998.75) and any `shelf.sold` price equals `amount * 1200`. **FAIL if** the gap stays at 2 m, or a sold shelf is still priced at 960 each.
+4. Evidence: `shelf.packed`, `shelf.placed`, `shelf.sold`. Version marker: public `1.17.11.4`.
+
+## 14.9 reseat the spare across the aisle (1.17.11.3)
+
+Tier 1: `Seat_one_shelf_in_a_wide_room_faces_the_aisle_before_a_side_neighbor`, `Reseat_packs_the_same_yaw_spare_and_leaves_an_aisle_pair`. Chain: `cover → reseat same-yaw spare across the aisle → third is back-to-back`.
+
+Human check. Gift shop at 22 7th Avenue. Two storage shelves, one against the wall with the boxes, the empty one stacked on the same side.
+
+1. Restart Big Ambitions so this build loads. Continue the same save. Confirm `mod.loaded version=1.17.11.3`.
+2. Let one morning finish. Do not cancel the time skip. Then open `%LocalAppData%\ChaoticCEO\ceo.log` and look at the two shelves.
+3. **PASS if** the empty shelf is packed (`shelf.packed` `reason=pattern`) and placed facing the shelf that already has boxes, with a walkable gap (`shelf.placed`, opposite facing, about 2 m between centers). Both fronts can be walked. **FAIL if** a shelf is still stacked half a meter in front of the wall shelf on the same facing, or the spare sits beside it along the wall.
+4. Evidence: `shelf.packed`, `shelf.placed`, `shelf.keep`. Version marker: public `1.17.11.3`. The third shelf, back-to-back with no gap, is not this morning. Keep stays at 2.
+
+## 14.9 place the purchased shelf (1.17.11.2)
+
+Tier 1: `Sell_does_not_drop_the_floor_below_keep_to_cover_a_pending_shelf`, `Order_does_not_buy_when_unplaced_cargo_already_covers_keep`. Chain: `cover → place cargo to keep → sell leaves the floor shelf`.
+
+Human check. Gift shop at 22 7th Avenue, the day 1589 cargo (11 storage shelves, none of that purchase on the floor).
+
+1. Restart Big Ambitions so this build loads. Continue the same save. Confirm `mod.loaded version=1.17.11.2`.
+2. Let one morning finish (F6). Do not cancel the time skip. Open the storage cargo, then `%LocalAppData%\ChaoticCEO\ceo.log`.
+3. **PASS if** a storage shelf is on the floor (`shelf.placed`) and stays there (`shelf.sold where=placed` does not drop `placed` below `keep`), and there is no new `shelf.ordered` while cargo plus placed plus pending is already at `keep`. **FAIL if** the purchased shelf is still only in cargo, or another shelf is ordered while unplaced shelves already cover `keep`.
+4. Evidence: `shelf.placed`, `shelf.sold`, `shelf.keep`, `shelf.ordered`. Version marker: public `1.17.11.2`.
+
+## 14.9 new-game storage aisle (1.17.11.1)
+
+Tier 1: `Seat_live_depth_aisle_gap_is_not_packed`, `KeepTarget_holds_the_empty_plus_one_when_it_blocks_its_own_seat`. Chains: `cover → place live 1+1 → Accessible`, `cover → box need → keep placed +1 → no sell`.
+
+Human check. Gift shop at 22 7th Avenue, the save from the 1.17.11 fail. This check is the empty +1 shelf. It does not check overhire or empty displays.
+
+1. Restart Big Ambitions so this build loads. Continue the same save. Confirm `mod.loaded version=1.17.11.1`.
+2. Let one morning roll (F6). Open `%LocalAppData%\ChaoticCEO\ceo.log`.
+3. **PASS if** that morning does not sell the empty storage shelf (`shelf.sold where=placed` is absent) and `shelf.keep` shows `placed` staying at 2 when `need=1`. **FAIL if** `shelf.sold where=placed` appears while `need=1` and the shelf count drops to 1.
+4. Evidence: `shelf.keep`, `shelf.sold`. Version marker: public `1.17.11.1`.
+
+**Human FAIL 2026-11-13** on 1.17.11 at 22 7th Avenue. Day 1600 `keep=2 placed=2`. Day 1601 `spareSeats=false keep=1 placed=2`, then `shelf.sold where=placed amount=1`. The empty +1 was sold. Day 1602 `placed=1`.
+
+Not in this slice: overhire, empty displays, the second register.

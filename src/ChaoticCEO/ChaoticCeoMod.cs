@@ -111,6 +111,7 @@ namespace ChaoticCEO
             LiveDump.TryRestaff(_cashiers, _localAppData);
             LiveDump.ReleaseCleaner(_cleaners, _mornings);
             LiveDump.TryCleaner(_cleaners, _localAppData);
+            LiveDump.TrySurvey(_localAppData);
             LiveDump.TryCover(_mornings, _localAppData);
             LiveDump.TryLoan(_loans, _localAppData);
             LiveDump.TryDemand(_demands, _localAppData);

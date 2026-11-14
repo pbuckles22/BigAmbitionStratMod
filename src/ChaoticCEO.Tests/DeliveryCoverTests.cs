@@ -428,8 +428,9 @@ public class DeliveryCoverTests
     }
 
     [Fact]
-    public void Cover_cuts_to_the_shelf_when_the_line_is_larger()
+    public void Cover_keeps_the_full_line_when_the_shelf_is_smaller()
     {
+        // HARD LOCK: free space must not clip Cover.Need.
         var plan = Wholesaler.Cover(
             Umbrella,
             currentDay: 5,
@@ -440,11 +441,13 @@ public class DeliveryCoverTests
                 new CoverSale(4, 20, open: true),
             },
             onHand: 10,
-            fixtureCap: 30);
+            fixtureCap: 30,
+            stands: Wholesaler.RetailStands(Umbrella));
 
-        Assert.Equal(36, plan.Target);
-        Assert.Equal(20, plan.Need);
-        Assert.Equal(20, plan.FixtureCap);
+        Assert.Equal(236, plan.Target);
+        Assert.Equal(226, plan.Need);
+        Assert.Equal(0, plan.FixtureCap);
+        Assert.True(plan.Need > 30);
     }
 
     [Fact]

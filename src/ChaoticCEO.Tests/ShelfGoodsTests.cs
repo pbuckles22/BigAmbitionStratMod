@@ -111,9 +111,10 @@ public class ShelfGoodsTests
     }
 
     [Fact]
-    public void Cover_22_7th_day_56_cheap_gifts_over_the_shelf_order_nothing()
+    public void Cover_22_7th_day_56_cheap_gifts_keep_the_full_line_when_the_shelf_is_full()
     {
-        // Harvest: day 56 on hand 184 already past a 100 shelf. The line is 0.
+        // Harvest: day 56 on hand 184 past a 100 shelf. Cover still buys the full line into cargo.
+        // Free space must not zero need; shelf buy uses leftover + inbound vs placed capacity.
         var plan = Wholesaler.Cover(
             CheapGift,
             currentDay: 56,
@@ -128,8 +129,9 @@ public class ShelfGoodsTests
             stands: Wholesaler.RetailStands(CheapGift));
 
         Assert.Equal(344, plan.Target);
-        Assert.Equal(0, plan.Need);
+        Assert.Equal(160, plan.Need);
         Assert.Equal(0, plan.FixtureCap);
+        Assert.True(Wholesaler.FixtureFull(184, 100));
     }
 
     [Fact]
@@ -152,10 +154,10 @@ public class ShelfGoodsTests
     }
 
     [Fact]
-    public void Chain_open_type_catalog_line_cuts_goods_and_keeps_paper_full()
+    public void Chain_open_type_catalog_line_keeps_goods_and_paper_full()
     {
         // Chain: open type → catalog → line
-        // Goods clip to shelf room. Paper keeps the full line past the register.
+        // HARD LOCK: neither paper nor goods clips Cover.Need to free space.
         var open = Open.Decide(
             1,
             Open.StageOneCandidates(
@@ -199,9 +201,9 @@ public class ShelfGoodsTests
         Assert.Equal(80, paperCap);
         Assert.Equal(80, goodsCap);
         Assert.Equal(0, paperPlan.FixtureCap);
+        Assert.Equal(0, goodsPlan.FixtureCap);
         Assert.True(paperPlan.Need > paperCap);
-        Assert.Equal(80, goodsPlan.FixtureCap);
-        Assert.Equal(80, goodsPlan.Need);
+        Assert.True(goodsPlan.Need > goodsCap);
     }
 
     [Fact]
@@ -252,51 +254,71 @@ public class ShelfGoodsTests
         Assert.Equal(Florist, open.Type);
         Assert.Equal("ba:itemname_expensiveflower", item);
         Assert.Equal(40, cap);
-        Assert.Equal(40, plan.Need);
+        Assert.True(plan.Need > cap);
+        Assert.Equal(0, plan.FixtureCap);
         Assert.NotNull(gap);
         Assert.Equal("short", gap.Reason);
         Assert.Equal(plan.Need, gap.Target);
         Assert.Equal(
             "contract.short version=" + LoadLog.Version
                 + " day=2 street=ba:street_seventhavenue number=22 item=" + item
-                + " amount=12 line=40",
+                + " amount=12 line=" + plan.Need.ToString(System.Globalization.CultureInfo.InvariantCulture),
             line);
     }
 
     [Fact]
-    public void Cover_cuts_the_line_to_free_space()
+    public void Cover_never_clips_the_line_to_free_space()
     {
+        // HARD LOCK: fixtureCap must not change Need for goods or paper.
         var days = new[]
         {
             new CoverSale(3, 16, open: true),
             new CoverSale(4, 20, open: true),
         };
 
+        var stands = Wholesaler.RetailStands(Umbrella);
         var open = Wholesaler.Cover(
             Umbrella,
             currentDay: 5,
             nextDeliveryDay: 7,
             days,
             onHand: 10,
-            fixtureCap: 30);
+            fixtureCap: 30,
+            stands: stands);
         var over = Wholesaler.Cover(
             Umbrella,
             currentDay: 5,
             nextDeliveryDay: 7,
             days,
             onHand: 40,
-            fixtureCap: 30);
+            fixtureCap: 30,
+            stands: stands);
+        var tiny = Wholesaler.Cover(
+            Umbrella,
+            currentDay: 5,
+            nextDeliveryDay: 7,
+            days,
+            onHand: 0,
+            fixtureCap: 4,
+            stands: stands);
 
-        Assert.Equal(20, open.Need);
-        Assert.Equal(20, open.FixtureCap);
-        Assert.Equal(0, over.Need);
+        Assert.Equal(236, open.Target);
+        Assert.Equal(226, open.Need);
+        Assert.Equal(0, open.FixtureCap);
+        Assert.Equal(196, over.Need);
         Assert.Equal(0, over.FixtureCap);
+        Assert.Equal(236, tiny.Need);
+        Assert.Equal(0, tiny.FixtureCap);
+        Assert.True(open.Need > 30);
+        Assert.True(over.Need > 0);
+        Assert.True(Wholesaler.FixtureFull(40, 30));
+        Assert.False(Wholesaler.FixtureFull(10, 30));
     }
 
     [Fact]
-    public void Chain_on_hand_free_space_line_cuts_the_order()
+    public void Chain_on_hand_free_space_orders_a_shelf_without_cutting_cover()
     {
-        // Chain: on hand → free space → line
+        // Chain: on hand → free space → shelf (Cover line stays full)
         var days = new[]
         {
             new CoverSale(3, 16, open: true),
@@ -317,38 +339,9 @@ public class ShelfGoodsTests
 
         Assert.Equal(22, capacity);
         Assert.Equal(22, space);
-        Assert.Equal(space, plan.Need);
-        Assert.Equal(space, plan.FixtureCap);
-    }
-
-    [Fact]
-    public void Cover_keeps_a_line_that_fits_and_a_space_under_the_minimum()
-    {
-        var days = new[]
-        {
-            new CoverSale(3, 16, open: true),
-            new CoverSale(4, 20, open: true),
-        };
-
-        var fits = Wholesaler.Cover(
-            Umbrella,
-            currentDay: 5,
-            nextDeliveryDay: 7,
-            days,
-            onHand: 20,
-            fixtureCap: 150);
-        var shortSpace = Wholesaler.Cover(
-            Umbrella,
-            currentDay: 5,
-            nextDeliveryDay: 7,
-            days,
-            onHand: 0,
-            fixtureCap: 4);
-
-        Assert.Equal(16, fits.Need);
-        Assert.Equal(130, fits.FixtureCap);
-        Assert.Equal(4, shortSpace.Need);
-        Assert.Equal(4, shortSpace.FixtureCap);
+        Assert.True(plan.Need > space);
+        Assert.Equal(0, plan.FixtureCap);
+        Assert.False(Wholesaler.FixtureFull(onHand, capacity));
     }
 
     [Fact]
@@ -424,5 +417,87 @@ public class ShelfGoodsTests
         Assert.Equal("wholesaler", step.Detail);
         Assert.NotNull(gap);
         Assert.Equal(1004, gap.Target);
+    }
+
+    [Fact]
+    public void Cover_day_1579_soda_keeps_the_full_line_past_storage_free_space()
+    {
+        // Harvest: 1.17.10 day 1579–1582. FreeSpace(72, 100)=28 clipped need while fridge emptied.
+        // HARD LOCK: Cover.Need is the full line; fixtureCap must not shrink it.
+        const string soda = "ba:itemname_sodacan";
+        var storageCap = 100;
+        var totalOnHand = 72;
+        var clippedRoom = Wholesaler.FreeSpace(totalOnHand, storageCap);
+        var plan = Wholesaler.Cover(
+            soda,
+            currentDay: 1579,
+            nextDeliveryDay: 1583,
+            new[]
+            {
+                new CoverSale(1577, 30, open: true),
+                new CoverSale(1578, 29, open: true),
+            },
+            onHand: totalOnHand,
+            fixtureCap: storageCap,
+            stands: Wholesaler.RetailStands(soda));
+
+        Assert.Equal(28, clippedRoom);
+        Assert.Equal(260, plan.Target);
+        Assert.Equal(188, plan.Need);
+        Assert.Equal(0, plan.FixtureCap);
+        Assert.True(plan.Need > clippedRoom);
+    }
+
+    [Fact]
+    public void FixtureCapacity_selling_only_skips_storage_shelves_and_racks()
+    {
+        const string soda = "ba:itemname_sodacan";
+        var fixtures = new[]
+        {
+            new ShelfFixture("ba:itemname_storageshelf", soda, 100),
+            new ShelfFixture("ba:itemname_storagerack", soda, 200),
+            new ShelfFixture("ba:itemname_drinksfridge", soda, 100),
+        };
+
+        Assert.Equal(400, Wholesaler.FixtureCapacity(soda, fixtures));
+        Assert.Equal(100, Wholesaler.FixtureCapacity(soda, fixtures, sellingOnly: true));
+        Assert.True(Wholesaler.IsStorageFixture("ba:itemname_storageshelf"));
+        Assert.False(Wholesaler.IsStorageFixture("ba:itemname_drinksfridge"));
+    }
+
+    [Fact]
+    public void Chain_storage_on_hand_empty_fridge_keeps_cover_and_reads_selling_room()
+    {
+        // Chain: storage on hand → empty fridge capacity → full cover line
+        const string soda = "ba:itemname_sodacan";
+        var fixtures = new[]
+        {
+            new ShelfFixture("ba:itemname_storageshelf", soda, Wholesaler.Hold("ba:itemname_storageshelf", soda)),
+            new ShelfFixture("ba:itemname_drinksfridge", soda, Wholesaler.Hold("ba:itemname_drinksfridge", soda)),
+        };
+        var totalOnHand = 72;
+        var sellingOnHand = 0;
+        var sellingCap = Wholesaler.FixtureCapacity(soda, fixtures, sellingOnly: true);
+        var room = Wholesaler.FreeSpace(sellingOnHand, sellingCap);
+        var plan = Wholesaler.Cover(
+            soda,
+            currentDay: 1579,
+            nextDeliveryDay: 1583,
+            new[]
+            {
+                new CoverSale(1577, 30, open: true),
+                new CoverSale(1578, 29, open: true),
+            },
+            onHand: totalOnHand,
+            fixtureCap: sellingCap,
+            stands: Wholesaler.RetailStands(soda));
+
+        Assert.Equal(100, sellingCap);
+        Assert.Equal(100, room);
+        Assert.Equal(188, plan.Need);
+        Assert.Equal(0, plan.FixtureCap);
+        Assert.True(plan.Need > room);
+        Assert.False(Wholesaler.FixtureFull(sellingOnHand, sellingCap));
+        Assert.Equal(soda, plan.Item);
     }
 }

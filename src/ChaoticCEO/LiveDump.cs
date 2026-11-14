@@ -1905,6 +1905,33 @@ namespace ChaoticCEO
             return changed;
         }
 
+        public static int TrySurvey(string localAppData)
+        {
+            if (string.IsNullOrEmpty(localAppData) || !InCity())
+            {
+                return 0;
+            }
+
+            var current = SaveGameManager.Current;
+            if (current?.BuildingRegistrations == null)
+            {
+                return 0;
+            }
+
+            var written = 0;
+            foreach (var building in current.BuildingRegistrations)
+            {
+                if (building == null || !building.RentedByPlayer)
+                {
+                    continue;
+                }
+
+                written += StorageShelfBridge.Survey(localAppData, building, current.Day);
+            }
+
+            return written;
+        }
+
         private static BuildingRegistration? FindOwned(GameInstance current, string street, int number)
         {
             if (current?.BuildingRegistrations == null)

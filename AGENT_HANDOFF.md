@@ -138,10 +138,10 @@ When shipping: update **PM_PLAN**, **doc/PROJECT_STATUS.md**, and **Current stat
 
 ## Current state
 
-- **Product:** Version **1.17.10**. Per-frame I/O throttle and F9 refresh cache are live. Epic 10 stays open. Ladder: [PM_PLAN.md](PM_PLAN.md). Handoff: [doc/handoff/0108-HANDOFF-2026-11-13_1540.md](doc/handoff/0108-HANDOFF-2026-11-13_1540.md).
-- **On:** `origin/main @ 46131b1` (version 1.17.10). **10.4** code stays stashed. Open WIP: `bug/soda-display-free-space`. https://github.com/pbuckles22/BigAmbitionStratMod
-- **Next:** Resume **14.9** new-game aisle on `bug/soda-display-free-space` when asked. **14.4** waits. No `$100M` soak until **10.7**.
-- **Blockers:** Do not pop the **10.4** stash. **7.9** blocks **14.10**. Do not clip paper to register free space or drop RegisterCap to 200. Do not CMPH soda aisle until new-game aisle PASS.
+- **Product:** Version **1.17.11.4** (1.25-body aisle and even shelf buyback, human PASS 2026-11-13). **14.9** stays open for the second pod. Epic 14 open. Ladder: [PM_PLAN.md](PM_PLAN.md). Handoff: [doc/handoff/0110-HANDOFF-2026-11-13_1806.md](doc/handoff/0110-HANDOFF-2026-11-13_1806.md).
+- **On:** `origin/main` after this land. **10.4** code stays stashed. https://github.com/pbuckles22/BigAmbitionStratMod
+- **Next:** The **14.9** second pod when asked: the third shelf sits against the spare with no gap. Then overhire and displays. **14.4** waits. No `$100M` soak until **10.7**.
+- **Blockers:** Do not pop the **10.4** stash. **7.9** blocks **14.10**. Do not clip paper to register free space or drop RegisterCap to 200.
 
 ## Run and test
 

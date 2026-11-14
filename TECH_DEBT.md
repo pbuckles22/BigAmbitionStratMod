@@ -19,6 +19,7 @@ This is the durable home for technical debt across sessions. Handoff notes can m
 
 (High ROI; frequent pain; not blocking.)
 
+- **14.9 / 1.17.9.10 queue (human 2026-11-13):** (1) New-game storage 1+1 aisle too close (continued save aisle PASS; keep `placed=2`/`keep=2` PASS). (2) Overhire: My Employees shows 1 cashier + many cleaners (need 1+1); `HireCandidate` rows show **$0/hr** so wage charge is 0, still wrong headcount. (3) New-game displays stay empty past day 4 — `g2=false`, `restock.summary ordered=0`. Fix one at a time; stay on `bug/soda-display-free-space` for (1).
 - Day-roll blip: `store.health` can briefly show `customers=0 revenue=0 ready=false` (and a trailing `-100` profit) even after Ready days, then recover. The open **10.4** tree harvests this. Drop this line when that tree commits. It is not an Epic 14 story.
 - Morning `g3` stays false after `cashier.replaced`. Day 1497 at 7th Avenue 22 served 82 customers and `g3` was still false. Sales do not flip the register flag. The live shift read is what misses the hired person.
 - Day 1 `ops.verified` on **1.16.7.7** logged cleaner `shift=false person=false uniform=nopreset`. Uniforms stay accepted below. The missing cleaner shift belongs to the **10.4** fit-out, not Epic 14.
