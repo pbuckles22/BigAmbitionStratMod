@@ -276,10 +276,10 @@ namespace ChaoticCEO
                 + EmptySellingCapacity(building)
                 + (StorageShelfBridge.PlacedCount(building) * StorageShelf.UnitCapacity);
             var need = StorageShelf.NeedShelves(boxesNeeded, spacesNeeded, placedCap);
-            var spareSeats = StorageShelfBridge.CanSpare(building, need);
-            var keep = StorageShelf.KeepTarget(need, spareSeats);
-            var cargo = StorageShelfBridge.BoxedCount(building);
             var placedCount = StorageShelfBridge.PlacedCount(building);
+            var spareSeats = StorageShelfBridge.CanSpare(building, need);
+            var keep = StorageShelf.KeepTarget(need, spareSeats, placedCount);
+            var cargo = StorageShelfBridge.BoxedCount(building);
             var have = StorageShelf.Have(placedCount, cargo, pendingAmount);
             RecordKeep(localAppData, day, street, number, boxesNeeded, need, keep, placedCount, cargo, pendingAmount, have, spareSeats);
 
@@ -409,7 +409,7 @@ namespace ChaoticCEO
                 return placedDone > 0 || packed > 0;
             }
 
-            var pick = StorageShelf.Order(street, number, orderAmount, cash, pending, inCargo: false, seat: true, GameApi.Live());
+            var pick = StorageShelf.Order(street, number, orderAmount, cash, pending, inCargo: cargo > 0, seat: true, GameApi.Live());
             if (!pick.Ordered)
             {
                 var seat = StorageShelfBridge.Seat(building);
@@ -465,7 +465,8 @@ namespace ChaoticCEO
             }
 
             var needShelves = StorageShelf.NeedShelves(boxesNeeded, spacesNeeded: 0, placedCap: 0);
-            var keep = StorageShelf.KeepTarget(needShelves, StorageShelfBridge.CanSpare(building, needShelves));
+            var placedNow = StorageShelfBridge.PlacedCount(building);
+            var keep = StorageShelf.KeepTarget(needShelves, StorageShelfBridge.CanSpare(building, needShelves), placedNow);
             var need = StorageShelf.NeedLine(
                 day,
                 street,

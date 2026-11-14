@@ -939,3 +939,51 @@ Human check. Gift shop at 22 7th Avenue (same save; optional new-game for aisle)
 5. Evidence: `shelf.keep`, `shelf.packed`, `shelf.placed`, `shelf.sold`, `shelf.surveyed`. Version marker: public `1.17.9.10`.
 
 Not in this slice: staff hold; second register; CMPH of the prior FAIL.
+
+## 14.9 closer aisle and even sellback (1.17.11.4)
+
+Tier 1: facing centers are `AisleCenterStep` (1.25 shelf bodies). `Buyback(960)` is the purchase price 1200. Chain: `cover → reseat same-yaw spare across the aisle → third is back-to-back` uses that step.
+
+Human check. Gift shop at 22 7th Avenue. The two storage shelves face each other with a wide gap.
+
+1. Restart Big Ambitions so this build loads. Continue the same save. Confirm `mod.loaded version=1.17.11.4`.
+2. Let one morning finish. Do not cancel the time skip.
+3. **PASS if** the shelves sit closer (centers about 1.25 m apart; the moved shelf is near x=998.00, not 998.75) and any `shelf.sold` price equals `amount * 1200`. **FAIL if** the gap stays at 2 m, or a sold shelf is still priced at 960 each.
+4. Evidence: `shelf.packed`, `shelf.placed`, `shelf.sold`. Version marker: public `1.17.11.4`.
+
+## 14.9 reseat the spare across the aisle (1.17.11.3)
+
+Tier 1: `Seat_one_shelf_in_a_wide_room_faces_the_aisle_before_a_side_neighbor`, `Reseat_packs_the_same_yaw_spare_and_leaves_an_aisle_pair`. Chain: `cover → reseat same-yaw spare across the aisle → third is back-to-back`.
+
+Human check. Gift shop at 22 7th Avenue. Two storage shelves, one against the wall with the boxes, the empty one stacked on the same side.
+
+1. Restart Big Ambitions so this build loads. Continue the same save. Confirm `mod.loaded version=1.17.11.3`.
+2. Let one morning finish. Do not cancel the time skip. Then open `%LocalAppData%\ChaoticCEO\ceo.log` and look at the two shelves.
+3. **PASS if** the empty shelf is packed (`shelf.packed` `reason=pattern`) and placed facing the shelf that already has boxes, with a walkable gap (`shelf.placed`, opposite facing, about 2 m between centers). Both fronts can be walked. **FAIL if** a shelf is still stacked half a meter in front of the wall shelf on the same facing, or the spare sits beside it along the wall.
+4. Evidence: `shelf.packed`, `shelf.placed`, `shelf.keep`. Version marker: public `1.17.11.3`. The third shelf, back-to-back with no gap, is not this morning. Keep stays at 2.
+
+## 14.9 place the purchased shelf (1.17.11.2)
+
+Tier 1: `Sell_does_not_drop_the_floor_below_keep_to_cover_a_pending_shelf`, `Order_does_not_buy_when_unplaced_cargo_already_covers_keep`. Chain: `cover → place cargo to keep → sell leaves the floor shelf`.
+
+Human check. Gift shop at 22 7th Avenue, the day 1589 cargo (11 storage shelves, none of that purchase on the floor).
+
+1. Restart Big Ambitions so this build loads. Continue the same save. Confirm `mod.loaded version=1.17.11.2`.
+2. Let one morning finish (F6). Do not cancel the time skip. Open the storage cargo, then `%LocalAppData%\ChaoticCEO\ceo.log`.
+3. **PASS if** a storage shelf is on the floor (`shelf.placed`) and stays there (`shelf.sold where=placed` does not drop `placed` below `keep`), and there is no new `shelf.ordered` while cargo plus placed plus pending is already at `keep`. **FAIL if** the purchased shelf is still only in cargo, or another shelf is ordered while unplaced shelves already cover `keep`.
+4. Evidence: `shelf.placed`, `shelf.sold`, `shelf.keep`, `shelf.ordered`. Version marker: public `1.17.11.2`.
+
+## 14.9 new-game storage aisle (1.17.11.1)
+
+Tier 1: `Seat_live_depth_aisle_gap_is_not_packed`, `KeepTarget_holds_the_empty_plus_one_when_it_blocks_its_own_seat`. Chains: `cover → place live 1+1 → Accessible`, `cover → box need → keep placed +1 → no sell`.
+
+Human check. Gift shop at 22 7th Avenue, the save from the 1.17.11 fail. This check is the empty +1 shelf. It does not check overhire or empty displays.
+
+1. Restart Big Ambitions so this build loads. Continue the same save. Confirm `mod.loaded version=1.17.11.1`.
+2. Let one morning roll (F6). Open `%LocalAppData%\ChaoticCEO\ceo.log`.
+3. **PASS if** that morning does not sell the empty storage shelf (`shelf.sold where=placed` is absent) and `shelf.keep` shows `placed` staying at 2 when `need=1`. **FAIL if** `shelf.sold where=placed` appears while `need=1` and the shelf count drops to 1.
+4. Evidence: `shelf.keep`, `shelf.sold`. Version marker: public `1.17.11.1`.
+
+**Human FAIL 2026-11-13** on 1.17.11 at 22 7th Avenue. Day 1600 `keep=2 placed=2`. Day 1601 `spareSeats=false keep=1 placed=2`, then `shelf.sold where=placed amount=1`. The empty +1 was sold. Day 1602 `placed=1`.
+
+Not in this slice: overhire, empty displays, the second register.

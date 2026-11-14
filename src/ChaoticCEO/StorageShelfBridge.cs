@@ -422,7 +422,7 @@ namespace ChaoticCEO
 
                 var full = box.GetSellingPrice();
                 var unit = stack <= 0 ? full : full / stack;
-                var credit = unit * take;
+                var credit = StorageShelf.Buyback(unit) * take;
                 if (take >= stack)
                 {
                     holder.RemoveFromCargo(box);
@@ -481,7 +481,7 @@ namespace ChaoticCEO
                     break;
                 }
 
-                var credit = item.GetSellingPrice();
+                var credit = StorageShelf.Buyback(item.GetSellingPrice());
                 Hide(building, item);
                 building.RemoveItemInstanceFromBuilding(item, true);
                 price += credit;
@@ -518,8 +518,35 @@ namespace ChaoticCEO
             ItemInstance? anchor = null;
             if (floor != null && shelves.Count > 0)
             {
-                var best = BestAnchor(floor, shelves, others);
-                anchor = FindPlaced(building, best.X, best.Z, best.Yaw);
+                var boxes = BoxCounts(building, shelves);
+                var home = StorageShelf.PatternAnchor(shelves, boxes);
+                if (home == null)
+                {
+                    home = BestAnchor(floor, shelves, others);
+                }
+
+                anchor = FindPlaced(building, home.X, home.Z, home.Yaw);
+                foreach (var spot in StorageShelf.ShelvesToReseat(floor, shelves, others, boxes))
+                {
+                    var item = FindPlaced(building, spot.X, spot.Z, spot.Yaw);
+                    if (item == null || item == anchor)
+                    {
+                        continue;
+                    }
+
+                    if (item.cargoInstances != null && item.cargoInstances.Count > 0)
+                    {
+                        continue;
+                    }
+
+                    if (!PackOne(building, item, out var rx, out var rz, out var ryaw))
+                    {
+                        continue;
+                    }
+
+                    packed.Add((rx, rz, ryaw, "pattern"));
+                    SplitFootprints(building, out shelves, out others);
+                }
             }
 
             // Pack every empty non-anchor shelf that fails accessibility.
@@ -792,6 +819,30 @@ namespace ChaoticCEO
             }
 
             return best;
+        }
+
+        private static List<int> BoxCounts(BuildingRegistration building, IReadOnlyList<ShelfSpot> shelves)
+        {
+            var boxes = new List<int>(shelves.Count);
+            foreach (var spot in shelves)
+            {
+                var amount = 0;
+                var item = FindPlaced(building, spot.X, spot.Z, spot.Yaw);
+                if (item?.cargoInstances != null)
+                {
+                    foreach (var cargo in item.cargoInstances)
+                    {
+                        if (cargo != null && cargo.amount > 0)
+                        {
+                            amount += cargo.amount;
+                        }
+                    }
+                }
+
+                boxes.Add(amount);
+            }
+
+            return boxes;
         }
 
         private static List<ShelfSpot> BlockersExcept(

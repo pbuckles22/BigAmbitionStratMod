@@ -74,8 +74,12 @@ namespace ChaoticCEO
         public const float FootprintDepth = 0.5f;
 
         /// <summary>
-        /// Clear floor between facing shelf fronts so NavMesh can reach the long side.
+        /// Facing shelves, center to center, in shelf bodies. A body is the full depth.
+        /// 1.25 leaves a quarter-body of air. Back-to-back pods stay one body apart, with no air.
         /// </summary>
+        public const float AislePitch = 1.25f;
+
+        /// <summary>Older clear-floor sample. Facing pitch is <see cref="AislePitch"/>.</summary>
         public const float AisleWidth = 1.0f;
 
         /// <summary>Walk-around corridor kept free along the shelf width to one wall.</summary>
@@ -226,15 +230,23 @@ namespace ChaoticCEO
 
         /// <summary>
         /// Shelves to keep on the floor: <c>need</c>, plus one spare when the room still has a seat.
+        /// A spare already on the floor (placed == need + 1) is kept even when the seat check is false,
+        /// because that shelf is standing on the only aisle cell.
+        /// More than that spare, with no seat, sells back down to <c>need</c>.
         /// </summary>
-        public static int KeepTarget(int need, bool roomCanSpare)
+        public static int KeepTarget(int need, bool roomCanSpare, int placed = 0)
         {
             if (need <= 0)
             {
                 return 0;
             }
 
-            return need + (roomCanSpare ? 1 : 0);
+            if (roomCanSpare || placed == need + 1)
+            {
+                return need + 1;
+            }
+
+            return need;
         }
 
         /// <summary>Placed + cargo + pending furniture trucks.</summary>
@@ -252,6 +264,197 @@ namespace ChaoticCEO
             var h = have < 0 ? 0 : have;
             var k = keep < 0 ? 0 : keep;
             return h > k ? h - k : 0;
+        }
+
+        /// <summary>
+        /// Empty shelves that are not the 1—aisle—2 seats grown from the shelf in use.
+        /// A same-yaw shelf stacked on that face is packed so Place can seat it across the aisle.
+        /// The next seat after that pair is back-to-back, with no aisle.
+        /// A stocked shelf stays where it is.
+        /// </summary>
+        public static IReadOnlyList<ShelfSpot> ShelvesToReseat(
+            ShelfFloor? floor,
+            IReadOnlyList<ShelfSpot>? shelves,
+            IReadOnlyList<ShelfSpot>? others,
+            IReadOnlyList<int>? boxes)
+        {
+            if (floor == null || shelves == null || shelves.Count <= 1)
+            {
+                return System.Array.Empty<ShelfSpot>();
+            }
+
+            var anchor = PatternAnchor(shelves, boxes);
+            var kept = new List<ShelfSpot> { anchor };
+            var rest = new List<ShelfSpot>();
+            for (var i = 0; i < shelves.Count; i++)
+            {
+                if (SameSpot(shelves[i], anchor))
+                {
+                    continue;
+                }
+
+                rest.Add(shelves[i]);
+            }
+
+            var off = new List<ShelfSpot>();
+            var blockers = others ?? System.Array.Empty<ShelfSpot>();
+            while (rest.Count > 0)
+            {
+                var seat = Seat(floor, kept, blockers);
+                if (!seat.Found)
+                {
+                    off.AddRange(rest);
+                    break;
+                }
+
+                var match = -1;
+                for (var i = 0; i < rest.Count; i++)
+                {
+                    if (NearSeat(rest[i], seat))
+                    {
+                        match = i;
+                        break;
+                    }
+                }
+
+                if (match < 0)
+                {
+                    off.AddRange(rest);
+                    break;
+                }
+
+                kept.Add(rest[match]);
+                rest.RemoveAt(match);
+            }
+
+            var empty = new List<ShelfSpot>();
+            foreach (var spot in off)
+            {
+                if (BoxesOn(shelves, boxes, spot) > 0)
+                {
+                    continue;
+                }
+
+                empty.Add(spot);
+            }
+
+            return empty;
+        }
+
+        public static ShelfSpot PatternAnchor(IReadOnlyList<ShelfSpot> shelves, IReadOnlyList<int>? boxes)
+        {
+            var best = -1;
+            var most = 0;
+            for (var i = 0; i < shelves.Count; i++)
+            {
+                var amount = BoxAt(boxes, i);
+                if (amount > most)
+                {
+                    most = amount;
+                    best = i;
+                }
+            }
+
+            if (best >= 0)
+            {
+                return shelves[best];
+            }
+
+            for (var i = 0; i < shelves.Count; i++)
+            {
+                for (var j = 0; j < shelves.Count; j++)
+                {
+                    if (i != j && InFrontOf(shelves[i], shelves[j]))
+                    {
+                        return shelves[i];
+                    }
+                }
+            }
+
+            return shelves[0];
+        }
+
+        private static bool InFrontOf(ShelfSpot anchor, ShelfSpot other)
+        {
+            if (!SameYaw(anchor.Yaw, other.Yaw))
+            {
+                return false;
+            }
+
+            var (ax, az) = anchor.Center();
+            var (bx, bz) = other.Center();
+            var (lx, lz) = ToLocal(bx - ax, bz - az, anchor.Yaw);
+            return System.Math.Abs(lx) <= Touch && lz > Touch;
+        }
+
+        private static bool SameSpot(ShelfSpot a, ShelfSpot b)
+        {
+            return System.Math.Abs(a.X - b.X) <= Touch
+                && System.Math.Abs(a.Z - b.Z) <= Touch
+                && SameYaw(a.Yaw, b.Yaw);
+        }
+
+        private static bool NearSeat(ShelfSpot spot, ShelfSeat seat)
+        {
+            return System.Math.Abs(spot.X - seat.X) <= Touch
+                && System.Math.Abs(spot.Z - seat.Z) <= Touch
+                && SameYaw(spot.Yaw, seat.Yaw);
+        }
+
+        private static int BoxesOn(IReadOnlyList<ShelfSpot> shelves, IReadOnlyList<int>? boxes, ShelfSpot spot)
+        {
+            for (var i = 0; i < shelves.Count; i++)
+            {
+                if (SameSpot(shelves[i], spot))
+                {
+                    return BoxAt(boxes, i);
+                }
+            }
+
+            return 0;
+        }
+
+        private static int BoxAt(IReadOnlyList<int>? boxes, int index)
+        {
+            if (boxes == null || index < 0 || index >= boxes.Count)
+            {
+                return 0;
+            }
+
+            return boxes[index] < 0 ? 0 : boxes[index];
+        }
+
+        /// <summary>
+        /// Full shelf thickness. A surveyed depth under 1 m is the half-extent (live ~0.50 → body 1).
+        /// </summary>
+        public static float ShelfBody(float depth)
+        {
+            if (depth < 0f)
+            {
+                return 0f;
+            }
+
+            return depth < 1f ? depth * 2f : depth;
+        }
+
+        /// <summary>Center-to-center distance of two shelves that face each other across the space.</summary>
+        public static float AisleCenterStep(float depth)
+        {
+            return ShelfBody(depth) * AislePitch;
+        }
+
+        /// <summary>
+        /// What we get back for one shelf. The game resale is below the purchase price.
+        /// Crediting the purchase price makes a buy-then-return even.
+        /// </summary>
+        public static float Buyback(float gameSell)
+        {
+            if (gameSell < Price)
+            {
+                return Price;
+            }
+
+            return gameSell;
         }
 
         /// <summary>Buy at most one shelf per morning toward <paramref name="keep"/>.</summary>
@@ -312,6 +515,14 @@ namespace ChaoticCEO
             var left = excess - fromCargo;
             var empty = emptyPlaced < 0 ? 0 : emptyPlaced;
             var fromEmpty = left < empty ? left : empty;
+            // A truck that has not arrived is part of the excess, but it is not a floor shelf.
+            // Never sell the floor below keep to cover it.
+            var floorSpare = placed > keep ? placed - keep : 0;
+            if (fromEmpty > floorSpare)
+            {
+                fromEmpty = floorSpare;
+            }
+
             if (fromEmpty < 0)
             {
                 fromEmpty = 0;
@@ -660,6 +871,17 @@ namespace ChaoticCEO
                 blockers.AddRange(others);
             }
 
+            // One shelf starts the 1—aisle—2 run. Face the spare across the aisle
+            // before stepping a same-yaw neighbor along the long face.
+            if (row.Count == 1)
+            {
+                var firstAisle = AisleEnds(floor, row, blockers);
+                if (firstAisle != null)
+                {
+                    return firstAisle;
+                }
+            }
+
             if (alongWidth)
             {
                 var step = first.Width;
@@ -791,22 +1013,21 @@ namespace ChaoticCEO
         }
 
         /// <summary>
-        /// Next seat along the grow axis: aisle then face back, or back-to-back when the end already faces the aisle.
-        /// Center spacing is Depth + AisleWidth (2.0 m) across an aisle, or Depth (1.0 m) for a touching pair.
-        /// Never same-yaw depth steps — those bury the long-side interaction face.
+        /// Next seat along the grow axis: a space when the face would be buried, otherwise back-to-back.
+        /// The space puts centers <see cref="AislePitch"/> shelf-bodies apart. Back-to-back centers stay one body apart.
         /// </summary>
         internal static ShelfSpot AisleStep(ShelfSpot from, float growX, float growZ)
         {
             var (fx, fz) = Facing(from.Yaw);
             var toward = (fx * growX) + (fz * growZ);
             var yaw = OppositeYaw(from.Yaw);
+            var body = ShelfBody(from.Depth);
             if (toward > 0.5f)
             {
-                var step = from.Depth + AisleWidth;
-                return WithYaw(from.Moved(growX * step, growZ * step), yaw);
+                return WithYaw(from.Moved(growX * AisleCenterStep(from.Depth), growZ * AisleCenterStep(from.Depth)), yaw);
             }
 
-            return WithYaw(from.Moved(growX * from.Depth, growZ * from.Depth), yaw);
+            return WithYaw(from.Moved(growX * body, growZ * body), yaw);
         }
 
         /// <summary>
@@ -893,10 +1114,12 @@ namespace ChaoticCEO
             var (cx, cz) = seat.Center();
             var (wx, wz) = ToWorld(1f, 0f, seat.Yaw);
             var halfWidth = System.Math.Max(0f, (seat.Width / 2f) - WallInset);
-            // Sample inside the aisle strip, not the far wall line (front + AisleWidth may sit on a wall cell).
-            for (var along = Sample; along <= AisleWidth - Sample; along += Sample)
+            var body = ShelfBody(seat.Depth);
+            var air = AisleCenterStep(seat.Depth) - body;
+            var face = body / 2f;
+            for (var along = Sample; along <= air - Sample + Touch; along += Sample)
             {
-                var depth = (seat.Depth / 2f) + along;
+                var depth = face + along;
                 foreach (var lateral in Steps(halfWidth))
                 {
                     var x = cx + (fx * depth) + (wx * lateral);
