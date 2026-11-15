@@ -16,7 +16,7 @@
 
 | Branch | Role |
 |--------|------|
-| **`main`** | Integration branch. Version 1.17.13. Overhire and per-game log. Human PASS 2026-11-15. |
+| **`main`** | Integration branch. Version 1.17.13. Land `d929f7b`. Overhire and per-game log. Human PASS 2026-11-15. |
 | **`feature/14.19-overhire`** | Overhire and per-game `ceo.log`. Version 1.17.13. Human PASS 2026-11-15. Kept after CMPH. |
 | **`feature/sick-hold`** | Sick hold. Version 1.17.11.12. Human PASS 2026-11-14. Kept after CMPH. |
 | **`feature/staff-hold`** | Staff hold cheat, wired. Version 1.17.11.11. Human PASS 2026-11-14. Kept after CMPH. |
