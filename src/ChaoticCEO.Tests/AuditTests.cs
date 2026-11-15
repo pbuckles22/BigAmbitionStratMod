@@ -3,6 +3,7 @@ using ChaoticCEO;
 
 namespace ChaoticCEO.Tests;
 
+[Collection(nameof(AutopilotState))]
 public class AuditTests
 {
     private const string Hair = "ba:itemname_haircareproduct";

@@ -27,6 +27,7 @@ namespace ChaoticCEO
         private readonly WholesalerWatch _contracts = new WholesalerWatch();
         private readonly CashierWatch _cashiers = new CashierWatch();
         private readonly CashierWatch _cleaners = new CashierWatch();
+        private readonly HeadcountWatch _headcount = new HeadcountWatch();
         private readonly MorningWatch _mornings = new MorningWatch();
         private readonly BankLoanWatch _loans = new BankLoanWatch();
         private readonly StaffDemandWatch _demands = new StaffDemandWatch();
@@ -102,6 +103,7 @@ namespace ChaoticCEO
             }
 
             _nextTickTime = FrameTick.Next(Time.unscaledTime);
+            LiveDump.BeginGame(_localAppData);
             LiveDump.HoldNeeds(_needs, _localAppData);
             StaffHoldBridge.Hold(_staff, _localAppData);
             LiveDump.TryRent(_rents, _localAppData);
@@ -110,6 +112,7 @@ namespace ChaoticCEO
             LiveDump.TryCapacity(_capacity, _localAppData);
             LiveDump.TryWholesaler(_contracts, _localAppData);
             LiveDump.TryCashier(_cashiers, _localAppData);
+            HeadcountBridge.Hold(_headcount, _localAppData);
             LiveDump.TryRestaff(_cashiers, _localAppData);
             LiveDump.ReleaseCleaner(_cleaners, _mornings);
             LiveDump.TryCleaner(_cleaners, _localAppData);

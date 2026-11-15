@@ -192,8 +192,22 @@ namespace ChaoticCEO
 
                 if (station.employeeInstance == null)
                 {
-                    hired.assignedAddress = registration.Address;
-                    EmployeeHelper.HireCandidate(hired);
+                    if (HeadcountBridge.Blocks(Cashier.Skill))
+                    {
+                        var kept = HeadcountBridge.Find(Cashier.Skill);
+                        if (kept == null)
+                        {
+                            reason = "over";
+                            return false;
+                        }
+
+                        hired = kept;
+                    }
+                    else
+                    {
+                        hired.assignedAddress = registration.Address;
+                        EmployeeHelper.HireCandidate(hired);
+                    }
                 }
 
                 Schedule(registration, station, hired);
@@ -422,8 +436,23 @@ namespace ChaoticCEO
                 hired.characterData.name = Cashier.RoleName;
             }
 
-            hired.assignedAddress = registration.Address;
-            EmployeeHelper.HireCandidate(hired);
+            if (HeadcountBridge.Blocks(Cashier.Skill))
+            {
+                var kept = HeadcountBridge.Find(Cashier.Skill);
+                if (kept == null)
+                {
+                    reason = "over";
+                    return false;
+                }
+
+                hired = kept;
+            }
+            else
+            {
+                hired.assignedAddress = registration.Address;
+                EmployeeHelper.HireCandidate(hired);
+            }
+
             WriteShifts(registration, item.id, hired);
             _ = pick;
             return !string.IsNullOrEmpty(hired.id);

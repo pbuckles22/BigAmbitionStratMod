@@ -2,13 +2,13 @@
 
 **Human-readable current state.** Keep in sync with [AGENT_HANDOFF.md](../AGENT_HANDOFF.md) → *Current state* when milestones ship.
 
-**Last updated:** 2026-11-14
+**Last updated:** 2026-11-15
 
 ---
 
 ## Summary
 
-**BigAmbitionStratMod** — Version **1.17.11.12** on `main` (sick hold clears a scheduled sick day and an absence that already landed; human PASS 2026-11-14). **14.9** stays open for the second pod. Then overhire; then displays. **14.4** waits. Epic 10 stays open. **10.4** code stays stashed. Rules: [requirements/strategy.md](requirements/strategy.md).
+**BigAmbitionStratMod** — Version **1.17.13** (overhire **14.19** and a per-game `ceo.log`; human PASS 2026-11-15). Next is **14.20** empty displays. **14.4** waits. Epic 10 stays open. **10.4** code stays stashed. Rules: [requirements/strategy.md](requirements/strategy.md).
 
 ---
 
@@ -16,7 +16,8 @@
 
 | Branch | Role |
 |--------|------|
-| **`main`** | Integration branch. Version 1.17.11.12. Land `d2072fb`. Sick hold. Human PASS 2026-11-14. |
+| **`main`** | Integration branch. Version 1.17.13. Overhire and per-game log. Human PASS 2026-11-15. |
+| **`feature/14.19-overhire`** | Overhire and per-game `ceo.log`. Version 1.17.13. Human PASS 2026-11-15. Kept after CMPH. |
 | **`feature/sick-hold`** | Sick hold. Version 1.17.11.12. Human PASS 2026-11-14. Kept after CMPH. |
 | **`feature/staff-hold`** | Staff hold cheat, wired. Version 1.17.11.11. Human PASS 2026-11-14. Kept after CMPH. |
 | **`feature/14.9-second-pod`** | 14.9 facing gap. Version 1.17.11.10. Human PASS 2026-11-14. Kept after CMPH. |

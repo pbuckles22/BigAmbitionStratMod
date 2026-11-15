@@ -6,7 +6,7 @@ namespace ChaoticCEO
 {
     public static class LoadLog
     {
-        public const string Version = "1.17.11.12";
+        public const string Version = "1.17.13";
         public const string PinnedBuild = "3682";
         public const string ModId = "ChaoticCEO";
         public const int HistoryLimit = 200;
@@ -53,6 +53,8 @@ namespace ChaoticCEO
         {
             var current = CeoLogPath(localAppData);
             RememberFile(current, HistoryPath(localAppData));
+            GameLog.Keep(localAppData);
+            GameLog.Release(localAppData);
             var line = Line(PinnedBuild);
             var directory = Path.GetDirectoryName(current);
             if (!string.IsNullOrEmpty(directory))

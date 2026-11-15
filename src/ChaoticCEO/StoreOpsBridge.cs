@@ -157,8 +157,22 @@ namespace ChaoticCEO
 
             if (station.employeeInstance == null)
             {
-                hired.assignedAddress = registration.Address;
-                EmployeeHelper.HireCandidate(hired);
+                if (cleaner && HeadcountBridge.Blocks(Cleaner.Skill))
+                {
+                    var kept = HeadcountBridge.Find(Cleaner.Skill);
+                    if (kept == null)
+                    {
+                        reason = "over";
+                        return false;
+                    }
+
+                    hired = kept;
+                }
+                else
+                {
+                    hired.assignedAddress = registration.Address;
+                    EmployeeHelper.HireCandidate(hired);
+                }
             }
 
             Schedule(registration, station, hired, cleaner ? WorkShiftType.Cleaning : WorkShiftType.Default);

@@ -25,6 +25,26 @@ namespace ChaoticCEO
             return SaveGameManager.Current != null;
         }
 
+        public static string BeginGame(string localAppData)
+        {
+            return BeginGame(localAppData, SaveGameManager.Current);
+        }
+
+        public static string BeginGame(string localAppData, object? save)
+        {
+            var opened = GameLog.Bind(localAppData, GameLog.Key(save));
+            if (opened.Length == 0)
+            {
+                return "";
+            }
+
+            _loanScanned = false;
+            _loanLogged = false;
+            StorageShelfBridge.ResetSurvey();
+            Stall.Clear();
+            return opened;
+        }
+
         public static IReadOnlyList<OverlayRow> OverlayRows()
         {
             var current = SaveGameManager.Current;
@@ -1783,6 +1803,22 @@ namespace ChaoticCEO
                 return null;
             }
 
+            if (HeadcountBridge.Blocks(Cashier.Skill))
+            {
+                var kept = new CashierPick(
+                    true,
+                    Cashier.RoleName,
+                    Cashier.Skill,
+                    Cashier.GiftType,
+                    registration.StreetName ?? "",
+                    registration.StreetNumber,
+                    "",
+                    "");
+                CashierBridge.Fill(registration, kept, out _);
+                watch.Fill(place);
+                return null;
+            }
+
             var current = SaveGameManager.Current;
             CashierBridge.Departure(registration, out var resigned, out var retired, out var poached);
             var gap = Cashier.Cover(
@@ -1852,6 +1888,14 @@ namespace ChaoticCEO
                 registration.warnedLastHourAboutNoEmployee).CleanerStaffed;
             if (Cleaner.OnStation(shiftStaffed, StoreOpsBridge.HasCleaner(registration)))
             {
+                watch.Fill(place);
+                return null;
+            }
+
+            if (HeadcountBridge.Blocks(Cleaner.Skill))
+            {
+                var seated = new StoreOpsPick(true, Cleaner.RoleName, "", false, "", "", "");
+                StoreOpsBridge.Live(registration, seated, out _, out _);
                 watch.Fill(place);
                 return null;
             }

@@ -4,6 +4,41 @@ Define **Tier 1** (fast feedback: unit, headless, or local) and **Tier 2** (inte
 
 ---
 
+## Game log (1.17.13)
+
+A new game does not read the previous game’s `ceo.log`. Each game keeps its own file. `ceo.log` is only the game now loaded. The previous game is copied to `%LocalAppData%\ChaoticCEO\games\<n>\ceo.log` when you start another game without quitting, and again on the next boot. The ledger then starts empty. A second look at the same save object does not split the log.
+
+Tier 1: `GameLogTests`. Chain: `rent → layout skip → game switch → new layout gate`.
+
+Human check. Continue a save, then start a new game without quitting.
+
+1. Restart Big Ambitions so this build loads. Confirm `mod.loaded version=1.17.13`.
+2. Continue 22 7th Avenue and let one morning finish.
+3. Start a new game without quitting.
+4. **PASS if** `%LocalAppData%\ChaoticCEO\ceo.log` opens with `mod.loaded` and `game.opened`, has no lines from the continued save, and that save is still in `games\<n>\ceo.log`. The new game then logs `building.rented` and `layout.loaded` with no `ops.skipped` before that `layout.loaded`. **FAIL if** `ceo.log` still contains the continued save, or `ops.skipped reason=open` is written before this game’s `layout.loaded`.
+5. Evidence: `game.opened`, then `building.rented`, then `layout.loaded`. Version marker: public `1.17.13`.
+
+This check is the log split. Stock on the selling displays by day 4 is still **14.20**.
+
+---
+
+## Overhire (1.17.12)
+
+My Employees shows one cashier and one cleaner. A `HireCandidate` row at $0/hr still counts. Extra cleaners are not hired, and extras already on the list are dropped. One scheduled cleaner is kept over a later $0/hr row. A later $0/hr row is kept only when nobody is on a shift. Other skills stay.
+
+Tier 1: `HeadcountTests`. Chain: `morning → one cashier → one cleaner`.
+
+Human check. Gift shop at 22 7th Avenue, My Employees.
+
+1. Restart Big Ambitions so this build loads. Continue the same save. Confirm `mod.loaded version=1.17.12`.
+2. Let one morning finish. Open My Employees.
+3. **PASS if** the list has one cashier and one cleaner. **FAIL if** a second cleaner is listed, including a row at $0/hr.
+4. Evidence: `headcount.held` with `cashiers=1 cleaners=1`. Version marker: public `1.17.12`.
+
+The wage on that one cleaner can still read $0/hr. Changing the wage is **14.10**.
+
+---
+
 ## Staff hold cheat (1.17.11.12)
 
 The parked employee hold is on, on the same tick as the player needs hold. Satisfaction stays at 100, an open complaint is cleared, the next complaint is a game year out, a rival poach is cancelled, and age resets to 60 at 65. A sick day on the calendar, due or later, becomes never, and an absence from a call that already landed is cleared. Walking off a shift for another reason is not held. Switch: `StaffHold.Enabled`.
