@@ -4,6 +4,22 @@ Define **Tier 1** (fast feedback: unit, headless, or local) and **Tier 2** (inte
 
 ---
 
+## Empty displays (1.17.14)
+
+A new game’s selling displays have stock by day 4. `g2` is true. The morning order is `restock.summary` with `ordered` above 0. A storage shelf is not one of those displays.
+
+Tier 1: `DisplayStockTests`. Chain: `new game → day roll → display stock → g2`.
+
+Human check. A new gift shop, played through day 4. This check is the selling displays. It does not check the storage pod.
+
+1. Restart Big Ambitions so this build loads. You are in a new game, at the gift shop on 22 7th Avenue, on the morning of day 4.
+2. The shelves, flower stand, fridge, and register should be holding product. Open `%LocalAppData%\ChaoticCEO\ceo.log`.
+3. Let the new game run from the first morning through day 4. Look at the selling fixtures, then find `mod.loaded`, `restock.summary`, and `store.health` for day 4.
+4. **PASS if** `mod.loaded version=1.17.14`, a `restock.summary` line has `ordered` above 0, and day 4 `store.health` has `g2=true` while those selling fixtures are not bare. **FAIL if** the version is still `1.17.13`, the only `restock.summary` says `ordered=0`, day 4 has `g2=false`, or the selling fixtures are still empty.
+5. Evidence: `restock.summary` (`ordered`). `store.health` (`g2`). `display.stocked` when a box was moved from storage onto a display. Version marker: public `1.17.14`.
+
+---
+
 ## Game log (1.17.13)
 
 A new game does not read the previous game’s `ceo.log`. Each game keeps its own file. `ceo.log` is only the game now loaded. The previous game is copied to `%LocalAppData%\ChaoticCEO\games\<n>\ceo.log` when you start another game without quitting, and again on the next boot. The ledger then starts empty. A second look at the same save object does not split the log.

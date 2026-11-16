@@ -1217,5 +1217,266 @@ namespace ChaoticCEO
                 && street.Length > 0
                 && number > 0;
         }
+
+        public static IReadOnlyList<DisplayLine> SellingLines()
+        {
+            var rows = new List<DisplayLine>();
+            var current = SaveGameManager.Current;
+            if (current?.BuildingRegistrations == null)
+            {
+                return rows;
+            }
+
+            foreach (var building in current.BuildingRegistrations)
+            {
+                if (building == null || !building.RentedByPlayer || string.IsNullOrEmpty(building.businessTypeName))
+                {
+                    continue;
+                }
+
+                foreach (var item in Wholesaler.Catalog(building.businessTypeName))
+                {
+                    rows.Add(new DisplayLine(item, UnitsOnHand(building, item, sellingOnly: true)));
+                }
+            }
+
+            return rows;
+        }
+
+        public static int StockDisplays(string? localAppData, int day)
+        {
+            var current = SaveGameManager.Current;
+            if (current?.BuildingRegistrations == null || day <= 0)
+            {
+                return 0;
+            }
+
+            var moved = 0;
+            foreach (var building in current.BuildingRegistrations)
+            {
+                if (building == null || !building.RentedByPlayer || building.itemInstances == null)
+                {
+                    continue;
+                }
+
+                foreach (var item in Wholesaler.Catalog(building.businessTypeName))
+                {
+                    foreach (var placed in building.itemInstances.Values)
+                    {
+                        if (!Sells(placed, item) || OnFixture(placed, item) > 0)
+                        {
+                            continue;
+                        }
+
+                        if (MoveOnto(localAppData, day, building, placed, item))
+                        {
+                            moved++;
+                        }
+                    }
+                }
+            }
+
+            if (moved > 0)
+            {
+                SaveGameManager.MarkChange();
+            }
+
+            return moved;
+        }
+
+        private static bool Sells(ItemInstance? placed, string item)
+        {
+            if (placed == null || !string.IsNullOrEmpty(placed.parentId) || Wholesaler.IsStorageFixture(placed.itemName))
+            {
+                return false;
+            }
+
+            var sold = placed.playerItemPurchaserSettings == null
+                ? ""
+                : placed.playerItemPurchaserSettings.itemName;
+            return sold == item;
+        }
+
+        private static int OnFixture(ItemInstance fixture, string item)
+        {
+            if (fixture.cargoInstances == null)
+            {
+                return 0;
+            }
+
+            var total = 0;
+            foreach (var box in fixture.cargoInstances)
+            {
+                if (box == null)
+                {
+                    continue;
+                }
+
+                if (box.itemName == item)
+                {
+                    total += box.amount;
+                }
+
+                if (box.nestedCargoInstances == null)
+                {
+                    continue;
+                }
+
+                foreach (var nested in box.nestedCargoInstances)
+                {
+                    if (nested != null && nested.itemName == item)
+                    {
+                        total += nested.amount;
+                    }
+                }
+            }
+
+            return total;
+        }
+
+        private static bool MoveOnto(
+            string? localAppData,
+            int day,
+            BuildingRegistration building,
+            ItemInstance display,
+            string item)
+        {
+            if (!Source(building, display, item, out var holder, out var box) || box == null)
+            {
+                return false;
+            }
+
+            var cap = FixtureCap(display, item);
+            var move = box.amount < cap ? box.amount : cap;
+            if (move <= 0)
+            {
+                return false;
+            }
+
+            try
+            {
+                var copy = box.Copy();
+                copy.amount = move;
+                if (!display.TryToAddToCargo(copy))
+                {
+                    return false;
+                }
+
+                holder.ReduceFromCargo(box, move);
+
+                GameEvent.Invoke("ba:gameevent_itemcargochanged");
+                if (!string.IsNullOrEmpty(localAppData))
+                {
+                    var path = LoadLog.CeoLogPath(localAppData);
+                    var directory = Path.GetDirectoryName(path);
+                    if (!string.IsNullOrEmpty(directory))
+                    {
+                        Directory.CreateDirectory(directory);
+                    }
+
+                    File.AppendAllText(
+                        path,
+                        DisplayStock.Stocked(day, building.StreetName, building.StreetNumber, item, move)
+                            + System.Environment.NewLine);
+                }
+
+                return true;
+            }
+            catch (System.Exception)
+            {
+                return false;
+            }
+        }
+
+        private static int FixtureCap(ItemInstance fixture, string item)
+        {
+            var boxSize = StorageShelfBridge.BoxSize(item);
+            var cached = fixture.ItemCached;
+            if (cached == null || boxSize <= 0)
+            {
+                return 1;
+            }
+
+            var cap = (int)System.Math.Ceiling(boxSize * (double)cached.cargoCapacityMultiplier);
+            return cap < 1 ? 1 : cap;
+        }
+
+        private static bool Source(
+            BuildingRegistration building,
+            ItemInstance display,
+            string item,
+            out ItemInstance holder,
+            out CargoInstance? box)
+        {
+            holder = display;
+            box = null;
+            if (building.itemInstances == null)
+            {
+                return false;
+            }
+
+            if (FindSource(building, display, item, storageOnly: true, out holder, out box))
+            {
+                return true;
+            }
+
+            return FindSource(building, display, item, storageOnly: false, out holder, out box);
+        }
+
+        private static bool FindSource(
+            BuildingRegistration building,
+            ItemInstance display,
+            string item,
+            bool storageOnly,
+            out ItemInstance holder,
+            out CargoInstance? box)
+        {
+            holder = display;
+            box = null;
+            foreach (var placed in building.itemInstances.Values)
+            {
+                if (placed == null
+                    || ReferenceEquals(placed, display)
+                    || placed.cargoInstances == null
+                    || Sells(placed, item)
+                    || Wholesaler.IsStorageFixture(placed.itemName) != storageOnly)
+                {
+                    continue;
+                }
+
+                foreach (var cargo in placed.cargoInstances)
+                {
+                    if (cargo != null && cargo.itemName == item && cargo.amount > 0)
+                    {
+                        holder = placed;
+                        box = cargo;
+                        return true;
+                    }
+
+                    if (cargo?.nestedCargoInstances == null)
+                    {
+                        continue;
+                    }
+
+                    for (var i = 0; i < cargo.nestedCargoInstances.Count; i++)
+                    {
+                        var nested = cargo.nestedCargoInstances[i];
+                        if (nested == null || nested.itemName != item || nested.amount <= 0)
+                        {
+                            continue;
+                        }
+
+                        var promoted = nested.ConvertToCargoInstance();
+                        cargo.nestedCargoInstances.RemoveAt(i);
+                        placed.AddToCargo(promoted, 0);
+                        holder = placed;
+                        box = promoted;
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
     }
 }

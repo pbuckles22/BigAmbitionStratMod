@@ -1,6 +1,6 @@
 # PM_PLAN — BigAmbitionStratMod
 
-In-game advisor for one Big Ambitions save, then a new-game guide and autopilot. Version scheme `MAJOR.EPIC.COUNTER`. Current public version **1.17.13**. The first ship of a new epic phase is `1.N.1`. When an epic runs after a higher-numbered epic, **EPIC** is `max(shipped_epic) + 1` (Epic 9 after 1.13.x → 1.14.1). Never go backwards.
+In-game advisor for one Big Ambitions save, then a new-game guide and autopilot. Version scheme `MAJOR.EPIC.COUNTER`. Current public version **1.17.14**. The first ship of a new epic phase is `1.N.1`. When an epic runs after a higher-numbered epic, **EPIC** is `max(shipped_epic) + 1` (Epic 9 after 1.13.x → 1.14.1). Never go backwards.
 
 ## Context
 
@@ -182,11 +182,11 @@ Starts after Epic **8**. Crossing **WinNetWorth** is a milestone. The autopilot 
 - **10.6** `[ ]` Stage 3 — clusters + truck pressure. Starts after **14.13**. ≥5 healthy supplied stores; the **14.8** district cap; TruckBusy → service/office; Close after FixDays+RedDays. Stall covers Stage 3 gates. **Out:** Real-estate buy.
 - **10.7** `[ ]` Stage 4 → win. Stage4Cash + all Ready + emptySlots=0; live buy by payback; `win.reached` once; telemetry still advances. Stall covers Stage 4 gates. **Out:** LLM / RL. Rival property buyout stays here, not in **14.8**.
 
-**Next:** **14.20** empty displays when asked. **14.19** is on this land. **14.9.7** second register waits for Stage 2. **14.4** waits. The **10.4** tree stays stashed. No `$100M` soak until **10.7**.
+**Next:** **14.4** cash, cost, and stage when asked. **14.20** is on this land. **14.9.7** second register waits for Stage 2. The **10.4** tree stays stashed. No `$100M` soak until **10.7**.
 
 ## Epic 14 — Live readings
 
-**Status:** in progress. **14.2** through **14.3**, **14.9.1** through **14.9.6**, and **14.14** through **14.19** are on this land. **14.9** stays open at the Stage 2 register (**14.9.7**). **14.20** is next. **14.4** waits.
+**Status:** in progress. **14.2** through **14.3**, **14.9.1** through **14.9.6**, and **14.14** through **14.20** are on this land. **14.9** stays open at the Stage 2 register (**14.9.7**). **14.4** is next.
 
 There is no separate “update the strategy” epic. The notes in `doc/requirements/strategy/` are the source. Stage 1 line sizing is `logistics_stocking_strategy_1_5x_buffer_2_open_day_moving_average.md`. The older logistics note keeps warehouse handover where it does not set a line amount. `strategy.md` keeps one sentence per rule. Epic **8** does not tune every number. Epic **10** stays open. **10.4** still ends at three healthy goods stores. **Out:** machine learning, LLM, RL. Public versions start at `1.17.1`. One decision per story. A later story adds its own playbook pick. It does not redo an earlier story’s reading.
 
@@ -216,9 +216,9 @@ There is no separate “update the strategy” epic. The notes in `doc/requireme
 - **14.17** `[x]` Staff hold. A test cheat until **14.10**. Satisfaction stays at 100. An open complaint is cleared, and the next complaint wait is one year. A pending poach is cleared. Age resets to 60 years once it passes one year under the retirement notice. The morning logs `staff.held` with raised, aged, complaints, and poach. Chain: `needs hold → staff hold`. Human PASS 2026-11-14 on 1.17.11.11. Version 1.17.11.11. **Out:** sick days (**14.18**), the HR policy (**14.10**).
 - **14.18** `[x]` Sick hold. The same cheat. A scheduled sick day becomes never, and an absence that already landed is cleared. `staff.held` counts `sick`. Chain: `needs hold → staff hold → sick stays clear`. Human PASS 2026-11-14 on 1.17.11.12 at 22 7th Avenue. Day 1588 `sick=8`. Days 1589–1644 `sick=0`. Version 1.17.11.12. **Out:** turning the hold off (**14.10**).
 - **14.19** `[x]` Overhire. After **14.9.6**. My Employees shows one cashier and one cleaner. Extra cleaners are not hired. A `HireCandidate` row at $0/hr is still the wrong headcount. Chain: `morning → one cashier → one cleaner`. Human PASS 2026-11-15 on 1.17.13. New game days 2–4 `cashiers=1 cleaners=1 dropped=0`. The 1.17.12 save dropped 6 cleaners on day 1588 and held 1 and 1 on days 1589–1591. **Out:** the second register (**14.9.7**), wages as an HR policy (**14.10**).
-- **14.20** `[ ]` Empty new-game displays. After **14.19**. A new game’s selling displays have stock by day 4. `g2` is true and the morning orders (`restock.summary` ordered above 0). The closed `depth=0.50` survey is not this story. Chain: `new game → day roll → display stock → g2`. **Out:** the storage pod (**14.9.6**).
+- **14.20** `[x]` Empty new-game displays. After **14.19**. A new game’s selling displays have stock by day 4. `g2` is true and the morning orders (`restock.summary` ordered above 0). The closed `depth=0.50` survey is not this story. Chain: `new game → day roll → display stock → g2`. Human PASS 2026-11-15 on 1.17.14 at 22 7th Avenue. Day 2 `restock.summary ordered=5`. Day 4 `g2=true`, 65 customers, revenue 1730, profit 1179.482. Version 1.17.14. **Out:** the storage pod (**14.9.6**).
 
-**Next:** **14.20** empty displays when asked. **14.19** is on this land. **14.9.7** second register waits for Stage 2. **14.4** waits. Do not stack onto the stashed **10.4** tree.
+**Next:** **14.4** cash, cost, and stage when asked. **14.20** is on this land. **14.9.7** second register waits for Stage 2. Do not stack onto the stashed **10.4** tree.
 
 Operating model (keep these when you replace this plan): `.cursor/rules/` ship commands (UCPH, CMPH, SWAT), human check, plan-coordinate versioning, long-run harvest (`testing.mdc`), and the chain harness and prefix (`integration-chain.mdc`). Do not delete them to “clean up” a new clone.
 

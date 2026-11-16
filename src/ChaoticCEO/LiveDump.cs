@@ -342,6 +342,7 @@ namespace ChaoticCEO
             // Truck loads are not read yet. Overflow only trips on ordered-and-short until that read exists.
             var overflow = Restock.Overflow(demanded, null);
             // The lines name the drain, overflow, and order. This pause does not call the game.
+            var displays = DisplayStock.Morning(current.Day, WholesalerBridge.SellingLines());
             watch.Tick(
                 localAppData,
                 current,
@@ -349,7 +350,8 @@ namespace ChaoticCEO
                 GameApi.Live(),
                 overflow.Homes,
                 arranged.Drains,
-                overflow.Claims);
+                overflow.Claims,
+                displays.Ordered);
         }
 
         public static void AuditDay(string localAppData)
@@ -1945,6 +1947,7 @@ namespace ChaoticCEO
             }
 
             var changed = WholesalerBridge.Maintain(localAppData, day);
+            changed += WholesalerBridge.StockDisplays(localAppData, day);
             watch.Mark(day);
             return changed;
         }

@@ -8,7 +8,7 @@
 
 ## Summary
 
-**BigAmbitionStratMod** — Version **1.17.13** (overhire **14.19** and a per-game `ceo.log`; human PASS 2026-11-15). Next is **14.20** empty displays. **14.4** waits. Epic 10 stays open. **10.4** code stays stashed. Rules: [requirements/strategy.md](requirements/strategy.md).
+**BigAmbitionStratMod** — Version **1.17.14** (empty displays **14.20**; human PASS 2026-11-15). Next is **14.4** cash, cost, and stage. Epic 10 stays open. **10.4** code stays stashed. Rules: [requirements/strategy.md](requirements/strategy.md).
 
 ---
 
@@ -16,7 +16,8 @@
 
 | Branch | Role |
 |--------|------|
-| **`main`** | Integration branch. Version 1.17.13. Land `d929f7b`. Overhire and per-game log. Human PASS 2026-11-15. |
+| **`main`** | Integration branch. Version 1.17.14. Empty displays. Human PASS 2026-11-15. |
+| **`feature/14.20-empty-displays`** | Empty selling displays. Version 1.17.14. Human PASS 2026-11-15. Kept after CMPH. |
 | **`feature/14.19-overhire`** | Overhire and per-game `ceo.log`. Version 1.17.13. Human PASS 2026-11-15. Kept after CMPH. |
 | **`feature/sick-hold`** | Sick hold. Version 1.17.11.12. Human PASS 2026-11-14. Kept after CMPH. |
 | **`feature/staff-hold`** | Staff hold cheat, wired. Version 1.17.11.11. Human PASS 2026-11-14. Kept after CMPH. |

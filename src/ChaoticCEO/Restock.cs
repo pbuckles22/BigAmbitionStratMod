@@ -741,7 +741,8 @@ namespace ChaoticCEO
             ApiNote? api,
             IReadOnlyList<WarehouseLevel>? levels,
             IReadOnlyList<WarehouseDrain>? drains = null,
-            IReadOnlyList<WarehouseOverflow>? overflows = null)
+            IReadOnlyList<WarehouseOverflow>? overflows = null,
+            int displayOrdered = 0)
         {
             if (save == null || ReferenceEquals(_seen, save))
             {
@@ -770,7 +771,8 @@ namespace ChaoticCEO
 
             if (orders.Count == 0)
             {
-                lines.Add(Restock.Summary(day, 0));
+                var count = displayOrdered > 0 ? displayOrdered : 0;
+                lines.Add(Restock.Summary(day, count));
             }
             else
             {
