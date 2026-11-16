@@ -1,5 +1,23 @@
 # Test plan (TEST_PLAN.md)
 
+## Cash, cost, and stage (1.17.15)
+
+Human PASS 2026-11-15. Day 2 at 26 7th Avenue: cash=15000 daily=0 reserve=0 cashBelowReserve=0. Day 1 profit=0.
+
+Yesterday’s rent, wages, marketing, loan payments, unassigned wages, and truck cost set the 7-day reserve. A zero profit stays zero. No goods stores stays Stage 1. Tax and the truck-load fraction are later stories.
+
+Tier 1: `DailyCostTests`, `StageTests`. Chains: `statements → daily cost → reserve → money` and `zero stores → Stage 1`.
+
+Human check. Continue the current save and let one morning roll. This check is the cost line and the reserve flag. It does not check tax or truck load.
+
+1. Restart Big Ambitions so this build loads. Continue the save at 22 7th Avenue and let the clock roll one morning.
+2. Open `%LocalAppData%\ChaoticCEO\ceo.log`. Find `mod.loaded` and the new `cost.read` line for that day. If autopilot is on, also find that day’s `audit.summary`.
+3. Compare `cost.read` with yesterday: `daily` is wages + rent + marketing + loan + truck + unassigned. `reserve` is 7 × `daily`. `truck` is 0 until a daily truck cost exists on the save.
+4. **PASS if** `mod.loaded version=1.17.15`, `cost.read` shows those parts, `reserve` is 7 × `daily`, and `cashBelowReserve` is 1 only when `cash` is below `reserve`. **FAIL if** the version is still `1.17.14`, there is no `cost.read` line, `reserve` is 0 while `daily` is above 0, or `cashBelowReserve` is 1 while `cash` is at least `reserve`.
+5. Evidence: `cost.read` (`daily`, `reserve`, `cash`). `audit.summary` (`cashBelowReserve`) when autopilot is on. Version marker: public `1.17.15`.
+
+---
+
 Define **Tier 1** (fast feedback: unit, headless, or local) and **Tier 2** (integration, browser, device, or E2E) for your stack. Replace the placeholders below.
 
 ---

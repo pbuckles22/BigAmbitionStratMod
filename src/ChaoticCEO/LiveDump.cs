@@ -368,13 +368,7 @@ namespace ChaoticCEO
             }
 
             var world = AuditWorldFrom(current);
-            var guard = new AuditGuard(
-                Autopilot.Enabled,
-                Autopilot.DryRun,
-                cash: 0m,
-                dailyCost: 0m,
-                truckCost: 0,
-                LoadLog.PinnedBuild);
+            var guard = Guard(current);
             Audit.Check(
                 localAppData,
                 current.Day,
@@ -398,13 +392,7 @@ namespace ChaoticCEO
             }
 
             var world = AuditWorldFrom(current);
-            var guard = new AuditGuard(
-                Autopilot.Enabled,
-                Autopilot.DryRun,
-                cash: 0m,
-                dailyCost: 0m,
-                truckCost: 0,
-                LoadLog.PinnedBuild);
+            var guard = Guard(current);
             var wealth = Helpers.PlayerHelper.GetPersonalWealth();
             var ownedHealth = OwnedStoreHealth(current);
             foreach (var row in ownedHealth)
@@ -2146,6 +2134,8 @@ namespace ChaoticCEO
             var needs = new List<GoodsNeed>();
             var sales = new List<DailyUnits>();
             ReadStores(current, needs, sales);
+            var parts = ReadCost(current);
+            DailyCost.Record(localAppData, DailyCost.Line(current.Day, Cash(current), parts));
             return watch.Tick(
                 localAppData,
                 current.Day,
@@ -2582,15 +2572,14 @@ namespace ChaoticCEO
             var health = OwnedStoreHealth(current);
             var sites = SiteCandidates(current);
             var business = TopBar.Yesterday(Days(current), current.Day);
-            var profit = TopBar.ShownProfit(DayTotal(current, business), business);
-            var openChosen = WinRun.PendingOpen.Length == 0
-                && Open.Decide(stage, opens, truckLoadFraction: 0m, health).Chosen;
+            var profit = Money.ProjectedProfit(TopBar.ShownProfit(DayTotal(current, business), business));
+            var cost = Operating(current);
             var money = Money.Decide(
                 stage,
                 cash,
-                dailyCost: 0m,
-                projectedDailyProfit: profit > 0m ? profit : openChosen ? 40m : 0m,
-                offers: BankLoanBridge.Offers(profit > 0m ? profit : 40m),
+                cost,
+                profit,
+                offers: BankLoanBridge.Offers(profit),
                 loan: null,
                 bestPaybackRate: 0m);
             var run = Run.Decide(LiveRunFacts(current, localAppData));
@@ -2600,7 +2589,7 @@ namespace ChaoticCEO
                 WinRun.PendingOpen,
                 sites,
                 cash,
-                Money.Reserve(0m),
+                Money.Reserve(cost),
                 money,
                 run,
                 health);
@@ -2943,6 +2932,61 @@ namespace ChaoticCEO
             var paused = clock.Paused || now.paused;
             int? rate = paused ? null : System.Convert.ToInt32(now.speed);
             return TopBar.Clock(paused, rate);
+        }
+
+        public static decimal Operating(GameInstance? current)
+        {
+            return ReadCost(current).Daily;
+        }
+
+        private static AuditGuard Guard(GameInstance current)
+        {
+            return new AuditGuard(
+                Autopilot.Enabled,
+                Autopilot.DryRun,
+                Cash(current),
+                Operating(current),
+                truckCost: 0,
+                LoadLog.PinnedBuild);
+        }
+
+        private static CostParts ReadCost(GameInstance? current)
+        {
+            if (current == null)
+            {
+                return DailyCost.Read(null, 0, 0m, 0m);
+            }
+
+            return DailyCost.Read(
+                Days(current),
+                current.Day,
+                YesterdayAmount(current, summary => summary.totalLoanExpenses),
+                truckCost: 0m,
+                YesterdayAmount(current, summary => summary.totalUnassignedStaffWages));
+        }
+
+        private static decimal Cash(GameInstance current)
+        {
+            return ToMoney(Helpers.PlayerHelper.GetPersonalWealth().cash);
+        }
+
+        private static decimal YesterdayAmount(GameInstance current, Func<FinancialSummary, float> read)
+        {
+            if (current.financialSummaries == null)
+            {
+                return 0m;
+            }
+
+            var yesterday = current.Day - 1;
+            foreach (var summary in current.financialSummaries)
+            {
+                if (summary != null && summary.dayNumber == yesterday)
+                {
+                    return (decimal)read(summary);
+                }
+            }
+
+            return 0m;
         }
 
         private static decimal ToMoney(object value)

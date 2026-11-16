@@ -46,7 +46,7 @@ public class StageTests
             4,
             Stage.Decide(30, Stage.Stage4Cash, 5, 5, 2, 0, 1));
         Assert.Equal(
-            4,
+            1,
             Stage.Decide(30, 3000000m, 0, 0, 0, 0, 0));
         Assert.Equal(
             3,
@@ -195,7 +195,7 @@ public class StageTests
                 Array.Empty<WarehouseHold>(),
                 new[] { new GarageSlot("W1", 1, filled: false) }));
         Assert.Equal(
-            4,
+            1,
             Stage.Read(
                 10,
                 Stage.Stage4Cash,
@@ -203,5 +203,32 @@ public class StageTests
                 null,
                 null,
                 Array.Empty<GarageSlot>()));
+    }
+
+    [Fact]
+    public void Zero_goods_stores_stay_stage_one_past_stage_four_cash()
+    {
+        Assert.Equal(1, Stage.Decide(30, Stage.Stage4Cash, 0, 0, 0, 0, 0));
+        Assert.Equal(1, Stage.Decide(30, 3000000m, 0, 0, 0, 0, 0));
+        Assert.Equal(1, Stage.Decide(30, 1000m, 0, 5, 1, 0, 1));
+        Assert.Equal(4, Stage.Decide(30, Stage.Stage4Cash, 1, 1, 0, 0, 0));
+    }
+
+    [Fact]
+    public void Chain_zero_stores_stay_stage_one()
+    {
+        // Chain: zero stores → Stage 1
+        var stage = Stage.Read(
+            30,
+            Stage.Stage4Cash,
+            needs: null,
+            stops: null,
+            holds: null,
+            slots: Array.Empty<GarageSlot>());
+        var withCash = Stage.Decide(30, Stage.Stage4Cash, 0, 0, 0, 0, 0);
+
+        Assert.Equal(1, stage);
+        Assert.Equal(1, withCash);
+        Assert.NotEqual(4, stage);
     }
 }

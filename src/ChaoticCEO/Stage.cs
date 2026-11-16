@@ -45,6 +45,11 @@ namespace ChaoticCEO
             _ = day;
             _ = warehouses;
             var gates = thresholds ?? StageThresholds.Starting();
+            if (goodsStores < 1)
+            {
+                return 1;
+            }
+
             if (cash >= gates.Stage4Cash && suppliedStores == goodsStores && emptySlots == 0)
             {
                 return 4;

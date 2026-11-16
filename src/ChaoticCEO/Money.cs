@@ -34,6 +34,11 @@ namespace ChaoticCEO
 
         public const decimal LoanCover = BankLoan.LoanCover;
 
+        public static decimal ProjectedProfit(decimal profit)
+        {
+            return profit > 0m ? profit : 0m;
+        }
+
         public static decimal Reserve(decimal dailyCost)
         {
             if (dailyCost <= 0m)

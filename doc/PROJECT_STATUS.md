@@ -8,7 +8,7 @@
 
 ## Summary
 
-**BigAmbitionStratMod** — Version **1.17.14** (empty displays **14.20**; human PASS 2026-11-15). Next is **14.4** cash, cost, and stage. Epic 10 stays open. **10.4** code stays stashed. Rules: [requirements/strategy.md](requirements/strategy.md).
+**BigAmbitionStratMod** — Version **1.17.15** (cash, cost, and stage **14.4**; human PASS 2026-11-15). Next is **14.5** three business modes. Epic 10 stays open. **10.4** code stays stashed. Rules: [requirements/strategy.md](requirements/strategy.md).
 
 ---
 
@@ -16,7 +16,8 @@
 
 | Branch | Role |
 |--------|------|
-| **`main`** | Integration branch. Version 1.17.14. Land `57d7f0a`. Empty displays. Human PASS 2026-11-15. |
+| **`main`** | Integration branch. Version 1.17.15. Land `LANDSHA`. Cash, cost, and stage. Human PASS 2026-11-15. |
+| **`feature/14.4-reserve`** | Yesterday’s cost and Stage 1 with no goods stores. Version 1.17.15. Human PASS 2026-11-15. Kept after CMPH. |
 | **`feature/14.20-empty-displays`** | Empty selling displays. Version 1.17.14. Human PASS 2026-11-15. Kept after CMPH. |
 | **`feature/14.19-overhire`** | Overhire and per-game `ceo.log`. Version 1.17.13. Human PASS 2026-11-15. Kept after CMPH. |
 | **`feature/sick-hold`** | Sick hold. Version 1.17.11.12. Human PASS 2026-11-14. Kept after CMPH. |

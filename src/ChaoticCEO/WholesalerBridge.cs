@@ -823,7 +823,7 @@ namespace ChaoticCEO
             var number = contract.businessAddress.streetNumber;
             var pending = FurniturePending(current, street, number, StorageRack.Item);
             var floorRoom = StorageShelfBridge.Seat(building).Found;
-            var spendRoom = Money.SpendRoom(cash, dailyCost: 0m);
+            var spendRoom = Money.SpendRoom(cash, LiveDump.Operating(current));
             var pick = StorageRack.Order(
                 street,
                 number,
