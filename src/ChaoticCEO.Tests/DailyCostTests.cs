@@ -21,10 +21,10 @@ public class DailyCostTests
         Assert.Equal(80m, parts.Daily);
         Assert.Equal(560m, reserve);
         Assert.Equal(0m, DailyCost.From(null, 5, 0m, 0m));
-        Assert.Contains("cost.read version=" + LoadLog.Version, line);
-        Assert.Contains("daily=80", line);
-        Assert.Contains("reserve=560", line);
-        Assert.Contains("truck=4", line);
+        Assert.Equal(
+            "cost.read version=" + LoadLog.Version
+                + " day=5 cash=100 wages=30 rent=35 marketing=5 loan=6 truck=4 unassigned=0 daily=80 reserve=560",
+            line);
     }
 
     [Fact]
@@ -124,6 +124,54 @@ public class DailyCostTests
         Assert.Equal(140m, reserve);
         Assert.Equal(0, Audit.CashBelowReserve(140m, cost));
         Assert.Equal(23m, DailyCost.From(days, 5, loanPayments: 0m, truckCost: 0m, unassignedWages: 3m));
+    }
+
+    [Fact]
+    public void Day_2_seventh_avenue_cost_read_matches_the_pass()
+    {
+        var days = new[]
+        {
+            new FinancialDay(
+                1,
+                new[]
+                {
+                    new StatementRow("ba:street_seventhavenue", 26, 0f, 0f, 0f, 0f, 0f, 0f, 0f),
+                }),
+        };
+        var parts = DailyCost.Read(days, today: 2, loanPayments: 0m, truckCost: 0m);
+        var profit = Money.ProjectedProfit(TopBar.Yesterday(days, 2));
+        var flag = Audit.CashBelowReserve(15_000m, parts.Daily);
+        var line = DailyCost.Line(2, cash: 15_000m, parts);
+        var summary = Audit.Summary(2, new AuditCounts(0, 0, 0, 0, 0, 1, flag, 0), 0);
+
+        Assert.Equal(0m, profit);
+        Assert.NotEqual(40m, profit);
+        Assert.Equal(0, flag);
+        Assert.Equal(
+            "cost.read version=" + LoadLog.Version
+                + " day=2 cash=15000 wages=0 rent=0 marketing=0 loan=0 truck=0 unassigned=0 daily=0 reserve=0",
+            line);
+        Assert.Equal(
+            "audit.summary version=" + LoadLog.Version
+                + " day=2 unconnected=0 emptySlots=0 dry=0 mixed=0 unstaffed=0 missingPlans=1 cashBelowReserve=0 pinMismatch=0 healed=0",
+            summary);
+    }
+
+    [Fact]
+    public void Chain_statements_set_the_flag_on_the_audit_line()
+    {
+        // Chain: statements → daily cost → reserve → audit
+        var days = YesterdayAndToday();
+        var cost = DailyCost.From(days, today: 5, loanPayments: 6m, truckCost: 4m);
+        var reserve = Money.Reserve(cost);
+        var flag = Audit.CashBelowReserve(100m, cost);
+        var summary = Audit.Summary(5, new AuditCounts(0, 0, 0, 0, 0, 0, flag, 0), 0);
+
+        Assert.Equal(80m, cost);
+        Assert.Equal(560m, reserve);
+        Assert.Equal(1, flag);
+        Assert.Contains("cashBelowReserve=1", summary);
+        Assert.Contains("healed=0", summary);
     }
 
     [Fact]

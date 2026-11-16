@@ -6,7 +6,7 @@ Human PASS 2026-11-15. Day 2 at 26 7th Avenue: cash=15000 daily=0 reserve=0 cash
 
 Yesterday’s rent, wages, marketing, loan payments, unassigned wages, and truck cost set the 7-day reserve. A zero profit stays zero. No goods stores stays Stage 1. Tax and the truck-load fraction are later stories.
 
-Tier 1: `DailyCostTests`, `StageTests`. Chains: `statements → daily cost → reserve → money` and `zero stores → Stage 1`.
+Tier 1: `DailyCostTests`, `StageTests`. Chains: `statements → daily cost → reserve → money`, `statements → daily cost → reserve → audit`, and `zero stores → Stage 1`. The day-2 pass locks `cost.read` for cash 15000 and a zero reserve, and `audit.summary` with `cashBelowReserve=0`. Cash under the reserve writes `cashBelowReserve=1`.
 
 Human check. Continue the current save and let one morning roll. This check is the cost line and the reserve flag. It does not check tax or truck load.
 
