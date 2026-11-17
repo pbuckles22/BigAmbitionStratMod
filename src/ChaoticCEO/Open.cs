@@ -71,7 +71,8 @@ namespace ChaoticCEO
             int stage,
             IReadOnlyList<OpenCandidate>? candidates,
             decimal truckLoadFraction,
-            IReadOnlyList<StoreHealth>? ownedHealth = null)
+            IReadOnlyList<StoreHealth>? ownedHealth = null,
+            bool factoryPipeline = false)
         {
             if (candidates == null || candidates.Count == 0)
             {
@@ -87,7 +88,7 @@ namespace ChaoticCEO
             OpenCandidate? winner = null;
             foreach (var candidate in candidates)
             {
-                if (!Eligible(stage, candidate, busy))
+                if (!Eligible(stage, candidate, busy, factoryPipeline))
                 {
                     continue;
                 }
@@ -145,12 +146,13 @@ namespace ChaoticCEO
             return rows;
         }
 
-        private static bool Eligible(int stage, OpenCandidate? candidate, bool busy)
+        private static bool Eligible(int stage, OpenCandidate? candidate, bool busy, bool factoryPipeline)
         {
             if (candidate == null
                 || candidate.Type.Length == 0
                 || candidate.Kind.Length == 0
-                || candidate.DailyProfit < 0m)
+                || candidate.DailyProfit < 0m
+                || !SkuScope.IsBusinessAllowed(candidate.Type, factoryPipeline))
             {
                 return false;
             }

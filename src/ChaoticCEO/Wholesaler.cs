@@ -528,17 +528,17 @@ namespace ChaoticCEO
         {
             if (businessType == "ba:businesstype_giftshop")
             {
-                return GiftShopWholesalersStock();
+                return SkuScope.Order(GiftShopWholesalersStock());
             }
 
             if (businessType == "ba:businesstype_florist")
             {
-                return FloristWholesalersStock();
+                return SkuScope.Order(FloristWholesalersStock());
             }
 
             if (businessType == "ba:businesstype_fastfoodrestaurant")
             {
-                return FastFoodKabobStock();
+                return SkuScope.Order(FastFoodKabobStock());
             }
 
             return Array.Empty<string>();

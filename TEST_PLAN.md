@@ -1,5 +1,24 @@
 # Test plan (TEST_PLAN.md)
 
+## Layout size and SKU lock (1.17.18)
+
+`Layout.Decide` keeps an A1 blueprint off a B1. A size with no golden uses the starter file for that size code: C2 gift is `GiftShopImporters`, B1 gift is none. An electronics store stays closed while the factory pipeline is off. Phones, earbuds, headphones, and the smartwatch are not ordered, including the game ids `headphones01`, `smartphone2`, `smartwatch1`, and `smartwatch2`. This slice does not rent a B1 and does not open an electronics store on screen. An A1 gift shop still loads `GiftShopWholesalers`.
+
+Tier 1: `LayoutSizeTests`. Chains: `size code → layout`, `sku scope → open`, and `open → size code → layout`. Command: the Tier 1 `dotnet test` suite.
+
+Human version smoke (install changed; the city still fits the A1 gift shop):
+
+1. Restart Big Ambitions so this build loads. Continue the current save, or start a new game.
+2. Open `%LocalAppData%\ChaoticCEO\ceo.log`.
+3. If a store is fitted, find its `layout.loaded` line. Do not look for a B1 building or an electronics store.
+4. **PASS if** the first line is `mod.loaded version=1.17.18 build=3682`. If a layout loaded, it is `GiftShopWholesalers` on the small lot. **FAIL if** the version is still `1.17.17` or missing, or a fitted gift shop loads a different blueprint.
+5. Evidence: `mod.loaded`. `layout.loaded` only when a store is fitted.
+6. Version marker: public `1.17.18`.
+
+Human PASS 2026-11-16 on 1.17.18. New game at 30 7th Avenue. `mod.loaded version=1.17.18 build=3682`. `layout.loaded` `GiftShopWholesalers`. Day 2 profit 894. Day 4: 65 customers, revenue 1703, profit 1162. Day 5: 69 customers, revenue 1733, profit 1182. Ready. Cash on day 5 was 3434.
+
+---
+
 ## Close list (1.17.17)
 
 A warehouse, a headquarters, and an office never close. A goods store with no delivery connects, and one with no staff hires. **FixDays** and **RedDays** still gate a losing goods store. The playbook close is that pick. This slice does not change the F9 list. The morning does not feed a live store into the pick yet.

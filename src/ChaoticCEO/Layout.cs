@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 
 namespace ChaoticCEO
@@ -95,11 +96,12 @@ namespace ChaoticCEO
             string? type,
             string? size,
             IReadOnlyList<OwnedLayout>? owned,
-            IReadOnlyList<StarterOffer>? starters)
+            IReadOnlyList<StarterOffer>? starters,
+            bool factoryPipeline = false)
         {
             var business = type ?? "";
             var building = size ?? "";
-            if (business.Length == 0 || building.Length == 0)
+            if (business.Length == 0 || building.Length == 0 || !SkuScope.IsBusinessAllowed(business, factoryPipeline))
             {
                 return LayoutPick.None();
             }
@@ -133,7 +135,7 @@ namespace ChaoticCEO
                 }
             }
 
-            return StarterFor(business, starters);
+            return StarterFor(business, building, starters);
         }
 
         public static LayoutClone Lock(
@@ -209,8 +211,35 @@ namespace ChaoticCEO
                 destination.Number);
         }
 
-        private static LayoutPick StarterFor(string type, IReadOnlyList<StarterOffer>? starters)
+        private static LayoutPick StarterFor(string type, string size, IReadOnlyList<StarterOffer>? starters)
         {
+            if (IsSizeCode(size))
+            {
+                if (starters != null)
+                {
+                    foreach (var offer in starters)
+                    {
+                        if (offer == null
+                            || offer.BusinessType != type
+                            || offer.Layout.Length == 0
+                            || !Fits(offer.Layout, size))
+                        {
+                            continue;
+                        }
+
+                        return new LayoutPick(offer.Layout, true);
+                    }
+                }
+
+                var builtin = Builtin(type, size);
+                if (builtin.Length > 0)
+                {
+                    return new LayoutPick(builtin, true);
+                }
+
+                return LayoutPick.None();
+            }
+
             var mode = Modes.FitOut(type);
             if (mode.Length > 0)
             {
@@ -235,6 +264,98 @@ namespace ChaoticCEO
             }
 
             return LayoutPick.None();
+        }
+
+        private static bool IsSizeCode(string size)
+        {
+            var letter = false;
+            var digit = false;
+            foreach (var ch in size)
+            {
+                if (ch >= 'A' && ch <= 'Z')
+                {
+                    letter = true;
+                    continue;
+                }
+
+                if (ch >= '0' && ch <= '9')
+                {
+                    digit = true;
+                    continue;
+                }
+
+                return false;
+            }
+
+            return letter && digit;
+        }
+
+        private static string Builtin(string type, string size)
+        {
+            foreach (var name in Names(type))
+            {
+                if (Fits(name, size))
+                {
+                    return name;
+                }
+            }
+
+            return "";
+        }
+
+        private static IEnumerable<string> Names(string type)
+        {
+            switch (type)
+            {
+                case "ba:businesstype_giftshop":
+                    return new[] { "GiftShopWholesalers", "GiftShopImporters" };
+                case "ba:businesstype_florist":
+                    return new[] { "FloristWholesalers", "FloristImporters" };
+                case "ba:businesstype_fastfoodrestaurant":
+                    return new[] { "FastFoodKabob", "FastFoodHotdog", "FastFoodPizza" };
+                case "ba:businesstype_hairdresser":
+                    return new[] { "HairdresserWholesalers", "HairdresserImporters" };
+                case "ba:businesstype_gym":
+                    return new[] { "GymWholesalers", "GymImporters" };
+                case "ba:businesstype_lawfirm":
+                    return new[] { "LawFirm" };
+                case "ba:businesstype_webdevelopmentagency":
+                    return new[] { "WebDevelopmentAgency" };
+                case "ba:businesstype_graphicsdesignagency":
+                    return new[] { "GraphicDesigner" };
+                case "ba:businesstype_travelagency":
+                    return new[] { "TravelAgency" };
+                default:
+                    return Array.Empty<string>();
+            }
+        }
+
+        private static bool Fits(string blueprint, string size)
+        {
+            switch (blueprint)
+            {
+                case "GiftShopWholesalers":
+                case "FloristWholesalers":
+                case "FastFoodKabob":
+                case "FastFoodHotdog":
+                case "HairdresserWholesalers":
+                case "GymWholesalers":
+                    return size == "A1" || size == "A2" || size == "C1";
+                case "GiftShopImporters":
+                case "FloristImporters":
+                case "HairdresserImporters":
+                case "GymImporters":
+                    return size == "C1" || size == "C2" || size == "D2";
+                case "FastFoodPizza":
+                    return size == "C1" || size == "C2" || size == "D2";
+                case "LawFirm":
+                case "WebDevelopmentAgency":
+                case "GraphicDesigner":
+                case "TravelAgency":
+                    return size == "A3" || size == "C1" || size == "D2" || size == "J1" || size == "K1";
+                default:
+                    return false;
+            }
         }
 
         private static LayoutClone None()
