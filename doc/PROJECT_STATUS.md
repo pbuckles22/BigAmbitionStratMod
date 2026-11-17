@@ -16,7 +16,7 @@
 
 | Branch | Role |
 |--------|------|
-| **`main`** | Integration branch. Version 1.17.19. Story 14.8. Land pending. Human PASS 2026-11-16. |
+| **`main`** | Integration branch. Version 1.17.19. Story 14.8. Land `e745900`. Human PASS 2026-11-16. |
 | **`feature/14.8-district-pace`** | District pace. Version 1.17.19. Human PASS 2026-11-16. Kept after CMPH. |
 | **`feature/14.7-layout-size`** | Layout size and SKU lock. Version 1.17.18. Human PASS 2026-11-16. Kept after CMPH. |
 | **`feature/14.6-close`** | Close list. Version 1.17.17. Human PASS 2026-11-16. Kept after CMPH. |
