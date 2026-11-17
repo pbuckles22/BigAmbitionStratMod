@@ -1,5 +1,24 @@
 # Test plan (TEST_PLAN.md)
 
+## District pace (1.17.19)
+
+A wholesaler neighborhood holds 3 businesses. Store 4 goes to another neighborhood. After that family's importer is running, the cap is 7 until Gold insurance is on, then the cap is off. Gold without an importer stays at 3. A full neighborhood is not a fallback when the other lot is over the cash reserve. This slice does not move a store in the city and does not turn Gold on. The morning still rents and fits the same lot.
+
+Tier 1: `DistrictPaceTests`. Chain: `importer flag → cap → where`. Command: the Tier 1 `dotnet test` suite.
+
+Human version smoke (install changed; the city does not show the district pick yet):
+
+1. Restart Big Ambitions so this build loads. Continue the current save, or start a new game.
+2. Open `%LocalAppData%\ChaoticCEO\ceo.log`.
+3. Do not look for a fourth store moving to another neighborhood. That pick is not on the morning yet.
+4. **PASS if** the first line is `mod.loaded version=1.17.19 build=3682`. **FAIL if** the version is still `1.17.18` or missing.
+5. Evidence: `mod.loaded`.
+6. Version marker: public `1.17.19`.
+
+Human PASS 2026-11-16 on 1.17.19. New game at 15 7th Avenue. `mod.loaded version=1.17.19 build=3682`. `layout.loaded` `GiftShopWholesalers`. Day 2 profit 1024. Day 3: 63 customers, revenue 1524, profit 1223, ready. Day 4: 67 customers, revenue 1791, cash 2766, ready.
+
+---
+
 ## Layout size and SKU lock (1.17.18)
 
 `Layout.Decide` keeps an A1 blueprint off a B1. A size with no golden uses the starter file for that size code: C2 gift is `GiftShopImporters`, B1 gift is none. An electronics store stays closed while the factory pipeline is off. Phones, earbuds, headphones, and the smartwatch are not ordered, including the game ids `headphones01`, `smartphone2`, `smartwatch1`, and `smartwatch2`. This slice does not rent a B1 and does not open an electronics store on screen. An A1 gift shop still loads `GiftShopWholesalers`.

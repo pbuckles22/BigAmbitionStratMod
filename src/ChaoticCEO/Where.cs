@@ -10,7 +10,9 @@ namespace ChaoticCEO
             int familyOnStreet,
             decimal traffic,
             decimal dailyRent,
-            decimal cost)
+            decimal cost,
+            string neighborhood = "",
+            int businessesInNeighborhood = 0)
         {
             Street = street ?? "";
             Number = number;
@@ -18,6 +20,8 @@ namespace ChaoticCEO
             Traffic = traffic;
             DailyRent = dailyRent;
             Cost = cost;
+            Neighborhood = neighborhood ?? "";
+            BusinessesInNeighborhood = businessesInNeighborhood;
         }
 
         public string Street { get; }
@@ -31,6 +35,10 @@ namespace ChaoticCEO
         public decimal DailyRent { get; }
 
         public decimal Cost { get; }
+
+        public string Neighborhood { get; }
+
+        public int BusinessesInNeighborhood { get; }
     }
 
     public sealed class SitePick
@@ -57,6 +65,50 @@ namespace ChaoticCEO
     public static class Where
     {
         public const int ClusterMin = 2;
+
+        public const int WholesalerDistrictMax = 3;
+
+        public const int PreGoldDistrictMax = 7;
+
+        public static int Cap(bool importerRunning, bool goldOn)
+        {
+            if (!importerRunning)
+            {
+                return WholesalerDistrictMax;
+            }
+
+            if (!goldOn)
+            {
+                return PreGoldDistrictMax;
+            }
+
+            return int.MaxValue;
+        }
+
+        public static SitePick Decide(
+            IReadOnlyList<SiteCandidate>? sites,
+            decimal cash,
+            decimal reserve,
+            int districtCap)
+        {
+            if (sites == null || sites.Count == 0)
+            {
+                return SitePick.None();
+            }
+
+            var open = new List<SiteCandidate>();
+            foreach (var site in sites)
+            {
+                if (site == null || site.BusinessesInNeighborhood >= districtCap)
+                {
+                    continue;
+                }
+
+                open.Add(site);
+            }
+
+            return Decide(open, cash, reserve);
+        }
 
         public static SitePick Decide(
             IReadOnlyList<SiteCandidate>? sites,

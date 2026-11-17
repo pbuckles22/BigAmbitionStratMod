@@ -8,7 +8,7 @@
 
 ## Summary
 
-**BigAmbitionStratMod** — Version **1.17.18** (layout size and SKU lock **14.7**; human PASS 2026-11-16). An A1 layout stays off a B1. An electronics store stays closed while the factory pipeline is off. Next is **14.8** district pace. Nightly price stories **14.21–14.26** are written and wait. Epic 10 stays open. **10.4** code stays stashed. Rules: [requirements/strategy.md](requirements/strategy.md).
+**BigAmbitionStratMod** — Version **1.17.19** (district pace **14.8**; human PASS 2026-11-16). A wholesaler neighborhood holds 3 businesses. The importer raises that cap to 7, and Gold insurance removes it. Next is **14.11** tax reserve. **14.9.7** waits for Stage 2. Nightly price stories **14.21–14.26** are written and wait. Epic 10 stays open. **10.4** code stays stashed. Rules: [requirements/strategy.md](requirements/strategy.md).
 
 ---
 
@@ -16,7 +16,8 @@
 
 | Branch | Role |
 |--------|------|
-| **`main`** | Integration branch. Version 1.17.18. Story 14.7. Land `b86601a`. Human PASS 2026-11-16. |
+| **`main`** | Integration branch. Version 1.17.19. Story 14.8. Land pending. Human PASS 2026-11-16. |
+| **`feature/14.8-district-pace`** | District pace. Version 1.17.19. Human PASS 2026-11-16. Kept after CMPH. |
 | **`feature/14.7-layout-size`** | Layout size and SKU lock. Version 1.17.18. Human PASS 2026-11-16. Kept after CMPH. |
 | **`feature/14.6-close`** | Close list. Version 1.17.17. Human PASS 2026-11-16. Kept after CMPH. |
 | **`feature/14.5-modes`** | Three business modes. Version 1.17.16.2. Human PASS 2026-11-16. Kept after CMPH. |
