@@ -467,15 +467,8 @@ namespace ChaoticCEO
             {
                 case "tax":
                 {
-                    var due = TaxBillBridge.Due();
-                    var paid = TaxBill.Pay(due.current, due.back, GameApi.Live());
-                    if (!paid.Paid || !TaxBillBridge.Live(paid))
-                    {
-                        return false;
-                    }
-
-                    TaxBill.Record(localAppData, paid, current.Day);
-                    return true;
+                    var paid = PayAssessedTax(localAppData);
+                    return paid != null && paid.StartsWith("tax.paid ", StringComparison.Ordinal);
                 }
                 case "demand":
                 {
@@ -1191,20 +1184,54 @@ namespace ChaoticCEO
             }
 
             var current = SaveGameManager.Current;
-            if (current == null || !watch.Due(current))
+            if (current == null || !watch.Due(current, current.Day))
             {
                 return null;
             }
 
-            var due = TaxBillBridge.Due();
-            var paid = TaxBill.Pay(due.current, due.back, GameApi.Live());
-            watch.Mark(current);
-            if (!paid.Paid)
+            return PayAssessedTax(localAppData);
+        }
+
+        private static string? PayAssessedTax(string localAppData)
+        {
+            var current = SaveGameManager.Current;
+            if (current == null || string.IsNullOrEmpty(localAppData))
             {
-                return "";
+                return null;
             }
 
-            if (!TaxBillBridge.Live(paid))
+            var gate = new TaxBillWatch();
+            if (!gate.Due(current, current.Day))
+            {
+                return null;
+            }
+
+            gate.Mark(current, current.Day);
+            var due = TaxBillBridge.Due();
+            var wealth = Helpers.PlayerHelper.GetPersonalWealth();
+            var cash = ToMoney(wealth.cash);
+            var cost = Operating(current);
+            var policy = TaxPolicy.DecidePayment(
+                cash,
+                cost,
+                due.current,
+                due.back,
+                daysUntilDue: 0);
+            if (!policy.Chosen)
+            {
+                if (due.current <= 0m && due.back <= 0m)
+                {
+                    return "";
+                }
+
+                var held = TaxPolicy.HoldLine(current.Day);
+                File.AppendAllText(LoadLog.CeoLogPath(localAppData), held + Environment.NewLine);
+                return held;
+            }
+
+            var amounts = TaxPolicy.Amounts(policy);
+            var paid = TaxBill.Pay(amounts.current, amounts.back, GameApi.Live());
+            if (!paid.Paid || !TaxBillBridge.Live(paid))
             {
                 return "";
             }
@@ -2613,6 +2640,8 @@ namespace ChaoticCEO
                 loan: null,
                 bestPaybackRate: 0m);
             var run = Run.Decide(LiveRunFacts(current, localAppData));
+            var due = TaxBillBridge.Due();
+            var tax = TaxPolicy.DecidePayment(cash, cost, due.current, due.back, daysUntilDue: 0);
             return WinRun.Next(
                 stage,
                 opens,
@@ -2622,7 +2651,8 @@ namespace ChaoticCEO
                 Money.Reserve(cost),
                 money,
                 run,
-                health);
+                health,
+                tax);
         }
 
         private static RunFacts LiveRunFacts(GameInstance current, string? localAppData)

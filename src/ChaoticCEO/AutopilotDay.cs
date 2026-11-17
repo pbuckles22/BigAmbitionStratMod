@@ -36,6 +36,13 @@ namespace ChaoticCEO
                     return "loan";
                 case "realestate":
                     return "buy";
+                case "tax":
+                    if (step.Detail != null && step.Detail.StartsWith("back", StringComparison.Ordinal))
+                    {
+                        return "taxes back";
+                    }
+
+                    return "taxes pay";
                 case "run":
                     if (step.Detail == "sleep")
                     {

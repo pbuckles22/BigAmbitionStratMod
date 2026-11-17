@@ -92,16 +92,19 @@ namespace ChaoticCEO
 
     public sealed class TaxBillWatch
     {
-        private object? _seen;
+        private static object? _seen;
 
-        public bool Due(object? save)
+        private static int _day = -1;
+
+        public bool Due(object? save, int day)
         {
-            return save != null && !ReferenceEquals(_seen, save);
+            return save != null && (!ReferenceEquals(_seen, save) || _day != day);
         }
 
-        public void Mark(object? save)
+        public void Mark(object? save, int day)
         {
             _seen = save;
+            _day = day;
         }
     }
 }

@@ -129,7 +129,8 @@ namespace ChaoticCEO
             decimal reserve,
             MoneyPick? money,
             RunPick? run,
-            IReadOnlyList<StoreHealth>? ownedHealth = null)
+            IReadOnlyList<StoreHealth>? ownedHealth = null,
+            TaxPaymentPick? tax = null)
         {
             var pending = pendingOpen ?? "";
             OpenPick open;
@@ -163,7 +164,8 @@ namespace ChaoticCEO
                 money ?? MoneyPick.None(),
                 EstatePick.None(),
                 ClosePick.None(),
-                run ?? RunPick.None());
+                run ?? RunPick.None(),
+                tax);
         }
 
         public static WinRunDay Day(

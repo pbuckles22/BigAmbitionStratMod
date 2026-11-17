@@ -41,7 +41,8 @@ namespace ChaoticCEO
             MoneyPick? money,
             EstatePick? realEstate,
             ClosePick? close,
-            RunPick? run)
+            RunPick? run,
+            TaxPaymentPick? tax = null)
         {
             if (run != null && run.Chosen && (run.Action == "sleep" || run.Action == "eat"))
             {
@@ -51,6 +52,17 @@ namespace ChaoticCEO
             if (close != null && close.Chosen)
             {
                 return new PlaybookStep("close", close.Action, true);
+            }
+
+            if (tax != null && tax.Chosen)
+            {
+                var detail = tax.Kind;
+                if (tax.Amount > 0m)
+                {
+                    detail += " " + FormatAmount(tax.Amount);
+                }
+
+                return new PlaybookStep("tax", detail, true);
             }
 
             if (open != null && open.Chosen)

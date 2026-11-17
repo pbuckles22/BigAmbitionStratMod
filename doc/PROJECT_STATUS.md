@@ -8,7 +8,7 @@
 
 ## Summary
 
-**BigAmbitionStratMod** — Version **1.17.19** (district pace **14.8**; human PASS 2026-11-16). A wholesaler neighborhood holds 3 businesses. The importer raises that cap to 7, and Gold insurance removes it. Next is **14.11** tax reserve. **14.9.7** waits for Stage 2. Nightly price stories **14.21–14.26** are written and wait. Epic 10 stays open. **10.4** code stays stashed. Rules: [requirements/strategy.md](requirements/strategy.md).
+**BigAmbitionStratMod** — Version **1.17.20** (tax reserve **14.11**; human PASS 2026-11-16). The reserve is 7 days of cost plus billed and unbilled tax. Back taxes pay first and stop at 3 days of cost. Next is **14.12** truck load. **14.9.7** waits for Stage 2. Nightly price stories **14.21–14.26** are written and wait. Epic 10 stays open. **10.4** code stays stashed. Rules: [requirements/strategy.md](requirements/strategy.md).
 
 ---
 
@@ -16,7 +16,8 @@
 
 | Branch | Role |
 |--------|------|
-| **`main`** | Integration branch. Version 1.17.19. Story 14.8. Land `e745900`. Human PASS 2026-11-16. |
+| **`main`** | Integration branch. Version 1.17.20. Story 14.11. Land pending this merge. Human PASS 2026-11-16. |
+| **`feature/14.11-tax-reserve`** | Tax reserve. Version 1.17.20. Human PASS 2026-11-16. Kept after CMPH. |
 | **`feature/14.8-district-pace`** | District pace. Version 1.17.19. Human PASS 2026-11-16. Kept after CMPH. |
 | **`feature/14.7-layout-size`** | Layout size and SKU lock. Version 1.17.18. Human PASS 2026-11-16. Kept after CMPH. |
 | **`feature/14.6-close`** | Close list. Version 1.17.17. Human PASS 2026-11-16. Kept after CMPH. |

@@ -1,5 +1,24 @@
 # Test plan (TEST_PLAN.md)
 
+## Tax reserve (1.17.20)
+
+The reserve is 7 days of operating cost plus billed and unbilled tax. Unbilled tax is 25% of profit minus deductible capex. Back taxes are paid first, and that pay stops at 3 days of operating cost. A partial pay under $500 is not sent. A current bill that is not due within 2 days stays above the 7-day reserve. In the 5 days before an assessment, a deductible buy (truck, pallet shelf, or Stage 4 building) may spend 60% above the operating reserve. Loan principal is not that deduction. F9 shows the tax pick ahead of an open or a loan repay. Sleep and a close still come first. This slice does not read an assessment calendar from the save, so the morning does not raise a truck or shelf order into that 60% window yet.
+
+Tier 1: `TaxPolicyTests`. Chain: `profit − capex → tax reserve → pay back taxes → shield spend`. Command: the Tier 1 `dotnet test` suite.
+
+Human version smoke:
+
+1. Restart Big Ambitions so this build loads. Continue the current save, or start a new game. Open the city, then press F9.
+2. Open `%LocalAppData%\ChaoticCEO\ceo.log`.
+3. Read the first line, then look for `tax.paid` or `tax.held`. On F9, read the `Next` line. A save with no tax bill keeps the usual next step. Do not look for a truck or a shelf purchase jumping to 60% spend. That window is not on the morning yet.
+4. **PASS if** the first line is `mod.loaded version=1.17.20 build=3682`. When back taxes are paid, cash left is at least 3 days of operating cost, or the log has `tax.held reason=survival` and no `tax.paid`. **FAIL if** the version is still `1.17.19` or missing, or a `tax.paid` back amount leaves less than 3 days of operating cost.
+5. Evidence: `mod.loaded`. `tax.paid` or `tax.held` when a bill is due. `playbook.shown kind=tax` when F9 is opened on a payable bill.
+6. Version marker: public `1.17.20`.
+
+Human PASS 2026-11-16 on 1.17.20. New game at 15 7th Avenue. `mod.loaded version=1.17.20 build=3682`. `layout.loaded` `GiftShopWholesalers`. Day 2 profit 615. Day 3: 47 customers, revenue 968, profit 1129, ready, cash 11319. Day 22 cash 6917, profit -100. No `tax.paid` and no `tax.held` through day 22.
+
+---
+
 ## District pace (1.17.19)
 
 A wholesaler neighborhood holds 3 businesses. Store 4 goes to another neighborhood. After that family's importer is running, the cap is 7 until Gold insurance is on, then the cap is off. Gold without an importer stays at 3. A full neighborhood is not a fallback when the other lot is over the cash reserve. This slice does not move a store in the city and does not turn Gold on. The morning still rents and fits the same lot.
