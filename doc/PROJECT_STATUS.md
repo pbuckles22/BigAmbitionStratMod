@@ -16,7 +16,7 @@
 
 | Branch | Role |
 |--------|------|
-| **`main`** | Integration branch. Version 1.17.16.2. Story 14.5. Human PASS 2026-11-16. |
+| **`main`** | Integration branch. Version 1.17.16.2. Story 14.5 land `7fa11b7`. Human PASS 2026-11-16. |
 | **`feature/14.5-modes`** | Three business modes. Version 1.17.16.2. Human PASS 2026-11-16. Kept after CMPH. |
 | **`feature/14.4-reserve`** | Yesterday’s cost and the day-2 cost-line locks. Version 1.17.15. Human PASS 2026-11-15. Kept after CMPH. |
 | **`feature/14.20-empty-displays`** | Empty selling displays. Version 1.17.14. Human PASS 2026-11-15. Kept after CMPH. |
