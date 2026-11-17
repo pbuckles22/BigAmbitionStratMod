@@ -68,7 +68,7 @@ A gate that stays false for **StuckDays** = 3 open days runs that gate’s *If f
 - Otherwise the building with the larger traffic index per dollar of daily rent wins.
 - A tie keeps the later building.
 - A building over the cash reserve is not a choice.
-- Days 1–7 rent the lot cash and the Stage 1 loan can afford. Driveability, marketing, and building size wait until there is more money. They do not replace that rent or that loan.
+- The next lot waits until the open stores have proved themselves. If a few days of profit cover it, wait. Otherwise one loan covers the shortfall. Driveability, marketing, and building size wait until there is more money.
 - A neighborhood on wholesaler supply holds at most **WholesalerDistrictMax** = 3 businesses. Store 4 goes to another neighborhood. After that family’s importer is running, the cap is **PreGoldDistrictMax** = 7 until Gold insurance is on, then the cap is off.
 
 ## 3. Which layout
@@ -119,8 +119,8 @@ A gate that stays false for **StuckDays** = 3 open days runs that gate’s *If f
 ## 8. Money
 
 - Keep a cash reserve of **ReserveDays** = 7 days of total costs, plus billed tax and unbilled tax at **EstimatedTaxRate** = 25% when the save has no brackets. No ordinary action spends that reserve.
-- Back taxes are paid first, down to **MinSurvivalDays** = 3 of operating cost. In the **TaxShieldWindowDays** = 5 before an assessment, trucks, pallet shelves, and Stage 4 building buys may spend up to **TaxShieldDaySpend** = 60% above the operating reserve. Loan principal is not a deduction.
-- Stage 1 takes the largest loan whose daily repayment is at most **LoanCover** = 50% of projected daily profit.
+- Fixtures, trucks, pallet shelves, and buildings lower taxable profit in the period they are bought, for the whole game. Back taxes are paid first, down to **MinSurvivalDays** = 3 of operating cost. In the **TaxShieldWindowDays** = 5 before an assessment, those planned buys may spend up to **TaxShieldDaySpend** = 60% above the operating reserve. Loan principal is not a deduction.
+- The next location waits until the open stores have proved themselves. If a few days of profit cover the shortfall, wait. Otherwise take one loan for that shortfall whose daily repayment is at most **LoanCover** = 50% of projected daily profit. Do not take the bank's maximum.
 - Repay a loan when its interest rate beats the best payback rate on offer.
 - Each day the autopilot spends at most **DaySpend** = 25% of cash above the reserve.
 

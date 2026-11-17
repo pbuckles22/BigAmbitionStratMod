@@ -8,7 +8,7 @@
 
 ## Summary
 
-**BigAmbitionStratMod** — Version **1.17.16.2** (three business modes **14.5**; human PASS 2026-11-16). Gift shop at 30 7th Avenue loaded `GiftShopWholesalers` with no fee. Next is **14.6** close list. Epic 10 stays open. **10.4** code stays stashed. Rules: [requirements/strategy.md](requirements/strategy.md).
+**BigAmbitionStratMod** — Version **1.17.17** (close list **14.6**; human PASS 2026-11-16). A warehouse, a headquarters, and an office do not close. Next is **14.7** layout size and SKU lock. Epic 10 stays open. **10.4** code stays stashed. Rules: [requirements/strategy.md](requirements/strategy.md).
 
 ---
 
@@ -16,7 +16,8 @@
 
 | Branch | Role |
 |--------|------|
-| **`main`** | Integration branch. Version 1.17.16.2. Story 14.5. Human PASS 2026-11-16. |
+| **`main`** | Integration branch. Version 1.17.17. Story 14.6. Human PASS 2026-11-16. |
+| **`feature/14.6-close`** | Close list. Version 1.17.17. Human PASS 2026-11-16. Kept after CMPH. |
 | **`feature/14.5-modes`** | Three business modes. Version 1.17.16.2. Human PASS 2026-11-16. Kept after CMPH. |
 | **`feature/14.4-reserve`** | Yesterday’s cost and the day-2 cost-line locks. Version 1.17.15. Human PASS 2026-11-15. Kept after CMPH. |
 | **`feature/14.20-empty-displays`** | Empty selling displays. Version 1.17.14. Human PASS 2026-11-15. Kept after CMPH. |

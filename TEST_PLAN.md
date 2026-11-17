@@ -1,5 +1,24 @@
 # Test plan (TEST_PLAN.md)
 
+## Close list (1.17.17)
+
+A warehouse, a headquarters, and an office never close. A goods store with no delivery connects, and one with no staff hires. **FixDays** and **RedDays** still gate a losing goods store. The playbook close is that pick. This slice does not change the F9 list. The morning does not feed a live store into the pick yet.
+
+Tier 1: `CloseListTests`. Chain: `type → close filter → playbook close`. A gift shop that has been delivered and staffed for **FixDays** with **RedDays** of losses is `Next close close`, and that pick beats an open. An unstaffed clothing store is a hire. Command: the Tier 1 `dotnet test` suite.
+
+Human version smoke (install changed; F9 close rows are unchanged):
+
+1. Restart Big Ambitions so this build loads. Any save or a new game is fine.
+2. Open `%LocalAppData%\ChaoticCEO\ceo.log`.
+3. Do nothing else for this check. Do not look for a store to close.
+4. **PASS if** the first line is `mod.loaded version=1.17.17 build=3682`. **FAIL if** the version is still `1.17.16.2` or missing.
+5. Evidence: that `mod.loaded` line.
+6. Version marker: public `1.17.17`.
+
+Human PASS 2026-11-16 on 1.17.17. `mod.loaded version=1.17.17 build=3682`. New game at 26 7th Avenue, stopped day 6. Day 3 ready after one selling day (profit 717). Days 4 and 6 named a $40,000 loan. No `loan.taken`. One store rented.
+
+---
+
 ## Three business modes (1.17.16.2)
 
 Human PASS 2026-11-16. New game at 30 7th Avenue: `layout.loaded` `GiftShopWholesalers`, no `bill.quoted`. Days 2–5 profit 879, 1196, 956, 1182 (customers 51, 65, 56, 70; revenue 1329, 1755, 1427, 1733). Same band as the 1.17.14 new-game day 4 (profit 1179). Days 1–7 keep the affordable lot and the Stage 1 loan. Driveability, marketing, and size wait.

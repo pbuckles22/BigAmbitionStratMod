@@ -67,6 +67,17 @@ namespace ChaoticCEO
 
         public const int RedDays = 7;
 
+        public static ClosePick Filter(
+            string? type,
+            int suppliedDays,
+            int staffedDays,
+            int redProfitDays,
+            bool delivered,
+            bool staffed)
+        {
+            return Decide(Kind(type), suppliedDays, staffedDays, redProfitDays, delivered, staffed);
+        }
+
         public static ClosePick Decide(
             string? kind,
             int suppliedDays,
@@ -108,6 +119,43 @@ namespace ChaoticCEO
             }
 
             return ClosePick.None();
+        }
+
+        private static string Kind(string? type)
+        {
+            var name = type ?? "";
+            if (name.Length == 0
+                || name == "goods"
+                || name == "warehouse"
+                || name == "headquarters"
+                || name == "office"
+                || name == "service")
+            {
+                return name;
+            }
+
+            if (name == "hq" || name == "ba:businesstype_headquarters")
+            {
+                return "headquarters";
+            }
+
+            if (name == "ba:businesstype_warehouse")
+            {
+                return "warehouse";
+            }
+
+            var family = StoreFamily.For(name);
+            if (family == "food" || family == "durables" || family == "specialty")
+            {
+                return "goods";
+            }
+
+            if (family == "warehouse" || family == "office" || family == "service")
+            {
+                return family;
+            }
+
+            return "";
         }
 
         public static StoreClose Lock(
