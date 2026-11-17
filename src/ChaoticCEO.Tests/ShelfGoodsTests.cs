@@ -207,13 +207,13 @@ public class ShelfGoodsTests
     }
 
     [Fact]
-    public void Contract_type_uses_the_open_goods_list_and_leaves_hair_and_office_on_the_starter()
+    public void Contract_type_uses_the_open_goods_list_and_an_office_signs_none()
     {
         Assert.Equal(Florist, Wholesaler.ContractType(Florist, Gift));
         Assert.Equal(FastFood, Wholesaler.ContractType(FastFood, Gift));
         Assert.Equal(Gift, Wholesaler.ContractType(Gift, FastFood));
         Assert.Equal(Gift, Wholesaler.ContractType("ba:businesstype_hairdresser", Gift));
-        Assert.Equal(Gift, Wholesaler.ContractType("ba:businesstype_lawfirm", Gift));
+        Assert.Equal("", Wholesaler.ContractType("ba:businesstype_lawfirm", Gift));
         Assert.Equal(Gift, Wholesaler.ContractType("", Gift));
         Assert.Equal(Gift, Wholesaler.ContractType(null, Gift));
         Assert.Empty(Wholesaler.Catalog("ba:businesstype_hairdresser"));

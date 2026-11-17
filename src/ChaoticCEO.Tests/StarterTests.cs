@@ -81,4 +81,58 @@ public class StarterTests
         Assert.False(noCall.Loaded);
         Assert.Equal("", noCall.Call);
     }
+
+    [Fact]
+    public void A_blank_layout_waits_and_the_gift_shop_still_loads()
+    {
+        var api = GameApi.Live();
+        var save = new object();
+        var watch = new StarterWatch();
+        var waiting = Starter.Choose(new StarterOffer[0], alreadyOpen: false, api);
+        var nightclub = Starter.Choose(
+            Starter.StageOne(),
+            alreadyOpen: false,
+            api,
+            "ba:businesstype_nightclub");
+        var gift = Starter.Choose(
+            Starter.StageOne(),
+            alreadyOpen: false,
+            api,
+            "ba:businesstype_giftshop");
+
+        var refused = new StarterWatch();
+
+        Assert.True(watch.Due(save));
+        Assert.True(Starter.Hold(waiting));
+        Assert.False(waiting.Loaded);
+        Assert.Equal("", waiting.BusinessType);
+        Assert.False(Starter.Settle(watch, save, waiting));
+        Assert.True(watch.Due(save));
+        Assert.False(Starter.Hold(nightclub));
+        Assert.False(nightclub.Loaded);
+        Assert.Equal("ba:businesstype_nightclub", nightclub.BusinessType);
+        Assert.Equal("", nightclub.Layout);
+        Assert.True(Starter.Settle(refused, save, nightclub));
+        Assert.False(refused.Due(save));
+        Assert.False(Starter.Hold(gift));
+        Assert.True(gift.Loaded);
+        Assert.Equal("GiftShopWholesalers", gift.Layout);
+        Assert.True(Starter.Settle(watch, save, gift));
+        Assert.False(watch.Due(save));
+    }
+
+    [Fact]
+    public void An_empty_lot_loads_the_gift_shop_starter()
+    {
+        var chosen = Starter.Choose(
+            Starter.StageOne(),
+            alreadyOpen: false,
+            GameApi.Live(),
+            "ba:businesstype_empty");
+
+        Assert.True(chosen.Loaded);
+        Assert.Equal("ba:businesstype_giftshop", chosen.BusinessType);
+        Assert.Equal("GiftShopWholesalers", chosen.Layout);
+        Assert.False(Starter.Hold(chosen));
+    }
 }

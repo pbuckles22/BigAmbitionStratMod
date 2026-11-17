@@ -155,14 +155,14 @@ namespace ChaoticCEO
                 return false;
             }
 
-            if (busy)
-            {
-                return candidate.Kind == "service" || candidate.Kind == "office";
-            }
-
             if (stage <= 1)
             {
                 return StageOneType(candidate.Type) && candidate.WholesalerSells;
+            }
+
+            if (busy)
+            {
+                return candidate.Kind == "service" || candidate.Kind == "office";
             }
 
             if (stage >= 3

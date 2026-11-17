@@ -1,5 +1,23 @@
 # Test plan (TEST_PLAN.md)
 
+## Three business modes (1.17.16.2)
+
+Human PASS 2026-11-16. New game at 30 7th Avenue: `layout.loaded` `GiftShopWholesalers`, no `bill.quoted`. Days 2–5 profit 879, 1196, 956, 1182 (customers 51, 65, 56, 70; revenue 1329, 1755, 1427, 1733). Same band as the 1.17.14 new-game day 4 (profit 1179). Days 1–7 keep the affordable lot and the Stage 1 loan. Driveability, marketing, and size wait.
+
+Retail G2 stays shelves. A hairdresser’s G2 is hair-care product and a styling station. An office or a gym passes G2 on complete workstations and signs no contract. Fit-out uses that mode’s starter. The bill is labor and overhead over (1 − margin), written onto that mode’s fee when the layout loads. A gift shop stays `GiftShopWholesalers` and is not quoted a fee. A stage 1 open cannot be a hairdresser, an office, or a gym. An empty lot (`ba:businesstype_empty`) loads the gift-shop starter. `1.17.16.1` missed that lot at 22 7th Avenue and did not load a layout.
+
+Tier 1: `ModesTests`, `StarterTests`. Chain: `open → mode → G2 → fit-out → bill`. The empty-lot case is `An_empty_lot_loads_the_gift_shop_starter`.
+
+Human check. Continue the current save, or start a new game. This is still the first gift shop. It is not a second store, and it is not a hairdresser, office, or gym open.
+
+1. Restart Big Ambitions so this build loads. Continue the save, or start a new game, and let the mod fit the first store.
+2. Open `%LocalAppData%\ChaoticCEO\ceo.log`. Find `mod.loaded` and a `layout.loaded` line for that store.
+3. Confirm the layout name and that the log has no `bill.quoted` line.
+4. **PASS if** `mod.loaded version=1.17.16.2` and `layout.loaded` contains `layout=GiftShopWholesalers`, and there is no `bill.quoted` line. **FAIL if** the version is still `1.17.16.1`, the only layout line is `layout.missed` for `ba:businesstype_empty`, or `bill.quoted` appears on that gift shop.
+5. Evidence: `mod.loaded`, `layout.loaded` (`layout=`). Version marker: public `1.17.16.2`.
+
+---
+
 ## Cash, cost, and stage (1.17.15)
 
 Human PASS 2026-11-15. Day 2 at 26 7th Avenue: cash=15000 daily=0 reserve=0 cashBelowReserve=0. Day 1 profit=0.

@@ -546,6 +546,11 @@ namespace ChaoticCEO
 
         public static string ContractType(string? openType, string? starterType)
         {
+            if (!Modes.SignsContract(openType))
+            {
+                return "";
+            }
+
             if (Catalog(openType).Count > 0)
             {
                 return openType ?? "";

@@ -716,26 +716,33 @@ namespace ChaoticCEO
             StarterPick chosen;
             try
             {
-                chosen = Starter.Choose(StarterBridge.Offers(registration), alreadyOpen: false, GameApi.Live());
+                chosen = Starter.Choose(
+                    StarterBridge.Offers(registration),
+                    alreadyOpen: false,
+                    GameApi.Live(),
+                    registration.businessTypeName);
             }
             catch (System.Exception)
             {
-                watch.Mark(current);
-                return Starter.Miss(localAppData, Starter.Choose(null, false, null), rented, current.Day);
+                return null;
+            }
+
+            if (!Starter.Settle(watch, current, chosen))
+            {
+                return null;
             }
 
             if (!chosen.Loaded)
             {
-                watch.Mark(current);
                 return Starter.Miss(localAppData, chosen, rented, current.Day);
             }
 
-            watch.Mark(current);
             if (!StarterBridge.Live(registration, chosen))
             {
                 return Starter.Miss(localAppData, chosen, rented, current.Day);
             }
 
+            QuoteBill(localAppData, registration, chosen, current.Day);
             return Starter.Record(localAppData, chosen, rented, current.Day);
         }
 
@@ -1042,7 +1049,7 @@ namespace ChaoticCEO
                     || family == "service";
                 var emptyLot = string.IsNullOrEmpty(building.businessTypeName)
                     && string.IsNullOrEmpty(building.BusinessName);
-                if (!goods && !emptyLot)
+                if (!goods && Modes.FitOut(building.businessTypeName).Length == 0 && !emptyLot)
                 {
                     continue;
                 }
@@ -1486,6 +1493,18 @@ namespace ChaoticCEO
             return null;
         }
 
+        private static void QuoteBill(string localAppData, BuildingRegistration registration, StarterPick chosen, int day)
+        {
+            var quote = Modes.Standard(chosen.BusinessType);
+            if (!quote.Chosen)
+            {
+                return;
+            }
+
+            BillBridge.Live(registration, quote);
+            Modes.Record(localAppData, quote, day);
+        }
+
         private static FitOutProgress FitProgress(string localAppData, BuildingRegistration building)
         {
             var street = building.StreetName ?? "";
@@ -1494,7 +1513,8 @@ namespace ChaoticCEO
                 || !string.IsNullOrEmpty(building.BusinessName);
             var ops = StoreOpsBridge.HasCleaner(building);
             var capacity = CapacityBridge.AlreadyMatched(localAppData, street, number);
-            var contract = WholesalerBridge.HasContract(street, number);
+            var contract = !Modes.SignsContract(building.businessTypeName)
+                || WholesalerBridge.HasContract(street, number);
             var cashier = CashierBridge.HasCashier(building);
             return new FitOutProgress(layout, ops, capacity, contract, cashier);
         }
@@ -1524,11 +1544,20 @@ namespace ChaoticCEO
                     StarterPick chosen;
                     try
                     {
-                        chosen = Starter.Choose(StarterBridge.Offers(registration), alreadyOpen: false, GameApi.Live());
+                        chosen = Starter.Choose(
+                            StarterBridge.Offers(registration),
+                            alreadyOpen: false,
+                            GameApi.Live(),
+                            registration.businessTypeName);
                     }
                     catch (Exception)
                     {
-                        return Starter.Miss(localAppData, Starter.Choose(null, false, null), rented, current.Day);
+                        return null;
+                    }
+
+                    if (Starter.Hold(chosen))
+                    {
+                        return null;
                     }
 
                     if (!chosen.Loaded)
@@ -1541,6 +1570,7 @@ namespace ChaoticCEO
                         return Starter.Miss(localAppData, chosen, rented, current.Day);
                     }
 
+                    QuoteBill(localAppData, registration, chosen, current.Day);
                     return Starter.Record(localAppData, chosen, rented, current.Day);
                 }
 
@@ -2655,7 +2685,9 @@ namespace ChaoticCEO
                 }
 
                 var family = StoreFamily.For(building.businessTypeName);
-                if (family != "specialty" && family != "food" && family != "durables" && family != "service")
+                var mode = Modes.Of(building.businessTypeName);
+                var goods = family == "specialty" || family == "food" || family == "durables" || family == "service";
+                if (!goods && mode != BusinessMode.Workstation)
                 {
                     continue;
                 }
@@ -2681,6 +2713,7 @@ namespace ChaoticCEO
                 var incomeProfits = OpenDayProfits(building);
                 var rawProfits = statementProfits.Count > 0 ? statementProfits : incomeProfits;
                 var profits = StoreHealth.DropIncompleteTail(rawProfits, sales.Customers);
+                var stations = Modes.Read(building.businessTypeName, PlacedNames(building));
                 rows.Add(
                     StoreHealth.Assess(
                         new StoreFacts(
@@ -2694,7 +2727,10 @@ namespace ChaoticCEO
                             scheduledOpen: true,
                             dailyCustomers: sales.Customers,
                             dailyRevenue: sales.Revenue,
-                            recentOpenDayProfits: profits)));
+                            recentOpenDayProfits: profits,
+                            businessType: building.businessTypeName,
+                            stylingStations: stations.Styling,
+                            completeWorkstations: stations.Workstations)));
             }
 
             return rows;
@@ -2766,6 +2802,25 @@ namespace ChaoticCEO
             }
 
             return rows;
+        }
+
+        private static IReadOnlyList<string> PlacedNames(BuildingRegistration building)
+        {
+            var names = new List<string>();
+            if (building.itemInstances == null)
+            {
+                return names;
+            }
+
+            foreach (var item in building.itemInstances.Values)
+            {
+                if (item != null && !string.IsNullOrEmpty(item.itemName))
+                {
+                    names.Add(item.itemName);
+                }
+            }
+
+            return names;
         }
 
         private static IReadOnlyDictionary<string, int> FixtureCargo(BuildingRegistration building)

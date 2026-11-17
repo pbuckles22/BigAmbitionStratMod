@@ -211,6 +211,12 @@ namespace ChaoticCEO
 
         private static LayoutPick StarterFor(string type, IReadOnlyList<StarterOffer>? starters)
         {
+            var mode = Modes.FitOut(type);
+            if (mode.Length > 0)
+            {
+                return new LayoutPick(mode, true);
+            }
+
             if (starters == null)
             {
                 return LayoutPick.None();

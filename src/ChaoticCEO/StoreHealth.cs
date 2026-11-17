@@ -31,7 +31,10 @@ namespace ChaoticCEO
             bool scheduledOpen,
             int dailyCustomers,
             decimal dailyRevenue,
-            IReadOnlyList<decimal>? recentOpenDayProfits)
+            IReadOnlyList<decimal>? recentOpenDayProfits,
+            string? businessType = null,
+            int stylingStations = 0,
+            int completeWorkstations = 0)
         {
             Place = place ?? "";
             TemporarilyClosed = temporarilyClosed;
@@ -44,6 +47,9 @@ namespace ChaoticCEO
             DailyCustomers = dailyCustomers;
             DailyRevenue = dailyRevenue;
             RecentOpenDayProfits = recentOpenDayProfits ?? Array.Empty<decimal>();
+            BusinessType = businessType ?? "";
+            StylingStations = stylingStations;
+            CompleteWorkstations = completeWorkstations;
         }
 
         public string Place { get; }
@@ -67,6 +73,12 @@ namespace ChaoticCEO
         public decimal DailyRevenue { get; }
 
         public IReadOnlyList<decimal> RecentOpenDayProfits { get; }
+
+        public string BusinessType { get; }
+
+        public int StylingStations { get; }
+
+        public int CompleteWorkstations { get; }
     }
 
     public sealed class DaySales
@@ -141,8 +153,7 @@ namespace ChaoticCEO
             }
 
             var open = !facts.TemporarilyClosed;
-            var stocked = facts.NeededItems.Count == 0
-                || FixtureCargoProof(facts.NeededItems, facts.CargoOnHand);
+            var stocked = ReadStocked(facts);
             var staffed = facts.RegisterStaffed
                 && facts.CleanerStaffed
                 && facts.StaffSatisfaction >= StoreHealthGate.SatisfactionFloor;
@@ -159,6 +170,25 @@ namespace ChaoticCEO
                 facts.DailyCustomers,
                 facts.DailyRevenue,
                 facts.RecentOpenDayProfits);
+        }
+
+        private static bool ReadStocked(StoreFacts facts)
+        {
+            var shelves = facts.NeededItems.Count == 0
+                || FixtureCargoProof(facts.NeededItems, facts.CargoOnHand);
+            if (facts.BusinessType.Length == 0)
+            {
+                return shelves;
+            }
+
+            facts.CargoOnHand.TryGetValue(Modes.HairCare, out var hair);
+            return Modes.Stocked(
+                Modes.Of(facts.BusinessType),
+                shelves,
+                hair,
+                facts.StylingStations,
+                facts.CompleteWorkstations,
+                facts.BusinessType);
         }
 
         public static DaySales CompletedDaySales(

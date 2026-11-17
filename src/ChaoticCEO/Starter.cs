@@ -70,9 +70,34 @@ namespace ChaoticCEO
         public static StarterPick Choose(
             IReadOnlyList<StarterOffer>? offers,
             bool alreadyOpen,
-            ApiNote? api)
+            ApiNote? api,
+            string? businessType = null)
         {
             var call = api == null ? "" : api.Call("clone");
+            var known = businessType ?? "";
+            if (known == "ba:businesstype_empty")
+            {
+                known = "";
+            }
+
+            if (known.Length > 0)
+            {
+                var modeLayout = Modes.FitOut(known);
+                if (alreadyOpen || call.Length == 0 || modeLayout.Length == 0)
+                {
+                    return new StarterPick(known, "", "", false, call, 0, 0);
+                }
+
+                return new StarterPick(
+                    known,
+                    modeLayout,
+                    StoreName(known),
+                    true,
+                    call,
+                    8,
+                    16);
+            }
+
             if (alreadyOpen || offers == null || call.Length == 0)
             {
                 return None();
@@ -100,9 +125,15 @@ namespace ChaoticCEO
                 return None();
             }
 
+            var layout = Modes.FitOut(winner.BusinessType);
+            if (layout.Length == 0)
+            {
+                layout = winner.Layout;
+            }
+
             return new StarterPick(
                 winner.BusinessType,
-                winner.Layout,
+                layout,
                 StoreName(winner.BusinessType),
                 true,
                 call,
@@ -216,7 +247,48 @@ namespace ChaoticCEO
                 return "Starter Kabob";
             }
 
+            if (businessType == "ba:businesstype_hairdresser")
+            {
+                return "Starter Hair";
+            }
+
+            if (businessType == "ba:businesstype_lawfirm")
+            {
+                return "Starter Law";
+            }
+
+            if (businessType == "ba:businesstype_webdevelopmentagency")
+            {
+                return "Starter Web";
+            }
+
+            if (businessType == "ba:businesstype_graphicsdesignagency")
+            {
+                return "Starter Graphics";
+            }
+
+            if (businessType == "ba:businesstype_gym")
+            {
+                return "Starter Gym";
+            }
+
             return "";
+        }
+
+        public static bool Hold(StarterPick? pick)
+        {
+            return pick == null || (!pick.Loaded && pick.BusinessType.Length == 0);
+        }
+
+        public static bool Settle(StarterWatch? watch, object? save, StarterPick? pick)
+        {
+            if (watch == null || Hold(pick))
+            {
+                return false;
+            }
+
+            watch.Mark(save);
+            return true;
         }
 
         private static StarterPick None()

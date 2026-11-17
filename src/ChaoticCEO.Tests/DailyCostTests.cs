@@ -175,6 +175,24 @@ public class DailyCostTests
     }
 
     [Fact]
+    public void Record_appends_the_cost_line()
+    {
+        using var dir = new TempLog();
+        var days = YesterdayAndToday();
+        var parts = DailyCost.Read(days, today: 5, loanPayments: 6m, truckCost: 4m);
+        var line = DailyCost.Line(5, cash: 100m, parts);
+        var recorded = DailyCost.Record(dir.Path, line);
+        var blank = DailyCost.Record("", line);
+        var file = File.ReadAllText(LoadLog.CeoLogPath(dir.Path)).Trim();
+
+        Assert.Equal(line, recorded);
+        Assert.Equal(line, blank);
+        Assert.Equal(line, file);
+        Assert.Contains("daily=80", file);
+        Assert.Contains("reserve=560", file);
+    }
+
+    [Fact]
     public void A_loan_without_a_statement_still_sets_the_reserve()
     {
         var cost = DailyCost.From(Array.Empty<FinancialDay>(), today: 2, loanPayments: 5m, truckCost: 2m);
@@ -230,5 +248,20 @@ public class DailyCostTests
                     new StatementRow("ba:street_a", 1, 0f, 0f, 999f, 999f, 999f, 0f, 0f),
                 }),
         };
+    }
+
+    private sealed class TempLog : IDisposable
+    {
+        public TempLog()
+        {
+            Path = Directory.CreateTempSubdirectory("chaotic-cost").FullName;
+        }
+
+        public string Path { get; }
+
+        public void Dispose()
+        {
+            Directory.Delete(Path, recursive: true);
+        }
     }
 }

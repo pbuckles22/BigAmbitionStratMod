@@ -68,6 +68,7 @@ A gate that stays false for **StuckDays** = 3 open days runs that gate’s *If f
 - Otherwise the building with the larger traffic index per dollar of daily rent wins.
 - A tie keeps the later building.
 - A building over the cash reserve is not a choice.
+- Days 1–7 rent the lot cash and the Stage 1 loan can afford. Driveability, marketing, and building size wait until there is more money. They do not replace that rent or that loan.
 - A neighborhood on wholesaler supply holds at most **WholesalerDistrictMax** = 3 businesses. Store 4 goes to another neighborhood. After that family’s importer is running, the cap is **PreGoldDistrictMax** = 7 until Gold insurance is on, then the cap is off.
 
 ## 3. Which layout

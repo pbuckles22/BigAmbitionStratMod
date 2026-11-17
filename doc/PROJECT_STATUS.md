@@ -2,13 +2,13 @@
 
 **Human-readable current state.** Keep in sync with [AGENT_HANDOFF.md](../AGENT_HANDOFF.md) → *Current state* when milestones ship.
 
-**Last updated:** 2026-11-15
+**Last updated:** 2026-11-16
 
 ---
 
 ## Summary
 
-**BigAmbitionStratMod** — Version **1.17.15** (cash, cost, and stage **14.4**; human PASS 2026-11-15). Black-box harvest `482f48a` locks the day-2 cost line. Next is **14.5** three business modes. QA stays black-box. Epic 10 stays open. **10.4** code stays stashed. Rules: [requirements/strategy.md](requirements/strategy.md).
+**BigAmbitionStratMod** — Version **1.17.16.2** (three business modes **14.5**; human PASS 2026-11-16). Gift shop at 30 7th Avenue loaded `GiftShopWholesalers` with no fee. Next is **14.6** close list. Epic 10 stays open. **10.4** code stays stashed. Rules: [requirements/strategy.md](requirements/strategy.md).
 
 ---
 
@@ -16,7 +16,8 @@
 
 | Branch | Role |
 |--------|------|
-| **`main`** | Integration branch. Version 1.17.15. Product land `d22b50d`. Black-box harvest `482f48a`. Human PASS 2026-11-15. |
+| **`main`** | Integration branch. Version 1.17.16.2. Story 14.5. Human PASS 2026-11-16. |
+| **`feature/14.5-modes`** | Three business modes. Version 1.17.16.2. Human PASS 2026-11-16. Kept after CMPH. |
 | **`feature/14.4-reserve`** | Yesterday’s cost and the day-2 cost-line locks. Version 1.17.15. Human PASS 2026-11-15. Kept after CMPH. |
 | **`feature/14.20-empty-displays`** | Empty selling displays. Version 1.17.14. Human PASS 2026-11-15. Kept after CMPH. |
 | **`feature/14.19-overhire`** | Overhire and per-game `ceo.log`. Version 1.17.13. Human PASS 2026-11-15. Kept after CMPH. |
