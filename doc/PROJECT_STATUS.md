@@ -16,8 +16,8 @@
 
 | Branch | Role |
 |--------|------|
-| **`main`** | Integration branch. Version 1.17.20 until the 1.17.21 land is pushed. Story 14.11. Land `6aa5fa4`. |
-| **`fix/display-stays-green`** | Display stays green. Version 1.17.21. Human PASS 2026-11-17. |
+| **`main`** | Integration branch. Version 1.17.21. Display stays green. Land `605d2db`. Human PASS 2026-11-17. |
+| **`fix/display-stays-green`** | Display stays green. Version 1.17.21. Human PASS 2026-11-17. Kept after CMPH. |
 | **`feature/14.11-tax-reserve`** | Tax reserve. Version 1.17.20. Human PASS 2026-11-16. Kept after CMPH. |
 | **`feature/14.8-district-pace`** | District pace. Version 1.17.19. Human PASS 2026-11-16. Kept after CMPH. |
 | **`feature/14.7-layout-size`** | Layout size and SKU lock. Version 1.17.18. Human PASS 2026-11-16. Kept after CMPH. |
