@@ -16,7 +16,7 @@
 
 | Branch | Role |
 |--------|------|
-| **`main`** | Integration branch. Version 1.17.22. Truck load **14.12**. Human PASS 2026-11-17. |
+| **`main`** | Integration branch. Version 1.17.22. Truck load **14.12**. Land `fe5f4a1`. Human PASS 2026-11-17. |
 | **`feature/14.12-truck-load`** | Truck load, payback, and run facts. Version 1.17.22. Human PASS 2026-11-17. Kept after CMPH. |
 | **`fix/display-stays-green`** | Display stays green. Version 1.17.21. Human PASS 2026-11-17. Kept after CMPH. |
 | **`feature/14.11-tax-reserve`** | Tax reserve. Version 1.17.20. Human PASS 2026-11-16. Kept after CMPH. |
