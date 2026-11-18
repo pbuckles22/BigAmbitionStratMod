@@ -8,7 +8,7 @@
 
 ## Summary
 
-**BigAmbitionStratMod** — Version **1.17.22** (truck load **14.12**). Truck load is cargo on filled trucks over their capacity. Repay uses the best rent ÷ price on offer. Dirt, theft, sales, and unmet demand come from the building. Human PASS 2026-11-17 at 15 7th Avenue, days 22–57. Next is **14.13** one stage sim. **14.9.7** waits for Stage 2. Nightly price stories **14.21–14.26** are written and wait. Epic 10 stays open. **10.4** code stays stashed. Rules: [requirements/strategy.md](requirements/strategy.md).
+**BigAmbitionStratMod** — Version **1.17.23** (one stage sim **14.13**). The sim steps close and tax through the live decides. Cost is the day-step wages and rent. A wholesaler contract counts as supplied. Headless. Next is **14.21** price floor. **14.9.7** waits for Stage 2. **10.6** can start. **10.4** code stays stashed. Rules: [requirements/strategy.md](requirements/strategy.md).
 
 ---
 
@@ -16,7 +16,8 @@
 
 | Branch | Role |
 |--------|------|
-| **`main`** | Integration branch. Version 1.17.22. Truck load **14.12**. Land `fe5f4a1`. Human PASS 2026-11-17. |
+| **`main`** | Integration branch. Version 1.17.23. One stage sim **14.13**. Headless. |
+| **`feature/14.13-stage-sim`** | One stage sim. Version 1.17.23. Headless. Kept after CMPH. |
 | **`feature/14.12-truck-load`** | Truck load, payback, and run facts. Version 1.17.22. Human PASS 2026-11-17. Kept after CMPH. |
 | **`fix/display-stays-green`** | Display stays green. Version 1.17.21. Human PASS 2026-11-17. Kept after CMPH. |
 | **`feature/14.11-tax-reserve`** | Tax reserve. Version 1.17.20. Human PASS 2026-11-16. Kept after CMPH. |

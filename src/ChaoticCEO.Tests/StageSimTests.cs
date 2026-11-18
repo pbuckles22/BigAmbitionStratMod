@@ -142,15 +142,15 @@ public class StageSimTests
             "climb",
             StageThresholds.Starting().With(stage2Cash: 30_000m, stage4Cash: 200_000m));
 
-        var tightRun = StageSim.Run(40_000m, 40_000m, catalog, seeds, tight.Thresholds, horizonDays: 80);
-        var climbRun = StageSim.Run(40_000m, 40_000m, catalog, seeds, climb.Thresholds, horizonDays: 80);
+        var tightRun = StageSim.Run(40_000m, 40_000m, catalog, seeds, tight.Thresholds, horizonDays: 90);
+        var climbRun = StageSim.Run(40_000m, 40_000m, catalog, seeds, climb.Thresholds, horizonDays: 90);
         var pick = StageSim.Tune(
             new[] { tight, climb },
             startCash: 40_000m,
             startNetWorth: 40_000m,
             catalog,
             seeds,
-            horizonDays: 80);
+            horizonDays: 90);
 
         Assert.False(tightRun.WinAtMedian);
         Assert.True(climbRun.WinAtMedian);

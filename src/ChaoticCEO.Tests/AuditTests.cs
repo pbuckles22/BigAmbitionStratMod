@@ -5485,7 +5485,7 @@ public class AuditTests
                 startNetWorth: 40_000m,
                 catalog,
                 seeds,
-                horizonDays: 80);
+                horizonDays: 90);
 
             Assert.Contains("day=1016", shot.Rolled);
             Assert.True(step.Chosen);
@@ -5498,7 +5498,7 @@ public class AuditTests
             Assert.True(tuned.WinAtMedian);
             Assert.Equal(30_000m, tuned.Thresholds.Stage2Cash);
             Assert.Equal(
-                StageSim.Run(40_000m, 40_000m, catalog, seeds, tuned.Thresholds, 80).Median,
+                StageSim.Run(40_000m, 40_000m, catalog, seeds, tuned.Thresholds, 90).Median,
                 tuned.Median);
             Win.ClearApproved();
             var logPath = LoadLog.CeoLogPath(dir.Path);
@@ -5650,7 +5650,7 @@ public class AuditTests
                 startNetWorth: 40_000m,
                 catalog,
                 seeds,
-                horizonDays: 80);
+                horizonDays: 90);
 
             Assert.Contains("day=1016", shot.Rolled);
             Assert.True(step.Chosen);
@@ -5923,7 +5923,7 @@ public class AuditTests
                 startNetWorth: 40_000m,
                 catalog,
                 seeds,
-                horizonDays: 80);
+                horizonDays: 90);
 
             Assert.Contains("day=1016", shot.Rolled);
             Assert.True(step.Chosen);

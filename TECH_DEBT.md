@@ -28,7 +28,6 @@ This is the durable home for technical debt across sessions. Handoff notes can m
 
 These left the backlog because a story now has the exit.
 
-- Second stage-sim empire, stubbed close and tax: **14.13**, after the new decisions exist and before **10.6**.
 - Tune scores **Stage2Cash** only: **14.1** narrows the rulebook. No tune-every-number story.
 - Audit cash and daily cost stay 0: **14.4**.
 - Skipped warehouse heals (slot, order, drain, plan): **10.5**.

@@ -50,7 +50,10 @@ namespace ChaoticCEO
             int suppliedStores,
             int warehouses,
             int emptySlots,
-            int plans)
+            int plans,
+            int closed = 0,
+            string? lastClose = null,
+            decimal dailyCost = 0m)
         {
             NetWorth = netWorth;
             Cash = cash;
@@ -60,6 +63,9 @@ namespace ChaoticCEO
             Warehouses = warehouses;
             EmptySlots = emptySlots;
             Plans = plans;
+            Closed = closed;
+            LastClose = lastClose ?? "";
+            DailyCost = dailyCost;
         }
 
         public decimal NetWorth { get; }
@@ -77,6 +83,134 @@ namespace ChaoticCEO
         public int EmptySlots { get; }
 
         public int Plans { get; }
+
+        public int Closed { get; }
+
+        public string LastClose { get; }
+
+        public decimal DailyCost { get; }
+    }
+
+    public sealed class StageDay
+    {
+        public StageDay(
+            int today,
+            decimal cash,
+            IReadOnlyList<FinancialDay>? days,
+            string? kind,
+            int suppliedDays,
+            int staffedDays,
+            int redProfitDays,
+            bool supplied,
+            bool staffed,
+            decimal billedCurrentTax = 0m,
+            decimal billedBackTax = 0m,
+            int daysUntilDue = 0,
+            RunFacts? run = null,
+            int stage = 1,
+            string? store = null,
+            string? item = null,
+            bool askSupply = false,
+            IReadOnlyList<WarehouseHold>? holds = null,
+            IReadOnlyList<DeliveryStop>? stops = null,
+            decimal loanPayments = 0m,
+            decimal truckCost = 0m)
+        {
+            Today = today;
+            Cash = cash;
+            Days = days ?? Array.Empty<FinancialDay>();
+            Kind = kind ?? "";
+            SuppliedDays = suppliedDays;
+            StaffedDays = staffedDays;
+            RedProfitDays = redProfitDays;
+            Supplied = supplied;
+            Staffed = staffed;
+            BilledCurrentTax = billedCurrentTax;
+            BilledBackTax = billedBackTax;
+            DaysUntilDue = daysUntilDue;
+            Run = run;
+            Stage = stage;
+            Store = store ?? "";
+            Item = item ?? "";
+            AskSupply = askSupply;
+            Holds = holds ?? Array.Empty<WarehouseHold>();
+            Stops = stops ?? Array.Empty<DeliveryStop>();
+            LoanPayments = loanPayments;
+            TruckCost = truckCost;
+        }
+
+        public int Today { get; }
+
+        public decimal Cash { get; }
+
+        public IReadOnlyList<FinancialDay> Days { get; }
+
+        public string Kind { get; }
+
+        public int SuppliedDays { get; }
+
+        public int StaffedDays { get; }
+
+        public int RedProfitDays { get; }
+
+        public bool Supplied { get; }
+
+        public bool Staffed { get; }
+
+        public decimal BilledCurrentTax { get; }
+
+        public decimal BilledBackTax { get; }
+
+        public int DaysUntilDue { get; }
+
+        public RunFacts? Run { get; }
+
+        public int Stage { get; }
+
+        public string Store { get; }
+
+        public string Item { get; }
+
+        public bool AskSupply { get; }
+
+        public IReadOnlyList<WarehouseHold> Holds { get; }
+
+        public IReadOnlyList<DeliveryStop> Stops { get; }
+
+        public decimal LoanPayments { get; }
+
+        public decimal TruckCost { get; }
+    }
+
+    public sealed class StageMorning
+    {
+        public StageMorning(
+            PlaybookStep step,
+            decimal dailyCost,
+            ClosePick close,
+            TaxPaymentPick tax,
+            SupplyPick supply,
+            RunPick run)
+        {
+            Step = step ?? PlaybookStep.None();
+            DailyCost = dailyCost;
+            Close = close ?? ClosePick.None();
+            Tax = tax ?? TaxPaymentPick.None();
+            Supply = supply ?? SupplyPick.None();
+            Run = run ?? RunPick.None();
+        }
+
+        public PlaybookStep Step { get; }
+
+        public decimal DailyCost { get; }
+
+        public ClosePick Close { get; }
+
+        public TaxPaymentPick Tax { get; }
+
+        public SupplyPick Supply { get; }
+
+        public RunPick Run { get; }
     }
 
     public sealed class StageSimResult
@@ -250,15 +384,75 @@ namespace ChaoticCEO
             return winner ?? StageSimResult.Empty(horizonDays > 0 ? horizonDays : Noise.SimHorizonDays);
         }
 
+        public static StageMorning Morning(
+            StageDay? day,
+            OpenPick? open = null,
+            SitePick? where = null,
+            LayoutPick? layout = null,
+            PricePick? prices = null,
+            TruckPick? trucks = null,
+            WarehousePick? warehouses = null,
+            ManagerPick? managers = null,
+            MoneyPick? money = null,
+            EstatePick? estate = null)
+        {
+            if (day == null)
+            {
+                return new StageMorning(
+                    PlaybookStep.None(),
+                    0m,
+                    ClosePick.None(),
+                    TaxPaymentPick.None(),
+                    SupplyPick.None(),
+                    RunPick.None());
+            }
+
+            var cost = DailyCost.From(day.Days, day.Today, day.LoanPayments, day.TruckCost);
+            var close = Close.Decide(
+                day.Kind,
+                day.SuppliedDays,
+                day.StaffedDays,
+                day.RedProfitDays,
+                day.Supplied,
+                day.Staffed);
+            var tax = TaxPolicy.DecidePayment(
+                day.Cash,
+                cost,
+                day.BilledCurrentTax,
+                day.BilledBackTax,
+                day.DaysUntilDue);
+            var run = global::ChaoticCEO.Run.Decide(day.Run);
+            var supply = day.AskSupply
+                ? Supply.Decide(day.Stage, day.Store, day.Item, day.Holds, day.Stops)
+                : SupplyPick.None();
+            var step = Playbook.Decide(
+                open,
+                where,
+                layout,
+                prices,
+                supply,
+                trucks,
+                warehouses,
+                managers,
+                money,
+                estate,
+                close,
+                run,
+                tax);
+            return new StageMorning(step, cost, close, tax, supply, run);
+        }
+
         private sealed class Store
         {
-            public Store(string street, int number, string type, string family, decimal dailyProfit)
+            public Store(string street, int number, string type, string family, string kind, decimal dailyProfit, decimal rent)
             {
                 Street = street;
                 Number = number;
                 Type = type;
                 Family = family;
+                Kind = kind;
                 DailyProfit = dailyProfit;
+                Rent = rent;
                 Key = street + " " + number.ToString(CultureInfo.InvariantCulture);
             }
 
@@ -270,9 +464,21 @@ namespace ChaoticCEO
 
             public string Family { get; }
 
+            public string Kind { get; }
+
             public decimal DailyProfit { get; }
 
+            public decimal Rent { get; }
+
             public string Key { get; }
+
+            public int SuppliedDays { get; set; }
+
+            public int StaffedDays { get; set; }
+
+            public int RedDays { get; set; }
+
+            public bool Staffed { get; set; }
 
             public bool Supplied { get; set; }
 
@@ -293,13 +499,19 @@ namespace ChaoticCEO
             private readonly List<DeliveryStop> _stops = new List<DeliveryStop>();
             private readonly List<GarageSlot> _slots = new List<GarageSlot>();
             private readonly List<WarehouseLevel> _homes = new List<WarehouseLevel>();
+            private readonly List<FinancialDay> _ledger = new List<FinancialDay>();
             private string _pendingOpen = "";
             private string _pendingFamily = "";
+            private string _pendingKind = "";
             private decimal _pendingProfit;
             private bool _pricingPlan;
             private bool _loanTaken;
             private decimal _cash;
             private decimal _netWorth;
+            private int _closed;
+            private string _lastClose = "";
+            private decimal _dailyCost;
+            private Store? _focus;
 
             public World(decimal cash, decimal netWorth, StageSimCatalog catalog, StageThresholds gates)
             {
@@ -312,8 +524,12 @@ namespace ChaoticCEO
 
             public void Step(int day, int seed)
             {
+                var today = day + 1;
+                TickStores();
+                _focus = FocusStore();
                 var stage = CurrentStage(day);
-                var dailyCost = DailyCost();
+                var dailyCost = DailyCost.From(_ledger, today, 0m, 0m);
+                _dailyCost = dailyCost;
                 var reserve = dailyCost * _gates.ReserveDays;
                 var truckLoad = TruckLoadFraction();
                 var open = Open.Decide(stage, OpenCandidates(), truckLoad);
@@ -344,11 +560,6 @@ namespace ChaoticCEO
                         {
                             new ItemSoldPerPriceEntry(_catalog.Item, 12f, 8),
                         });
-                var unsupplied = _stores.FirstOrDefault(store => !store.Supplied);
-                var supplyRaw = unsupplied == null
-                    ? SupplyPick.None()
-                    : Supply.Decide(stage, unsupplied.Key, _catalog.Item, _holds, _stops);
-                var supply = GateSupply(stage, unsupplied, supplyRaw);
                 var delivering = _holds
                     .Select(hold => hold.Warehouse)
                     .Where(name => name.Length > 0)
@@ -385,21 +596,36 @@ namespace ChaoticCEO
                     loan: null,
                     bestPaybackRate: 0.1m);
                 var estate = RealEstate.Decide(stage, _catalog.Estates);
-                var step = Playbook.Decide(
+                var morning = Morning(
+                    new StageDay(
+                        today,
+                        _cash,
+                        _ledger,
+                        _focus?.Kind ?? "",
+                        _focus?.SuppliedDays ?? 0,
+                        _focus?.StaffedDays ?? 0,
+                        _focus?.RedDays ?? 0,
+                        _focus?.Supplied ?? false,
+                        _focus?.Staffed ?? false,
+                        stage: stage,
+                        store: _focus?.Key ?? "",
+                        item: _catalog.Item,
+                        askSupply: _focus != null && !_focus.Supplied,
+                        holds: _holds,
+                        stops: _stops),
                     open,
                     where,
                     layout,
                     price,
-                    supply,
                     trucks,
                     warehouses,
                     managers,
                     money,
-                    estate,
-                    ClosePick.None(),
-                    RunPick.None());
-                Apply(step, open, where, layout, price, supply, trucks, warehouses, managers, money, estate, reserve);
+                    estate);
+                _dailyCost = morning.DailyCost;
+                Apply(morning, open, where, layout, price, trucks, warehouses, managers, money, estate, reserve);
                 Earn(seed, day);
+                Remember(today);
             }
 
             public StageSimTrial Snapshot()
@@ -413,16 +639,18 @@ namespace ChaoticCEO
                     _stores.Count(store => store.Supplied),
                     WarehouseCount(),
                     EmptySlots(),
-                    PlanCount());
+                    PlanCount(),
+                    _closed,
+                    _lastClose,
+                    _dailyCost);
             }
 
             private void Apply(
-                PlaybookStep step,
+                StageMorning morning,
                 OpenPick open,
                 SitePick where,
                 LayoutPick layout,
                 PricePick price,
-                SupplyPick supply,
                 TruckPick trucks,
                 WarehousePick warehouses,
                 ManagerPick managers,
@@ -430,6 +658,8 @@ namespace ChaoticCEO
                 EstatePick estate,
                 decimal reserve)
             {
+                var step = morning.Step;
+                var supply = morning.Supply;
                 if (!step.Chosen)
                 {
                     return;
@@ -443,6 +673,7 @@ namespace ChaoticCEO
                             var candidate = OpenCandidates().FirstOrDefault(item => item.Type == open.Type);
                             _pendingOpen = open.Type;
                             _pendingFamily = candidate?.Family ?? "specialty";
+                            _pendingKind = candidate?.Kind ?? "goods";
                             _pendingProfit = candidate?.DailyProfit ?? 0m;
                         }
 
@@ -461,10 +692,13 @@ namespace ChaoticCEO
                                     site.Number,
                                     _pendingOpen,
                                     _pendingFamily,
-                                    _pendingProfit));
+                                    _pendingKind.Length > 0 ? _pendingKind : "goods",
+                                    _pendingProfit,
+                                    site.DailyRent));
                                 _usedSites.Add(SiteKey(site));
                                 _pendingOpen = "";
                                 _pendingFamily = "";
+                                _pendingKind = "";
                                 _pendingProfit = 0m;
                             }
                         }
@@ -514,8 +748,20 @@ namespace ChaoticCEO
                             }
                             else if (supply.Source == "wholesaler")
                             {
+                                target.Supplied = true;
                                 target.Contracted = true;
                             }
+                        }
+
+                        break;
+                    case "close":
+                        ApplyClose(supply);
+                        break;
+                    case "tax":
+                        if (morning.Tax.Chosen && morning.Tax.Amount > 0m && _cash >= morning.Tax.Amount)
+                        {
+                            _cash -= morning.Tax.Amount;
+                            _netWorth -= morning.Tax.Amount;
                         }
 
                         break;
@@ -704,31 +950,142 @@ namespace ChaoticCEO
                 return list;
             }
 
-            private SupplyPick GateSupply(int stage, Store? unsupplied, SupplyPick raw)
+            private static decimal OperatingProfit(Store store)
             {
-                if (unsupplied == null || !raw.Chosen)
-                {
-                    return SupplyPick.None();
-                }
-
-                if (raw.Source == "wholesaler" && unsupplied.Contracted)
-                {
-                    return SupplyPick.None();
-                }
-
-                if (stage >= 2 && WarehouseCount() == 0)
-                {
-                    return SupplyPick.None();
-                }
-
-                return raw;
+                var net = store.DailyProfit - store.Rent;
+                return net;
             }
 
-            private decimal DailyCost()
+            private void TickStores()
             {
-                decimal cost = _stores.Count * 10m;
-                cost += WarehouseCount() * 20m;
-                return cost;
+                foreach (var store in _stores)
+                {
+                    if (store.Supplied)
+                    {
+                        store.SuppliedDays++;
+                    }
+
+                    if (store.Staffed)
+                    {
+                        store.StaffedDays++;
+                    }
+
+                    if (store.Staffed && OperatingProfit(store) < 0m)
+                    {
+                        store.RedDays++;
+                    }
+                }
+            }
+
+            private Store? FocusStore()
+            {
+                Store? connect = null;
+                Store? hire = null;
+                Store? shutdown = null;
+                foreach (var store in _stores)
+                {
+                    var pick = Close.Decide(
+                        store.Kind,
+                        store.SuppliedDays,
+                        store.StaffedDays,
+                        store.RedDays,
+                        store.Supplied,
+                        store.Staffed);
+                    if (!pick.Chosen)
+                    {
+                        continue;
+                    }
+
+                    if (pick.Action == "close")
+                    {
+                        shutdown = store;
+                    }
+                    else if (pick.Action == "hire" && hire == null)
+                    {
+                        hire = store;
+                    }
+                    else if (pick.Action == "connect" && connect == null)
+                    {
+                        connect = store;
+                    }
+                }
+
+                return shutdown ?? hire ?? connect;
+            }
+
+            private void ApplyClose(SupplyPick supply)
+            {
+                if (_focus == null)
+                {
+                    return;
+                }
+
+                var pick = Close.Decide(
+                    _focus.Kind,
+                    _focus.SuppliedDays,
+                    _focus.StaffedDays,
+                    _focus.RedDays,
+                    _focus.Supplied,
+                    _focus.Staffed);
+                if (!pick.Chosen)
+                {
+                    return;
+                }
+
+                if (pick.Action == "connect")
+                {
+                    if (supply.Chosen && supply.Source == "warehouse" && supply.Warehouse.Length > 0)
+                    {
+                        _focus.Supplied = true;
+                        _focus.Contracted = true;
+                        _stops.Add(new DeliveryStop(
+                            supply.Warehouse,
+                            _focus.Key,
+                            _catalog.Item,
+                            day: null,
+                            truck: ""));
+                    }
+                    else
+                    {
+                        _focus.Supplied = true;
+                        _focus.Contracted = true;
+                    }
+
+                    return;
+                }
+
+                if (pick.Action == "hire")
+                {
+                    _focus.Staffed = true;
+                    return;
+                }
+
+                if (pick.Action == "close")
+                {
+                    _stores.Remove(_focus);
+                    _closed++;
+                    _lastClose = pick.Action;
+                }
+            }
+
+            private void Remember(int today)
+            {
+                var rows = new List<StatementRow>();
+                foreach (var store in _stores)
+                {
+                    rows.Add(new StatementRow(
+                        store.Street,
+                        store.Number,
+                        0f,
+                        0f,
+                        0f,
+                        (float)store.Rent,
+                        0f,
+                        0f,
+                        (float)OperatingProfit(store)));
+                }
+
+                _ledger.Add(new FinancialDay(today, rows));
             }
 
             private decimal TruckLoadFraction()

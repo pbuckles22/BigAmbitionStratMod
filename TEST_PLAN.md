@@ -1,5 +1,15 @@
 # Test plan (TEST_PLAN.md)
 
+## One stage sim (1.17.23)
+
+The stage sim steps close and tax through the live decides. Cost is yesterday’s wages and rent from the day step. A wholesaler contract counts as supplied. Close wins over tax. Headless. No game boot.
+
+Tier 1: `StageSimMorningTests`. Unit: the sim close matches `Close.Decide`. Chain: `day step → live decides → close → tax`. Command: the Tier 1 `dotnet test` suite.
+
+Measured: `dotnet test` 1235 passed (prior 1225).
+
+---
+
 ## Truck load (1.17.22)
 
 Truck load is the cargo on filled garage slots divided by those trucks’ capacity. Above **TruckBusy** (85%) the next open is a service or office. Repay uses the best daily rent ÷ price among buildings for sale. A loan is repaid only when its interest is higher than that rate. Dirt, theft, sales, and unmet customer demand come from the rented building. Cleaner, guard, or customer is the run pick only when that reading says so.
@@ -613,7 +623,7 @@ Human PASS 2026-11-08 on 1.15.5. `mod.loaded version=1.15.5 build=3682`.
 
 ## Story 8.6 — Stage sim (headless + version smoke)
 
-Tier 1: `StageSimTests` locks **StageThresholds.Starting** against every named production const, `Stage.Decide` with thresholds, stage-1 open cap at **Stage2Stores**, `Trial` / `Run` win flags against **WinNetWorth**, empty inputs, and `Tune` (climb over tight, median tie, blank skip). Chain `… → policy → stage-sim` reports win flags after calibrate/noise/policy; FitFile chain tunes climb over tight. Command: the Tier 1 `dotnet test` suite above.
+Tier 1: `StageSimTests` locks **StageThresholds.Starting** against every named production const, `Stage.Decide` with thresholds, stage-1 open cap at **Stage2Stores**, `Trial` / `Run` win flags against **WinNetWorth**, empty inputs, and `Tune` (climb over tight, median tie, blank skip). Chain `… → policy → stage-sim` reports win flags after calibrate/noise/policy; FitFile chain tunes climb over tight. **14.13** extends this with `StageSimMorningTests`: `day step → live decides → close → tax`. The climb check uses 90 days. Command: the Tier 1 `dotnet test` suite above.
 
 Human version smoke (install changed; stage sim is headless):
 
