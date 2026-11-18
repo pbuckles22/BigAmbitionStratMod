@@ -8,7 +8,7 @@
 
 ## Summary
 
-**BigAmbitionStratMod** — Version **1.17.21** (a selling display stays green all day). Green is 2/3 of that display. A count under the line, or one that would fall under it before the truck, is pulled to today. Human PASS 2026-11-17 at 15 7th Avenue. Next is **14.12** truck load. **14.9.7** waits for Stage 2. Nightly price stories **14.21–14.26** are written and wait. Epic 10 stays open. **10.4** code stays stashed. Rules: [requirements/strategy.md](requirements/strategy.md).
+**BigAmbitionStratMod** — Version **1.17.22** (truck load **14.12**). Truck load is cargo on filled trucks over their capacity. Repay uses the best rent ÷ price on offer. Dirt, theft, sales, and unmet demand come from the building. Human PASS 2026-11-17 at 15 7th Avenue, days 22–57. Next is **14.13** one stage sim. **14.9.7** waits for Stage 2. Nightly price stories **14.21–14.26** are written and wait. Epic 10 stays open. **10.4** code stays stashed. Rules: [requirements/strategy.md](requirements/strategy.md).
 
 ---
 
@@ -16,7 +16,8 @@
 
 | Branch | Role |
 |--------|------|
-| **`main`** | Integration branch. Version 1.17.21. Display stays green. Land `605d2db`. Human PASS 2026-11-17. |
+| **`main`** | Integration branch. Version 1.17.22. Truck load **14.12**. Human PASS 2026-11-17. |
+| **`feature/14.12-truck-load`** | Truck load, payback, and run facts. Version 1.17.22. Human PASS 2026-11-17. Kept after CMPH. |
 | **`fix/display-stays-green`** | Display stays green. Version 1.17.21. Human PASS 2026-11-17. Kept after CMPH. |
 | **`feature/14.11-tax-reserve`** | Tax reserve. Version 1.17.20. Human PASS 2026-11-16. Kept after CMPH. |
 | **`feature/14.8-district-pace`** | District pace. Version 1.17.19. Human PASS 2026-11-16. Kept after CMPH. |

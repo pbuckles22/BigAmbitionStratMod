@@ -4,6 +4,7 @@ using System.Globalization;
 using System.IO;
 using BigAmbitions.Items;
 using Entities;
+using Vehicles.VehicleTypes;
 
 namespace ChaoticCEO
 {
@@ -2193,6 +2194,12 @@ namespace ChaoticCEO
             ReadStores(current, needs, sales);
             var parts = ReadCost(current);
             DailyCost.Record(localAppData, DailyCost.Line(current.Day, Cash(current), parts));
+            var cargos = ReadGarageCargo(current);
+            DailyCost.Record(localAppData, TruckLoad.Line(current.Day, cargos));
+            var payback = PaybackRate.Best(ReadYields(current));
+            DailyCost.Record(localAppData, PaybackRate.Line(current.Day, payback));
+            var pulse = BuildingSignalRead.Read(ReadBuildings(current));
+            DailyCost.Record(localAppData, BuildingSignalRead.Line(current.Day, pulse));
             return watch.Tick(
                 localAppData,
                 current.Day,
@@ -2631,15 +2638,17 @@ namespace ChaoticCEO
             var business = TopBar.Yesterday(Days(current), current.Day);
             var profit = Money.ProjectedProfit(TopBar.ShownProfit(DayTotal(current, business), business));
             var cost = Operating(current);
+            var payback = PaybackRate.Best(ReadYields(current));
             var money = Money.Decide(
                 stage,
                 cash,
                 cost,
                 profit,
                 offers: BankLoanBridge.Offers(profit),
-                loan: null,
-                bestPaybackRate: 0m);
+                loan: LiveLoan(current),
+                bestPaybackRate: payback.Rate);
             var run = Run.Decide(LiveRunFacts(current, localAppData));
+            var cargos = ReadGarageCargo(current);
             var due = TaxBillBridge.Due();
             var tax = TaxPolicy.DecidePayment(cash, cost, due.current, due.back, daysUntilDue: 0);
             return WinRun.Next(
@@ -2652,7 +2661,8 @@ namespace ChaoticCEO
                 money,
                 run,
                 health,
-                tax);
+                tax,
+                TruckLoad.Fraction(cargos));
         }
 
         private static RunFacts LiveRunFacts(GameInstance current, string? localAppData)
@@ -2678,21 +2688,259 @@ namespace ChaoticCEO
                 marketingGain = Marketing.StarterGain;
             }
 
+            var pulse = BuildingSignalRead.Read(ReadBuildings(current));
             return new RunFacts(
                 current.Energy,
                 current.Hunger,
                 current.Happiness,
                 unmetDays,
                 employeeState: "",
-                hasDirt: false,
-                theft: 0m,
-                sales: 0m,
-                unmetCustomerDemand: false,
+                pulse.HasDirt,
+                pulse.Theft,
+                pulse.Sales,
+                pulse.Unmet,
                 marketingCost,
                 marketingGain,
                 taxDue: tax.current + tax.back,
                 takeoverOffer: pending == null ? 0m : pending.Value.offer,
                 takeoverDailyProfit: pending == null ? 0m : pending.Value.dailyProfit);
+        }
+
+        private static LoanBalance? LiveLoan(GameInstance current)
+        {
+            if (current.Loans == null)
+            {
+                return null;
+            }
+
+            foreach (var loan in current.Loans)
+            {
+                if (loan == null || loan.remainingAmount <= 0f)
+                {
+                    continue;
+                }
+
+                var rate = loan.dailyInterest <= 0
+                    ? 0m
+                    : (decimal)loan.dailyInterest / (decimal)loan.remainingAmount;
+                return new LoanBalance((decimal)loan.remainingAmount, loan.dailyInterest, rate);
+            }
+
+            return null;
+        }
+
+        private static List<BuildingYield> ReadYields(GameInstance current)
+        {
+            var rows = new List<BuildingYield>();
+            if (current.buildingsForSale == null)
+            {
+                return rows;
+            }
+
+            foreach (var sale in current.buildingsForSale)
+            {
+                if (sale == null || sale.address == null)
+                {
+                    continue;
+                }
+
+                var rent = 0m;
+                var registration = sale.BuildingRegistration;
+                if (registration != null)
+                {
+                    rent = ToMoney(registration.RentPerDay);
+                }
+
+                rows.Add(new BuildingYield(
+                    sale.address.streetName ?? "",
+                    sale.address.streetNumber,
+                    ToMoney(sale.buildingPrice),
+                    rent));
+            }
+
+            return rows;
+        }
+
+        private static List<BuildingReading> ReadBuildings(GameInstance current)
+        {
+            var rows = new List<BuildingReading>();
+            if (current.BuildingRegistrations == null)
+            {
+                return rows;
+            }
+
+            foreach (var building in current.BuildingRegistrations)
+            {
+                if (building == null
+                    || !building.RentedByPlayer
+                    || string.IsNullOrEmpty(building.businessTypeName)
+                    || string.IsNullOrEmpty(building.StreetName)
+                    || building.StreetNumber <= 0)
+                {
+                    continue;
+                }
+
+                rows.Add(new BuildingReading(
+                    building.StreetName,
+                    building.StreetNumber,
+                    DirtSpots(building),
+                    building.stolenItemsCost > 0f ? (decimal)building.stolenItemsCost : 0m,
+                    CompletedSales(building, current.Day),
+                    DemandSets(building, out var fulfilled),
+                    fulfilled));
+            }
+
+            return rows;
+        }
+
+        private static int DirtSpots(BuildingRegistration building)
+        {
+            if (building.dirtSpots == null)
+            {
+                return 0;
+            }
+
+            var spots = 0;
+            foreach (var spot in building.dirtSpots)
+            {
+                if (spot != null && spot.dirtiness > 0f)
+                {
+                    spots++;
+                }
+            }
+
+            return spots;
+        }
+
+        private static decimal CompletedSales(BuildingRegistration building, int today)
+        {
+            if (building.orderHistory == null)
+            {
+                return 0m;
+            }
+
+            var revenue = 0f;
+            var day = 0;
+            foreach (var entry in building.orderHistory)
+            {
+                if (entry == null || entry.dayNumber >= today || entry.dayNumber < day)
+                {
+                    continue;
+                }
+
+                day = entry.dayNumber;
+                revenue = entry.totalRevenue;
+            }
+
+            return revenue > 0f ? (decimal)revenue : 0m;
+        }
+
+        private static int DemandSets(BuildingRegistration building, out int fulfilled)
+        {
+            fulfilled = 0;
+            var type = Helpers.BusinessTypeHelper.GetData(building);
+            if (type == null || type.customerDemandSets == null)
+            {
+                return 0;
+            }
+
+            var met = new HashSet<string>(System.StringComparer.Ordinal);
+            if (building.cachedFulfilledCustomerDemands != null)
+            {
+                foreach (var name in building.cachedFulfilledCustomerDemands)
+                {
+                    if (!string.IsNullOrEmpty(name))
+                    {
+                        met.Add(name);
+                    }
+                }
+            }
+
+            var sets = 0;
+            foreach (var demand in type.customerDemandSets)
+            {
+                if (demand == null || string.IsNullOrEmpty(demand.type))
+                {
+                    continue;
+                }
+
+                sets++;
+                if (met.Contains(demand.type))
+                {
+                    fulfilled++;
+                }
+            }
+
+            return sets;
+        }
+
+        private static List<GarageCargo> ReadGarageCargo(GameInstance current)
+        {
+            var rows = new List<GarageCargo>();
+            if (current.BuildingRegistrations == null)
+            {
+                return rows;
+            }
+
+            var vehicles = new Dictionary<string, VehicleInstance>(System.StringComparer.Ordinal);
+            if (current.VehicleInstances != null)
+            {
+                foreach (var vehicle in current.VehicleInstances)
+                {
+                    if (vehicle == null || string.IsNullOrEmpty(vehicle.id) || vehicles.ContainsKey(vehicle.id))
+                    {
+                        continue;
+                    }
+
+                    vehicles.Add(vehicle.id, vehicle);
+                }
+            }
+
+            foreach (var building in current.BuildingRegistrations)
+            {
+                var warehouse = building as Warehouse;
+                if (warehouse == null
+                    || warehouse.businessTypeName != "ba:businesstype_warehouse"
+                    || warehouse.vehicleSlots == null)
+                {
+                    continue;
+                }
+
+                foreach (var slot in warehouse.vehicleSlots)
+                {
+                    if (slot == null)
+                    {
+                        continue;
+                    }
+
+                    var filled = !string.IsNullOrEmpty(slot.vehicleInstanceId);
+                    if (!filled
+                        || slot.vehicleInstanceId == null
+                        || !vehicles.TryGetValue(slot.vehicleInstanceId, out var vehicle))
+                    {
+                        rows.Add(new GarageCargo(0, 0, filled));
+                        continue;
+                    }
+
+                    var kind = VehicleTypeHelper.GetVehicleType(vehicle.vehicleTypeName);
+                    var capacity = kind == null ? 0 : kind.maxCargoCapacity;
+                    var carried = 0;
+                    if (vehicle.cargoInstances != null)
+                    {
+                        foreach (var box in vehicle.cargoInstances)
+                        {
+                            if (box != null && box.amount > 0)
+                            {
+                                carried += box.amount;
+                            }
+                        }
+                    }
+
+                    rows.Add(new GarageCargo(carried, capacity, true));
+                }
+            }
+
+            return rows;
         }
 
         private static IReadOnlyList<StoreHealth> OwnedStoreHealth(GameInstance current)

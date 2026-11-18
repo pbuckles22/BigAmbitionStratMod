@@ -664,7 +664,7 @@ public class TimeAdvanceTests
     [Fact]
     public void TimeAdvance_a_running_skip_keeps_the_delivery_day_and_esc_stops_it()
     {
-        // Harvest: 1.17.21 days 57–60 moved the truck and opened rent and loan during SkipTime.
+        // Harvest: 1.17.22 days 57–60 moved the truck and opened rent and loan during SkipTime.
         Assert.True(TimeAdvance.LeaveSkipAlone(skipping: true));
         Assert.False(TimeAdvance.LeaveSkipAlone(skipping: false));
         Assert.False(TimeAdvance.MoveDelivery(replace: true, skipping: true));

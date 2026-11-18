@@ -1,5 +1,24 @@
 # Test plan (TEST_PLAN.md)
 
+## Truck load (1.17.22)
+
+Truck load is the cargo on filled garage slots divided by those trucks’ capacity. Above **TruckBusy** (85%) the next open is a service or office. Repay uses the best daily rent ÷ price among buildings for sale. A loan is repaid only when its interest is higher than that rate. Dirt, theft, sales, and unmet customer demand come from the rented building. Cleaner, guard, or customer is the run pick only when that reading says so.
+
+Tier 1: `TruckLoadTests`. Chains: `garage → truck load → open`, `buildings → payback → repay`, and `building → run facts → remedy`. Command: the Tier 1 `dotnet test` suite.
+
+Human version smoke:
+
+1. Restart Big Ambitions so this build loads. Continue the 15 7th Avenue save and let one morning roll.
+2. Open `%LocalAppData%\ChaoticCEO\ceo.log`.
+3. Read `mod.loaded`, then that morning’s `truck.load`, `payback.best`, and `building.pulse`.
+4. **PASS if** the version is `1.17.22` and those three lines are present. On a gift shop with no filled truck, `fraction=0` and the morning does not open a service. **FAIL if** the version is still `1.17.21` or any of the three lines is missing.
+5. Evidence: `mod.loaded`. `truck.load`. `payback.best`. `building.pulse`.
+6. Version marker: public `1.17.22`.
+
+Measured 2026-11-17 at 15 7th Avenue on the truck-load build: `mod.loaded version=1.17.21 build=3682`. Days 22–57 each wrote the three lines. `fraction=0`. `rate=0`. `dirt=1` `theft=0` `unmet=0`. Day 56: 96 customers, revenue 3066, profit 2183.67, cash 13830. Day 57 cash 530. Human PASS. The land number is 1.17.22 because 1.17.21 is the display-green ship.
+
+---
+
 ## Display stays green (1.17.21)
 
 A selling display stays at or above 2/3 of its capacity for the whole day, open or closed. Below 1/3 is red. The band between is yellow. The 4 AM count is that display. The order leaves at least one day of sales above the green line. A count already under the line, or one that would fall under it before the truck, is pulled to today. The buy line is not cut to free space.

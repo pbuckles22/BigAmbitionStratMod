@@ -130,7 +130,8 @@ namespace ChaoticCEO
             MoneyPick? money,
             RunPick? run,
             IReadOnlyList<StoreHealth>? ownedHealth = null,
-            TaxPaymentPick? tax = null)
+            TaxPaymentPick? tax = null,
+            decimal truckLoadFraction = 0m)
         {
             var pending = pendingOpen ?? "";
             OpenPick open;
@@ -148,7 +149,7 @@ namespace ChaoticCEO
             }
             else
             {
-                open = Open.Decide(stage, opens, truckLoadFraction: 0m, ownedHealth);
+                open = Open.Decide(stage, opens, truckLoadFraction, ownedHealth);
                 where = SitePick.None();
             }
 
