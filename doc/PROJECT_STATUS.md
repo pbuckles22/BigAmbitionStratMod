@@ -16,7 +16,7 @@
 
 | Branch | Role |
 |--------|------|
-| **`main`** | Integration branch. Version 1.17.23. One stage sim **14.13**. Headless. |
+| **`main`** | Integration branch. Version 1.17.23. One stage sim **14.13**. Land `a8d9ad7`. Headless. |
 | **`feature/14.13-stage-sim`** | One stage sim. Version 1.17.23. Headless. Kept after CMPH. |
 | **`feature/14.12-truck-load`** | Truck load, payback, and run facts. Version 1.17.22. Human PASS 2026-11-17. Kept after CMPH. |
 | **`fix/display-stays-green`** | Display stays green. Version 1.17.21. Human PASS 2026-11-17. Kept after CMPH. |
