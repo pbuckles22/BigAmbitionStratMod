@@ -1,5 +1,24 @@
 # Test plan (TEST_PLAN.md)
 
+## Display stays green (1.17.21)
+
+A selling display stays at or above 2/3 of its capacity for the whole day, open or closed. Below 1/3 is red. The band between is yellow. The 4 AM count is that display. The order leaves at least one day of sales above the green line. A count already under the line, or one that would fall under it before the truck, is pulled to today. The buy line is not cut to free space.
+
+Tier 1: `Cover_day_58_yellow_gift_shelf_pulls_the_truck_to_today`, `Cover_a_green_count_that_would_cross_the_line_pulls_the_truck_to_today`. Chain: `open days → burn → green line → truck today → playbook`. Command: the Tier 1 `dotnet test` suite.
+
+Human version smoke:
+
+1. Restart Big Ambitions so this build loads. Continue the 15 7th Avenue save. The cheap-gift rounded shelf is already yellow at 152/250. This morning cannot be painted green until the truck arrives.
+2. Let today run. After the delivery, check the cheap-gift shelf, then check it again at the next 4 AM, while the shop is still closed. Look at flowers, soda, umbrellas, and the register bags the same way.
+3. Open `%LocalAppData%\ChaoticCEO\ceo.log`. Read the first line and the cheap-gift `contract.cover` row for today.
+4. **PASS if** the first line is `mod.loaded version=1.17.21 build=3682`, today's cheap-gift row has `replace=true` and `next` equal to today, and after that delivery the shelf stays at or above 2/3 full through the next 4 AM. **FAIL if** the version is still `1.17.20` or missing, the truck stays on a later day, or the shelf is yellow or red again at the next 4 AM after a normal sales day.
+5. Evidence: `mod.loaded`. `contract.cover` for `ba:itemname_cheapgift` with `replace=true` and `next` equal to the current day.
+6. Version marker: public `1.17.21`.
+
+Measured 2026-11-17 at 15 7th Avenue: `mod.loaded version=1.17.21 build=3682`. Day 59 cheap gift `replace=true` `next=59`, rescheduled from day 64. Day 60 profit 1888.64. Day 61 profit 1988.74, cash 8049. Day 62 profit 2092.88, cash 9457, cheap gift onHand 266, `replace=false`, `next=64`. Human PASS.
+
+---
+
 ## Tax reserve (1.17.20)
 
 The reserve is 7 days of operating cost plus billed and unbilled tax. Unbilled tax is 25% of profit minus deductible capex. Back taxes are paid first, and that pay stops at 3 days of operating cost. A partial pay under $500 is not sent. A current bill that is not due within 2 days stays above the 7-day reserve. In the 5 days before an assessment, a deductible buy (truck, pallet shelf, or Stage 4 building) may spend 60% above the operating reserve. Loan principal is not that deduction. F9 shows the tax pick ahead of an open or a loan repay. Sleep and a close still come first. This slice does not read an assessment calendar from the save, so the morning does not raise a truck or shelf order into that 60% window yet.

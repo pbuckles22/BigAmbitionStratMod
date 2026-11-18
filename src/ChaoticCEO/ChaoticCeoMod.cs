@@ -97,6 +97,7 @@ namespace ChaoticCEO
 
             StopOnHotkey();
             ResumeOnHotkey();
+            StopOnEscape();
             if (!FrameTick.Due(Time.unscaledTime, _nextTickTime))
             {
                 return;
@@ -132,7 +133,7 @@ namespace ChaoticCEO
                 LiveDump.RestockWarehouses(_restock, _localAppData);
                 // Fit-out once per day roll — never per frame (scene scans stall the clock).
                 LiveDump.TryFitOut(_localAppData);
-                if (Autopilot.Enabled)
+                if (Autopilot.Enabled && !TimeAdvance.LeaveSkipAlone(TimeAdvanceBridge.Skipping()))
                 {
                     LiveDump.RunAutopilot(_localAppData);
                 }
@@ -174,6 +175,27 @@ namespace ChaoticCEO
                 LoadLog.CeoLogPath(_localAppData),
                 "controls.pressed version=" + LoadLog.Version
                     + " action=toggle-skip key=f6 on=" + (on ? "true" : "false") + Environment.NewLine);
+        }
+
+        private void StopOnEscape()
+        {
+            var keyboard = Keyboard.current;
+            var pressed = keyboard != null && keyboard.escapeKey.wasPressedThisFrame;
+            if (!pressed && !Input.GetKeyDown(KeyCode.Escape))
+            {
+                return;
+            }
+
+            if (!TimeAdvance.EscStops(true, TimeAdvanceBridge.Skipping()))
+            {
+                return;
+            }
+
+            TimeAdvanceBridge.Stop();
+            Controls.Pause();
+            _time.ClearWait();
+            var current = SaveGameManager.Current;
+            TimeAdvance.RecordSynced(_localAppData, current == null ? 0 : current.Day, "stop", "esc");
         }
 
         private void StopOnHotkey()

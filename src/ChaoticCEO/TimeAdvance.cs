@@ -71,6 +71,21 @@ namespace ChaoticCEO
             return called && machineRunning;
         }
 
+        public static bool LeaveSkipAlone(bool skipping)
+        {
+            return skipping;
+        }
+
+        public static bool MoveDelivery(bool replace, bool skipping)
+        {
+            return replace && !LeaveSkipAlone(skipping);
+        }
+
+        public static bool EscStops(bool escapeDown, bool skipping)
+        {
+            return escapeDown && skipping;
+        }
+
         public static string Next(bool machineRunning, bool armed, int idleFrames)
         {
             if (machineRunning)

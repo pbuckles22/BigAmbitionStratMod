@@ -2,13 +2,13 @@
 
 **Human-readable current state.** Keep in sync with [AGENT_HANDOFF.md](../AGENT_HANDOFF.md) → *Current state* when milestones ship.
 
-**Last updated:** 2026-11-16
+**Last updated:** 2026-11-17
 
 ---
 
 ## Summary
 
-**BigAmbitionStratMod** — Version **1.17.20** (tax reserve **14.11**; human PASS 2026-11-16). The reserve is 7 days of cost plus billed and unbilled tax. Back taxes pay first and stop at 3 days of cost. Next is **14.12** truck load. **14.9.7** waits for Stage 2. Nightly price stories **14.21–14.26** are written and wait. Epic 10 stays open. **10.4** code stays stashed. Rules: [requirements/strategy.md](requirements/strategy.md).
+**BigAmbitionStratMod** — Version **1.17.21** (a selling display stays green all day). Green is 2/3 of that display. A count under the line, or one that would fall under it before the truck, is pulled to today. Human PASS 2026-11-17 at 15 7th Avenue. Next is **14.12** truck load. **14.9.7** waits for Stage 2. Nightly price stories **14.21–14.26** are written and wait. Epic 10 stays open. **10.4** code stays stashed. Rules: [requirements/strategy.md](requirements/strategy.md).
 
 ---
 
@@ -16,7 +16,8 @@
 
 | Branch | Role |
 |--------|------|
-| **`main`** | Integration branch. Version 1.17.20. Story 14.11. Land `6aa5fa4`. Human PASS 2026-11-16. |
+| **`main`** | Integration branch. Version 1.17.20 until the 1.17.21 land is pushed. Story 14.11. Land `6aa5fa4`. |
+| **`fix/display-stays-green`** | Display stays green. Version 1.17.21. Human PASS 2026-11-17. |
 | **`feature/14.11-tax-reserve`** | Tax reserve. Version 1.17.20. Human PASS 2026-11-16. Kept after CMPH. |
 | **`feature/14.8-district-pace`** | District pace. Version 1.17.19. Human PASS 2026-11-16. Kept after CMPH. |
 | **`feature/14.7-layout-size`** | Layout size and SKU lock. Version 1.17.18. Human PASS 2026-11-16. Kept after CMPH. |

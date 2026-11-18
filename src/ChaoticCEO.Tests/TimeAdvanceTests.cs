@@ -660,4 +660,47 @@ public class TimeAdvanceTests
             Directory.Delete(dir.FullName, true);
         }
     }
+
+    [Fact]
+    public void TimeAdvance_a_running_skip_keeps_the_delivery_day_and_esc_stops_it()
+    {
+        // Harvest: 1.17.21 days 57–60 moved the truck and opened rent and loan during SkipTime.
+        Assert.True(TimeAdvance.LeaveSkipAlone(skipping: true));
+        Assert.False(TimeAdvance.LeaveSkipAlone(skipping: false));
+        Assert.False(TimeAdvance.MoveDelivery(replace: true, skipping: true));
+        Assert.True(TimeAdvance.MoveDelivery(replace: true, skipping: false));
+        Assert.False(TimeAdvance.MoveDelivery(replace: false, skipping: false));
+        Assert.True(TimeAdvance.EscStops(escapeDown: true, skipping: true));
+        Assert.False(TimeAdvance.EscStops(escapeDown: true, skipping: false));
+        Assert.False(TimeAdvance.EscStops(escapeDown: false, skipping: true));
+    }
+
+    [Fact]
+    public void Chain_green_pull_holds_the_date_while_the_skip_runs_and_esc_stops()
+    {
+        // Chain: open days → green pull → skip holds the date → Esc stops
+        var plan = Wholesaler.Cover(
+            "ba:itemname_cheapgift",
+            currentDay: 58,
+            nextDeliveryDay: 64,
+            new[]
+            {
+                new CoverSale(56, 77, open: true),
+                new CoverSale(57, 68, open: true),
+            },
+            onHand: 152,
+            fixtureCap: 250,
+            stands: Wholesaler.RetailStands("ba:itemname_cheapgift"));
+        Assert.True(plan.Replace);
+        Assert.Equal(58, plan.NextDay);
+        Assert.False(TimeAdvance.MoveDelivery(plan.Replace, skipping: true));
+        Assert.True(TimeAdvance.MoveDelivery(plan.Replace, skipping: false));
+
+        var skip = new SleepSkip();
+        var save = new object();
+        Assert.Equal("start", skip.Sync(sceneReady: true, save, allowed: true, running: false));
+        Assert.Equal("ended", skip.Sync(sceneReady: true, save, allowed: true, running: false));
+        Assert.False(skip.DesiredOn);
+        Assert.Equal("hold", skip.Sync(sceneReady: true, save, allowed: true, running: false));
+    }
 }

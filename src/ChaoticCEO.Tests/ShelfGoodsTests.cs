@@ -107,7 +107,7 @@ public class ShelfGoodsTests
         Assert.Equal(0, Wholesaler.FixtureCapacity(CheapGift, fixtures));
         Assert.Equal(1172, plan.Target);
         Assert.Equal(995, plan.Need);
-        Assert.Equal(0, plan.FixtureCap);
+        Assert.Equal(1000, plan.FixtureCap);
     }
 
     [Fact]
@@ -130,7 +130,7 @@ public class ShelfGoodsTests
 
         Assert.Equal(344, plan.Target);
         Assert.Equal(160, plan.Need);
-        Assert.Equal(0, plan.FixtureCap);
+        Assert.Equal(100, plan.FixtureCap);
         Assert.True(Wholesaler.FixtureFull(184, 100));
     }
 
@@ -200,8 +200,8 @@ public class ShelfGoodsTests
         Assert.Equal("ba:itemname_sodacan", goods);
         Assert.Equal(80, paperCap);
         Assert.Equal(80, goodsCap);
-        Assert.Equal(0, paperPlan.FixtureCap);
-        Assert.Equal(0, goodsPlan.FixtureCap);
+        Assert.Equal(80, paperPlan.FixtureCap);
+        Assert.Equal(80, goodsPlan.FixtureCap);
         Assert.True(paperPlan.Need > paperCap);
         Assert.True(goodsPlan.Need > goodsCap);
     }
@@ -255,7 +255,7 @@ public class ShelfGoodsTests
         Assert.Equal("ba:itemname_expensiveflower", item);
         Assert.Equal(40, cap);
         Assert.True(plan.Need > cap);
-        Assert.Equal(0, plan.FixtureCap);
+        Assert.Equal(40, plan.FixtureCap);
         Assert.NotNull(gap);
         Assert.Equal("short", gap.Reason);
         Assert.Equal(plan.Need, gap.Target);
@@ -304,11 +304,11 @@ public class ShelfGoodsTests
 
         Assert.Equal(236, open.Target);
         Assert.Equal(226, open.Need);
-        Assert.Equal(0, open.FixtureCap);
+        Assert.Equal(30, open.FixtureCap);
         Assert.Equal(196, over.Need);
-        Assert.Equal(0, over.FixtureCap);
+        Assert.Equal(30, over.FixtureCap);
         Assert.Equal(236, tiny.Need);
-        Assert.Equal(0, tiny.FixtureCap);
+        Assert.Equal(4, tiny.FixtureCap);
         Assert.True(open.Need > 30);
         Assert.True(over.Need > 0);
         Assert.True(Wholesaler.FixtureFull(40, 30));
@@ -340,7 +340,7 @@ public class ShelfGoodsTests
         Assert.Equal(22, capacity);
         Assert.Equal(22, space);
         Assert.True(plan.Need > space);
-        Assert.Equal(0, plan.FixtureCap);
+        Assert.Equal(22, plan.FixtureCap);
         Assert.False(Wholesaler.FixtureFull(onHand, capacity));
     }
 
@@ -376,7 +376,7 @@ public class ShelfGoodsTests
         Assert.Equal(850, space);
         Assert.Equal(1154, plan.Target);
         Assert.Equal(1004, plan.Need);
-        Assert.Equal(0, plan.FixtureCap);
+        Assert.Equal(capacity, plan.FixtureCap);
         Assert.True(plan.Need > space);
     }
 
@@ -412,7 +412,7 @@ public class ShelfGoodsTests
 
         Assert.Equal(850, space);
         Assert.Equal(1004, plan.Need);
-        Assert.Equal(0, plan.FixtureCap);
+        Assert.Equal(capacity, plan.FixtureCap);
         Assert.Equal("supply", step.Kind);
         Assert.Equal("wholesaler", step.Detail);
         Assert.NotNull(gap);
@@ -444,7 +444,7 @@ public class ShelfGoodsTests
         Assert.Equal(28, clippedRoom);
         Assert.Equal(260, plan.Target);
         Assert.Equal(188, plan.Need);
-        Assert.Equal(0, plan.FixtureCap);
+        Assert.Equal(100, plan.FixtureCap);
         Assert.True(plan.Need > clippedRoom);
     }
 
@@ -495,7 +495,7 @@ public class ShelfGoodsTests
         Assert.Equal(100, sellingCap);
         Assert.Equal(100, room);
         Assert.Equal(188, plan.Need);
-        Assert.Equal(0, plan.FixtureCap);
+        Assert.Equal(100, plan.FixtureCap);
         Assert.True(plan.Need > room);
         Assert.False(Wholesaler.FixtureFull(sellingOnHand, sellingCap));
         Assert.Equal(soda, plan.Item);

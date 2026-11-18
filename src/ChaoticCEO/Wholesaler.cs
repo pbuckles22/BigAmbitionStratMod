@@ -67,6 +67,12 @@ namespace ChaoticCEO
         /// <summary>Applied to the daily average only. Not applied to the stand floor, and not multiplied by the window.</summary>
         public const decimal SalesWindowMultiplier = 2.0m;
 
+        /// <summary>A selling display at or above this fraction of its capacity stays green.</summary>
+        public const decimal DisplayGreen = 2m / 3m;
+
+        /// <summary>Below this fraction the display is red. The band between red and green is yellow.</summary>
+        public const decimal DisplayRed = 1m / 3m;
+
         public const int MaxKeptWindow = 3;
 
         public const int DefaultGapDays = 2;
@@ -126,6 +132,26 @@ namespace ChaoticCEO
         public static int RescheduleDay(int currentDay)
         {
             return currentDay + 1;
+        }
+
+        public static int GreenUnits(int fixtureCap)
+        {
+            if (fixtureCap <= 0)
+            {
+                return 0;
+            }
+
+            return CeilUnits(fixtureCap * DisplayGreen);
+        }
+
+        public static int RedUnits(int fixtureCap)
+        {
+            if (fixtureCap <= 0)
+            {
+                return 0;
+            }
+
+            return CeilUnits(fixtureCap * DisplayRed);
         }
 
         public static int RetailStands(string? item)
@@ -341,13 +367,29 @@ namespace ChaoticCEO
             var salesTarget = CeilUnits(average * SalesWindowMultiplier);
             var floor = name == PaperBag ? RegisterFloor(stands) : StandFloor(stands);
             var target = floor + salesTarget;
+            var cap = fixtureCap < 0 ? 0 : fixtureCap;
+            var green = GreenUnits(cap);
+            var aboveGreen = green + CeilUnits(average);
+            if (aboveGreen > target)
+            {
+                target = aboveGreen;
+            }
+
+            // A known display that is under the green line, or would fall under it before the
+            // truck, is filled today. Capacity never cuts the line.
+            var stillGreen = green + CeilUnits(average * daysUntilTruck);
+            if (green > 0 && (stock < green || stock < stillGreen) && next != currentDay)
+            {
+                window = DefaultGapDays;
+                replace = true;
+                next = currentDay;
+            }
+
             var raw = target - stock;
             // HARD LOCK — Cover buy amount. Do not clip need to free space for paper OR goods.
             // 14.15 clipped goods to shelf room and starved displays (paper yellow, then soda empty
             // while stock sat in storage). 1.17.8.3 restored paper; 1.17.9.1 restores goods.
             // Free space is for FixtureFull / storage-shelf orders only — never for this line.
-            // fixtureCap stays on the signature for callers; it must not change need.
-            _ = fixtureCap;
             var need = raw < MinLineAmount ? MinLineAmount : raw;
 
             return new CoverPlan(
@@ -364,7 +406,7 @@ namespace ChaoticCEO
                 need,
                 stock,
                 target,
-                0);
+                cap);
         }
 
         private static int CeilUnits(decimal value)

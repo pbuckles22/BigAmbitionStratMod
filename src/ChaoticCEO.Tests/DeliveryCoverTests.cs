@@ -38,11 +38,11 @@ public class DeliveryCoverTests
         Assert.Equal(18m, plan.Average);
         Assert.Equal(2, plan.Gap);
         Assert.Equal(2, plan.Window);
-        Assert.Equal(36, plan.Target);
+        Assert.Equal(118, plan.Target);
         Assert.Equal(20, plan.OnHand);
-        Assert.Equal(16, plan.Need);
+        Assert.Equal(98, plan.Need);
         Assert.True(plan.Replace);
-        Assert.Equal(6, plan.NextDay);
+        Assert.Equal(5, plan.NextDay);
         Assert.False(plan.Guess);
     }
 
@@ -350,11 +350,11 @@ public class DeliveryCoverTests
         };
         var health = StoreHealth.Assess(Shelf(cargo));
 
-        Assert.Equal(36, plan.Target);
-        Assert.Equal(16, plan.Need);
+        Assert.Equal(118, plan.Target);
+        Assert.Equal(98, plan.Need);
         Assert.Contains("onHand=20", line);
-        Assert.Contains("target=36", line);
-        Assert.Contains("need=16", line);
+        Assert.Contains("target=118", line);
+        Assert.Contains("need=98", line);
         Assert.Equal("supply", step.Kind);
         Assert.Equal("wholesaler", step.Detail);
         Assert.True(health.Stocked);
@@ -377,16 +377,16 @@ public class DeliveryCoverTests
 
         Assert.Equal(1080, plan.Target);
         Assert.Equal(1049, plan.Need);
-        Assert.Equal(0, plan.FixtureCap);
-        Assert.Equal(7, plan.NextDay);
+        Assert.Equal(250, plan.FixtureCap);
+        Assert.Equal(6, plan.NextDay);
         Assert.Contains("sold=40|40", line);
         Assert.Contains("gap=6", line);
         Assert.Contains("window=2", line);
         Assert.Contains("onHand=31", line);
         Assert.Contains("need=1049", line);
-        Assert.Contains("cap=0", line);
+        Assert.Contains("cap=250", line);
         Assert.Contains("replace=true", line);
-        Assert.Contains("next=7", line);
+        Assert.Contains("next=6", line);
         Assert.DoesNotContain("need=10 ", line);
         Assert.Equal("wholesaler", step.Detail);
     }
@@ -446,7 +446,7 @@ public class DeliveryCoverTests
 
         Assert.Equal(236, plan.Target);
         Assert.Equal(226, plan.Need);
-        Assert.Equal(0, plan.FixtureCap);
+        Assert.Equal(30, plan.FixtureCap);
         Assert.True(plan.Need > 30);
     }
 
@@ -462,10 +462,10 @@ public class DeliveryCoverTests
                 new CoverSale(3, 16, open: true),
                 new CoverSale(4, 20, open: true),
             },
-            onHand: 54,
+            onHand: 140,
             fixtureCap: 150);
 
-        Assert.Equal(36, plan.Target);
+        Assert.Equal(118, plan.Target);
         Assert.Equal(10, plan.Need);
     }
 
@@ -729,7 +729,7 @@ public class DeliveryCoverTests
         Assert.Equal(1000, Wholesaler.RegisterCap);
         Assert.Equal(1166, plan.Target);
         Assert.Equal(800, plan.Need);
-        Assert.Equal(0, plan.FixtureCap);
+        Assert.Equal(1000, plan.FixtureCap);
         Assert.True(plan.Target > Wholesaler.RegisterCap / 2);
     }
 
@@ -757,6 +757,193 @@ public class DeliveryCoverTests
         Assert.Equal(1150, plan.Target);
         Assert.Equal(1150, plan.Need);
         Assert.Equal("supply", step.Kind);
+        Assert.Equal("wholesaler", step.Detail);
+    }
+
+    [Fact]
+    public void Cover_day_58_yellow_gift_shelf_pulls_the_truck_to_today()
+    {
+        // Harvest: day 58 at 4 AM, Gift (Cheap) 152/250 was yellow. Sold 77 then 68.
+        var plan = Wholesaler.Cover(
+            "ba:itemname_cheapgift",
+            currentDay: 58,
+            nextDeliveryDay: 64,
+            new[]
+            {
+                new CoverSale(56, 77, open: true),
+                new CoverSale(57, 68, open: true),
+            },
+            onHand: 152,
+            fixtureCap: 250,
+            stands: Wholesaler.RetailStands("ba:itemname_cheapgift"));
+
+        Assert.Equal(2m / 3m, Wholesaler.DisplayGreen);
+        Assert.Equal(1m / 3m, Wholesaler.DisplayRed);
+        Assert.Equal(167, Wholesaler.GreenUnits(250));
+        Assert.Equal(84, Wholesaler.RedUnits(250));
+        Assert.True(152 >= Wholesaler.RedUnits(250));
+        Assert.True(152 < Wholesaler.GreenUnits(250));
+        Assert.Equal(73m, plan.Average);
+        Assert.True(plan.Replace);
+        Assert.Equal(58, plan.NextDay);
+        Assert.True(plan.Target >= Wholesaler.GreenUnits(250) + 73);
+        Assert.Equal(plan.Target - 152, plan.Need);
+        Assert.Equal(250, plan.FixtureCap);
+    }
+
+    [Fact]
+    public void Cover_day_59_cheap_gift_above_green_pulls_the_five_day_truck_to_today()
+    {
+        // Harvest: day 59 at 15 7th Avenue. Gift (Cheap) onHand 272, cap 100, sold 68 then 69.
+        // The truck was day 64. Stock was above the green line and still came today.
+        var plan = Wholesaler.Cover(
+            "ba:itemname_cheapgift",
+            currentDay: 59,
+            nextDeliveryDay: 64,
+            new[]
+            {
+                new CoverSale(57, 68, open: true),
+                new CoverSale(58, 69, open: true),
+            },
+            onHand: 272,
+            fixtureCap: 100,
+            stands: Wholesaler.RetailStands("ba:itemname_cheapgift"));
+
+        Assert.Equal(67, Wholesaler.GreenUnits(100));
+        Assert.True(272 >= Wholesaler.GreenUnits(100));
+        Assert.Equal(69m, plan.Average);
+        Assert.Equal(5, plan.Gap);
+        Assert.Equal(2, plan.Window);
+        Assert.Equal(338, plan.Target);
+        Assert.Equal(66, plan.Need);
+        Assert.True(plan.Replace);
+        Assert.Equal(59, plan.NextDay);
+    }
+
+    [Fact]
+    public void Cover_day_62_restocked_cheap_gift_keeps_the_later_truck()
+    {
+        // Harvest: day 62 after that delivery. onHand 266 stayed above the line, so day 64 stayed.
+        var plan = Wholesaler.Cover(
+            "ba:itemname_cheapgift",
+            currentDay: 62,
+            nextDeliveryDay: 64,
+            new[]
+            {
+                new CoverSale(60, 71, open: true),
+                new CoverSale(61, 72, open: true),
+            },
+            onHand: 266,
+            fixtureCap: 100,
+            stands: Wholesaler.RetailStands("ba:itemname_cheapgift"));
+
+        Assert.Equal(72m, plan.Average);
+        Assert.Equal(2, plan.Gap);
+        Assert.Equal(344, plan.Target);
+        Assert.Equal(78, plan.Need);
+        Assert.False(plan.Replace);
+        Assert.Equal(64, plan.NextDay);
+        Assert.True(266 >= Wholesaler.GreenUnits(100) + 72 * 2);
+    }
+
+    [Fact]
+    public void Chain_day_59_above_green_pulls_today_and_playbook_supplies()
+    {
+        // Chain: open days → burn → green line → truck today → playbook
+        var plan = Wholesaler.Cover(
+            "ba:itemname_cheapgift",
+            currentDay: 59,
+            nextDeliveryDay: 64,
+            new[]
+            {
+                new CoverSale(57, 68, open: true),
+                new CoverSale(58, 69, open: true),
+            },
+            onHand: 272,
+            fixtureCap: 100,
+            stands: Wholesaler.RetailStands("ba:itemname_cheapgift"));
+        var supply = Supply.Decide(1, "ba:street_seventhavenue 15", "ba:itemname_cheapgift", null, null);
+        var step = Playbook.Decide(null, null, null, null, supply, null, null, null, null, null, null, null);
+
+        Assert.Equal(69m, plan.Average);
+        Assert.Equal(66, plan.Need);
+        Assert.True(plan.Replace);
+        Assert.Equal(59, plan.NextDay);
+        Assert.Equal("wholesaler", step.Detail);
+    }
+
+    [Fact]
+    public void Cover_a_green_count_that_would_cross_the_line_pulls_the_truck_to_today()
+    {
+        var plan = Wholesaler.Cover(
+            Umbrella,
+            currentDay: 6,
+            nextDeliveryDay: 7,
+            new[]
+            {
+                new CoverSale(4, 20, open: true),
+                new CoverSale(5, 20, open: true),
+            },
+            onHand: 180,
+            fixtureCap: 250,
+            stands: Wholesaler.RetailStands(Umbrella));
+
+        Assert.Equal(167, Wholesaler.GreenUnits(250));
+        Assert.True(180 >= Wholesaler.GreenUnits(250));
+        Assert.True(plan.Replace);
+        Assert.Equal(6, plan.NextDay);
+        Assert.True(plan.Target >= 167 + 20);
+    }
+
+    [Fact]
+    public void Chain_open_days_burn_to_the_green_line_and_the_truck_comes_today()
+    {
+        // Chain: open days → burn → green line → truck today → playbook
+        var plan = Wholesaler.Cover(
+            "ba:itemname_cheapgift",
+            currentDay: 58,
+            nextDeliveryDay: 64,
+            new[]
+            {
+                new CoverSale(56, 77, open: true),
+                new CoverSale(57, 68, open: true),
+            },
+            onHand: 152,
+            fixtureCap: 250,
+            stands: Wholesaler.RetailStands("ba:itemname_cheapgift"));
+        var supply = Supply.Decide(1, "ba:street_seventhavenue 15", "ba:itemname_cheapgift", null, null);
+        var step = Playbook.Decide(null, null, null, null, supply, null, null, null, null, null, null, null);
+
+        Assert.Equal(73m, plan.Average);
+        Assert.True(plan.Replace);
+        Assert.Equal(58, plan.NextDay);
+        Assert.True(plan.Need >= Wholesaler.GreenUnits(250) + 73 - 152);
+        Assert.Equal("wholesaler", step.Detail);
+    }
+
+    [Fact]
+    public void Chain_a_shelf_that_stays_green_keeps_the_truck_and_playbook_supplies()
+    {
+        // Chain: open days → burn → green hold → same truck → playbook
+        var plan = Wholesaler.Cover(
+            Umbrella,
+            currentDay: 5,
+            nextDeliveryDay: 7,
+            new[]
+            {
+                new CoverSale(3, 20, open: true),
+                new CoverSale(4, 20, open: true),
+            },
+            onHand: 400,
+            fixtureCap: 250,
+            stands: Wholesaler.RetailStands(Umbrella));
+        var supply = Supply.Decide(1, "ba:street_seventhavenue 15", Umbrella, null, null);
+        var step = Playbook.Decide(null, null, null, null, supply, null, null, null, null, null, null, null);
+
+        Assert.False(plan.Replace);
+        Assert.Equal(7, plan.NextDay);
+        Assert.True(400 - 20 * 2 >= Wholesaler.GreenUnits(250));
+        Assert.Equal(10, plan.Need);
         Assert.Equal("wholesaler", step.Detail);
     }
 

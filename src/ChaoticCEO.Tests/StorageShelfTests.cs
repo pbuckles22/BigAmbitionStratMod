@@ -614,7 +614,7 @@ public class StorageShelfTests
         var pick = StorageShelf.Order(Street, 22, shortfall, cash: 75900m, pending: false, inCargo: false, seat.Found, GameApi.Live());
 
         Assert.True(plan.Need > 0);
-        Assert.Equal(0, plan.FixtureCap);
+        Assert.Equal(30, plan.FixtureCap);
         Assert.True(shortfall > 0);
         Assert.Equal(0, plenty);
         Assert.True(pick.Ordered);

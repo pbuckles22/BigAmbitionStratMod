@@ -413,7 +413,7 @@ public class CloneTests
         Assert.Equal("", Clone.Record(dir.Path, undone));
         Assert.Equal(1, Count(File.ReadAllText(LoadLog.CeoLogPath(dir.Path)), "layout.cloned"));
         Assert.Equal(
-            "layout.cloned version=1.17.20 street=ba:street_main family=food blueprint=soda-line source=1 destination=4 call=BusinessLayoutSets.BusinessLayoutSetHelper.LoadBusinessLayoutSet",
+            "layout.cloned version=1.17.21 street=ba:street_main family=food blueprint=soda-line source=1 destination=4 call=BusinessLayoutSets.BusinessLayoutSetHelper.LoadBusinessLayoutSet",
             logged);
         Assert.DoesNotContain("LoadBusinessLayoutSet", statementsBefore);
         Assert.DoesNotContain("LoadBusinessLayoutSet", routesBefore);

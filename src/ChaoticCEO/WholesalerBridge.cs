@@ -244,7 +244,9 @@ namespace ChaoticCEO
                 touched = true;
             }
 
-            if (replacement != null && contract.nextDeliveryDay != replacement.NextDay)
+            if (replacement != null
+                && TimeAdvance.MoveDelivery(true, TimeAdvanceBridge.Skipping())
+                && contract.nextDeliveryDay != replacement.NextDay)
             {
                 var from = contract.nextDeliveryDay;
                 contract.nextDeliveryDay = replacement.NextDay;
