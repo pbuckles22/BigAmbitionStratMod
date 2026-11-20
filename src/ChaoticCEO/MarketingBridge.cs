@@ -78,8 +78,9 @@ namespace ChaoticCEO
                 SaveGameManager.MarkChange();
                 return true;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                CrashTrace.Seen(ex, "MarketingBridge.Start.1", "");
                 return false;
             }
         }
@@ -104,8 +105,9 @@ namespace ChaoticCEO
                 SaveGameManager.MarkChange();
                 return true;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                CrashTrace.Seen(ex, "MarketingBridge.Stop.1", "");
                 return false;
             }
         }
@@ -171,8 +173,9 @@ namespace ChaoticCEO
                 type = (MarketingTypeName)Enum.Parse(typeof(MarketingTypeName), name, ignoreCase: false);
                 return type != MarketingTypeName.None;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                CrashTrace.Seen(ex, "MarketingBridge.TryType.1", "");
                 return false;
             }
         }

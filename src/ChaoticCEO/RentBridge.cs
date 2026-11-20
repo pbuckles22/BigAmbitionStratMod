@@ -16,8 +16,9 @@ namespace ChaoticCEO
                 BuildingCommands.Command_RentBuilding(rent.Number, rent.Street);
                 return true;
             }
-            catch (System.Exception)
+            catch (System.Exception ex)
             {
+                CrashTrace.Seen(ex, "RentBridge.Live.1", "");
                 return false;
             }
         }

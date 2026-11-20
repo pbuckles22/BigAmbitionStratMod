@@ -64,8 +64,9 @@ namespace ChaoticCEO
                 BusinessLayoutSetHelper.LoadBusinessLayoutSet(pick.Layout);
                 return true;
             }
-            catch (System.Exception)
+            catch (System.Exception ex)
             {
+                CrashTrace.Seen(ex, "StarterBridge.Live.1", "");
                 return false;
             }
         }

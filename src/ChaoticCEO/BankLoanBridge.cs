@@ -88,8 +88,9 @@ namespace ChaoticCEO
                 SaveGameManager.MarkChange();
                 return true;
             }
-            catch (System.Exception)
+            catch (System.Exception ex)
             {
+                CrashTrace.Seen(ex, "BankLoanBridge.Take.1", "");
                 return false;
             }
         }
@@ -130,8 +131,9 @@ namespace ChaoticCEO
                 SaveGameManager.MarkChange();
                 return true;
             }
-            catch (System.Exception)
+            catch (System.Exception ex)
             {
+                CrashTrace.Seen(ex, "BankLoanBridge.Repay.1", "");
                 return false;
             }
         }

@@ -41,8 +41,9 @@ namespace ChaoticCEO
                 SaveGameManager.MarkChange();
                 return true;
             }
-            catch (System.Exception)
+            catch (System.Exception ex)
             {
+                CrashTrace.Seen(ex, "BillBridge.Live.1", "");
                 return false;
             }
         }

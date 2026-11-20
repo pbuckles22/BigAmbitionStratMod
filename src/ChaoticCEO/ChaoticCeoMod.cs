@@ -45,7 +45,10 @@ namespace ChaoticCEO
         public Task OnLoadAsync(ModContext context)
         {
             var localAppData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+            CrashTrace.Reset();
+            SpendDump.Reset();
             LoadLog.StartSession(localAppData);
+            CrashTrace.Bind(localAppData);
             _localAppData = localAppData;
             Controls.OnResumeSkip = () =>
             {
@@ -79,64 +82,81 @@ namespace ChaoticCEO
 
         private void OnFrame()
         {
-            DumpOnHotkey();
+            CrashTrace.Arm(_localAppData);
+            var pulse = Pulse();
+            CrashTrace.Begin();
+            CrashTrace.Guard("Dump", pulse, DumpOnHotkey);
             if (!_panelFailed)
             {
                 try
                 {
                     PanelView.Ensure(_localAppData);
+                    CrashTrace.Note("Panel", pulse);
                 }
                 catch (Exception ex)
                 {
                     _panelFailed = true;
-                    File.AppendAllText(
-                        LoadLog.CeoLogPath(_localAppData),
-                        "panel.failed " + ex.GetType().Name + " " + ex.Message + Environment.NewLine);
+                    CrashTrace.Seen(ex, "Panel", pulse);
                 }
             }
 
-            StopOnHotkey();
-            ResumeOnHotkey();
-            StopOnEscape();
+            CrashTrace.Guard("Stop", pulse, StopOnHotkey);
+            CrashTrace.Guard("Resume", pulse, ResumeOnHotkey);
+            CrashTrace.Guard("Escape", pulse, StopOnEscape);
             if (!FrameTick.Due(Time.unscaledTime, _nextTickTime))
             {
                 return;
             }
 
             _nextTickTime = FrameTick.Next(Time.unscaledTime);
-            LiveDump.BeginGame(_localAppData);
-            LiveDump.HoldNeeds(_needs, _localAppData);
-            StaffHoldBridge.Hold(_staff, _localAppData);
-            LiveDump.TryRent(_rents, _localAppData);
-            LiveDump.TryLayout(_layouts, _localAppData);
-            LiveDump.TryOps(_ops, _localAppData);
-            LiveDump.TryCapacity(_capacity, _localAppData);
-            LiveDump.TryWholesaler(_contracts, _localAppData);
-            LiveDump.TryCashier(_cashiers, _localAppData);
-            HeadcountBridge.Hold(_headcount, _localAppData);
-            LiveDump.TryRestaff(_cashiers, _localAppData);
-            LiveDump.ReleaseCleaner(_cleaners, _mornings);
-            LiveDump.TryCleaner(_cleaners, _localAppData);
-            LiveDump.TrySurvey(_localAppData);
-            LiveDump.TryCover(_mornings, _localAppData);
-            LiveDump.TryLoan(_loans, _localAppData);
-            LiveDump.TryDemand(_demands, _localAppData);
-            LiveDump.TryTax(_taxes, _localAppData);
-            LiveDump.TryTime(_time, _localAppData);
-            LiveDump.TryMarketing(_marketing, _time, _localAppData);
-            LiveDump.TryTakeover(_marketing, _takeovers, _localAppData);
-            if (LiveDump.Roll(_days, _localAppData) != null)
+            CrashTrace.Guard("BeginGame", pulse, () => LiveDump.BeginGame(_localAppData));
+            CrashTrace.Guard("HoldNeeds", pulse, () => LiveDump.HoldNeeds(_needs, _localAppData));
+            CrashTrace.Guard("StaffHold", pulse, () => StaffHoldBridge.Hold(_staff, _localAppData));
+            CrashTrace.Guard("TryRent", pulse, () => LiveDump.TryRent(_rents, _localAppData));
+            CrashTrace.Guard("TryLayout", pulse, () => LiveDump.TryLayout(_layouts, _localAppData));
+            CrashTrace.Guard("TryOps", pulse, () => LiveDump.TryOps(_ops, _localAppData));
+            CrashTrace.Guard("TryCapacity", pulse, () => LiveDump.TryCapacity(_capacity, _localAppData));
+            CrashTrace.Guard("TryWholesaler", pulse, () => LiveDump.TryWholesaler(_contracts, _localAppData));
+            CrashTrace.Guard("TryCashier", pulse, () => LiveDump.TryCashier(_cashiers, _localAppData));
+            CrashTrace.Guard("Headcount", pulse, () => HeadcountBridge.Hold(_headcount, _localAppData));
+            CrashTrace.Guard("TryRestaff", pulse, () => LiveDump.TryRestaff(_cashiers, _localAppData));
+            CrashTrace.Guard("ReleaseCleaner", pulse, () => LiveDump.ReleaseCleaner(_cleaners, _mornings));
+            CrashTrace.Guard("TryCleaner", pulse, () => LiveDump.TryCleaner(_cleaners, _localAppData));
+            CrashTrace.Guard("TrySurvey", pulse, () => LiveDump.TrySurvey(_localAppData));
+            CrashTrace.Guard("TryCover", pulse, () => LiveDump.TryCover(_mornings, _localAppData));
+            CrashTrace.Guard("TryLoan", pulse, () => LiveDump.TryLoan(_loans, _localAppData));
+            CrashTrace.Guard("TryDemand", pulse, () => LiveDump.TryDemand(_demands, _localAppData));
+            CrashTrace.Guard("TryTax", pulse, () => LiveDump.TryTax(_taxes, _localAppData));
+            CrashTrace.Guard("TryTime", pulse, () => LiveDump.TryTime(_time, _localAppData));
+            CrashTrace.Guard("TryMarketing", pulse, () => LiveDump.TryMarketing(_marketing, _time, _localAppData));
+            CrashTrace.Guard("TryTakeover", pulse, () => LiveDump.TryTakeover(_marketing, _takeovers, _localAppData));
+            string? rolled = null;
+            CrashTrace.Guard("Roll", pulse, () => rolled = LiveDump.Roll(_days, _localAppData));
+            if (rolled != null)
             {
-                LiveDump.FillSlots(_slots, _localAppData);
-                LiveDump.ConnectStores(_stores, _localAppData);
-                LiveDump.AssignPlans(_plans, _localAppData);
-                LiveDump.RestockWarehouses(_restock, _localAppData);
+                CrashTrace.Guard("FillSlots", pulse, () => LiveDump.FillSlots(_slots, _localAppData));
+                CrashTrace.Guard("ConnectStores", pulse, () => LiveDump.ConnectStores(_stores, _localAppData));
+                CrashTrace.Guard("AssignPlans", pulse, () => LiveDump.AssignPlans(_plans, _localAppData));
+                CrashTrace.Guard("Restock", pulse, () => LiveDump.RestockWarehouses(_restock, _localAppData));
                 // Fit-out once per day roll — never per frame (scene scans stall the clock).
-                LiveDump.TryFitOut(_localAppData);
+                CrashTrace.Guard("TryFitOut", pulse, () => LiveDump.TryFitOut(_localAppData));
                 if (Autopilot.Enabled && !TimeAdvance.LeaveSkipAlone(TimeAdvanceBridge.Skipping()))
                 {
-                    LiveDump.RunAutopilot(_localAppData);
+                    CrashTrace.Guard("RunAutopilot", pulse, () => LiveDump.RunAutopilot(_localAppData));
                 }
+            }
+        }
+
+        private static string Pulse()
+        {
+            try
+            {
+                var current = SaveGameManager.Current;
+                return CrashTrace.Pulse(current == null ? 0 : current.Day);
+            }
+            catch (Exception)
+            {
+                return CrashTrace.Pulse(0);
             }
         }
 

@@ -16,8 +16,9 @@ namespace ChaoticCEO
                 BusinessHelper.UpdateCustomerCapacity(registration);
                 return true;
             }
-            catch (System.Exception)
+            catch (System.Exception ex)
             {
+                CrashTrace.Seen(ex, "CapacityBridge.Live.1", "");
                 return false;
             }
         }

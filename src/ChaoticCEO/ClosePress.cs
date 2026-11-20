@@ -188,8 +188,9 @@ namespace ChaoticCEO
                     new Address(building.StreetName, building.StreetNumber));
                 controller?.UpdateSign();
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                CrashTrace.Seen(ex, "CloseBridge.Shut.1", "");
                 // The business is already shut down. A missing sign refresh still leaves the data closed.
             }
         }

@@ -16,8 +16,9 @@ namespace ChaoticCEO
                     : 0m;
                 return (current, back);
             }
-            catch (System.Exception)
+            catch (System.Exception ex)
             {
+                CrashTrace.Seen(ex, "TaxBillBridge.Due.1", "");
                 return (0m, 0m);
             }
         }
@@ -44,8 +45,9 @@ namespace ChaoticCEO
 
                 return ok;
             }
-            catch (System.Exception)
+            catch (System.Exception ex)
             {
+                CrashTrace.Seen(ex, "TaxBillBridge.Live.1", "");
                 return false;
             }
         }

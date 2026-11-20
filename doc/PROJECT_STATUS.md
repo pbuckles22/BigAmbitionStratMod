@@ -2,13 +2,13 @@
 
 **Human-readable current state.** Keep in sync with [AGENT_HANDOFF.md](../AGENT_HANDOFF.md) → *Current state* when milestones ship.
 
-**Last updated:** 2026-11-17
+**Last updated:** 2026-11-20
 
 ---
 
 ## Summary
 
-**BigAmbitionStratMod** — Version **1.17.23** (one stage sim **14.13**). The sim steps close and tax through the live decides. Cost is the day-step wages and rent. A wholesaler contract counts as supplied. Headless. Next is **14.21** price floor. **14.9.7** waits for Stage 2. **10.6** can start. **10.4** code stays stashed. Rules: [requirements/strategy.md](requirements/strategy.md).
+**BigAmbitionStratMod** — Version **1.18.2** (named spend **15.2** and crash trail **15.1**, human PASS 2026-11-20). A day change names every business, item, home, property, empire charge, and wallet move. A thrown morning step appends `crash.caught`. Next is **14.21** when asked. Remote setup waits. **10.4** code stays stashed. Rules: [requirements/strategy.md](requirements/strategy.md).
 
 ---
 
@@ -16,7 +16,8 @@
 
 | Branch | Role |
 |--------|------|
-| **`main`** | Integration branch. Version 1.17.23. One stage sim **14.13**. Land `a8d9ad7`. Headless. |
+| **`feature/15.1-crash-trace`** | Crash trail and named spend. Version 1.18.2. Human PASS 2026-11-20. Kept after CMPH. |
+| **`main`** | Integration branch. Version 1.18.2. Crash trail **15.1** and named spend **15.2**. |
 | **`feature/14.13-stage-sim`** | One stage sim. Version 1.17.23. Headless. Kept after CMPH. |
 | **`feature/14.12-truck-load`** | Truck load, payback, and run facts. Version 1.17.22. Human PASS 2026-11-17. Kept after CMPH. |
 | **`fix/display-stays-green`** | Display stays green. Version 1.17.21. Human PASS 2026-11-17. Kept after CMPH. |

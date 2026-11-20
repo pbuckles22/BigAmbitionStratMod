@@ -455,7 +455,7 @@ namespace ChaoticCEO
 
         private void Fail(Exception ex)
         {
-            Note("panel.failed " + ex.GetType().Name + " " + OneLine(ex.Message));
+            CrashTrace.Seen(ex, "Panel", OneLine(ex.Message));
         }
 
         private void Note(string line)

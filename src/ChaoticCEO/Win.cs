@@ -55,13 +55,14 @@ namespace ChaoticCEO
             }
 
             var line = Line(day, netWorth);
+            var trail = CrashTrace.WinLine(day, netWorth);
             var directory = Path.GetDirectoryName(path);
             if (!string.IsNullOrEmpty(directory))
             {
                 Directory.CreateDirectory(directory);
             }
 
-            File.AppendAllText(path, line + Environment.NewLine);
+            File.AppendAllText(path, line + Environment.NewLine + trail + Environment.NewLine);
             return line;
         }
     }

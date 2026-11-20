@@ -64,8 +64,9 @@ namespace ChaoticCEO
                 SaveGameManager.MarkChange();
                 return true;
             }
-            catch (System.Exception)
+            catch (System.Exception ex)
             {
+                CrashTrace.Seen(ex, "WholesalerBridge.Live.1", "");
                 return false;
             }
         }
@@ -665,8 +666,9 @@ namespace ChaoticCEO
                         building,
                         contract.itemsToDeliver);
                 }
-                catch (System.Exception)
+                catch (System.Exception ex)
                 {
+                    CrashTrace.Seen(ex, "WholesalerBridge.FlushDueShelves.1", "");
                     GameManager.ChangeMoneySafe(cost, info);
                     continue;
                 }
@@ -895,8 +897,9 @@ namespace ChaoticCEO
                 var wealth = Helpers.PlayerHelper.GetPersonalWealth();
                 return System.Convert.ToDecimal(wealth.cash, CultureInfo.InvariantCulture);
             }
-            catch (System.Exception)
+            catch (System.Exception ex)
             {
+                CrashTrace.Seen(ex, "WholesalerBridge.Cash.1", "");
                 return 0m;
             }
         }
@@ -1384,8 +1387,9 @@ namespace ChaoticCEO
 
                 return true;
             }
-            catch (System.Exception)
+            catch (System.Exception ex)
             {
+                CrashTrace.Seen(ex, "WholesalerBridge.MoveOnto.1", "");
                 return false;
             }
         }

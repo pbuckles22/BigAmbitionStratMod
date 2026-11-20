@@ -1,5 +1,34 @@
 # Test plan (TEST_PLAN.md)
 
+## Named spend (1.18.2)
+
+On each day change, the closed day appends named money lines to `%LocalAppData%\ChaoticCEO\ceo.log`. `spend.store` is one business: `kind` is `retail`, `service`, or `cost`, and `check` is sales − goods − ongoing. `ongoing` is wages + rent + marketing + theft + license. `gap` on that line is the game profit minus `check`. `spend.item` names each sale and each goods purchase. `spend.roll` sums profit by retail, service, cost, and other. `spend.home` and `spend.property` name each address. `spend.empire` is business + real estate − residential + loan + parking + unassigned + salary + insurance + headhunter. Interest is on that line and is not in `check`. `spend.move` is one transaction from that day, with its type, categories, address, and kind. `spend.cash` is the wallet: `delta` is close − open, and `gap` is delta − the sum of those moves. The first roll of a session has `open=missing`. A closed day with no statement appends `spend.blocked reason=no_summary`.
+
+Tier 1: `SpendMathTests`. Unit: the day-64 gift shop and warehouse, interest left out of the total, license and theft inside ongoing, a profit gap, moves that cover the wallet, a missing open, and the kind split. Chain: `statements → daily cost → spend kind → named spend → cash gap` and `store family → spend kind → retail and cost → empire check`. Command: the Tier 1 `dotnet test` suite.
+
+Human check: city view, after a load of this build. Let the day change twice (a short skip is enough).
+
+1. Restart Big Ambitions so this build loads. Continue the save and let two mornings pass.
+2. Open `%LocalAppData%\ChaoticCEO\ceo.log`.
+3. Find `mod.loaded version=1.18.2`, then the second `day.rolled` block.
+4. **PASS if** that block has `spend.store` with `kind=retail` for the gift shop, `spend.roll`, `spend.empire`, and `spend.cash` whose `delta` is close − open. A dollar that is not a store, a home, a property, or a move shows up as `gap` on `spend.cash` or `spend.empire`. **FAIL if** the version is still `1.18.1`, or the only money lines are `cost.read` and `csv.written`.
+5. Evidence: `spend.store`, `spend.item`, `spend.roll`, `spend.empire`, `spend.move`, `spend.cash`.
+6. Version marker: public `1.18.2`.
+
+The first morning of the session has `spend.cash` `open=missing`. The wallet math starts on the second morning.
+
+Human PASS 2026-11-20 on 1.18.2 at 15 7th Avenue. Loaded day 64, F6 on day 69. Gift shop `kind=retail`. Empire gap 0 on days 64–68. Cash gap 0 on days 65, 66, and 68, and −0.003 on day 67. Day 64 moves −8516.834 against a wallet drop of 8516.829 from the prior session’s open 12300.51. Eight delivery contracts of 1200 have no street.
+
+Measured: `dotnet test` 1251 passed (prior 1240). Release `1.18.2+643`.
+
+## Crash trail (1.18.1)
+
+A thrown morning step, and a bridge catch that used to return with no line, appends one `crash.caught` line to `%LocalAppData%\ChaoticCEO\ceo.log`. The line names `where`, the exception type, `slug=UNHANDLED`, the day, `payload`, `trail`, `message`, and `stack`. The same exception waits until the next day. The first tick appends one `trace.armed` line. Crossing the win appends one `win.trail` line with the same steps. The tick continues after the catch.
+
+Tier 1: `CrashTraceTests`. Unit: the caught line names the exception, the payload, and the steps. The same exception logs once until the day changes. Chain: `load → morning steps → crash` and `load → morning steps → win`. Command: the Tier 1 `dotnet test` suite.
+
+Human check: city view, after a load. `mod.loaded version=1.18.1` and one `trace.armed version=1.18.1`. If a step throws, one `crash.caught` line with `type`, `trail`, and `payload`. PASS if both boot lines are present and a thrown step names itself. FAIL if the log stays on `1.17.23` or a thrown step leaves no `crash.caught` line.
+
 ## One stage sim (1.17.23)
 
 The stage sim steps close and tax through the live decides. Cost is yesterday’s wages and rent from the day step. A wholesaler contract counts as supplied. Close wins over tax. Headless. No game boot.

@@ -123,8 +123,9 @@ namespace ChaoticCEO
                 SaveGameManager.MarkChange();
                 return true;
             }
-            catch (System.Exception)
+            catch (System.Exception ex)
             {
+                CrashTrace.Seen(ex, "TimeAdvanceBridge.Care.1", "");
                 return false;
             }
         }
@@ -156,8 +157,9 @@ namespace ChaoticCEO
                 DistanceField?.SetValue(machine, rate);
                 return rate;
             }
-            catch (System.Exception)
+            catch (System.Exception ex)
             {
+                CrashTrace.Seen(ex, "TimeAdvanceBridge.Start.1", "");
                 return 0f;
             }
         }
@@ -185,8 +187,9 @@ namespace ChaoticCEO
                 var machine = Machine();
                 return machine != null && machine.isRunning;
             }
-            catch (System.Exception)
+            catch (System.Exception ex)
             {
+                CrashTrace.Seen(ex, "TimeAdvanceBridge.Running.1", "");
                 return false;
             }
         }
@@ -203,8 +206,9 @@ namespace ChaoticCEO
                     cancelled = true;
                 }
             }
-            catch (System.Exception)
+            catch (System.Exception ex)
             {
+                CrashTrace.Seen(ex, "TimeAdvanceBridge.Cancel.1", "");
             }
 
             ReleaseClock();
@@ -223,8 +227,9 @@ namespace ChaoticCEO
                 var screenUp = InstanceBehavior<UI.Load.LoadingScreen>.Instance != null;
                 return TimeAdvance.CityReady(UI.Load.LoadScene.isLoading, screenUp);
             }
-            catch (System.Exception)
+            catch (System.Exception ex)
             {
+                CrashTrace.Seen(ex, "TimeAdvanceBridge.SceneReady.1", "");
                 return false;
             }
         }
@@ -270,8 +275,9 @@ namespace ChaoticCEO
 
                 clock.Set(new GameSpeed(false, TimeSpeed.Normal, false));
             }
-            catch (System.Exception)
+            catch (System.Exception ex)
             {
+                CrashTrace.Seen(ex, "TimeAdvanceBridge.ReleaseClock.1", "");
             }
         }
 
@@ -295,8 +301,9 @@ namespace ChaoticCEO
                     bed.PerformActivity();
                     return;
                 }
-                catch (System.Exception)
+                catch (System.Exception ex)
                 {
+                    CrashTrace.Seen(ex, "TimeAdvanceBridge.SleepBed.1", "");
                 }
             }
         }

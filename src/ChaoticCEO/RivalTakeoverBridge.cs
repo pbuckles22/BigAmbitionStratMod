@@ -70,8 +70,9 @@ namespace ChaoticCEO
                 SaveGameManager.MarkChange();
                 return true;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                CrashTrace.Seen(ex, "RivalTakeoverBridge.Decline.1", "");
                 return false;
             }
         }

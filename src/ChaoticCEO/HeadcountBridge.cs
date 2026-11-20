@@ -100,8 +100,9 @@ namespace ChaoticCEO
                     return cashier;
                 }
             }
-            catch (System.Exception)
+            catch (System.Exception ex)
             {
+                CrashTrace.Seen(ex, "HeadcountBridge.Role.1", "");
                 return null;
             }
 
@@ -138,15 +139,17 @@ namespace ChaoticCEO
                     match.RemoveEmployee();
                     removed++;
                 }
-                catch (System.Exception)
+                catch (System.Exception ex)
                 {
+                    CrashTrace.Seen(ex, "HeadcountBridge.Release.1", "");
                     try
                     {
                         current.EmployeeInstances.Remove(match);
                         removed++;
                     }
-                    catch (System.Exception)
+                    catch (System.Exception inner)
                     {
+                        CrashTrace.Seen(inner, "HeadcountBridge.Release.2", "");
                     }
                 }
             }
@@ -200,8 +203,9 @@ namespace ChaoticCEO
                 {
                     scheduled = employee.IsAssignedToAnyWorkShift();
                 }
-                catch (System.Exception)
+                catch (System.Exception ex)
                 {
+                    CrashTrace.Seen(ex, "HeadcountBridge.Read.1", "");
                     scheduled = false;
                 }
 
@@ -218,8 +222,9 @@ namespace ChaoticCEO
                         seats.Add(new HeadcountSeat(employee.id, Cleaner.Skill, hourly, scheduled));
                     }
                 }
-                catch (System.Exception)
+                catch (System.Exception ex)
                 {
+                    CrashTrace.Seen(ex, "HeadcountBridge.Read.2", "");
                 }
             }
 

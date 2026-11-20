@@ -296,8 +296,9 @@ namespace ChaoticCEO
                 var moved = new StoreDelivery(heal.Store, "", heal.Warehouse, family, true, heal.Call);
                 return RedoBridge.Live(moved);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                CrashTrace.Seen(ex, "AuditBridge.Live.1", "");
                 return false;
             }
         }

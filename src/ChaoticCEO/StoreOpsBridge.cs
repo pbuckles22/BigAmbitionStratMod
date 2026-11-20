@@ -44,8 +44,9 @@ namespace ChaoticCEO
 
                 return true;
             }
-            catch (System.Exception)
+            catch (System.Exception ex)
             {
+                CrashTrace.Seen(ex, "StoreOpsBridge.Live.1", "");
                 reason = "exception";
                 return false;
             }
@@ -114,8 +115,9 @@ namespace ChaoticCEO
                     && cleaner.EmployeeId.Length > 0
                     && cleaner.Shift;
             }
-            catch (System.Exception)
+            catch (System.Exception ex)
             {
+                CrashTrace.Seen(ex, "StoreOpsBridge.HasCleaner.1", "");
                 return false;
             }
         }
@@ -281,8 +283,9 @@ namespace ChaoticCEO
                     employee != null && employee.gameObject.activeInHierarchy,
                     employee == null ? "" : employee.GetType().Name);
             }
-            catch (System.Exception)
+            catch (System.Exception ex)
             {
+                CrashTrace.Seen(ex, "StoreOpsBridge.ReadCleaner.1", "");
                 return null;
             }
         }

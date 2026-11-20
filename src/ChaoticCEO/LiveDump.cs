@@ -716,8 +716,9 @@ namespace ChaoticCEO
                     GameApi.Live(),
                     registration.businessTypeName);
             }
-            catch (System.Exception)
+            catch (System.Exception ex)
             {
+                CrashTrace.Seen(ex, "LiveDump.TryLayout.1", "");
                 return null;
             }
 
@@ -1578,8 +1579,9 @@ namespace ChaoticCEO
                             GameApi.Live(),
                             registration.businessTypeName);
                     }
-                    catch (Exception)
+                    catch (Exception ex)
                     {
+                        CrashTrace.Seen(ex, "LiveDump.RunFitOutStep.1", "");
                         return null;
                     }
 
@@ -2194,6 +2196,10 @@ namespace ChaoticCEO
             ReadStores(current, needs, sales);
             var parts = ReadCost(current);
             DailyCost.Record(localAppData, DailyCost.Line(current.Day, Cash(current), parts));
+            foreach (var spend in SpendDump.Lines(current))
+            {
+                DailyCost.Record(localAppData, spend);
+            }
             var cargos = ReadGarageCargo(current);
             DailyCost.Record(localAppData, TruckLoad.Line(current.Day, cargos));
             var payback = PaybackRate.Best(ReadYields(current));

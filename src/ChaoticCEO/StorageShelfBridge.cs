@@ -157,6 +157,7 @@ namespace ChaoticCEO
             }
             catch (System.Exception ex)
             {
+                CrashTrace.Seen(ex, "StorageShelfBridge.MoveShipping.1", "");
                 reason = "error:" + ex.GetType().Name;
                 return false;
             }
@@ -227,8 +228,9 @@ namespace ChaoticCEO
                 var cached = ItemsGetter.GetByName(item, true);
                 return cached == null ? 0 : cached.boxSize;
             }
-            catch (System.Exception)
+            catch (System.Exception ex)
             {
+                CrashTrace.Seen(ex, "StorageShelfBridge.BoxSize.1", "");
                 return 0;
             }
         }
@@ -462,6 +464,7 @@ namespace ChaoticCEO
             }
             catch (System.Exception ex)
             {
+                CrashTrace.Seen(ex, "StorageShelfBridge.Place.1", "");
                 reason = "error:" + ex.GetType().Name;
                 return false;
             }
@@ -830,8 +833,9 @@ namespace ChaoticCEO
                 SaveGameManager.MarkChange();
                 return true;
             }
-            catch (System.Exception)
+            catch (System.Exception ex)
             {
+                CrashTrace.Seen(ex, "StorageShelfBridge.PackOne.1", "");
                 return false;
             }
         }
@@ -1128,6 +1132,7 @@ namespace ChaoticCEO
             }
             catch (System.Exception ex)
             {
+                CrashTrace.Seen(ex, "StorageShelfBridge.Floor.1", "");
                 reason = "error:" + ex.GetType().Name;
                 return null;
             }
@@ -1199,8 +1204,9 @@ namespace ChaoticCEO
                     }
                 }
             }
-            catch (System.Exception)
+            catch (System.Exception ex)
             {
+                CrashTrace.Seen(ex, "StorageShelfBridge.Size.1", "");
                 size = null;
             }
 

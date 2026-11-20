@@ -614,8 +614,9 @@ namespace ChaoticCEO
 
                 return ApplyGap(ParseGap(File.ReadAllText(path)));
             }
-            catch (System.Exception)
+            catch (System.Exception ex)
             {
+                CrashTrace.Seen(ex, "StorageShelf.LoadGap.1", "");
                 return ApplyGap(0f);
             }
         }

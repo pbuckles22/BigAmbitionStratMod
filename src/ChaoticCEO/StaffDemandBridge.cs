@@ -24,8 +24,9 @@ namespace ChaoticCEO
 
                 return employee.GiveBonus();
             }
-            catch (System.Exception)
+            catch (System.Exception ex)
             {
+                CrashTrace.Seen(ex, "StaffDemandBridge.Live.1", "");
                 return false;
             }
         }
@@ -73,8 +74,9 @@ namespace ChaoticCEO
                     }
                 }
             }
-            catch (System.Exception)
+            catch (System.Exception ex)
             {
+                CrashTrace.Seen(ex, "StaffDemandBridge.Due.1", "");
                 return due;
             }
 

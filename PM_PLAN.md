@@ -1,6 +1,6 @@
 # PM_PLAN — BigAmbitionStratMod
 
-In-game advisor for one Big Ambitions save, then a new-game guide and autopilot. Version scheme `MAJOR.EPIC.COUNTER`. Current public version **1.17.23**. The first ship of a new epic phase is `1.N.1`. When an epic runs after a higher-numbered epic, **EPIC** is `max(shipped_epic) + 1` (Epic 9 after 1.13.x → 1.14.1). Never go backwards.
+In-game advisor for one Big Ambitions save, then a new-game guide and autopilot. Version scheme `MAJOR.EPIC.COUNTER`. Current public version **1.18.2**. The first ship of a new epic phase is `1.N.1`. When an epic runs after a higher-numbered epic, **EPIC** is `max(shipped_epic) + 1` (Epic 9 after 1.13.x → 1.14.1). Never go backwards.
 
 ## Context
 
@@ -182,11 +182,11 @@ Starts after Epic **8**. Crossing **WinNetWorth** is a milestone. The autopilot 
 - **10.6** `[ ]` Stage 3 — clusters + truck pressure. Starts after **14.13**. ≥5 healthy supplied stores; the **14.8** district cap; TruckBusy → service/office; Close after FixDays+RedDays. Stall covers Stage 3 gates. **Out:** Real-estate buy.
 - **10.7** `[ ]` Stage 4 → win. Stage4Cash + all Ready + emptySlots=0; live buy by payback; `win.reached` once; telemetry still advances. Stall covers Stage 4 gates. **Out:** LLM / RL. Rival property buyout stays here, not in **14.8**.
 
-**Next:** **14.21** price floor when asked. **14.9.7** waits for Stage 2. **10.6** can start; **10.4** stays stashed. No `$100M` soak until **10.7**.
+**Next:** **14.21** price floor when asked. Remote setup waits. The BridgeResult sweep is not a story. **14.9.7** waits for Stage 2. **10.4** stays stashed. No `$100M` soak until **10.7**.
 
 ## Epic 14 — Live readings
 
-**Status:** in progress. **14.2** through **14.8**, **14.9.1** through **14.9.6**, and **14.11** through **14.20** are on this land. **14.9** stays open at the Stage 2 register (**14.9.7**). **14.21** is next.
+**Status:** in progress. **14.2** through **14.8**, **14.9.1** through **14.9.6**, and **14.11** through **14.20** are on this land. **14.9** stays open at the Stage 2 register (**14.9.7**). **15.1** and **15.2** are landed. **14.21** waits.
 
 There is no separate “update the strategy” epic. The notes in `doc/requirements/strategy/` are the source. Stage 1 line sizing is `logistics_stocking_strategy_1_5x_buffer_2_open_day_moving_average.md`. The older logistics note keeps warehouse handover where it does not set a line amount. `strategy.md` keeps one sentence per rule. Epic **8** does not tune every number. Epic **10** stays open. **10.4** still ends at three healthy goods stores. **Out:** machine learning, LLM, RL. Public versions start at `1.17.1`. One decision per story. A later story adds its own playbook pick. It does not redo an earlier story’s reading.
 
@@ -224,7 +224,14 @@ There is no separate “update the strategy” epic. The notes in `doc/requireme
 - **14.25** `[ ]` One pricing plan per neighborhood and business type. Two neighborhoods do not share a plan. The create call stays `PricingManagersPlanList.AddPlan`. Headless pick. The save write waits on **7.9**. Chain: `neighborhood → type → plan`. **Out:** the staff-plan write (**7.9**).
 - **14.26** `[ ]` Empire thermostat. **EmpireDefenseMargin** = 22% for **ProfitProofDays** adds **EmpireMarginBoost** = 5 points to each floor and switches contested items to a match. **EmpireConquestMargin** = 35% with cash above the reserve allows the **14.24** undercut. Headless. Chain: `empire margin → defense or conquest → 14.24`. **Out:** pricing under the floor. Rival buyout stays **10.7**.
 
-**Next:** **14.21** price floor when asked. **14.9.7** waits for Stage 2. **14.22–14.26** are written and wait. **10.6** can start. Do not stack onto the stashed **10.4** tree.
+**Next:** **14.21** price floor when asked. Remote setup waits. The BridgeResult sweep is not a story. **14.9.7** waits for Stage 2. **14.22–14.26** are written and wait. Do not stack onto the stashed **10.4** tree.
+
+## Epic 15 — Crash trail
+
+**Status:** in progress. **15.1** and **15.2** are landed. Public versions are `1.18.COUNTER`. The BridgeResult sweep, saga ids, and circuit breakers are not stories yet. Remote setup stays the next epic.
+
+- **15.1** `[x]` Crash trail. A thrown exception on the morning tick, and a bridge catch that used to return with no line, appends one `crash.caught` line to `ceo.log`. The line names `where`, the exception type, `slug=UNHANDLED`, the day, the payload, the steps of this tick (`trail`), the message, and the stack. The same exception does not append again until the day changes. The first tick appends one `trace.armed` line. Crossing the win appends one `win.trail` line with those steps. The tick continues after the catch. Chain: `load → morning steps → crash` and `load → morning steps → win`. Version 1.18.1. Human PASS 2026-11-20 on 1.18.2: `mod.loaded` and `trace.armed`. No step threw, so no `crash.caught`. **Out:** remote fit-out, a second log file, circuit breakers.
+- **15.2** `[x]` Named spend. On the day roll, the closed day appends one `spend.store` line per business (`kind` retail, service, or cost; sales, goods, wages, rent, marketing, theft, license, ongoing, profit, check, gap), one `spend.item` line per named sale or goods purchase, one `spend.roll` (retail, service, cost, other), one `spend.home` and one `spend.property` per address, one `spend.empire` (business + real estate − residential + loan + parking + unassigned + salary + insurance + headhunter; interest is named and stays out of that check), one `spend.move` per transaction on that day, and one `spend.cash` (open, close, delta, moves, gap). A missing summary appends `spend.blocked reason=no_summary`. The first roll of a session has `open=missing`. Chain: `statements → daily cost → spend kind → named spend → cash gap` and `store family → spend kind → retail and cost → empire check`. Version 1.18.2. Human PASS 2026-11-20 on 1.18.2 at 15 7th Avenue. Days 65–68 cash gap 0, 0, −0.003, 0. Day 64 moves −8516.834; eight $1200 delivery contracts have no street. **Out:** remote fit-out.
 
 Operating model (keep these when you replace this plan): `.cursor/rules/` ship commands (UCPH, CMPH, SWAT), human check, plan-coordinate versioning, long-run harvest (`testing.mdc`), and the chain harness and prefix (`integration-chain.mdc`). Do not delete them to “clean up” a new clone.
 

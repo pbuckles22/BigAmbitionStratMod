@@ -22,8 +22,9 @@ namespace ChaoticCEO
                     && station.employeeInstance != null
                     && !string.IsNullOrEmpty(station.employeeInstance.id);
             }
-            catch (System.Exception)
+            catch (System.Exception ex)
             {
+                CrashTrace.Seen(ex, "CashierBridge.HasCashier.1", "");
                 return false;
             }
         }
@@ -95,8 +96,9 @@ namespace ChaoticCEO
                 var poachedList = registration.poachedEmployees;
                 poached = poachedList != null && poachedList.Count > 0;
             }
-            catch (System.Exception)
+            catch (System.Exception ex)
             {
+                CrashTrace.Seen(ex, "CashierBridge.Departure.1", "");
                 resigned = false;
                 retired = false;
                 poached = false;
@@ -139,8 +141,9 @@ namespace ChaoticCEO
 
                 return ScheduleOnItem(registration, pick, out reason);
             }
-            catch (System.Exception)
+            catch (System.Exception ex)
             {
+                CrashTrace.Seen(ex, "CashierBridge.Fill.1", "");
                 reason = "exception";
                 return false;
             }
@@ -227,8 +230,9 @@ namespace ChaoticCEO
                 station.AssignEmployee(person, hired);
                 return station.employeeInstance != null;
             }
-            catch (System.Exception)
+            catch (System.Exception ex)
             {
+                CrashTrace.Seen(ex, "CashierBridge.Live.1", "");
                 reason = "exception";
                 return false;
             }
