@@ -16,7 +16,7 @@
 
 | Branch | Role |
 |--------|------|
-| **`main`** | Integration branch. Version 1.18.4. Rack brake **15.11**. Land recorded after this CMPH. |
+| **`main`** | Integration branch. Version 1.18.4. Rack brake **15.11**. Land `7a2dd38`. |
 | **`feature/15.11-rack-goods-reconcile`** | Rack brake and goods reconcile. Version 1.18.4. Human PASS 2026-11-20. Kept after CMPH. |
 | **`feature/15.3-named-block`** | Named block. Version 1.18.3. Human PASS 2026-11-20. Kept after CMPH. |
 | **`feature/15.1-crash-trace`** | Crash trail and named spend. Version 1.18.2. Human PASS 2026-11-20. Kept after CMPH. |
