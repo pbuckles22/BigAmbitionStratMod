@@ -153,7 +153,7 @@ public class DailyCostTests
             line);
         Assert.Equal(
             "audit.summary version=" + LoadLog.Version
-                + " day=2 unconnected=0 emptySlots=0 dry=0 mixed=0 unstaffed=0 missingPlans=1 cashBelowReserve=0 pinMismatch=0 healed=0",
+                + " day=2 unconnected=0 emptySlots=0 dry=0 mixed=0 unstaffed=0 missingPlans=1 cashBelowReserve=0 pinMismatch=0 bareLeases=0 healed=0",
             summary);
     }
 

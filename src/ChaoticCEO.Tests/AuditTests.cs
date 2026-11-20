@@ -75,7 +75,7 @@ public class AuditTests
         Assert.Equal(0, Audit.PinMismatch("", LoadLog.PinnedBuild));
         Assert.Equal(
             "audit.summary version=" + LoadLog.Version
-                + " day=1016 unconnected=1 emptySlots=2 dry=3 mixed=1 unstaffed=3 missingPlans=1 cashBelowReserve=1 pinMismatch=1 healed=0",
+                + " day=1016 unconnected=1 emptySlots=2 dry=3 mixed=1 unstaffed=3 missingPlans=1 cashBelowReserve=1 pinMismatch=1 bareLeases=0 healed=0",
             Audit.Summary(1016, new AuditCounts(1, 2, 3, 1, 3, 1, 1, 1), 0));
     }
 

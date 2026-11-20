@@ -8,7 +8,7 @@
 
 ## Summary
 
-**BigAmbitionStratMod** — Version **1.18.2** (named spend **15.2** and crash trail **15.1**, human PASS 2026-11-20). A day change names every business, item, home, property, empire charge, and wallet move. A thrown morning step appends `crash.caught`. Next is **14.21** when asked. Remote setup waits. **10.4** code stays stashed. Rules: [requirements/strategy.md](requirements/strategy.md).
+**BigAmbitionStratMod** — Version **1.18.3** (named block **15.3** landed). A silent refusal on rent, fit-out, or ops appends `block.named` with a slug. Next is **15.11** rack/goods reconcile. Remote open waits on **15.6**. **14.21** waits. **10.4** code stays stashed. Rules: [requirements/strategy.md](requirements/strategy.md).
 
 ---
 
@@ -16,8 +16,9 @@
 
 | Branch | Role |
 |--------|------|
+| **`main`** | Integration branch. Version 1.18.3. Named block **15.3**. Land TBD this CMPH. |
+| **`feature/15.3-named-block`** | Named block. Version 1.18.3. Human PASS 2026-11-20. Kept after CMPH. |
 | **`feature/15.1-crash-trace`** | Crash trail and named spend. Version 1.18.2. Human PASS 2026-11-20. Kept after CMPH. |
-| **`main`** | Integration branch. Version 1.18.2. Crash trail **15.1** and named spend **15.2**. Land `ee80920`. |
 | **`feature/14.13-stage-sim`** | One stage sim. Version 1.17.23. Headless. Kept after CMPH. |
 | **`feature/14.12-truck-load`** | Truck load, payback, and run facts. Version 1.17.22. Human PASS 2026-11-17. Kept after CMPH. |
 | **`fix/display-stays-green`** | Display stays green. Version 1.17.21. Human PASS 2026-11-17. Kept after CMPH. |

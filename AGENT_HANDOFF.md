@@ -138,10 +138,10 @@ When shipping: update **PM_PLAN**, **doc/PROJECT_STATUS.md**, and **Current stat
 
 ## Current state
 
-- **Product:** Version **1.18.2** (named spend **15.2**, crash trail **15.1**). Epic 15 stays open. Epic 14 stays open. Ladder: [PM_PLAN.md](PM_PLAN.md). Handoff: [doc/handoff/0127-HANDOFF-2026-11-20_1224.md](doc/handoff/0127-HANDOFF-2026-11-20_1224.md).
-- **On:** `origin/main @ ee80920`. **10.4** code stays stashed. The price-floor WIP is in `git stash`. https://github.com/pbuckles22/BigAmbitionStratMod
-- **Next:** **14.21** price floor when asked. Remote setup waits. The BridgeResult sweep is not a story. **14.9.7** waits for Stage 2. No `$100M` soak until **10.7**.
-- **Blockers:** Do not pop the **10.4** stash. Do not pop the old staff-hold stash. Do not pop the old **14.12** stash. **7.9** blocks **14.10**. Do not clip paper to register free space or drop RegisterCap to 200. Turn `StaffHold.Enabled` off before tuning HR.
+- **Product:** Version **1.18.3** (named block **15.3** landed). Epic 15 open. Epic 16 waits on **15.6**. Epic 14 stays open. Ladder: [PM_PLAN.md](PM_PLAN.md). Handoff: [doc/handoff/0128-HANDOFF-2026-11-20_1503.md](doc/handoff/0128-HANDOFF-2026-11-20_1503.md).
+- **On:** `origin/main` (after this CMPH). Feature branch `feature/15.3-named-block` kept. **10.4** code stays stashed. The price-floor WIP is in `git stash`. https://github.com/pbuckles22/BigAmbitionStratMod
+- **Next:** **15.11** rack/goods reconcile when asked. Then **15.9** / **15.10**. Remote open waits on **15.6**. **14.21** waits. **14.9.7** waits for Stage 2. No `$100M` soak until **10.7**.
+- **Blockers:** Do not pop the **10.4** stash. Do not pop the old staff-hold stash. Do not pop the old **14.12** stash. **7.9** blocks **14.10**. Do not clip paper to register free space or drop RegisterCap to 200. Turn `StaffHold.Enabled` off before tuning HR. Empty `doc/gemini/dropzone` breaks the pytest save gate until a ledger `.hsg` is restored.
 
 ## Run and test
 

@@ -141,7 +141,7 @@ namespace ChaoticCEO
 
             if (!Started(station))
             {
-                reason = "notstarted";
+                reason = "ops-station-not-initialized-frame0";
                 return false;
             }
 

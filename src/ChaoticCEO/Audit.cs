@@ -71,7 +71,8 @@ namespace ChaoticCEO
             int unstaffed,
             int missingPlans,
             int cashBelowReserve,
-            int pinMismatch)
+            int pinMismatch,
+            int bareLeases = 0)
         {
             Unconnected = unconnected;
             EmptySlots = emptySlots;
@@ -81,6 +82,7 @@ namespace ChaoticCEO
             MissingPlans = missingPlans;
             CashBelowReserve = cashBelowReserve;
             PinMismatch = pinMismatch;
+            BareLeases = bareLeases < 0 ? 0 : bareLeases;
         }
 
         public int Unconnected { get; }
@@ -98,6 +100,8 @@ namespace ChaoticCEO
         public int CashBelowReserve { get; }
 
         public int PinMismatch { get; }
+
+        public int BareLeases { get; }
     }
 
     public sealed class AuditGuard
@@ -210,7 +214,8 @@ namespace ChaoticCEO
             IReadOnlyList<HqSeat>? seats,
             IReadOnlyList<HiredHand>? hired,
             IReadOnlyList<string>? stores,
-            IReadOnlyList<string>? staffed)
+            IReadOnlyList<string>? staffed,
+            int bareLeases = 0)
         {
             Stops = stops ?? Array.Empty<DeliveryStop>();
             Holds = holds ?? Array.Empty<WarehouseHold>();
@@ -224,6 +229,7 @@ namespace ChaoticCEO
             Hired = hired ?? Array.Empty<HiredHand>();
             Stores = stores ?? Array.Empty<string>();
             Staffed = staffed ?? Array.Empty<string>();
+            BareLeases = bareLeases < 0 ? 0 : bareLeases;
         }
 
         public IReadOnlyList<DeliveryStop> Stops { get; }
@@ -250,6 +256,8 @@ namespace ChaoticCEO
 
         public IReadOnlyList<string> Staffed { get; }
 
+        public int BareLeases { get; }
+
         public AuditWorld WithStops(IReadOnlyList<DeliveryStop>? stops)
         {
             return new AuditWorld(
@@ -264,7 +272,8 @@ namespace ChaoticCEO
                 Seats,
                 Hired,
                 Stores,
-                Staffed);
+                Staffed,
+                BareLeases);
         }
     }
 
@@ -434,6 +443,7 @@ namespace ChaoticCEO
                 + " missingPlans=" + counts.MissingPlans.ToString(CultureInfo.InvariantCulture)
                 + " cashBelowReserve=" + counts.CashBelowReserve.ToString(CultureInfo.InvariantCulture)
                 + " pinMismatch=" + counts.PinMismatch.ToString(CultureInfo.InvariantCulture)
+                + " bareLeases=" + counts.BareLeases.ToString(CultureInfo.InvariantCulture)
                 + " healed=" + healed.ToString(CultureInfo.InvariantCulture);
         }
 
@@ -743,7 +753,8 @@ namespace ChaoticCEO
                 Unstaffed(world.Stores, staffed),
                 MissingPlans(api, pricing, seats, world.Hired),
                 CashBelowReserve(guard.Cash, guard.DailyCost),
-                PinMismatch(guard.Build, LoadLog.PinnedBuild));
+                PinMismatch(guard.Build, LoadLog.PinnedBuild),
+                world.BareLeases);
         }
 
         private static int SpendRoom(decimal cash, decimal dailyCost)

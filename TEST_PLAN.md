@@ -1,5 +1,24 @@
 # Test plan (TEST_PLAN.md)
 
+## Named block (1.18.3)
+
+A silent refusal on the rent, fit-out, or ops path appends one `block.named` line to `%LocalAppData%\ChaoticCEO\ceo.log`. The line names `where`, `slug`, day, street, and number. `Inside` false is `slug=not-inside`. Other silent returns on that path use `no-rent`, `no-lot`, `no-layout`, `no-pick`, `no-items`, `waiting`, `bad-place`, or `ops-station-not-initialized-frame0`. A rented lot with a blank business type stays in store health and counts as `bareLeases` on `audit.summary`.
+
+Tier 1: `NamedBlockTests`. Unit: the not-inside line, each slug, the Frame-0 retry slug, bare-lease count, and the record write. Chain: `load → morning steps → named block` and the fit-out/ops share of that line. Command: the Tier 1 `dotnet test` suite.
+
+Human check: city view, after a restart onto this build. One morning is enough. Stay outside a second lot if the morning tries fit-out there.
+
+1. Restart Big Ambitions so this build loads.
+2. Continue a save (or a new game) and let one morning run while not standing inside a bare rented lot the morning tries to open.
+3. Open `%LocalAppData%\ChaoticCEO\ceo.log`.
+4. **PASS if** `mod.loaded version=1.18.3` and a fit-out or layout refusal writes `block.named` with `slug=not-inside` (or another named slug on that path). **FAIL if** the version is still `1.18.2`, or a refused layout leaves no `block.named` line.
+5. Evidence: `block.named` (`where`, `slug`, street, number).
+6. Version marker: public `1.18.3`.
+
+Human PASS 2026-11-20 on 1.18.3. `mod.loaded version=1.18.3 build=3682`. Day 1 `block.named where=layout slug=not-inside street=ba:street_seventhavenue number=15` (twice).
+
+Measured: `dotnet test` 1257 passed. Release build succeeded. Public `1.18.3`.
+
 ## Named spend (1.18.2)
 
 On each day change, the closed day appends named money lines to `%LocalAppData%\ChaoticCEO\ceo.log`. `spend.store` is one business: `kind` is `retail`, `service`, or `cost`, and `check` is sales − goods − ongoing. `ongoing` is wages + rent + marketing + theft + license. `gap` on that line is the game profit minus `check`. `spend.item` names each sale and each goods purchase. `spend.roll` sums profit by retail, service, cost, and other. `spend.home` and `spend.property` name each address. `spend.empire` is business + real estate − residential + loan + parking + unassigned + salary + insurance + headhunter. Interest is on that line and is not in `check`. `spend.move` is one transaction from that day, with its type, categories, address, and kind. `spend.cash` is the wallet: `delta` is close − open, and `gap` is delta − the sum of those moves. The first roll of a session has `open=missing`. A closed day with no statement appends `spend.blocked reason=no_summary`.

@@ -8,7 +8,7 @@ public class TelemetryTests
     public void Telemetry_one_day_stays_one_row()
     {
         using var dir = new TempTelemetry();
-        var summary = "audit.summary version=x day=1016 unconnected=1 emptySlots=2 dry=3 mixed=1 unstaffed=4 missingPlans=5 cashBelowReserve=6 pinMismatch=0 healed=1";
+        var summary = "audit.summary version=x day=1016 unconnected=1 emptySlots=2 dry=3 mixed=1 unstaffed=4 missingPlans=5 cashBelowReserve=6 pinMismatch=0 bareLeases=0 healed=1";
         var heal = "audit.healed version=x day=1016 action=connect store=ba:street_fourthavenue 28 warehouse=W11 item=ba:itemname_haircareproduct call=Add dry=false";
         Seed(dir.Path, heal + "\n" + summary + "\n");
         var bar = TopBar.Line(1016, 1000m, 20m, 7m, 1, true, 1);
@@ -53,7 +53,7 @@ public class TelemetryTests
             dir.Path,
             "audit.healed version=x day=1016 action=connect store=a warehouse=W1 item=hair call=Add dry=false\n"
                 + "audit.healed version=x day=1016 action=slot warehouse=W7 slot=1 order=Order assign=Assign driver= dry=false\n"
-                + "audit.summary version=x day=1016 unconnected=1 emptySlots=2 dry=0 mixed=0 unstaffed=0 missingPlans=0 cashBelowReserve=0 pinMismatch=0 healed=2\n");
+                + "audit.summary version=x day=1016 unconnected=1 emptySlots=2 dry=0 mixed=0 unstaffed=0 missingPlans=0 cashBelowReserve=0 pinMismatch=0 bareLeases=0 healed=2\n");
         var bar = TopBar.Line(1016, 10m, 20m, -40.5m, 2, true, 0);
         var health = "Stores supplied unconnected=1  Slots filled emptySlots=2  Plans present missingPlans=0  Last heal healed=2 action=slot";
         var controls = Controls.Row(autopilot: true, dryRun: true);
@@ -62,7 +62,7 @@ public class TelemetryTests
         Seed(
             dir.Path,
             File.ReadAllText(LoadLog.CeoLogPath(dir.Path))
-                + "audit.summary version=x day=1017 unconnected=0 emptySlots=0 dry=0 mixed=0 unstaffed=0 missingPlans=0 cashBelowReserve=0 pinMismatch=0 healed=0\n");
+                + "audit.summary version=x day=1017 unconnected=0 emptySlots=0 dry=0 mixed=0 unstaffed=0 missingPlans=0 cashBelowReserve=0 pinMismatch=0 bareLeases=0 healed=0\n");
         var nextBar = TopBar.Line(1017, 11m, 21m, 4m, 2, true, 0);
         var nextHealth = "Stores supplied unconnected=0  Slots filled emptySlots=0  Plans present missingPlans=0  Last heal healed=0 none";
         var second = Telemetry.Record(dir.Path, nextBar, nextHealth, controls);

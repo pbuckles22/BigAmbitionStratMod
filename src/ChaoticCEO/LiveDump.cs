@@ -590,7 +590,33 @@ namespace ChaoticCEO
                 Seats(current),
                 Hired(current),
                 stores,
-                staffed);
+                staffed,
+                CountBareLeases(current));
+        }
+
+        private static int CountBareLeases(GameInstance current)
+        {
+            if (current?.BuildingRegistrations == null)
+            {
+                return 0;
+            }
+
+            var facts = new List<BareLeaseFact>();
+            foreach (var building in current.BuildingRegistrations)
+            {
+                if (building == null)
+                {
+                    continue;
+                }
+
+                facts.Add(new BareLeaseFact(
+                    building.RentedByPlayer,
+                    building.businessTypeName,
+                    building.StreetName,
+                    building.StreetNumber));
+            }
+
+            return BareLease.Count(facts);
         }
 
         private static void RegisterLists(
@@ -697,13 +723,18 @@ namespace ChaoticCEO
 
             if (!LastRent(localAppData, out var street, out var number))
             {
-                return null;
+                return NamedBlock.Record(localAppData, current.Day, "layout", "no-rent", "", 0);
             }
 
             var registration = FindLot(current, street, number);
-            if (registration == null || !StarterBridge.Inside(new BuildingRent(street, number, true, "")))
+            if (registration == null)
             {
-                return null;
+                return NamedBlock.Record(localAppData, current.Day, "layout", "no-lot", street, number);
+            }
+
+            if (!StarterBridge.Inside(new BuildingRent(street, number, true, "")))
+            {
+                return NamedBlock.Record(localAppData, current.Day, "layout", "not-inside", street, number);
             }
 
             var rented = new BuildingRent(street, number, true, GameApi.Live().Call("clone"));
@@ -722,9 +753,14 @@ namespace ChaoticCEO
                 return null;
             }
 
+            if (Starter.Hold(chosen))
+            {
+                return NamedBlock.Record(localAppData, current.Day, "layout", "no-pick", street, number);
+            }
+
             if (!Starter.Settle(watch, current, chosen))
             {
-                return null;
+                return NamedBlock.Record(localAppData, current.Day, "layout", "no-pick", street, number);
             }
 
             if (!chosen.Loaded)
@@ -779,7 +815,7 @@ namespace ChaoticCEO
 
             if (!LastLayout(localAppData, out var street, out var number, out var skipped))
             {
-                return null;
+                return NamedBlock.Record(localAppData, current.Day, "ops", "no-layout", "", 0);
             }
 
             if (skipped)
@@ -791,7 +827,7 @@ namespace ChaoticCEO
             var registration = FindRented(current, street, number);
             if (registration == null)
             {
-                return null;
+                return NamedBlock.Record(localAppData, current.Day, "ops", "no-lot", street, number);
             }
 
             var rented = new BuildingRent(street, number, true, "");
@@ -800,7 +836,7 @@ namespace ChaoticCEO
                 watch.Note();
                 if (watch.Waiting())
                 {
-                    return null;
+                    return NamedBlock.Record(localAppData, current.Day, "ops", "waiting", street, number);
                 }
 
                 watch.Mark(current);
@@ -823,12 +859,17 @@ namespace ChaoticCEO
             StoreOps.CleanerLine(localAppData, rented, current.Day, placed);
             if (!live)
             {
+                if (reason == "ops-station-not-initialized-frame0")
+                {
+                    NamedBlock.Record(localAppData, current.Day, "ops", reason, street, number);
+                }
+
                 if (StoreOps.Retry(reason))
                 {
                     watch.Note();
                     if (watch.Waiting())
                     {
-                        return null;
+                        return NamedBlock.Record(localAppData, current.Day, "ops", "waiting", street, number);
                     }
                 }
 
@@ -1557,7 +1598,7 @@ namespace ChaoticCEO
         {
             if (!SplitPlace(place, out var street, out var number))
             {
-                return null;
+                return NamedBlock.Record(localAppData, current.Day, "fitout", "bad-place", place ?? "", 0);
             }
 
             var rented = new BuildingRent(street, number, true, "");
@@ -1567,7 +1608,7 @@ namespace ChaoticCEO
                 {
                     if (!StarterBridge.Inside(rented))
                     {
-                        return null;
+                        return NamedBlock.Record(localAppData, current.Day, "fitout", "not-inside", street, number);
                     }
 
                     StarterPick chosen;
@@ -1587,7 +1628,7 @@ namespace ChaoticCEO
 
                     if (Starter.Hold(chosen))
                     {
-                        return null;
+                        return NamedBlock.Record(localAppData, current.Day, "fitout", "no-pick", street, number);
                     }
 
                     if (!chosen.Loaded)
@@ -1608,7 +1649,7 @@ namespace ChaoticCEO
                 {
                     if (!StoreOpsBridge.HasItems(registration))
                     {
-                        return null;
+                        return NamedBlock.Record(localAppData, current.Day, "fitout", "no-items", street, number);
                     }
 
                     var chosen = Starter.Choose(Starter.StageOne(), alreadyOpen: false, GameApi.Live());
@@ -1624,6 +1665,11 @@ namespace ChaoticCEO
 
                     if (!StoreOpsBridge.Live(registration, assigned, out var reason, out var placed))
                     {
+                        if (reason == "ops-station-not-initialized-frame0")
+                        {
+                            NamedBlock.Record(localAppData, current.Day, "fitout", reason, street, number);
+                        }
+
                         return StoreOps.Miss(localAppData, assigned, rented, current.Day, reason);
                     }
 
@@ -2961,17 +3007,18 @@ namespace ChaoticCEO
             {
                 if (building == null
                     || !building.RentedByPlayer
-                    || string.IsNullOrEmpty(building.businessTypeName)
                     || string.IsNullOrEmpty(building.StreetName)
                     || building.StreetNumber <= 0)
                 {
                     continue;
                 }
 
-                var family = StoreFamily.For(building.businessTypeName);
-                var mode = Modes.Of(building.businessTypeName);
+                var type = building.businessTypeName ?? "";
+                var family = StoreFamily.For(type);
+                var mode = Modes.Of(type);
                 var goods = family == "specialty" || family == "food" || family == "durables" || family == "service";
-                if (!goods && mode != BusinessMode.Workstation)
+                var bare = type.Length == 0;
+                if (!bare && !goods && mode != BusinessMode.Workstation)
                 {
                     continue;
                 }
@@ -2979,25 +3026,29 @@ namespace ChaoticCEO
                 var place = building.StreetName
                     + " "
                     + building.StreetNumber.ToString(CultureInfo.InvariantCulture);
-                var cargo = FixtureCargo(building);
-                var needed = Wholesaler.Catalog(building.businessTypeName);
+                var cargo = bare ? new Dictionary<string, int>() : FixtureCargo(building);
+                var needed = bare ? new List<string>() : Wholesaler.Catalog(type);
                 var staff = SenseStaff(building);
-                var todayOrder = OrderDaySales(building, current.Day);
-                var priorOrder = OrderDaySales(building, current.Day - 1);
+                var todayOrder = bare ? StoreHealth.OrderDaySales(0, 0m) : OrderDaySales(building, current.Day);
+                var priorOrder = bare ? StoreHealth.OrderDaySales(0, 0m) : OrderDaySales(building, current.Day - 1);
                 var sales = StoreHealth.CompletedDaySales(
                     todayOrder.Customers,
                     todayOrder.Revenue,
                     priorOrder.Customers,
                     priorOrder.Revenue);
-                var statementProfits = StoreHealth.StatementProfits(
-                    Days(current),
-                    building.StreetName,
-                    building.StreetNumber,
-                    current.Day);
-                var incomeProfits = OpenDayProfits(building);
+                var statementProfits = bare
+                    ? Array.Empty<decimal>()
+                    : StoreHealth.StatementProfits(
+                        Days(current),
+                        building.StreetName,
+                        building.StreetNumber,
+                        current.Day);
+                var incomeProfits = bare ? Array.Empty<decimal>() : OpenDayProfits(building);
                 var rawProfits = statementProfits.Count > 0 ? statementProfits : incomeProfits;
                 var profits = StoreHealth.DropIncompleteTail(rawProfits, sales.Customers);
-                var stations = Modes.Read(building.businessTypeName, PlacedNames(building));
+                var stations = bare
+                    ? Modes.Read("", Array.Empty<string>())
+                    : Modes.Read(type, PlacedNames(building));
                 rows.Add(
                     StoreHealth.Assess(
                         new StoreFacts(
@@ -3005,14 +3056,14 @@ namespace ChaoticCEO
                             building.temporarilyClosed,
                             needed,
                             cargo,
-                            staff.RegisterStaffed,
-                            staff.CleanerStaffed,
-                            staff.Satisfaction,
-                            scheduledOpen: true,
+                            bare ? false : staff.RegisterStaffed,
+                            bare ? false : staff.CleanerStaffed,
+                            bare ? 0f : staff.Satisfaction,
+                            scheduledOpen: !bare,
                             dailyCustomers: sales.Customers,
                             dailyRevenue: sales.Revenue,
                             recentOpenDayProfits: profits,
-                            businessType: building.businessTypeName,
+                            businessType: type,
                             stylingStations: stations.Styling,
                             completeWorkstations: stations.Workstations)));
             }

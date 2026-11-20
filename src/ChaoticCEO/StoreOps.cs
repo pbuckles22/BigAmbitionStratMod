@@ -282,6 +282,7 @@ namespace ChaoticCEO
         public static bool Retry(string? reason)
         {
             return reason == "notstarted"
+                || reason == "ops-station-not-initialized-frame0"
                 || reason == "nostation"
                 || reason == "nolocker"
                 || reason == "nouniform"
