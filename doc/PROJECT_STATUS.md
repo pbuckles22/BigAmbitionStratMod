@@ -17,7 +17,7 @@
 | Branch | Role |
 |--------|------|
 | **`feature/15.1-crash-trace`** | Crash trail and named spend. Version 1.18.2. Human PASS 2026-11-20. Kept after CMPH. |
-| **`main`** | Integration branch. Version 1.18.2. Crash trail **15.1** and named spend **15.2**. |
+| **`main`** | Integration branch. Version 1.18.2. Crash trail **15.1** and named spend **15.2**. Land `ee80920`. |
 | **`feature/14.13-stage-sim`** | One stage sim. Version 1.17.23. Headless. Kept after CMPH. |
 | **`feature/14.12-truck-load`** | Truck load, payback, and run facts. Version 1.17.22. Human PASS 2026-11-17. Kept after CMPH. |
 | **`fix/display-stays-green`** | Display stays green. Version 1.17.21. Human PASS 2026-11-17. Kept after CMPH. |
