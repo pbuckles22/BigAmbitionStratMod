@@ -16,7 +16,7 @@
 
 | Branch | Role |
 |--------|------|
-| **`main`** | Integration branch. Version 1.18.3. Named block **15.3**. Land TBD this CMPH. |
+| **`main`** | Integration branch. Version 1.18.3. Named block **15.3**. Land `6d97d4d`. |
 | **`feature/15.3-named-block`** | Named block. Version 1.18.3. Human PASS 2026-11-20. Kept after CMPH. |
 | **`feature/15.1-crash-trace`** | Crash trail and named spend. Version 1.18.2. Human PASS 2026-11-20. Kept after CMPH. |
 | **`feature/14.13-stage-sim`** | One stage sim. Version 1.17.23. Headless. Kept after CMPH. |
