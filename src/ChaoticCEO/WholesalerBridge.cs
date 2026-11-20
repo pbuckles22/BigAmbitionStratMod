@@ -10,6 +10,23 @@ namespace ChaoticCEO
 {
     public static class WholesalerBridge
     {
+        private static readonly Dictionary<string, HandSeen> SeenStock = new Dictionary<string, HandSeen>();
+
+        private static readonly Dictionary<string, int> LastPull = new Dictionary<string, int>();
+
+        private sealed class HandSeen
+        {
+            public HandSeen(int day, int onHand)
+            {
+                Day = day;
+                OnHand = onHand;
+            }
+
+            public int Day { get; }
+
+            public int OnHand { get; }
+        }
+
         public static bool Live(WholesalerPick? pick, string businessType)
         {
             if (pick == null || !pick.Signed || pick.Wholesale.Length == 0 || pick.Street.Length == 0 || pick.Number <= 0)
@@ -99,7 +116,13 @@ namespace ChaoticCEO
         public static int Maintain(string? localAppData, int day)
         {
             var current = SaveGameManager.Current;
-            if (current?.DeliveryContracts == null || day <= 0)
+            if (current == null || day <= 0)
+            {
+                return 0;
+            }
+
+            RecordFurniture(localAppData, day, current);
+            if (current.DeliveryContracts == null)
             {
                 return 0;
             }
@@ -151,6 +174,7 @@ namespace ChaoticCEO
             var rackTarget = 0;
             var rackCap = 0;
             CoverPlan? replacement = null;
+            var replacementRose = false;
             var stocks = new List<ShelfStock>();
             var shelves = Shelves(building);
             foreach (var item in contract.items)
@@ -225,13 +249,26 @@ namespace ChaoticCEO
                     rackCap = sellingCap;
                 }
 
+                var roseNow = NoteGoods(
+                    localAppData,
+                    day,
+                    contract.businessAddress.streetName,
+                    contract.businessAddress.streetNumber,
+                    item.itemName,
+                    plan.Need,
+                    onHand,
+                    contract.nextDeliveryDay);
                 if (plan.Replace)
                 {
                     replacement = plan;
+                    replacementRose = roseNow;
                 }
             }
 
             var boxesNeeded = StorageShelf.BoxesNeeded(stocks);
+            var shelfVerdict = StorageShelf.Verdict(
+                boxesNeeded,
+                building == null ? 0 : StorageShelfBridge.PlacedCount(building));
             StorageShelf.LoadGap(localAppData);
             RecordGap(localAppData, day);
             RecordBoxes(localAppData, day, contract, building, stocks, boxesNeeded);
@@ -240,19 +277,31 @@ namespace ChaoticCEO
                 touched = true;
             }
 
-            if (AttendRack(localAppData, day, contract, building, rackTarget, rackCap, cash))
+            if (AttendRack(localAppData, day, contract, building, rackTarget, rackCap, cash, shelfVerdict))
             {
                 touched = true;
             }
 
             if (replacement != null
-                && TimeAdvance.MoveDelivery(true, TimeAdvanceBridge.Skipping())
-                && contract.nextDeliveryDay != replacement.NextDay)
+                && TimeAdvance.MoveDelivery(true, TimeAdvanceBridge.Skipping()))
             {
-                var from = contract.nextDeliveryDay;
-                contract.nextDeliveryDay = replacement.NextDay;
-                touched = true;
-                RecordReschedule(localAppData, day, contract, from);
+                var street = contract.businessAddress.streetName ?? "";
+                var number = contract.businessAddress.streetNumber;
+                var next = GoodsReconcile.NextDelivery(
+                    replacement.Replace,
+                    day,
+                    replacement.NextDay,
+                    contract.nextDeliveryDay,
+                    LastPullDay(street, number, day),
+                    replacementRose);
+                if (next != contract.nextDeliveryDay)
+                {
+                    var from = contract.nextDeliveryDay;
+                    contract.nextDeliveryDay = next;
+                    touched = true;
+                    RememberPull(street, number, day);
+                    RecordReschedule(localAppData, day, contract, from);
+                }
             }
 
             return touched;
@@ -808,6 +857,180 @@ namespace ChaoticCEO
             return true;
         }
 
+        public static List<OpenFurniture> FurnitureOpen(GameInstance? current)
+        {
+            var rows = new List<OpenFurniture>();
+            if (current?.FurnitureDeliveryContracts == null)
+            {
+                return rows;
+            }
+
+            foreach (var contract in current.FurnitureDeliveryContracts)
+            {
+                if (contract == null)
+                {
+                    continue;
+                }
+
+                var itemName = "";
+                var price = 0;
+                if (contract.itemsToDeliver != null)
+                {
+                    foreach (var item in contract.itemsToDeliver)
+                    {
+                        if (item == null)
+                        {
+                            continue;
+                        }
+
+                        itemName = item.itemName ?? "";
+                        price = System.Convert.ToInt32(
+                            System.Math.Round(
+                                System.Convert.ToDecimal(item.pricePerUnit, CultureInfo.InvariantCulture),
+                                System.MidpointRounding.AwayFromZero),
+                            CultureInfo.InvariantCulture);
+                        break;
+                    }
+                }
+
+                rows.Add(new OpenFurniture(
+                    contract.fromAddress == null ? "" : contract.fromAddress.streetName,
+                    contract.fromAddress == null ? 0 : contract.fromAddress.streetNumber,
+                    contract.toAddress == null ? "" : contract.toAddress.streetName,
+                    contract.toAddress == null ? 0 : contract.toAddress.streetNumber,
+                    itemName,
+                    contract.dayOfDelivery,
+                    price));
+            }
+
+            return rows;
+        }
+
+        private static void RecordFurniture(string? localAppData, int day, GameInstance current)
+        {
+            foreach (var row in FurnitureOpen(current))
+            {
+                GoodsReconcile.RecordOnce(localAppData, GoodsReconcile.OpenLine(day, row));
+            }
+        }
+
+        private static bool NoteGoods(
+            string? localAppData,
+            int day,
+            string? street,
+            int number,
+            string item,
+            int need,
+            int onHand,
+            int deliveryDay)
+        {
+            var key = (street ?? "") + "|" + number.ToString(CultureInfo.InvariantCulture) + "|" + item;
+            var rose = false;
+            if (SeenStock.TryGetValue(key, out var seen) && seen.Day > day)
+            {
+                SeenStock.Remove(key);
+                seen = null;
+            }
+
+            if (seen != null && seen.Day < day)
+            {
+                rose = onHand > seen.OnHand;
+                if (day == deliveryDay)
+                {
+                    GoodsReconcile.Record(
+                        localAppData,
+                        GoodsReconcile.GoodsLine(day, deliveryDay, street, number, item, need, seen.OnHand, onHand));
+                }
+            }
+
+            if (!SeenStock.TryGetValue(key, out var current) || current.Day != day)
+            {
+                SeenStock[key] = new HandSeen(day, onHand);
+            }
+
+            return rose;
+        }
+
+        private static int LastPullDay(string street, int number, int currentDay)
+        {
+            var key = PullKey(street, number);
+            if (!LastPull.TryGetValue(key, out var day))
+            {
+                return 0;
+            }
+
+            if (day > currentDay)
+            {
+                LastPull.Remove(key);
+                return 0;
+            }
+
+            return day;
+        }
+
+        private static void RememberPull(string street, int number, int day)
+        {
+            LastPull[PullKey(street, number)] = day;
+        }
+
+        private static string PullKey(string street, int number)
+        {
+            return street + "|" + number.ToString(CultureInfo.InvariantCulture);
+        }
+
+        private static int RacksOwned(BuildingRegistration? building)
+        {
+            if (building?.itemInstances == null)
+            {
+                return 0;
+            }
+
+            var total = 0;
+            foreach (var item in building.itemInstances.Values)
+            {
+                if (item != null && item.itemName == StorageRack.Item)
+                {
+                    total++;
+                }
+            }
+
+            return total;
+        }
+
+        private static int RackPending(GameInstance current, string street, int number)
+        {
+            var total = FurniturePendingAmount(current, street, number, StorageRack.Item);
+            if (current.FurnitureDeliveryContracts == null)
+            {
+                return total;
+            }
+
+            foreach (var contract in current.FurnitureDeliveryContracts)
+            {
+                if (contract?.itemsToDeliver == null)
+                {
+                    continue;
+                }
+
+                var to = contract.toAddress;
+                var blank = to == null || string.IsNullOrEmpty(to.streetName) || to.streetNumber <= 0;
+                if (!blank)
+                {
+                    continue;
+                }
+
+                foreach (var item in contract.itemsToDeliver)
+                {
+                    if (item != null && item.itemName == StorageRack.Item && item.amount > 0)
+                    {
+                        total += item.amount;
+                    }
+                }
+            }
+
+            return total;
+        }
+
         private static bool AttendRack(
             string? localAppData,
             int day,
@@ -815,7 +1038,8 @@ namespace ChaoticCEO
             BuildingRegistration? building,
             int target,
             int fixtureCap,
-            decimal cash)
+            decimal cash,
+            string? shelfVerdict)
         {
             var current = SaveGameManager.Current;
             if (current == null || contract.businessAddress == null || fixtureCap <= 0 || target <= 0)
@@ -836,7 +1060,10 @@ namespace ChaoticCEO
                 spendRoom,
                 pending,
                 floorRoom,
-                GameApi.Live());
+                GameApi.Live(),
+                shelfVerdict,
+                RacksOwned(building),
+                RackPending(current, street, number));
             if (!pick.Ordered)
             {
                 return false;

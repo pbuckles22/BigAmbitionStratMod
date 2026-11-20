@@ -98,6 +98,8 @@ namespace ChaoticCEO
             }
 
             var moves = new List<SpendMove>();
+            var openFurniture = WholesalerBridge.FurnitureOpen(current);
+            var furnitureCursor = 0;
             if (current.Transactions != null)
             {
                 foreach (var move in current.Transactions)
@@ -111,6 +113,21 @@ namespace ChaoticCEO
                     var street = address == null || address.streetName == null ? "" : address.streetName;
                     var number = address == null ? 0 : address.streetNumber;
                     var kind = address == null ? "player" : KindAt(kinds, street, number);
+                    GoodsReconcile.Attach(
+                        street,
+                        number,
+                        (decimal)move.amount,
+                        openFurniture,
+                        ref furnitureCursor,
+                        out var matchedStreet,
+                        out var matchedNumber);
+                    if (street.Length == 0 && matchedStreet.Length > 0)
+                    {
+                        street = matchedStreet;
+                        number = matchedNumber;
+                        kind = KindAt(kinds, street, number);
+                    }
+
                     moves.Add(new SpendMove(
                         move.transactionType,
                         Cats(move),

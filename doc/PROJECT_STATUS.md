@@ -8,7 +8,7 @@
 
 ## Summary
 
-**BigAmbitionStratMod** — Version **1.18.3** (named block **15.3** landed). A silent refusal on rent, fit-out, or ops appends `block.named` with a slug. Next is **15.11** rack/goods reconcile. Remote open waits on **15.6**. **14.21** waits. **10.4** code stays stashed. Rules: [requirements/strategy.md](requirements/strategy.md).
+**BigAmbitionStratMod** — Version **1.18.4** (rack brake **15.11** landed). A rack is not ordered when `shelf.need` is `enough`, and a delivery day logs `goods.delivered` or `goods.missed`. Next is **15.9** course gate naming. Remote open waits on **15.6**. **14.21** waits. **10.4** code stays stashed. Rules: [requirements/strategy.md](requirements/strategy.md).
 
 ---
 
@@ -16,7 +16,8 @@
 
 | Branch | Role |
 |--------|------|
-| **`main`** | Integration branch. Version 1.18.3. Named block **15.3**. Land `6d97d4d`. |
+| **`main`** | Integration branch. Version 1.18.4. Rack brake **15.11**. Land recorded after this CMPH. |
+| **`feature/15.11-rack-goods-reconcile`** | Rack brake and goods reconcile. Version 1.18.4. Human PASS 2026-11-20. Kept after CMPH. |
 | **`feature/15.3-named-block`** | Named block. Version 1.18.3. Human PASS 2026-11-20. Kept after CMPH. |
 | **`feature/15.1-crash-trace`** | Crash trail and named spend. Version 1.18.2. Human PASS 2026-11-20. Kept after CMPH. |
 | **`feature/14.13-stage-sim`** | One stage sim. Version 1.17.23. Headless. Kept after CMPH. |

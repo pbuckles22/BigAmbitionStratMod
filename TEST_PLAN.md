@@ -1,5 +1,24 @@
 # Test plan (TEST_PLAN.md)
 
+## Rack brake and goods reconcile (1.18.4)
+
+A storage rack is not ordered when `shelf.need` is `enough`, even if Cover’s target is at least 85% of the selling fixture. Owned racks plus pending racks are capped at 1. Open furniture contracts append `furniture.open` (`from`, `to`, item, deliver day, price). A blank-street wallet move of $1200 takes the next open furniture contract’s street. On a delivery day, `goods.delivered` or `goods.missed` names the Cover need and the on-hand delta. A same-day `replace` that has not landed keeps the scheduled truck for one delivery cycle (`RiseDays` = 2).
+
+Tier 1: `GoodsReconcileTests`. Unit: enough shelves block the rack, the owned+pending cap, on-hand rises within 2 days after a large replace, a $1200 blank move takes the furniture street, a smaller blank move does not, and the same-day hold. Chain: `cover need → delivery land → rack gate`, `cover need → delivery hold → goods land`, and `cover need → on-hand rose → delivery release`. Command: the Tier 1 `dotnet test` suite.
+
+Human check: city view, after a restart onto this build. One morning on the gift store is enough.
+
+1. Restart Big Ambitions so this build loads.
+2. Continue the gift-store save and let one morning run.
+3. Open `%LocalAppData%\ChaoticCEO\ceo.log`.
+4. **PASS if** `mod.loaded version=1.18.4`, a `shelf.need` line with `verdict=enough` is not followed by a new `rack.ordered` that morning, and any open furniture contract has a `furniture.open` line with `from` and `to`. **FAIL if** the version is still `1.18.3`, or `verdict=enough` and a new `rack.ordered` share that day.
+5. Evidence: `shelf.need` (`verdict`), `rack.ordered` (absent when enough), `furniture.open` (`from`, `to`, `price`), and on a delivery day `goods.delivered` or `goods.missed` (`need`, `delta`).
+6. Version marker: public `1.18.4`.
+
+Measured: `dotnet test` 1267 passed. Release build succeeded and installed. Public `1.18.4`.
+
+Human PASS 2026-11-20 on 1.18.4 at 15 7th Avenue. `mod.loaded version=1.18.4 build=3682`. Days 6–9 `shelf.need verdict=enough` and no `rack.ordered`. Day 6 `contract.rescheduled from=8 next=6`. Day 8 five `goods.missed` `delta=0` (gift before=65 after=65 need=233). Day 9 gift onHand 250. Day 8 `spend.move` deliverycontract -$2340.99 already had `ba:street_seventhavenue` 15. No `furniture.open`.
+
 ## Named block (1.18.3)
 
 A silent refusal on the rent, fit-out, or ops path appends one `block.named` line to `%LocalAppData%\ChaoticCEO\ceo.log`. The line names `where`, `slug`, day, street, and number. `Inside` false is `slug=not-inside`. Other silent returns on that path use `no-rent`, `no-lot`, `no-layout`, `no-pick`, `no-items`, `waiting`, `bad-place`, or `ops-station-not-initialized-frame0`. A rented lot with a blank business type stays in store health and counts as `bareLeases` on `audit.summary`.

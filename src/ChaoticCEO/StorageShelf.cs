@@ -747,11 +747,21 @@ namespace ChaoticCEO
         /// Daily verdict: boxes the store needs in storage vs shelves placed. <c>keep</c> is need (+1 spare).
         /// <c>spare</c> is placed shelves beyond bare need; <c>verdict=short</c> means a delivery can be refunded.
         /// </summary>
+        public static string Verdict(int boxesNeeded, int placedShelves)
+        {
+            if (boxesNeeded < 0)
+            {
+                return "unknown";
+            }
+
+            return ShelvesForBoxes(boxesNeeded) > placedShelves ? "short" : "enough";
+        }
+
         public static string NeedLine(int day, string? street, int number, int boxesNeeded, int placedShelves, int usedSlots, int keep)
         {
             var shelves = ShelvesForBoxes(boxesNeeded);
             var known = boxesNeeded >= 0;
-            var verdict = !known ? "unknown" : shelves > placedShelves ? "short" : "enough";
+            var verdict = Verdict(boxesNeeded, placedShelves);
             var spare = known ? placedShelves - shelves : 0;
             return "shelf.need version=" + LoadLog.Version
                 + " day=" + day.ToString(CultureInfo.InvariantCulture)

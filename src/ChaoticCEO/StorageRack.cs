@@ -27,10 +27,14 @@ namespace ChaoticCEO
             decimal spendRoom,
             bool pending,
             bool floorRoom,
-            ApiNote? api)
+            ApiNote? api,
+            string? shelfVerdict = null,
+            int ownedRacks = 0,
+            int pendingRacks = 0)
         {
             var call = api == null ? "" : api.Call("storage rack");
-            if (fixtureCap <= 0
+            if (!GoodsReconcile.AllowRack(shelfVerdict, ownedRacks, pendingRacks)
+                || fixtureCap <= 0
                 || target < fixtureCap * RackTriggerRatio
                 || spendRoom < RackSpendRoom
                 || pending
