@@ -123,6 +123,7 @@ namespace ChaoticCEO
             File.WriteAllText(
                 path,
                 LoadLog.Line(LoadLog.PinnedBuild) + Environment.NewLine + opened + Environment.NewLine);
+            NamedBlock.Forget(path);
         }
 
         private static void AppendOpened(string localAppData, string opened)

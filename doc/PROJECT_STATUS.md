@@ -8,7 +8,7 @@
 
 ## Summary
 
-**BigAmbitionStratMod** — Version **1.18.6** (course taken **15.10** landed). A bare second lot logs `course.taken` for Market Demands, then the fit-out retry. Next is **15.4** state check. Remote open waits on **15.6**. **14.21** waits. **10.4** code stays stashed. Rules: [requirements/strategy.md](requirements/strategy.md).
+**BigAmbitionStratMod** — Version **1.18.7.1** (state check **15.4** landed). A rent or layout call that does not stick logs `SILENT_NOOP`. The same `block.named` line is written once. Next is **15.5** saga. Remote open waits on **15.6**. **14.21** waits. **10.4** code stays stashed. Rules: [requirements/strategy.md](requirements/strategy.md).
 
 ---
 
@@ -16,7 +16,8 @@
 
 | Branch | Role |
 |--------|------|
-| **`main`** | Integration branch. Version 1.18.6. Course taken **15.10**. Land `6490b13`. |
+| **`main`** | Integration branch. Version 1.18.7.1. State check **15.4**. Land `LANDSHA`. |
+| **`feature/15.4-state-check`** | State check. Version 1.18.7.1. Human PASS 2026-11-20. Kept after CMPH. |
 | **`feature/15.10-course-taken`** | Course taken. Version 1.18.6. Human PASS 2026-11-20. Kept after CMPH. |
 | **`feature/15.9-course-gate`** | Course and expansion gate. Version 1.18.5.2. Human PASS 2026-11-20. Kept after CMPH. |
 | **`feature/15.11-rack-goods-reconcile`** | Rack brake and goods reconcile. Version 1.18.4. Human PASS 2026-11-20. Kept after CMPH. |

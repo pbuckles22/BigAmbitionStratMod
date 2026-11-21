@@ -1,5 +1,35 @@
 # Test plan (TEST_PLAN.md)
 
+## Named block once (1.18.7.1)
+
+Where: a new game, in the city, before the first rent. The same refusal must not fill the log on every frame.
+
+1. Restart Big Ambitions so this build loads.
+2. Start a new game and let it reach the first rent. Stay put.
+3. Open `%LocalAppData%\ChaoticCEO\ceo.log`.
+4. **PASS if** `mod.loaded version=1.18.7.1`, day 1 has one `block.named` `slug=no-rent` and one `slug=no-layout`, then `building.rented` and `layout.loaded`. **FAIL if** the same `slug=no-rent` line appears more than once on that day, or the version is still `1.18.7`.
+5. Evidence: one `block.named` `slug=no-rent`, one `slug=no-layout`, then `building.rented` and `layout.loaded`.
+6. Version marker: public `1.18.7.1`.
+
+Tier 1: `NamedBlockTests`. Unit: day-1 frames before rent log `no-rent` once, the next day logs again, and a new game or a second save can log it again. Chain: `load → morning steps → named block` writes the refusal once. Command: the Tier 1 `dotnet test` suite.
+
+Measured: `dotnet test` 1301 passed (prior 1297). Release build installed `1.18.7.1+664`.
+
+## State check (1.18.7)
+
+Where: the city, on the save you already have open. One morning. This checks a rent or a layout call against the next read. It does not open a second store from the street.
+
+1. Restart Big Ambitions so this build loads.
+2. Continue the save and let one morning run. Stay put.
+3. Open `%LocalAppData%\ChaoticCEO\ceo.log`.
+4. **PASS if** `mod.loaded version=1.18.7`, and a layout call that leaves `businessTypeName` blank has one `SILENT_NOOP` line with `where=layout`, `expected`, and `actual`. A layout that sticks has `layout.loaded` and no `SILENT_NOOP` for that address. **FAIL if** the log has `layout.loaded` and that building’s type is still empty.
+5. Evidence: `SILENT_NOOP` (`where`, `expected`, `actual`, `street`, `number`) or `layout.loaded` when the type matches. A rent that sticks stays `building.rented`.
+6. Version marker: public `1.18.7`.
+
+Tier 1: `StateCheckTests`. Unit: a blank or null business type after layout logs `SILENT_NOOP`, an empty-type token and a wrong type do too, a matching type stays quiet, a rent that does not stick logs `SILENT_NOOP`, a rent that sticks stays quiet, a blank expected stays quiet, and the noop line is written once. Chain: `named block → state check` for a blank layout, a matching layout, a rent that does not stick, and a rent that sticks. Command: the Tier 1 `dotnet test` suite.
+
+Measured: `dotnet test` 1297 passed (prior 1284). Release build installed `1.18.7+661`.
+
 ## Course taken (1.18.6)
 
 Where: the city, on the save whose second lot is `ba:street_ninthavenue` 19 (`ba:businesstype_empty`). This morning takes the blocking course. It does not fit the lot out from the street.

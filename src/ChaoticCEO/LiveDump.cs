@@ -443,8 +443,18 @@ namespace ChaoticCEO
                 }
 
                 var current = SaveGameManager.Current;
-                Rent.Record(localAppData, rent, current == null ? 0 : current.Day);
-                return true;
+                var day = current == null ? 0 : current.Day;
+                var actual = current == null ? "not-rented" : RentReading(current, rent.Street, rent.Number);
+                var recorded = Checked(
+                    localAppData,
+                    day,
+                    "rent",
+                    rent.Street,
+                    rent.Number,
+                    "rented",
+                    actual,
+                    () => Rent.Record(localAppData, rent, day));
+                return recorded != null && recorded.StartsWith("building.rented ", StringComparison.Ordinal);
             }
 
             if (step.Kind == "run")
@@ -699,7 +709,55 @@ namespace ChaoticCEO
                 return Rent.Miss(localAppData, chosen, current.Day);
             }
 
-            return Rent.Record(localAppData, chosen, current.Day);
+            return Checked(
+                localAppData,
+                current.Day,
+                "rent",
+                chosen.Street,
+                chosen.Number,
+                "rented",
+                RentReading(current, chosen.Street, chosen.Number),
+                () => Rent.Record(localAppData, chosen, current.Day));
+        }
+
+        private static string RentReading(GameInstance current, string street, int number)
+        {
+            if (current == null || current.BuildingRegistrations == null)
+            {
+                return "not-rented";
+            }
+
+            foreach (var building in current.BuildingRegistrations)
+            {
+                var registration = building as BuildingRegistration;
+                if (registration != null
+                    && registration.StreetName == street
+                    && registration.StreetNumber == number
+                    && registration.RentedByPlayer)
+                {
+                    return "rented";
+                }
+            }
+
+            return "not-rented";
+        }
+
+        private static string Checked(
+            string localAppData,
+            int day,
+            string where,
+            string street,
+            int number,
+            string expected,
+            string actual,
+            Func<string> success)
+        {
+            if (StateCheck.Line(day, where, street, number, expected, actual).Length > 0)
+            {
+                return StateCheck.Record(localAppData, day, where, street, number, expected, actual);
+            }
+
+            return success();
         }
 
         public static string? TryLayout(StarterWatch watch, string localAppData)
@@ -773,8 +831,19 @@ namespace ChaoticCEO
                 return Starter.Miss(localAppData, chosen, rented, current.Day);
             }
 
-            QuoteBill(localAppData, registration, chosen, current.Day);
-            return Starter.Record(localAppData, chosen, rented, current.Day);
+            return Checked(
+                localAppData,
+                current.Day,
+                "layout",
+                street,
+                number,
+                chosen.BusinessType,
+                registration.businessTypeName ?? "",
+                () =>
+                {
+                    QuoteBill(localAppData, registration, chosen, current.Day);
+                    return Starter.Record(localAppData, chosen, rented, current.Day);
+                });
         }
 
         public static string? TryOps(StoreOpsWatch watch, string localAppData)
@@ -1770,8 +1839,19 @@ namespace ChaoticCEO
                         return Starter.Miss(localAppData, chosen, rented, current.Day);
                     }
 
-                    QuoteBill(localAppData, registration, chosen, current.Day);
-                    return Starter.Record(localAppData, chosen, rented, current.Day);
+                    return Checked(
+                        localAppData,
+                        current.Day,
+                        "layout",
+                        street,
+                        number,
+                        chosen.BusinessType,
+                        registration.businessTypeName ?? "",
+                        () =>
+                        {
+                            QuoteBill(localAppData, registration, chosen, current.Day);
+                            return Starter.Record(localAppData, chosen, rented, current.Day);
+                        });
                 }
 
                 case "ops":

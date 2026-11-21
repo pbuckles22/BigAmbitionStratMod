@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Text;
@@ -7,6 +8,23 @@ namespace ChaoticCEO
 {
     public static class NamedBlock
     {
+        private static readonly object Gate = new object();
+        private static readonly HashSet<string> Seen = new HashSet<string>(StringComparer.Ordinal);
+
+        public static void Forget(string? path)
+        {
+            if (string.IsNullOrEmpty(path))
+            {
+                return;
+            }
+
+            var prefix = path + "\n";
+            lock (Gate)
+            {
+                Seen.RemoveWhere(key => key.StartsWith(prefix, StringComparison.Ordinal));
+            }
+        }
+
         public static string Line(int day, string where, string slug, string street, int number)
         {
             return "block.named version=" + LoadLog.Version
@@ -26,6 +44,15 @@ namespace ChaoticCEO
             }
 
             var path = LoadLog.CeoLogPath(localAppData);
+            var key = path + "\n" + line;
+            lock (Gate)
+            {
+                if (!Seen.Add(key))
+                {
+                    return line;
+                }
+            }
+
             var directory = Path.GetDirectoryName(path);
             if (!string.IsNullOrEmpty(directory))
             {
