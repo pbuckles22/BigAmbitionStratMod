@@ -1,5 +1,21 @@
 # Test plan (TEST_PLAN.md)
 
+## Bare-open breaker (1.18.9)
+
+Where: the city. Two mornings. A rented lot whose business type is still blank. This does not fit that lot out, and it does not hold the lease.
+
+1. Restart Big Ambitions so this build loads.
+2. Continue a save that has a rented lot with a blank business type, or `ba:businesstype_empty`. Note the street, the number, and the day. Stay put through that morning.
+3. Sleep or wait until the next day is in the city.
+4. Open `%LocalAppData%\ChaoticCEO\ceo.log`.
+5. **PASS if** `mod.loaded version=1.18.9` and the second morning has one `breaker.tripped` `slug=bare-open` for that street and number, and that morning does not append `building.rented` for a different address. **FAIL if** the second morning has no `breaker.tripped`, the slug is `lease.held`, or another building is rented that morning. The first morning this build sees the bare lot does not trip.
+6. Evidence: one `breaker.tripped` (`slug=bare-open`, `street`, `number`, `day`).
+7. Version marker: public `1.18.9`.
+
+Tier 1: `BareOpenTests`. Unit: a bare lot the next morning pauses the next open-rent with `slug=bare-open`. The same morning, a typed lot, an unrented blank, a blank street, and a zero number do not. An empty type does. Two lots name the later one. The third morning keeps one log line and the pause. Chain: `bare open → breaker`, a typed next morning keeps the rent, and a cleared later lot leaves the earlier bare lot to pause. Command: the Tier 1 `dotnet test` suite.
+
+Measured: `dotnet test` 1332 passed (prior 1320). Release build installed `1.18.9+672`.
+
 ## Saga and timeline fork (1.18.8)
 
 Where: the city. This checks a reload onto an earlier day. It does not open a store or trip a breaker.

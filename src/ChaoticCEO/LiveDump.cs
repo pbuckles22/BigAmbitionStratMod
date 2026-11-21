@@ -424,6 +424,11 @@ namespace ChaoticCEO
 
         private static bool ExecutePlaybook(string localAppData, PlaybookStep step, string call)
         {
+            if (step != null && step.Chosen && step.Kind == "where" && BareOpen.Holding)
+            {
+                return false;
+            }
+
             if (step == null || !step.Chosen || Autopilot.DryRun)
             {
                 return true;
@@ -671,6 +676,40 @@ namespace ChaoticCEO
                 || family == "food"
                 || family == "durables"
                 || family == "service";
+        }
+
+        public static string WatchBare(string localAppData)
+        {
+            if (string.IsNullOrEmpty(localAppData))
+            {
+                return "";
+            }
+
+            var current = SaveGameManager.Current;
+            if (current == null
+                || current.BuildingRegistrations == null
+                || current.BuildingRegistrations.Count == 0
+                || !BareOpen.Arm(current.Day))
+            {
+                return "";
+            }
+
+            var facts = new List<BareLeaseFact>();
+            foreach (var building in current.BuildingRegistrations)
+            {
+                if (building == null)
+                {
+                    continue;
+                }
+
+                facts.Add(new BareLeaseFact(
+                    building.RentedByPlayer,
+                    building.businessTypeName,
+                    building.StreetName,
+                    building.StreetNumber));
+            }
+
+            return BareOpen.Watch(localAppData, current.Day, facts);
         }
 
         public static string? TryRent(RentWatch watch, string localAppData)

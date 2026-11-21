@@ -8,7 +8,7 @@
 
 ## Summary
 
-**BigAmbitionStratMod** — Version **1.18.8** (saga **15.5** landed). One `saga_id` follows an address from lease through open. Loading an earlier day logs one `TIMELINE_FORK`. Next is **15.6** bare-open breaker. Remote open waits on **15.6**. **14.21** waits. **10.4** code stays stashed. Rules: [requirements/strategy.md](requirements/strategy.md).
+**BigAmbitionStratMod** — Version **1.18.9** (bare-open breaker **15.6** landed). A rented lot that is still bare the next morning pauses the next open-rent with `breaker.tripped slug=bare-open`. Next is **16.1** remote layout. **15.7** and **15.8** wait for a soak. **14.21** waits. **10.4** code stays stashed. Rules: [requirements/strategy.md](requirements/strategy.md).
 
 ---
 
@@ -16,7 +16,8 @@
 
 | Branch | Role |
 |--------|------|
-| **`main`** | Integration branch. Version 1.18.8. Saga **15.5**. Land `2de1b6a`. |
+| **`main`** | Integration branch. Version 1.18.9. Bare-open breaker **15.6**. |
+| **`feature/15.6-bare-open`** | Bare-open breaker. Version 1.18.9. Human PASS 2026-11-21. Kept after CMPH. |
 | **`feature/15.5-saga`** | Saga and timeline fork. Version 1.18.8. Human PASS 2026-11-21. Kept after CMPH. |
 | **`feature/15.4-state-check`** | State check. Version 1.18.7.1. Human PASS 2026-11-20. Kept after CMPH. |
 | **`feature/15.10-course-taken`** | Course taken. Version 1.18.6. Human PASS 2026-11-20. Kept after CMPH. |

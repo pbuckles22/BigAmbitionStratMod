@@ -48,6 +48,7 @@ namespace ChaoticCEO
             CrashTrace.Reset();
             SpendDump.Reset();
             Saga.Reset();
+            BareOpen.Reset();
             LoadLog.StartSession(localAppData);
             CrashTrace.Bind(localAppData);
             _localAppData = localAppData;
@@ -133,6 +134,7 @@ namespace ChaoticCEO
             CrashTrace.Guard("TryTime", pulse, () => LiveDump.TryTime(_time, _localAppData));
             CrashTrace.Guard("TryMarketing", pulse, () => LiveDump.TryMarketing(_marketing, _time, _localAppData));
             CrashTrace.Guard("TryTakeover", pulse, () => LiveDump.TryTakeover(_marketing, _takeovers, _localAppData));
+            CrashTrace.Guard("BareOpen", pulse, () => LiveDump.WatchBare(_localAppData));
             string? rolled = null;
             CrashTrace.Guard("Roll", pulse, () => rolled = LiveDump.Roll(_days, _localAppData));
             if (rolled != null)
