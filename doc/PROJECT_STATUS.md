@@ -16,7 +16,7 @@
 
 | Branch | Role |
 |--------|------|
-| **`main`** | Integration branch. Version 1.18.9. Bare-open breaker **15.6**. Land `d9e91d3`. |
+| **`main`** | Integration branch. Version 1.18.9. Bare-open breaker **15.6**. Land `4132023`. |
 | **`feature/15.6-bare-open`** | Bare-open breaker. Version 1.18.9. Human PASS 2026-11-21. Kept after CMPH. |
 | **`feature/15.5-saga`** | Saga and timeline fork. Version 1.18.8. Human PASS 2026-11-21. Kept after CMPH. |
 | **`feature/15.4-state-check`** | State check. Version 1.18.7.1. Human PASS 2026-11-20. Kept after CMPH. |
