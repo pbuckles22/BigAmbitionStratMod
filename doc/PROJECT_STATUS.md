@@ -16,7 +16,7 @@
 
 | Branch | Role |
 |--------|------|
-| **`main`** | Integration branch. Version 1.18.7.1. State check **15.4**. Land `0f5f9ea`. |
+| **`main`** | Integration branch. Version 1.18.7.1. State check **15.4**. Land `932cf4f`. |
 | **`feature/15.4-state-check`** | State check. Version 1.18.7.1. Human PASS 2026-11-20. Kept after CMPH. |
 | **`feature/15.10-course-taken`** | Course taken. Version 1.18.6. Human PASS 2026-11-20. Kept after CMPH. |
 | **`feature/15.9-course-gate`** | Course and expansion gate. Version 1.18.5.2. Human PASS 2026-11-20. Kept after CMPH. |
