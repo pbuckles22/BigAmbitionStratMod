@@ -138,9 +138,9 @@ When shipping: update **PM_PLAN**, **doc/PROJECT_STATUS.md**, and **Current stat
 
 ## Current state
 
-- **Product:** Version **1.18.5.2** (course gate **15.9** landed). Epic 15 open. Epic 16 waits on **15.6**. Epic 14 stays open. Ladder: [PM_PLAN.md](PM_PLAN.md). Handoff: [doc/handoff/0130-HANDOFF-2026-11-20_1702.md](doc/handoff/0130-HANDOFF-2026-11-20_1702.md).
-- **On:** `origin/main @ ec08c9d`. Feature branch `feature/15.9-course-gate` kept. **10.4** code stays stashed. The price-floor WIP is in `git stash`. https://github.com/pbuckles22/BigAmbitionStratMod
-- **Next:** **15.10** auto-take training when asked. Remote open waits on **15.6**. **14.21** waits. **14.9.7** waits for Stage 2. No `$100M` soak until **10.7**.
+- **Product:** Version **1.18.6** (course taken **15.10** landed). Epic 15 open. Epic 16 waits on **15.6**. Epic 14 stays open. Ladder: [PM_PLAN.md](PM_PLAN.md). Handoff: [doc/handoff/0131-HANDOFF-2026-11-20_2037.md](doc/handoff/0131-HANDOFF-2026-11-20_2037.md).
+- **On:** `feature/15.10-course-taken` (land sha recorded after merge). Feature branch `feature/15.9-course-gate` kept. **10.4** code stays stashed. The price-floor WIP is in `git stash`. https://github.com/pbuckles22/BigAmbitionStratMod
+- **Next:** **15.4** state check when asked. Remote open waits on **15.6**. **14.21** waits. **14.9.7** waits for Stage 2. No `$100M` soak until **10.7**.
 - **Blockers:** Do not pop the **10.4** stash. Do not pop the old staff-hold stash. Do not pop the old **14.12** stash. **7.9** blocks **14.10**. Do not clip paper to register free space or drop RegisterCap to 200. Turn `StaffHold.Enabled` off before tuning HR. Empty `doc/gemini/dropzone` breaks the pytest save gate until a ledger `.hsg` is restored.
 
 ## Run and test

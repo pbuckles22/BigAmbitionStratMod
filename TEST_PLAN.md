@@ -1,5 +1,22 @@
 # Test plan (TEST_PLAN.md)
 
+## Course taken (1.18.6)
+
+Where: the city, on the save whose second lot is `ba:street_ninthavenue` 19 (`ba:businesstype_empty`). This morning takes the blocking course. It does not fit the lot out from the street.
+
+1. Restart Big Ambitions so this build loads.
+2. Continue that save and let one morning run. Stay put. Do not walk to class.
+3. Open `%LocalAppData%\ChaoticCEO\ceo.log`.
+4. **PASS if** `mod.loaded version=1.18.6` and that morning has `course.taken` `course=market-demands` for `ba:street_ninthavenue` 19. **FAIL if** the version is still `1.18.5.2`, or that morning logs `course.needed` and no `course.taken`.
+5. Evidence: `course.taken` (`course`, `day`, `street`, `number`, `call=EducationHelper.Command_CompleteCourse`). A later `block.named` `slug=not-inside` or `slug=expansion-blocked` is the existing fit-out gate.
+6. Version marker: public `1.18.6`.
+
+Human PASS 2026-11-20 on 1.18.6. Day 62 `course.taken` `course=market-demands` `street=ba:street_ninthavenue` `number=19` `call=EducationHelper.Command_CompleteCourse`, then `block.named` `slug=expansion-blocked`. Day 63 no `course.needed`. Day 61 retail profit 1489.785, cash close 63728.51. Day 62 retail profit 863.0155, cash 63728.51 → 64800.51.
+
+Measured: `dotnet test` 1284 passed. Release build installed `1.18.6`.
+
+Tier 1: `CourseTakeTests`. Unit: unfinished Market Demands enrolls, an expansion block does not, headquarters enrolls, and the taken line is written once. Chain: `course.needed → enroll → course.taken → retry` for a ready prior store, and the same chain when the prior store is not ready. Command: the Tier 1 `dotnet test` suite.
+
 ## Course gate (1.18.5.2)
 
 Where: a save with one open store and a second rented lot whose type is `ba:businesstype_empty` (BizMan: Empty).

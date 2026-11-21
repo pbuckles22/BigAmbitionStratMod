@@ -1052,6 +1052,29 @@ namespace ChaoticCEO
             return Cashier.Record(localAppData, hired, current.Day);
         }
 
+        private static string? ReleaseCourse(
+            string localAppData,
+            int day,
+            string street,
+            int number,
+            string gate)
+        {
+            var needed = CourseGate.Record(localAppData, gate, day, street, number);
+            var enrolled = CourseTake.Enroll(gate, day, street, number);
+            if (!enrolled.Enroll)
+            {
+                return needed;
+            }
+
+            if (!CourseBridge.Complete(enrolled.Course))
+            {
+                return needed;
+            }
+
+            CourseTake.Record(localAppData, enrolled);
+            return null;
+        }
+
         public static string? TryFitOut(string localAppData)
         {
             if (string.IsNullOrEmpty(localAppData) || !InCity())
@@ -1143,12 +1166,44 @@ namespace ChaoticCEO
                 var barePick = FitOut.BareLot(owned, sites, CourseBridge.Required(barePriors));
                 if (barePick.Gate.Length > 0)
                 {
-                    return CourseGate.Record(
+                    var held = ReleaseCourse(
                         localAppData,
-                        barePick.Gate,
                         current.Day,
                         bareBuilding.StreetName ?? "",
-                        bareBuilding.StreetNumber);
+                        bareBuilding.StreetNumber,
+                        barePick.Gate);
+                    if (held != null)
+                    {
+                        return held;
+                    }
+
+                    barePick = FitOut.BareLot(owned, sites, "");
+                    if (barePick.Gate.Length > 0)
+                    {
+                        return CourseGate.Record(
+                            localAppData,
+                            barePick.Gate,
+                            current.Day,
+                            bareBuilding.StreetName ?? "",
+                            bareBuilding.StreetNumber);
+                    }
+
+                    if (barePick.Chosen)
+                    {
+                        var bareLine = RunFitOutStep(
+                            localAppData,
+                            current,
+                            bareBuilding,
+                            barePick.Place,
+                            barePick);
+                        if (bareLine == null)
+                        {
+                            return null;
+                        }
+
+                        FitOut.Record(localAppData, barePick, current.Day);
+                        return bareLine;
+                    }
                 }
             }
 
@@ -1169,17 +1224,37 @@ namespace ChaoticCEO
             var pick = FitOut.Decide(priors, place, progress, CourseBridge.Required(priors.Count));
             if (!pick.Chosen)
             {
-                if (pick.Gate.Length > 0)
+                if (pick.Gate.Length == 0)
                 {
-                    return CourseGate.Record(
-                        localAppData,
-                        pick.Gate,
-                        current.Day,
-                        target.StreetName ?? "",
-                        target.StreetNumber);
+                    return null;
                 }
 
-                return null;
+                var held = ReleaseCourse(
+                    localAppData,
+                    current.Day,
+                    target.StreetName ?? "",
+                    target.StreetNumber,
+                    pick.Gate);
+                if (held != null)
+                {
+                    return held;
+                }
+
+                pick = FitOut.Decide(priors, place, progress, "");
+                if (!pick.Chosen)
+                {
+                    if (pick.Gate.Length > 0)
+                    {
+                        return CourseGate.Record(
+                            localAppData,
+                            pick.Gate,
+                            current.Day,
+                            target.StreetName ?? "",
+                            target.StreetNumber);
+                    }
+
+                    return null;
+                }
             }
 
             var line = RunFitOutStep(localAppData, current, target, place, pick);
