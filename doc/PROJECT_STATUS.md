@@ -16,7 +16,7 @@
 
 | Branch | Role |
 |--------|------|
-| **`main`** | Integration branch. Version 1.18.8. Saga **15.5**. |
+| **`main`** | Integration branch. Version 1.18.8. Saga **15.5**. Land `2de1b6a`. |
 | **`feature/15.5-saga`** | Saga and timeline fork. Version 1.18.8. Human PASS 2026-11-21. Kept after CMPH. |
 | **`feature/15.4-state-check`** | State check. Version 1.18.7.1. Human PASS 2026-11-20. Kept after CMPH. |
 | **`feature/15.10-course-taken`** | Course taken. Version 1.18.6. Human PASS 2026-11-20. Kept after CMPH. |
