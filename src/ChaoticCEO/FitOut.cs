@@ -142,11 +142,12 @@ namespace ChaoticCEO
 
     public sealed class FitOutPick
     {
-        public FitOutPick(string place, string step, bool chosen)
+        public FitOutPick(string place, string step, bool chosen, string? gate = null)
         {
             Place = place ?? "";
             Step = step ?? "";
             Chosen = chosen;
+            Gate = gate ?? "";
         }
 
         public string Place { get; }
@@ -155,9 +156,38 @@ namespace ChaoticCEO
 
         public bool Chosen { get; }
 
+        public string Gate { get; }
+
         public static FitOutPick None()
         {
             return new FitOutPick("", "", false);
+        }
+    }
+
+    public sealed class FitOutSite
+    {
+        public FitOutSite(string street, int number, bool bare, FitOutProgress? progress)
+        {
+            Street = street ?? "";
+            Number = number;
+            Bare = bare;
+            Progress = progress ?? FitOutProgress.Bare();
+        }
+
+        public string Street { get; }
+
+        public int Number { get; }
+
+        public bool Bare { get; }
+
+        public FitOutProgress Progress { get; }
+
+        public string Place
+        {
+            get
+            {
+                return Street + " " + Number.ToString(CultureInfo.InvariantCulture);
+            }
         }
     }
 
@@ -166,8 +196,15 @@ namespace ChaoticCEO
         public static FitOutPick Decide(
             IReadOnlyList<StoreHealth>? priorStores,
             string? place,
-            FitOutProgress? bare)
+            FitOutProgress? bare,
+            string? requiredCourse = null)
         {
+            var gate = CourseGate.Name(priorStores, place, bare, requiredCourse);
+            if (gate.Length > 0)
+            {
+                return new FitOutPick(place ?? "", "", false, gate);
+            }
+
             if (priorStores == null
                 || priorStores.Count == 0
                 || !StoreHealthGate.ExpansionAllowed(priorStores)
@@ -200,6 +237,45 @@ namespace ChaoticCEO
             if (!bare.CashierHired)
             {
                 return new FitOutPick(place, "cashier", true);
+            }
+
+            return FitOutPick.None();
+        }
+
+        public static FitOutPick BareLot(
+            IReadOnlyList<StoreHealth>? owned,
+            IReadOnlyList<FitOutSite>? sites,
+            string? requiredCourse)
+        {
+            if (sites == null)
+            {
+                return FitOutPick.None();
+            }
+
+            foreach (var site in sites)
+            {
+                if (site == null || !site.Bare || site.Street.Length == 0 || site.Number <= 0)
+                {
+                    continue;
+                }
+
+                var priors = new List<StoreHealth>();
+                if (owned != null)
+                {
+                    foreach (var health in owned)
+                    {
+                        if (health != null && health.Place != site.Place)
+                        {
+                            priors.Add(health);
+                        }
+                    }
+                }
+
+                var pick = Decide(priors, site.Place, FitOutProgress.Bare(), requiredCourse);
+                if (pick.Gate.Length > 0 || pick.Chosen)
+                {
+                    return pick;
+                }
             }
 
             return FitOutPick.None();

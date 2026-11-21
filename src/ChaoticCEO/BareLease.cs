@@ -23,13 +23,21 @@ namespace ChaoticCEO
 
     public static class BareLease
     {
+        public const string EmptyType = "ba:businesstype_empty";
+
+        public static bool IsEmptyType(string? businessType)
+        {
+            var type = businessType ?? "";
+            return type.Length == 0 || type == EmptyType;
+        }
+
         public static bool IsBare(BareLeaseFact? fact)
         {
             return fact != null
                 && fact.Rented
                 && fact.Street.Length > 0
                 && fact.Number > 0
-                && fact.BusinessType.Length == 0;
+                && IsEmptyType(fact.BusinessType);
         }
 
         public static int Count(IReadOnlyList<BareLeaseFact>? facts)

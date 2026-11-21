@@ -1066,8 +1066,10 @@ namespace ChaoticCEO
             }
 
             BuildingRegistration? target = null;
+            BuildingRegistration? bareBuilding = null;
             string place = "";
             FitOutProgress? progress = null;
+            var sites = new List<FitOutSite>();
             foreach (var building in current.BuildingRegistrations)
             {
                 if (building == null
@@ -1083,15 +1085,26 @@ namespace ChaoticCEO
                     || family == "food"
                     || family == "durables"
                     || family == "service";
-                var emptyLot = string.IsNullOrEmpty(building.businessTypeName)
-                    && string.IsNullOrEmpty(building.BusinessName);
-                if (!goods && Modes.FitOut(building.businessTypeName).Length == 0 && !emptyLot)
+                var bare = BareLease.IsEmptyType(building.businessTypeName);
+                if (!goods && Modes.FitOut(building.businessTypeName).Length == 0 && !bare)
                 {
                     continue;
                 }
 
                 var row = FitProgress(localAppData, building);
-                if (row.LayoutLoaded
+                if (bare && bareBuilding == null)
+                {
+                    bareBuilding = building;
+                }
+
+                sites.Add(
+                    new FitOutSite(
+                        building.StreetName,
+                        building.StreetNumber,
+                        bare,
+                        bare ? FitOutProgress.Bare() : row));
+                if (!bare
+                    && row.LayoutLoaded
                     && row.OpsAssigned
                     && row.CapacityMatched
                     && row.ContractSigned
@@ -1100,12 +1113,43 @@ namespace ChaoticCEO
                     continue;
                 }
 
+                if (target != null)
+                {
+                    continue;
+                }
+
                 target = building;
                 place = building.StreetName
                     + " "
                     + building.StreetNumber.ToString(CultureInfo.InvariantCulture);
-                progress = row;
-                break;
+                progress = bare ? FitOutProgress.Bare() : row;
+            }
+
+            var owned = OwnedStoreHealth(current);
+            if (bareBuilding != null)
+            {
+                var barePlace = bareBuilding.StreetName
+                    + " "
+                    + bareBuilding.StreetNumber.ToString(CultureInfo.InvariantCulture);
+                var barePriors = 0;
+                foreach (var health in owned)
+                {
+                    if (health != null && health.Place != barePlace)
+                    {
+                        barePriors++;
+                    }
+                }
+
+                var barePick = FitOut.BareLot(owned, sites, CourseBridge.Required(barePriors));
+                if (barePick.Gate.Length > 0)
+                {
+                    return CourseGate.Record(
+                        localAppData,
+                        barePick.Gate,
+                        current.Day,
+                        bareBuilding.StreetName ?? "",
+                        bareBuilding.StreetNumber);
+                }
             }
 
             if (target == null || progress == null || place.Length == 0)
@@ -1114,7 +1158,7 @@ namespace ChaoticCEO
             }
 
             var priors = new List<StoreHealth>();
-            foreach (var health in OwnedStoreHealth(current))
+            foreach (var health in owned)
             {
                 if (health != null && health.Place != place)
                 {
@@ -1122,9 +1166,19 @@ namespace ChaoticCEO
                 }
             }
 
-            var pick = FitOut.Decide(priors, place, progress);
+            var pick = FitOut.Decide(priors, place, progress, CourseBridge.Required(priors.Count));
             if (!pick.Chosen)
             {
+                if (pick.Gate.Length > 0)
+                {
+                    return CourseGate.Record(
+                        localAppData,
+                        pick.Gate,
+                        current.Day,
+                        target.StreetName ?? "",
+                        target.StreetNumber);
+                }
+
                 return null;
             }
 
@@ -3017,7 +3071,7 @@ namespace ChaoticCEO
                 var family = StoreFamily.For(type);
                 var mode = Modes.Of(type);
                 var goods = family == "specialty" || family == "food" || family == "durables" || family == "service";
-                var bare = type.Length == 0;
+                var bare = BareLease.IsEmptyType(type);
                 if (!bare && !goods && mode != BusinessMode.Workstation)
                 {
                     continue;

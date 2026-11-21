@@ -1,5 +1,18 @@
 # Test plan (TEST_PLAN.md)
 
+## Course gate (1.18.5.2)
+
+Where: a save with one open store and a second rented lot whose type is `ba:businesstype_empty` (BizMan: Empty).
+
+1. Restart so `mod.loaded version=1.18.5.2` is first in `%LocalAppData%\ChaoticCEO\ceo.log`.
+2. Let the next day roll.
+3. **PASS if** that address has `course.needed` `course=market-demands`, or `block.named` `slug=expansion-blocked` when Market Demands is already completed and the first store is not Ready. **FAIL if** the lot stays `kind=other` and neither line is there.
+4. Version marker: public `1.18.5.2`.
+
+Measured: `dotnet test` 1278 passed. Release build installed `1.18.5.2`.
+
+Human PASS 2026-11-20 on 1.18.5.2. Days 37–62 each logged `course.needed` `course=market-demands` `street=ba:street_ninthavenue` `number=19`. The lot stayed `kind=other`, rent 87, profit −87. Day 61 retail profit 1489.785. Cash 61796.51 → 63728.51.
+
 ## Rack brake and goods reconcile (1.18.4)
 
 A storage rack is not ordered when `shelf.need` is `enough`, even if Cover’s target is at least 85% of the selling fixture. Owned racks plus pending racks are capped at 1. Open furniture contracts append `furniture.open` (`from`, `to`, item, deliver day, price). A blank-street wallet move of $1200 takes the next open furniture contract’s street. On a delivery day, `goods.delivered` or `goods.missed` names the Cover need and the on-hand delta. A same-day `replace` that has not landed keeps the scheduled truck for one delivery cycle (`RiseDays` = 2).
