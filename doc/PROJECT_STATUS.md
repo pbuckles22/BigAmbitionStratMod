@@ -16,7 +16,7 @@
 
 | Branch | Role |
 |--------|------|
-| **`main`** | Integration branch. Version 1.18.6. Course taken **15.10**. Land sha in the land commit. |
+| **`main`** | Integration branch. Version 1.18.6. Course taken **15.10**. Land `6490b13`. |
 | **`feature/15.10-course-taken`** | Course taken. Version 1.18.6. Human PASS 2026-11-20. Kept after CMPH. |
 | **`feature/15.9-course-gate`** | Course and expansion gate. Version 1.18.5.2. Human PASS 2026-11-20. Kept after CMPH. |
 | **`feature/15.11-rack-goods-reconcile`** | Rack brake and goods reconcile. Version 1.18.4. Human PASS 2026-11-20. Kept after CMPH. |
