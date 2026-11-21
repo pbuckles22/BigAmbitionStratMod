@@ -47,6 +47,7 @@ namespace ChaoticCEO
             var localAppData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
             CrashTrace.Reset();
             SpendDump.Reset();
+            Saga.Reset();
             LoadLog.StartSession(localAppData);
             CrashTrace.Bind(localAppData);
             _localAppData = localAppData;
@@ -83,7 +84,9 @@ namespace ChaoticCEO
         private void OnFrame()
         {
             CrashTrace.Arm(_localAppData);
-            var pulse = Pulse();
+            var day = CurrentDay();
+            Saga.Load(_localAppData, day);
+            var pulse = CrashTrace.Pulse(day);
             CrashTrace.Begin();
             CrashTrace.Guard("Dump", pulse, DumpOnHotkey);
             if (!_panelFailed)
@@ -147,16 +150,16 @@ namespace ChaoticCEO
             }
         }
 
-        private static string Pulse()
+        private static int CurrentDay()
         {
             try
             {
                 var current = SaveGameManager.Current;
-                return CrashTrace.Pulse(current == null ? 0 : current.Day);
+                return current == null ? 0 : current.Day;
             }
             catch (Exception)
             {
-                return CrashTrace.Pulse(0);
+                return 0;
             }
         }
 

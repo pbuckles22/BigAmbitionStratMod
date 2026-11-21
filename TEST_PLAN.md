@@ -1,5 +1,21 @@
 # Test plan (TEST_PLAN.md)
 
+## Saga and timeline fork (1.18.8)
+
+Where: the city. This checks a reload onto an earlier day. It does not open a store or trip a breaker.
+
+1. Restart Big Ambitions so this build loads.
+2. Continue the save and wait until the city is up. Note the day.
+3. Load an earlier save. Stay put.
+4. Open `%LocalAppData%\ChaoticCEO\ceo.log`.
+5. **PASS if** `mod.loaded version=1.18.8` and one `TIMELINE_FORK` names both days (`fromDay` is the day you noted, `toDay` is the day you loaded). **FAIL if** the reload appends no `TIMELINE_FORK`, or the version is still `1.18.7.1`.
+6. Evidence: one `TIMELINE_FORK` (`fromDay`, `toDay`). A lease through open on one address shares one `saga_id` on `saga` lines (`stage=lease`, `fit-out`, `staff`, `stock`, `open`).
+7. Version marker: public `1.18.8`.
+
+Tier 1: `SagaTests`. Unit: an earlier day logs `TIMELINE_FORK` with both days, a later day and a zero day do not, and day 9 lease shares `saga_id` with day 14 open. Chain: `lease → fit-out → saga`, then staff, stock, and open, and a closed store does not open. Command: the Tier 1 `dotnet test` suite.
+
+Measured: `dotnet test` 1320 passed (prior 1301). Release build installed `1.18.8+668`.
+
 ## Named block once (1.18.7.1)
 
 Where: a new game, in the city, before the first rent. The same refusal must not fill the log on every frame.

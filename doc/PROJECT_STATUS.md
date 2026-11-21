@@ -2,13 +2,13 @@
 
 **Human-readable current state.** Keep in sync with [AGENT_HANDOFF.md](../AGENT_HANDOFF.md) → *Current state* when milestones ship.
 
-**Last updated:** 2026-11-20
+**Last updated:** 2026-11-21
 
 ---
 
 ## Summary
 
-**BigAmbitionStratMod** — Version **1.18.7.1** (state check **15.4** landed). A rent or layout call that does not stick logs `SILENT_NOOP`. The same `block.named` line is written once. Next is **15.5** saga. Remote open waits on **15.6**. **14.21** waits. **10.4** code stays stashed. Rules: [requirements/strategy.md](requirements/strategy.md).
+**BigAmbitionStratMod** — Version **1.18.8** (saga **15.5** landed). One `saga_id` follows an address from lease through open. Loading an earlier day logs one `TIMELINE_FORK`. Next is **15.6** bare-open breaker. Remote open waits on **15.6**. **14.21** waits. **10.4** code stays stashed. Rules: [requirements/strategy.md](requirements/strategy.md).
 
 ---
 
@@ -16,7 +16,8 @@
 
 | Branch | Role |
 |--------|------|
-| **`main`** | Integration branch. Version 1.18.7.1. State check **15.4**. Land `a75ccaa`. |
+| **`main`** | Integration branch. Version 1.18.8. Saga **15.5**. |
+| **`feature/15.5-saga`** | Saga and timeline fork. Version 1.18.8. Human PASS 2026-11-21. Kept after CMPH. |
 | **`feature/15.4-state-check`** | State check. Version 1.18.7.1. Human PASS 2026-11-20. Kept after CMPH. |
 | **`feature/15.10-course-taken`** | Course taken. Version 1.18.6. Human PASS 2026-11-20. Kept after CMPH. |
 | **`feature/15.9-course-gate`** | Course and expansion gate. Version 1.18.5.2. Human PASS 2026-11-20. Kept after CMPH. |

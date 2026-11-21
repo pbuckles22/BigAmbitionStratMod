@@ -398,7 +398,7 @@ namespace ChaoticCEO
             var ownedHealth = OwnedStoreHealth(current);
             foreach (var row in ownedHealth)
             {
-                StoreHealth.Record(localAppData, row);
+                Saga.After(localAppData, StoreHealth.Record(localAppData, row), current.Day);
                 if (Autopilot.Enabled)
                 {
                     Stall.Track(localAppData, row, current.Day);
@@ -757,7 +757,7 @@ namespace ChaoticCEO
                 return StateCheck.Record(localAppData, day, where, street, number, expected, actual);
             }
 
-            return success();
+            return Saga.After(localAppData, success(), day);
         }
 
         public static string? TryLayout(StarterWatch watch, string localAppData)
@@ -952,7 +952,10 @@ namespace ChaoticCEO
                 watch.Arm(street, number, current.Day, StoreOps.VerifyFrames, assigned);
             }
 
-            return StoreOps.Record(localAppData, assigned, rented, current.Day);
+            return Saga.After(
+                localAppData,
+                StoreOps.Record(localAppData, assigned, rented, current.Day),
+                current.Day);
         }
 
         public static string? TryCapacity(CapacityWatch watch, string localAppData)
@@ -1053,7 +1056,10 @@ namespace ChaoticCEO
                 return Wholesaler.Miss(localAppData, signed, current.Day);
             }
 
-            return Wholesaler.Record(localAppData, signed, current.Day);
+            return Saga.After(
+                localAppData,
+                Wholesaler.Record(localAppData, signed, current.Day),
+                current.Day);
         }
 
         public static string? TryCashier(CashierWatch watch, string localAppData)
@@ -1883,7 +1889,10 @@ namespace ChaoticCEO
                     }
 
                     StoreOps.CleanerLine(localAppData, rented, current.Day, placed);
-                    return StoreOps.Record(localAppData, assigned, rented, current.Day);
+                    return Saga.After(
+                        localAppData,
+                        StoreOps.Record(localAppData, assigned, rented, current.Day),
+                        current.Day);
                 }
 
                 case "capacity":
@@ -1921,7 +1930,10 @@ namespace ChaoticCEO
                         return Wholesaler.Miss(localAppData, signed, current.Day);
                     }
 
-                    return Wholesaler.Record(localAppData, signed, current.Day);
+                    return Saga.After(
+                        localAppData,
+                        Wholesaler.Record(localAppData, signed, current.Day),
+                        current.Day);
                 }
 
                 case "cashier":
