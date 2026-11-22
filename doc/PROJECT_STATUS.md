@@ -16,7 +16,7 @@
 
 | Branch | Role |
 |--------|------|
-| **`main`** | Integration branch. Version 1.19.3.1. Remote cashier **16.3**. |
+| **`main`** | Integration branch. Version 1.19.3.1. Remote cashier **16.3**. Land `7970c3d`. |
 | **`feature/16.3-remote-cashier`** | Remote cashier. Version 1.19.3.1. Human PASS 2026-11-21. Kept after CMPH. |
 | **`feature/16.2-remote-ops`** | Remote ops. Version 1.19.2.2. Human PASS 2026-11-21. Kept after CMPH. |
 | **`feature/16.1-remote-layout`** | Remote layout. Version 1.19.1.1. Human PASS 2026-11-21. Kept after CMPH. |
