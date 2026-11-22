@@ -52,6 +52,91 @@ namespace ChaoticCEO
             }
         }
 
+        public static bool LiveRemote(BuildingRegistration registration, StoreOpsPick? pick, out string reason, out StoreOpsCleaner? placed)
+        {
+            reason = "";
+            placed = null;
+            if (registration == null || pick == null || !pick.Assigned)
+            {
+                reason = "empty";
+                return false;
+            }
+
+            try
+            {
+                var cleaningId = ItemId(registration, "ba:itemname_cleaningstation");
+                var guardId = ItemId(registration, "ba:itemname_securityguardlocker");
+                var uniformLocker = ItemId(registration, "ba:itemname_uniformlocker").Length > 0;
+                var save = SaveGameManager.Current;
+                var ready = registration.uniformsBySkill != null && save != null;
+                var presets = PresetIds();
+                if (pick.Uniforms && StoreOps.UniformPreset(presets, null).Length == 0)
+                {
+                    var copied = CopyPreset(registration);
+                    if (copied.Length > 0)
+                    {
+                        presets.Add(copied);
+                    }
+                }
+
+                var days = registration.scheduleDays == null ? 0 : registration.scheduleDays.Count;
+                var plan = RemoteOps.Decide(
+                    false,
+                    pick,
+                    cleaningId,
+                    guardId,
+                    uniformLocker,
+                    ready,
+                    presets,
+                    days,
+                    ScheduledId(registration, cleaningId, WorkShiftType.Cleaning),
+                    ScheduledId(registration, guardId, WorkShiftType.Default));
+                if (!plan.Applied)
+                {
+                    reason = plan.Reason;
+                    return false;
+                }
+
+                if (plan.Uniforms && !WriteUniforms(registration, true, out reason))
+                {
+                    return false;
+                }
+
+                if (plan.HireGuard
+                    && !HireOnto(registration, "SecurityGuard", false, plan.GuardItemId, WorkShiftType.Default, out reason, out _, out _))
+                {
+                    return false;
+                }
+
+                var cleanerName = "Cleaner";
+                var cleanerEmployee = ScheduledId(registration, plan.CleanerItemId, WorkShiftType.Cleaning);
+                if (plan.HireCleaner
+                    && !HireOnto(registration, "Cleaning", true, plan.CleanerItemId, WorkShiftType.Cleaning, out reason, out cleanerEmployee, out cleanerName))
+                {
+                    return false;
+                }
+
+                if (plan.CleanerItemId.Length > 0 && cleanerEmployee.Length > 0)
+                {
+                    placed = new StoreOpsCleaner(
+                        cleanerEmployee,
+                        cleanerName,
+                        plan.CleanerItemId,
+                        true,
+                        false,
+                        StoreOps.UnstartedType("Cleaner"));
+                }
+
+                return true;
+            }
+            catch (System.Exception ex)
+            {
+                CrashTrace.Seen(ex, "StoreOpsBridge.LiveRemote.1", "");
+                reason = "exception";
+                return false;
+            }
+        }
+
         public static StoreFixtures Fixtures(BuildingRegistration registration)
         {
             var names = new List<string>();
@@ -90,6 +175,22 @@ namespace ChaoticCEO
 
         public static bool HasItems(BuildingRegistration registration)
         {
+            if (registration == null)
+            {
+                return false;
+            }
+
+            if (registration.itemInstances != null)
+            {
+                foreach (var item in registration.itemInstances.Values)
+                {
+                    if (item != null)
+                    {
+                        return true;
+                    }
+                }
+            }
+
             foreach (var item in Items(registration))
             {
                 if (item != null)
@@ -392,9 +493,14 @@ namespace ChaoticCEO
         private static bool Uniforms(BuildingRegistration registration, out string reason)
         {
             var locker = Find<UniformLockerController>(registration, "ba:itemname_uniformlocker");
+            return WriteUniforms(registration, locker != null, out reason);
+        }
+
+        private static bool WriteUniforms(BuildingRegistration registration, bool locker, out string reason)
+        {
             var bySkill = registration.uniformsBySkill;
             var save = SaveGameManager.Current;
-            reason = StoreOps.UniformReason(locker != null, bySkill != null && save != null, "-", dressed: true);
+            reason = StoreOps.UniformReason(locker, bySkill != null && save != null, "-", dressed: true);
             if (reason.Length > 0 || bySkill == null || save == null)
             {
                 return false;
@@ -536,6 +642,213 @@ namespace ChaoticCEO
             var items = new List<ItemInstance>();
             registration.GetAssignableItems(items);
             return items;
+        }
+
+        private static bool HireOnto(
+            BuildingRegistration registration,
+            string skill,
+            bool cleaner,
+            string itemId,
+            WorkShiftType kind,
+            out string reason,
+            out string employeeId,
+            out string employeeName)
+        {
+            reason = "";
+            employeeId = "";
+            employeeName = cleaner ? "Cleaner" : "Guard";
+            EmployeeInstance? hired = null;
+            var kept = cleaner && HeadcountBridge.Blocks(Cleaner.Skill);
+            if (kept)
+            {
+                hired = HeadcountBridge.Find(Cleaner.Skill);
+                if (hired == null)
+                {
+                    reason = "over";
+                    return false;
+                }
+            }
+            else
+            {
+                hired = Create(skill);
+                if (hired == null)
+                {
+                    reason = "noemployee";
+                    return false;
+                }
+
+                hired.assignedAddress = registration.Address;
+                EmployeeHelper.HireCandidate(hired);
+            }
+
+            if (hired.characterData != null)
+            {
+                if (string.IsNullOrEmpty(hired.characterData.name))
+                {
+                    hired.characterData.name = employeeName;
+                }
+                else
+                {
+                    employeeName = hired.characterData.name;
+                }
+            }
+
+            ScheduleOnItem(registration, itemId, hired, kind);
+            employeeId = hired.id ?? "";
+            if (employeeId.Length == 0)
+            {
+                reason = "noemployee";
+                return false;
+            }
+
+            return true;
+        }
+
+        private static void ScheduleOnItem(
+            BuildingRegistration registration,
+            string itemId,
+            EmployeeInstance employee,
+            WorkShiftType kind)
+        {
+            if (registration.scheduleDays == null
+                || string.IsNullOrEmpty(itemId)
+                || string.IsNullOrEmpty(employee.id))
+            {
+                return;
+            }
+
+            employee.assignedAddress = registration.Address;
+            foreach (var day in registration.scheduleDays)
+            {
+                if (day?.workShifts == null)
+                {
+                    continue;
+                }
+
+                var listed = false;
+                foreach (var shift in day.workShifts)
+                {
+                    if (shift != null
+                        && shift.itemInstanceId == itemId
+                        && shift.employeeId == employee.id)
+                    {
+                        listed = true;
+                        break;
+                    }
+                }
+
+                if (listed)
+                {
+                    continue;
+                }
+
+                day.AddWorkShift(new WorkShift
+                {
+                    startingHour = RemoteOps.StartHour,
+                    endingHour = RemoteOps.EndHour,
+                    employeeId = employee.id,
+                    itemInstanceId = itemId,
+                    type = kind,
+                });
+            }
+
+            employee.UpdateWeeklyHoursAndDays(registration.scheduleDays);
+            employee.UpdateAssignedWorkStationItems();
+        }
+
+        private static string ScheduledId(BuildingRegistration registration, string itemId, WorkShiftType kind)
+        {
+            if (registration.scheduleDays == null || string.IsNullOrEmpty(itemId))
+            {
+                return "";
+            }
+
+            foreach (var day in registration.scheduleDays)
+            {
+                if (day?.workShifts == null)
+                {
+                    continue;
+                }
+
+                foreach (var shift in day.workShifts)
+                {
+                    if (shift != null
+                        && shift.itemInstanceId == itemId
+                        && shift.type == kind
+                        && !string.IsNullOrEmpty(shift.employeeId))
+                    {
+                        return shift.employeeId;
+                    }
+                }
+            }
+
+            return "";
+        }
+
+        private static string ItemId(BuildingRegistration registration, string itemName)
+        {
+            if (registration.itemInstances != null)
+            {
+                foreach (var item in registration.itemInstances.Values)
+                {
+                    if (item != null && item.itemName == itemName && !string.IsNullOrEmpty(item.id))
+                    {
+                        return item.id;
+                    }
+                }
+            }
+
+            foreach (var item in Items(registration))
+            {
+                if (item != null && item.itemName == itemName && !string.IsNullOrEmpty(item.id))
+                {
+                    return item.id;
+                }
+            }
+
+            return "";
+        }
+
+        private static List<string> PresetIds()
+        {
+            var ids = new List<string>();
+            var save = SaveGameManager.Current;
+            if (save?.employeePresets == null)
+            {
+                return ids;
+            }
+
+            foreach (var preset in save.employeePresets)
+            {
+                ids.Add(preset?.id ?? "");
+            }
+
+            return ids;
+        }
+
+        private static string CopyPreset(BuildingRegistration registration)
+        {
+            var current = SaveGameManager.Current;
+            if (current?.employeePresets == null)
+            {
+                return "";
+            }
+
+            var business = BusinessTypeHelper.GetData(registration);
+            if (business?.uniforms == null || business.uniforms.Count == 0)
+            {
+                return "";
+            }
+
+            var source = business.uniforms[0];
+            var copy = new EmployeePreset
+            {
+                name = source.name,
+                maleElements = new List<AppearanceElementData>(source.maleElements),
+                femaleElements = new List<AppearanceElementData>(source.femaleElements),
+            };
+            current.employeePresets.Add(copy);
+            return copy.id ?? "";
         }
 
         private static ThirdPersonCharacter? Character(EmployeeInstance employee)

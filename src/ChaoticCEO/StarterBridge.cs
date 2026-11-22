@@ -77,6 +77,7 @@ namespace ChaoticCEO
                 }
 
                 BusinessLayoutSetHelper.LoadBusinessLayoutSet(pick.Layout);
+                ApplyFixtures(registration);
                 return TypeLanded(registration, pick);
             }
             catch (System.Exception ex)
@@ -90,6 +91,53 @@ namespace ChaoticCEO
                 {
                     manager.buildingRegistration = previous;
                 }
+            }
+        }
+
+        public static bool ApplyFixtures(BuildingRegistration registration)
+        {
+            if (registration == null || string.IsNullOrWhiteSpace(registration.Layout))
+            {
+                return false;
+            }
+
+            if (StoreOpsBridge.HasItems(registration))
+            {
+                return true;
+            }
+
+            try
+            {
+                var set = BusinessLayoutSetHelper.GetOrLoadBusinessLayoutSet(
+                    registration.businessTypeName,
+                    new BuildingSizeInfo(registration),
+                    registration.Layout,
+                    false);
+                if (set?.Items == null)
+                {
+                    return false;
+                }
+
+                var instances = BusinessLayoutSetHelper.GetItemInstancesFromLayoutItems(set.Items);
+                if (instances == null)
+                {
+                    return false;
+                }
+
+                foreach (var item in instances)
+                {
+                    if (item != null)
+                    {
+                        registration.AddItemInstanceToBuilding(item);
+                    }
+                }
+
+                return StoreOpsBridge.HasItems(registration);
+            }
+            catch (System.Exception ex)
+            {
+                CrashTrace.Seen(ex, "StarterBridge.ApplyFixtures.1", "");
+                return false;
             }
         }
 

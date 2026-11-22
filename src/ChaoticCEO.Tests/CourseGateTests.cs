@@ -85,12 +85,15 @@ public class CourseGateTests
         Assert.Equal("", CourseGate.Slug("   "));
         Assert.Equal("", CourseGate.Line("", 5, "ba:street_thirdstreet", 51));
 
+        // Harvest: 1.19.2.1 morning. Layout already loaded, prior store unstaffed, no fit-out line.
+        // A required course still does not nag once the layout is on the address. Ops still runs.
         var started = FitOut.Decide(
             new[] { new StoreHealth(true, true, false, true, true, "ba:street_seventhavenue 15") },
             "ba:street_thirdstreet 51",
             new FitOutProgress(true, false, false, false, false),
             "Market Demands");
-        Assert.False(started.Chosen);
+        Assert.True(started.Chosen);
+        Assert.Equal("ops", started.Step);
         Assert.Equal("", started.Gate);
     }
 

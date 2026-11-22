@@ -193,6 +193,59 @@ public class FitOutTests
         Assert.False(FitOut.Decide(new[] { g3Fail }, next, FitOutProgress.Bare()).Chosen);
     }
 
+    [Fact]
+    public void FitOut_an_open_address_still_gets_ops_when_the_prior_store_is_unstaffed()
+    {
+        // Harvest: 1.19.2.1 morning. Seventh cleaners=0, Ninth already named, TryFitOut wrote nothing.
+        var prior = new StoreHealth(true, true, false, true, false, "ba:street_seventhavenue 15");
+        var ninth = "ba:street_ninthavenue 15";
+        var open = new FitOutProgress(true, false, true, true, false);
+        var pick = FitOut.Decide(new[] { prior }, ninth, open);
+
+        Assert.False(prior.Ready);
+        Assert.True(pick.Chosen);
+        Assert.Equal("ops", pick.Step);
+        Assert.Equal(ninth, pick.Place);
+        Assert.Equal("", pick.Gate);
+        Assert.False(FitOut.Decide(new[] { prior }, ninth, FitOutProgress.Bare()).Chosen);
+        var capacity = FitOut.Decide(
+            new[] { prior },
+            ninth,
+            new FitOutProgress(true, true, false, true, false));
+        Assert.True(capacity.Chosen);
+        Assert.Equal("capacity", capacity.Step);
+    }
+
+    [Fact]
+    public void FitOut_a_store_that_still_needs_a_cleaner_is_chosen_ahead_of_a_cashier_gap()
+    {
+        // Harvest: cashier is scene-only, so an outside morning must not stay stuck on Seventh and skip Ninth.
+        var seventhCashier = new FitOutSite(
+            "ba:street_seventhavenue",
+            15,
+            false,
+            new FitOutProgress(true, true, true, true, false));
+        var ninthOps = new FitOutSite(
+            "ba:street_ninthavenue",
+            15,
+            false,
+            new FitOutProgress(true, false, false, false, false));
+        var seventhAlso = new FitOutSite(
+            "ba:street_seventhavenue",
+            15,
+            false,
+            new FitOutProgress(true, false, true, true, false));
+
+        Assert.Equal(
+            "ba:street_ninthavenue 15",
+            FitOut.PlaceNeedingOps(new[] { seventhCashier, ninthOps }));
+        Assert.Equal(
+            "ba:street_seventhavenue 15",
+            FitOut.PlaceNeedingOps(new[] { seventhAlso, ninthOps }));
+        Assert.Equal("", FitOut.PlaceNeedingOps(new[] { seventhCashier }));
+        Assert.Equal("", FitOut.PlaceNeedingOps(null));
+    }
+
     private static FitOutProgress Bare(
         bool layout = false,
         bool ops = false,

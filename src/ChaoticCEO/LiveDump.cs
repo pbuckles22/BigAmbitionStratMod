@@ -946,6 +946,12 @@ namespace ChaoticCEO
             }
 
             var rented = new BuildingRent(street, number, true, "");
+            if (!StoreOpsBridge.HasItems(registration)
+                && FixtureGate.Next(false, registration.Layout) == "apply")
+            {
+                StarterBridge.ApplyFixtures(registration);
+            }
+
             if (!StoreOpsBridge.HasItems(registration))
             {
                 watch.Note();
@@ -970,7 +976,12 @@ namespace ChaoticCEO
                 return StoreOps.Miss(localAppData, assigned, rented, current.Day, "empty");
             }
 
-            var live = StoreOpsBridge.Live(registration, assigned, out var reason, out var placed);
+            string reason;
+            StoreOpsCleaner? placed;
+            var entered = StarterBridge.Inside(rented);
+            var live = entered
+                ? StoreOpsBridge.Live(registration, assigned, out reason, out placed)
+                : StoreOpsBridge.LiveRemote(registration, assigned, out reason, out placed);
             StoreOps.CleanerLine(localAppData, rented, current.Day, placed);
             if (!live)
             {
@@ -1327,6 +1338,34 @@ namespace ChaoticCEO
                         FitOut.Record(localAppData, barePick, current.Day);
                         return bareLine;
                     }
+                }
+            }
+
+            var opsPlace = FitOut.PlaceNeedingOps(sites);
+            if (opsPlace.Length > 0 && opsPlace != place)
+            {
+                foreach (var building in current.BuildingRegistrations)
+                {
+                    if (building == null
+                        || !building.RentedByPlayer
+                        || string.IsNullOrEmpty(building.StreetName)
+                        || building.StreetNumber <= 0)
+                    {
+                        continue;
+                    }
+
+                    var candidate = building.StreetName
+                        + " "
+                        + building.StreetNumber.ToString(CultureInfo.InvariantCulture);
+                    if (candidate != opsPlace)
+                    {
+                        continue;
+                    }
+
+                    target = building;
+                    place = opsPlace;
+                    progress = FitProgress(localAppData, building);
+                    break;
                 }
             }
 
@@ -1897,7 +1936,11 @@ namespace ChaoticCEO
             var number = building.StreetNumber;
             var layout = StoreOpsBridge.HasItems(building)
                 || !string.IsNullOrEmpty(building.BusinessName);
-            var ops = StoreOpsBridge.HasCleaner(building);
+            var ops = Cleaner.OnStation(
+                StoreStaff.FromShifts(
+                    ReadStaffShifts(building),
+                    building.warnedLastHourAboutNoEmployee).CleanerStaffed,
+                StoreOpsBridge.HasCleaner(building));
             var capacity = CapacityBridge.AlreadyMatched(localAppData, street, number);
             var contract = !Modes.SignsContract(building.businessTypeName)
                 || WholesalerBridge.HasContract(street, number);
@@ -1981,6 +2024,12 @@ namespace ChaoticCEO
 
                 case "ops":
                 {
+                    if (!StoreOpsBridge.HasItems(registration)
+                        && FixtureGate.Next(false, registration.Layout) == "apply")
+                    {
+                        StarterBridge.ApplyFixtures(registration);
+                    }
+
                     if (!StoreOpsBridge.HasItems(registration))
                     {
                         return NamedBlock.Record(localAppData, current.Day, "fitout", "no-items", street, number);
@@ -1997,7 +2046,13 @@ namespace ChaoticCEO
                         return StoreOps.Miss(localAppData, assigned, rented, current.Day, "empty");
                     }
 
-                    if (!StoreOpsBridge.Live(registration, assigned, out var reason, out var placed))
+                    string reason;
+                    StoreOpsCleaner? placed;
+                    var entered = StarterBridge.Inside(rented);
+                    var live = entered
+                        ? StoreOpsBridge.Live(registration, assigned, out reason, out placed)
+                        : StoreOpsBridge.LiveRemote(registration, assigned, out reason, out placed);
+                    if (!live)
                     {
                         if (reason == "ops-station-not-initialized-frame0")
                         {
@@ -3465,18 +3520,45 @@ namespace ChaoticCEO
                     }
 
                     var itemId = shift.itemInstanceId ?? "";
-                    if (shift.type == WorkShiftType.Cleaning || cleanerStations.Contains(itemId))
+                    var kind = RemoteOps.ShiftKind(
+                        ShiftItemName(building, itemId, cleanerStations),
+                        shift.type == WorkShiftType.Cleaning);
+                    if (kind.Length == 0)
                     {
-                        rows.Add(new StaffShift(shift.employeeId, itemId, StaffShift.Cleaner));
+                        continue;
                     }
-                    else
-                    {
-                        rows.Add(new StaffShift(shift.employeeId, itemId, StaffShift.Register));
-                    }
+
+                    rows.Add(new StaffShift(shift.employeeId, itemId, kind));
                 }
             }
 
             return rows;
+        }
+
+        private static string ShiftItemName(
+            BuildingRegistration building,
+            string itemId,
+            HashSet<string> cleanerStations)
+        {
+            if (cleanerStations.Contains(itemId))
+            {
+                return "ba:itemname_cleaningstation";
+            }
+
+            if (building?.itemInstances == null || itemId.Length == 0)
+            {
+                return "";
+            }
+
+            foreach (var item in building.itemInstances.Values)
+            {
+                if (item != null && item.id == itemId)
+                {
+                    return item.itemName ?? "";
+                }
+            }
+
+            return "";
         }
 
         private static IReadOnlyList<string> PlacedNames(BuildingRegistration building)

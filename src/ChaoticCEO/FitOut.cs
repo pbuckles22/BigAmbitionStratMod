@@ -205,11 +205,15 @@ namespace ChaoticCEO
                 return new FitOutPick(place ?? "", "", false, gate);
             }
 
-            if (priorStores == null
-                || priorStores.Count == 0
-                || !StoreHealthGate.ExpansionAllowed(priorStores)
-                || string.IsNullOrEmpty(place)
-                || bare == null)
+            if (string.IsNullOrEmpty(place) || bare == null)
+            {
+                return FitOutPick.None();
+            }
+
+            if (!bare.LayoutLoaded
+                && (priorStores == null
+                    || priorStores.Count == 0
+                    || !StoreHealthGate.ExpansionAllowed(priorStores)))
             {
                 return FitOutPick.None();
             }
@@ -240,6 +244,29 @@ namespace ChaoticCEO
             }
 
             return FitOutPick.None();
+        }
+
+        public static string PlaceNeedingOps(IReadOnlyList<FitOutSite>? sites)
+        {
+            if (sites == null)
+            {
+                return "";
+            }
+
+            foreach (var site in sites)
+            {
+                if (site == null || site.Bare || site.Street.Length == 0 || site.Number <= 0)
+                {
+                    continue;
+                }
+
+                if (site.Progress.LayoutLoaded && !site.Progress.OpsAssigned)
+                {
+                    return site.Place;
+                }
+            }
+
+            return "";
         }
 
         public static FitOutPick BareLot(

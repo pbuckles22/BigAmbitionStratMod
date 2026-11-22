@@ -1,5 +1,21 @@
 # Test plan (TEST_PLAN.md)
 
+## Remote ops (1.19.2.2)
+
+Where: the city, outside an address that already has a business type. This copies that layout's fixtures onto the address when they are missing, then schedules the cleaner, and the guard and uniforms when that layout asks for them. It does not hire a cashier.
+
+1. Restart Big Ambitions so this build loads. Stay in the city. Do not walk into the open address.
+2. Use the save whose rented store already has a business type and no cleaner. Ninth Avenue 15 is that address. Note the street, the number, and the day.
+3. Let that morning run without entering the building.
+4. Open `%LocalAppData%\ChaoticCEO\ceo.log`.
+5. **PASS if** `mod.loaded version=1.19.2.2` and Ninth Avenue 15 has one `ops.assigned` line with `cleaner=Cleaner`, plus one `ops.cleaner` line with `shift=true`. **FAIL if** that address has no `store.fitout`, logs `block.named` `slug=no-items`, `ops.missed` `reason=nostation`, or the version is still `1.19.2.1`.
+6. Evidence: `ops.assigned` (`street`, `number`, `cleaner`, `guard`, `uniforms`) and `ops.cleaner` (`shift`, `type`). `person=false` is expected while the building is not in the scene.
+7. Version marker: public `1.19.2.2`.
+
+Tier 1: `RemoteOpsTests` and `FitOutTests`. Unit: an open address the player does not enter still gets a cleaner, including when the prior store is unstaffed. A store that still needs a cleaner is chosen ahead of a cashier gap. A guard shift is not a cashier. Uniforms dress the cleaning skill. No station, no days, a missing guard item, a missing locker, and a missing preset do not claim the ops. An existing cleaner is kept. Walking in does not take the remote schedule. Chain: `open rent → remote layout → ops remote`, the same chain when the prior store is unstaffed, the same chain when the player is inside (layout loads, remote ops stays quiet), and the same chain when the layout does not apply.
+
+Measured: `dotnet test` 1365 passed (prior 1362). Release build installed `1.19.2.2+687`. Human PASS 2026-11-21 on 1.19.2.2 at Ninth Avenue 15, player outside. `mod.loaded version=1.19.2.2 build=3682`. Day 22 `spend.store` profit −33, `employees=1`, `cleaners=0`. Day 23 `store.fitout` `step=ops` `chosen=true`, `ops.assigned` `cleaner=Cleaner` `uniforms=false`, `ops.cleaner` `shift=true` `person=false` `type=CleanerEmployee` `placed=false`, `saga` `stage=staff`, then `employees=2`. No `block.named` `slug=no-items` and no `ops.missed` `reason=nostation`. The 1.19.2 run stopped on `no-items`; 1.19.2.1 stayed silent while Seventh Avenue 15 had `cleaners=0`. Watch: `ScheduleOnItem` writes the 8–16 shift onto every `scheduleDays` entry, including Sunday `isOpen=false` (56h, not 48h). That misses this check and will hit the 50h cap when `StaffHold` is off. Next stop on this address is cashier (`16.3`).
+
 ## Remote layout (1.19.1.1)
 
 Where: the city, outside the rented address. This loads a business type onto an open rent and gives that store its own name. It does not hire staff, place shelves, or hold the lease.
