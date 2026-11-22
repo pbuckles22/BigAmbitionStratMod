@@ -180,9 +180,60 @@ namespace ChaoticCEO.Tests
             Assert.Equal("", Headcount.Record(Path.GetTempPath(), cashier, cleaner));
         }
 
-        private static HeadcountSeat Seat(string id, string skill, decimal hourly, bool scheduled)
+        [Fact]
+        public void Headcount_a_cashier_at_another_building_is_kept()
         {
-            return new HeadcountSeat(id, skill, hourly, scheduled);
+            var plan = Headcount.Decide(new[]
+            {
+                Seat("seventh", Cashier.Skill, 12m, scheduled: true, "ba:street_seventhavenue 15"),
+                Seat("ninth", Cashier.Skill, 0m, scheduled: true, "ba:street_ninthavenue 15"),
+                Seat("cleaner", Cleaner.Skill, 8m, scheduled: true, "ba:street_seventhavenue 15"),
+            });
+
+            Assert.Equal(2, plan.Cashier.Count);
+            Assert.False(plan.Cashier.Hire);
+            Assert.Empty(plan.Cashier.Drop);
+            Assert.Empty(Headcount.Extra(plan.Cashier, plan.Cleaner));
+        }
+
+        [Fact]
+        public void Headcount_a_second_cashier_at_the_same_building_is_extra()
+        {
+            var plan = Headcount.Decide(new[]
+            {
+                Seat("ada", Cashier.Skill, 12m, scheduled: true, "ba:street_ninthavenue 15"),
+                Seat("bob", Cashier.Skill, 0m, scheduled: false, "ba:street_ninthavenue 15"),
+            });
+
+            Assert.Equal("ada", plan.Cashier.Keep);
+            Assert.Equal(new[] { "bob" }, plan.Cashier.Drop);
+        }
+
+        [Fact]
+        public void Chain_morning_keeps_a_cashier_at_the_next_building()
+        {
+            // Chain: morning → one cashier → one cleaner → cashier at the next building
+            var day = Headcount.Open(1645, 1644);
+            var roster = new[]
+            {
+                Seat("seventh", Cashier.Skill, 12m, scheduled: true, "ba:street_seventhavenue 15"),
+                Seat("ninth", Cashier.Skill, 0m, scheduled: true, "ba:street_ninthavenue 15"),
+                Seat("cleaner", Cleaner.Skill, 8m, scheduled: true, "ba:street_seventhavenue 15"),
+            };
+            var cashier = Headcount.Cashier(day, roster);
+            var cleaner = Headcount.Cleaner(cashier, roster);
+
+            Assert.Equal(1645, day);
+            Assert.Equal(2, cashier.Count);
+            Assert.False(cashier.Hire);
+            Assert.Empty(cashier.Drop);
+            Assert.Equal(1, cleaner.Count);
+            Assert.Empty(Headcount.Extra(cashier, cleaner));
+        }
+
+        private static HeadcountSeat Seat(string id, string skill, decimal hourly, bool scheduled, string building = "")
+        {
+            return new HeadcountSeat(id, skill, hourly, scheduled, building);
         }
     }
 }

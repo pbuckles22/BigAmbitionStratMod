@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using BigAmbitions.Items;
 using Controllers;
 using Entities;
@@ -195,21 +196,10 @@ namespace ChaoticCEO
 
                 if (station.employeeInstance == null)
                 {
-                    if (HeadcountBridge.Blocks(Cashier.Skill))
+                    hired = TakeCashier(registration, hired, out reason);
+                    if (hired == null)
                     {
-                        var kept = HeadcountBridge.Find(Cashier.Skill);
-                        if (kept == null)
-                        {
-                            reason = "over";
-                            return false;
-                        }
-
-                        hired = kept;
-                    }
-                    else
-                    {
-                        hired.assignedAddress = registration.Address;
-                        EmployeeHelper.HireCandidate(hired);
+                        return false;
                     }
                 }
 
@@ -233,6 +223,85 @@ namespace ChaoticCEO
             catch (System.Exception ex)
             {
                 CrashTrace.Seen(ex, "CashierBridge.Live.1", "");
+                reason = "exception";
+                return false;
+            }
+        }
+
+        public static bool Scheduled(BuildingRegistration registration)
+        {
+            if (registration == null)
+            {
+                return false;
+            }
+
+            try
+            {
+                var read = ReadSchedule(registration);
+                var pick = new CashierPick(
+                    true,
+                    Cashier.RoleName,
+                    Cashier.Skill,
+                    Cashier.GiftType,
+                    registration.StreetName ?? "",
+                    registration.StreetNumber,
+                    "hire",
+                    "cashier");
+                var plan = RemoteCashier.Decide(false, pick, read.Registers, read.OpenDays, read.Posted, read.LiveIds);
+                return plan.Applied && !plan.Hire && plan.EmployeeId.Length > 0;
+            }
+            catch (System.Exception ex)
+            {
+                CrashTrace.Seen(ex, "CashierBridge.Scheduled.1", "");
+                return false;
+            }
+        }
+
+        public static bool LiveRemote(
+            BuildingRegistration registration,
+            CashierPick? pick,
+            out string reason,
+            out RemoteCashierPlan? plan,
+            out string employeeId)
+        {
+            reason = "";
+            plan = null;
+            employeeId = "";
+            if (registration == null || pick == null || !pick.Hired)
+            {
+                reason = "empty";
+                return false;
+            }
+
+            try
+            {
+                var read = ReadSchedule(registration);
+                plan = RemoteCashier.Decide(false, pick, read.Registers, read.OpenDays, read.Posted, read.LiveIds);
+                if (!plan.Applied)
+                {
+                    reason = plan.Reason;
+                    return false;
+                }
+
+                Purge(registration, plan);
+                var hired = Resolve(registration, plan, out reason);
+                if (hired == null || string.IsNullOrEmpty(hired.id))
+                {
+                    if (reason.Length == 0)
+                    {
+                        reason = "noemployee";
+                    }
+
+                    return false;
+                }
+
+                employeeId = hired.id;
+                WriteOpenDays(registration, plan, hired);
+                return true;
+            }
+            catch (System.Exception ex)
+            {
+                CrashTrace.Seen(ex, "CashierBridge.LiveRemote.1", "");
                 reason = "exception";
                 return false;
             }
@@ -440,21 +509,10 @@ namespace ChaoticCEO
                 hired.characterData.name = Cashier.RoleName;
             }
 
-            if (HeadcountBridge.Blocks(Cashier.Skill))
+            hired = TakeCashier(registration, hired, out reason);
+            if (hired == null)
             {
-                var kept = HeadcountBridge.Find(Cashier.Skill);
-                if (kept == null)
-                {
-                    reason = "over";
-                    return false;
-                }
-
-                hired = kept;
-            }
-            else
-            {
-                hired.assignedAddress = registration.Address;
-                EmployeeHelper.HireCandidate(hired);
+                return false;
             }
 
             WriteShifts(registration, item.id, hired);
@@ -569,6 +627,400 @@ namespace ChaoticCEO
                 && registration.Address != null
                 && address.streetName == registration.Address.streetName
                 && address.streetNumber == registration.Address.streetNumber;
+        }
+
+        private sealed class ScheduleRead
+        {
+            public ScheduleRead(
+                List<ServiceRegister> registers,
+                List<bool> openDays,
+                List<PostedShift> posted,
+                List<string> liveIds,
+                HashSet<string> knownItems)
+            {
+                Registers = registers;
+                OpenDays = openDays;
+                Posted = posted;
+                LiveIds = liveIds;
+                KnownItems = knownItems;
+            }
+
+            public List<ServiceRegister> Registers { get; }
+
+            public List<bool> OpenDays { get; }
+
+            public List<PostedShift> Posted { get; }
+
+            public List<string> LiveIds { get; }
+
+            public HashSet<string> KnownItems { get; }
+        }
+
+        private static ScheduleRead ReadSchedule(BuildingRegistration registration)
+        {
+            var registers = new List<ServiceRegister>();
+            var known = new HashSet<string>(System.StringComparer.Ordinal);
+            var seen = new HashSet<string>(System.StringComparer.Ordinal);
+            foreach (var item in RegisterItems(registration))
+            {
+                if (item == null || string.IsNullOrEmpty(item.id) || !known.Add(item.id))
+                {
+                    continue;
+                }
+
+                if (ServesCustomers(item) && seen.Add(item.id))
+                {
+                    registers.Add(new ServiceRegister(item.id, Cashier.Skill));
+                }
+            }
+
+            var openDays = new List<bool>();
+            var posted = new List<PostedShift>();
+            var service = new HashSet<string>(System.StringComparer.Ordinal);
+            foreach (var register in registers)
+            {
+                service.Add(register.Id);
+            }
+
+            if (registration.scheduleDays != null)
+            {
+                for (var day = 0; day < registration.scheduleDays.Count; day++)
+                {
+                    var row = registration.scheduleDays[day];
+                    openDays.Add(row != null && row.isOpen);
+                    if (row?.workShifts == null)
+                    {
+                        continue;
+                    }
+
+                    foreach (var shift in row.workShifts)
+                    {
+                        if (shift == null || string.IsNullOrEmpty(shift.itemInstanceId))
+                        {
+                            continue;
+                        }
+
+                        var onRegister = service.Contains(shift.itemInstanceId);
+                        var orphan = !onRegister
+                            && shift.type == WorkShiftType.Default
+                            && !known.Contains(shift.itemInstanceId);
+                        if (!onRegister && !orphan)
+                        {
+                            continue;
+                        }
+
+                        posted.Add(new PostedShift(day, shift.employeeId, shift.itemInstanceId, orphan));
+                    }
+                }
+            }
+
+            return new ScheduleRead(registers, openDays, posted, LiveEmployees(registration), known);
+        }
+
+        private static List<ItemInstance> RegisterItems(BuildingRegistration registration)
+        {
+            var items = new List<ItemInstance>();
+            if (registration.itemInstances != null)
+            {
+                foreach (var item in registration.itemInstances.Values)
+                {
+                    if (item != null)
+                    {
+                        items.Add(item);
+                    }
+                }
+            }
+
+            var assignable = new List<ItemInstance>();
+            registration.GetAssignableItems(assignable);
+            items.AddRange(assignable);
+            return items;
+        }
+
+        private static bool ServesCustomers(ItemInstance item)
+        {
+            var skills = item.ItemCached != null ? item.ItemCached.suitableSkills : null;
+            if (skills == null && !string.IsNullOrEmpty(item.itemName))
+            {
+                var named = ItemsGetter.GetByName(item.itemName);
+                skills = named == null ? null : named.suitableSkills;
+            }
+
+            if (skills == null)
+            {
+                return item.itemName != null
+                    && item.itemName.IndexOf("cashregister", System.StringComparison.OrdinalIgnoreCase) >= 0;
+            }
+
+            foreach (var skill in skills)
+            {
+                if (skill == Cashier.Skill)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        private static List<string> LiveEmployees(BuildingRegistration registration)
+        {
+            var ids = new List<string>();
+            var current = SaveGameManager.Current;
+            if (current?.EmployeeInstances == null)
+            {
+                return ids;
+            }
+
+            foreach (var employee in current.EmployeeInstances)
+            {
+                if (employee != null
+                    && !string.IsNullOrEmpty(employee.id)
+                    && !employee.poached
+                    && SameAddress(employee.assignedAddress, registration))
+                {
+                    ids.Add(employee.id);
+                }
+            }
+
+            return ids;
+        }
+
+        private static void Purge(BuildingRegistration registration, RemoteCashierPlan plan)
+        {
+            if (registration.scheduleDays == null || plan.Stale.Count == 0)
+            {
+                return;
+            }
+
+            for (var day = 0; day < registration.scheduleDays.Count; day++)
+            {
+                var row = registration.scheduleDays[day];
+                if (row?.workShifts == null)
+                {
+                    continue;
+                }
+
+                var drop = new List<WorkShift>();
+                foreach (var shift in row.workShifts)
+                {
+                    if (shift != null && Matches(plan.Stale, day, shift))
+                    {
+                        drop.Add(shift);
+                    }
+                }
+
+                foreach (var shift in drop)
+                {
+                    row.RemoveWorkShift(shift);
+                }
+            }
+        }
+
+        private static bool Matches(IReadOnlyList<PostedShift> stale, int day, WorkShift shift)
+        {
+            foreach (var row in stale)
+            {
+                if (row.DayIndex == day
+                    && row.EmployeeId == (shift.employeeId ?? "")
+                    && row.ItemId == (shift.itemInstanceId ?? ""))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        private static EmployeeInstance? Resolve(BuildingRegistration registration, RemoteCashierPlan plan, out string reason)
+        {
+            reason = "";
+            if (plan.EmployeeId.Length > 0)
+            {
+                var kept = FindEmployee(plan.EmployeeId);
+                if (kept != null && SameAddress(kept.assignedAddress, registration))
+                {
+                    return kept;
+                }
+            }
+
+            var hired = EmployeeHelper.CreateAIEmployeeInstance(Cashier.Skill);
+            if (hired == null)
+            {
+                reason = "noemployee";
+                return null;
+            }
+
+            if (hired.characterData != null && string.IsNullOrEmpty(hired.characterData.name))
+            {
+                hired.characterData.name = Cashier.RoleName;
+            }
+
+            return TakeCashier(registration, hired, out reason);
+        }
+
+        private static EmployeeInstance? TakeCashier(
+            BuildingRegistration registration,
+            EmployeeInstance created,
+            out string reason)
+        {
+            reason = "";
+            if (!RemoteCashier.Recruit(true, CashiersHere(registration)))
+            {
+                var kept = CashierHere(registration);
+                if (kept == null)
+                {
+                    reason = "over";
+                    return null;
+                }
+
+                return kept;
+            }
+
+            created.assignedAddress = registration.Address;
+            EmployeeHelper.HireCandidate(created);
+            if (string.IsNullOrEmpty(created.id) || FindEmployee(created.id) == null)
+            {
+                reason = "roster";
+                return null;
+            }
+
+            return created;
+        }
+
+        private static int CashiersHere(BuildingRegistration registration)
+        {
+            var count = 0;
+            foreach (var employee in Roster())
+            {
+                if (SameAddress(employee.assignedAddress, registration) && HasCashierSkill(employee))
+                {
+                    count++;
+                }
+            }
+
+            return count;
+        }
+
+        private static EmployeeInstance? CashierHere(BuildingRegistration registration)
+        {
+            foreach (var employee in Roster())
+            {
+                if (SameAddress(employee.assignedAddress, registration) && HasCashierSkill(employee))
+                {
+                    return employee;
+                }
+            }
+
+            return null;
+        }
+
+        private static List<EmployeeInstance> Roster()
+        {
+            var rows = new List<EmployeeInstance>();
+            var current = SaveGameManager.Current;
+            if (current?.EmployeeInstances == null)
+            {
+                return rows;
+            }
+
+            foreach (var employee in current.EmployeeInstances)
+            {
+                if (employee != null && !string.IsNullOrEmpty(employee.id) && !employee.poached)
+                {
+                    rows.Add(employee);
+                }
+            }
+
+            return rows;
+        }
+
+        private static bool HasCashierSkill(EmployeeInstance employee)
+        {
+            try
+            {
+                return employee.HasSkill(Cashier.Skill);
+            }
+            catch (System.Exception ex)
+            {
+                CrashTrace.Seen(ex, "CashierBridge.HasCashierSkill.1", "");
+                return false;
+            }
+        }
+
+        private static EmployeeInstance? FindEmployee(string id)
+        {
+            var current = SaveGameManager.Current;
+            if (current?.EmployeeInstances == null)
+            {
+                return null;
+            }
+
+            foreach (var employee in current.EmployeeInstances)
+            {
+                if (employee != null && employee.id == id && !employee.poached)
+                {
+                    return employee;
+                }
+            }
+
+            return null;
+        }
+
+        private static void WriteOpenDays(BuildingRegistration registration, RemoteCashierPlan plan, EmployeeInstance employee)
+        {
+            if (registration.scheduleDays == null || string.IsNullOrEmpty(employee.id))
+            {
+                return;
+            }
+
+            employee.assignedAddress = registration.Address;
+            foreach (var day in plan.ShiftDays)
+            {
+                if (day < 0 || day >= registration.scheduleDays.Count)
+                {
+                    continue;
+                }
+
+                var row = registration.scheduleDays[day];
+                if (row?.workShifts == null || !row.isOpen)
+                {
+                    continue;
+                }
+
+                foreach (var register in plan.RegisterIds)
+                {
+                    if (Listed(row, register, employee.id))
+                    {
+                        continue;
+                    }
+
+                    row.AddWorkShift(new WorkShift
+                    {
+                        startingHour = RemoteCashier.StartHour,
+                        endingHour = RemoteCashier.EndHour,
+                        employeeId = employee.id,
+                        itemInstanceId = register,
+                        type = WorkShiftType.Default,
+                    });
+                }
+            }
+
+            employee.UpdateWeeklyHoursAndDays(registration.scheduleDays);
+            employee.UpdateAssignedWorkStationItems();
+        }
+
+        private static bool Listed(ScheduleDay day, string itemId, string employeeId)
+        {
+            foreach (var shift in day.workShifts)
+            {
+                if (shift != null && shift.itemInstanceId == itemId && shift.employeeId == employeeId)
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
     }
 }

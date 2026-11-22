@@ -138,9 +138,9 @@ When shipping: update **PM_PLAN**, **doc/PROJECT_STATUS.md**, and **Current stat
 
 ## Current state
 
-- **Product:** Version **1.19.2.2** (remote ops **16.2** landed). An open store gets a cleaner while the player stays outside. Epic 16 stays open. Epic 14 stays open. Ladder: [PM_PLAN.md](PM_PLAN.md). Handoff: [doc/handoff/0136-HANDOFF-2026-11-21_1756.md](doc/handoff/0136-HANDOFF-2026-11-21_1756.md).
-- **On:** `origin/main @ c4f58b0`. Feature branch `feature/16.2-remote-ops` kept. **10.4** code stays stashed. The price-floor WIP is in `git stash`. https://github.com/pbuckles22/BigAmbitionStratMod
-- **Next:** **16.3** remote cashier when asked. **15.7** and **15.8** wait for a soak. **14.21** waits. **14.9.7** waits for Stage 2. No `$100M` soak until **10.7**.
+- **Product:** Version **1.19.3.1** (remote cashier **16.3** landed). A store with no cashier gets one while the player stays outside. Epic 16 stays open. Epic 14 stays open. Ladder: [PM_PLAN.md](PM_PLAN.md). Handoff: [doc/handoff/0137-HANDOFF-2026-11-21_1916.md](doc/handoff/0137-HANDOFF-2026-11-21_1916.md).
+- **On:** `origin/main` after this land. Feature branch `feature/16.3-remote-cashier` kept. **10.4** code stays stashed. The price-floor WIP is in `git stash`. https://github.com/pbuckles22/BigAmbitionStratMod
+- **Next:** **16.4** remote shelf when asked. **15.7** and **15.8** wait for a soak. **14.21** waits. **14.9.7** waits for Stage 2. No `$100M` soak until **10.7**.
 - **Blockers:** Do not pop the **10.4** stash. Do not pop the old staff-hold stash. Do not pop the old **14.12** stash. **7.9** blocks **14.10**. Do not clip paper to register free space or drop RegisterCap to 200. Turn `StaffHold.Enabled` off before tuning HR. Empty `doc/gemini/dropzone` breaks the pytest save gate until a ledger `.hsg` is restored.
 
 ## Run and test

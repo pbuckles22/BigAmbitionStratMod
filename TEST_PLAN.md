@@ -1,5 +1,23 @@
 # Test plan (TEST_PLAN.md)
 
+## Remote cashier (1.19.3.1)
+
+Where: the city, outside the open store. My Employees → Employees. This hires a cashier for the store that does not have one, even when another store already has a cashier. Shifts are written on that store's open days only. A closed day, a missing employee, and a missing register item are removed. It does not place shelves.
+
+1. Restart Big Ambitions so this build loads. Load the save from the 1.19.3 check. Stay in the city. Do not walk into the open address.
+2. Ninth Avenue 15 is the store that still needs its own cashier. Seventh Avenue already has the cashier named Cashier and the cleaner. Note the day.
+3. Let mornings run without entering the building until Ninth Avenue reaches the cashier step.
+4. Open My Employees → Employees. Then open `%LocalAppData%\ChaoticCEO\ceo.log`.
+5. **PASS if** `mod.loaded version=1.19.3.1` and Employees shows three people: the cleaner, the cashier who was already there, and a new Cashier. The log has one new `hire.cashier` for `ba:street_ninthavenue` `number=15` with `skill=ba:skill_customerservice`, plus `cashier.shift` `person=false` `closed=1` and `shifts` above 0. **FAIL if** Employees still shows only the cleaner and the original cashier, the version is still `1.19.3`, or the cashier step logs `hire.missed`.
+6. Evidence: `hire.cashier` (`street`, `number`, `skill`, `call`) and `cashier.shift` (`register`, `employee`, `shifts`, `purged`, `closed`, `person`). `person=false` is expected while the building is not in the scene. The next morning keeps one cashier per store (`headcount.held` `dropped=0`).
+7. Version marker: public `1.19.3.1`.
+
+This check is the cashier on the store that did not have one. Shelves stay on the next story. The 1.19.3 run logged `hire.cashier` and `cashier.shift` for Ninth Avenue and left the roster at two, because that step reused Seventh Avenue's cashier.
+
+Measured this build: `dotnet test` 1377 passed (prior 1373). Release `1.19.3.1+696` is installed. Human PASS 2026-11-21 on 1.19.3.1. Day 27 employees 2 → 3. `hire.cashier` Ninth Avenue 15. `cashier.shift` `shifts=6` `closed=1` `person=false`. Day 28–29 `cashiers=2` `cleaners=1` `dropped=0`. Employees: cashier and cleaner on 7AV15 TH, new cashier on 9AV15 IC.
+
+Tier 1: `RemoteCashierTests` and `HeadcountTests`. Unit: staying outside still gets a cashier, and a closed day gets no shift. A store with no cashier still recruits when another store has one. A live open-day cashier is kept while a stale shift is purged. A closed week does not hire. Walking in does not take the remote schedule. A cleaning station is not a register. A cashier at another building is kept. A second cashier at the same building is extra. Chain: `remote layout → ops remote → cashier remote`, the same chain when a stale shift is purged, the same chain when ops does not apply, and `morning → one cashier → one cleaner → cashier at the next building`.
+
 ## Remote ops (1.19.2.2)
 
 Where: the city, outside an address that already has a business type. This copies that layout's fixtures onto the address when they are missing, then schedules the cleaner, and the guard and uniforms when that layout asks for them. It does not hire a cashier.

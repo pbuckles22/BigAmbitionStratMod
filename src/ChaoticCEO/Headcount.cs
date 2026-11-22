@@ -7,11 +7,17 @@ namespace ChaoticCEO
     public sealed class HeadcountSeat
     {
         public HeadcountSeat(string id, string skill, decimal hourly, bool scheduled)
+            : this(id, skill, hourly, scheduled, "")
+        {
+        }
+
+        public HeadcountSeat(string id, string skill, decimal hourly, bool scheduled, string building)
         {
             Id = id ?? "";
             Skill = skill ?? "";
             Hourly = hourly;
             Scheduled = scheduled;
+            Building = building ?? "";
         }
 
         public string Id { get; }
@@ -21,6 +27,8 @@ namespace ChaoticCEO
         public decimal Hourly { get; }
 
         public bool Scheduled { get; }
+
+        public string Building { get; }
     }
 
     public sealed class HeadcountRole
@@ -132,21 +140,32 @@ namespace ChaoticCEO
 
             var keep = "";
             HeadcountSeat? best = null;
-            foreach (var seat in seats)
-            {
-                if (best == null || Prefer(seat, best))
-                {
-                    best = seat;
-                    keep = seat.Id;
-                }
-            }
-
             var drop = new List<string>();
-            if (day > 0 && seats.Count > 1)
+            foreach (var group in Groups(seats))
             {
-                foreach (var seat in seats)
+                HeadcountSeat? local = null;
+                foreach (var seat in group)
                 {
-                    if (seat.Id.Length > 0 && seat.Id != keep)
+                    if (local == null || Prefer(seat, local))
+                    {
+                        local = seat;
+                    }
+                }
+
+                if (local != null && (best == null || Prefer(local, best)))
+                {
+                    best = local;
+                    keep = local.Id;
+                }
+
+                if (day <= 0 || group.Count < 2 || local == null)
+                {
+                    continue;
+                }
+
+                foreach (var seat in group)
+                {
+                    if (seat.Id.Length > 0 && seat.Id != local.Id)
                     {
                         drop.Add(seat.Id);
                     }
@@ -154,6 +173,32 @@ namespace ChaoticCEO
             }
 
             return new HeadcountRole(day, seats.Count, day > 0 && seats.Count == 0, day > 0 ? keep : "", drop);
+        }
+
+        private static List<List<HeadcountSeat>> Groups(List<HeadcountSeat> seats)
+        {
+            var order = new List<string>();
+            var groups = new Dictionary<string, List<HeadcountSeat>>(System.StringComparer.Ordinal);
+            foreach (var seat in seats)
+            {
+                var key = seat.Building ?? "";
+                if (!groups.TryGetValue(key, out var group))
+                {
+                    group = new List<HeadcountSeat>();
+                    groups[key] = group;
+                    order.Add(key);
+                }
+
+                group.Add(seat);
+            }
+
+            var rows = new List<List<HeadcountSeat>>();
+            foreach (var key in order)
+            {
+                rows.Add(groups[key]);
+            }
+
+            return rows;
         }
 
         private static bool Prefer(HeadcountSeat next, HeadcountSeat current)

@@ -1157,7 +1157,9 @@ namespace ChaoticCEO
                 Wholesaler.StageOne(),
                 alreadySigned: false,
                 GameApi.Live());
-            var already = CashierBridge.HasCashier(registration);
+            var entered = StarterBridge.Inside(rented);
+            var already = CashierBridge.HasCashier(registration)
+                || (!entered && CashierBridge.Scheduled(registration));
             var hired = Cashier.Hire(rented, chosen, signed, already, GameApi.Live());
             if (!hired.Hired)
             {
@@ -1165,7 +1167,7 @@ namespace ChaoticCEO
                 return "";
             }
 
-            if (!CashierBridge.Live(registration, hired, out var reason))
+            if (!ApplyCashier(registration, rented, hired, out var reason, out var plan, out var employeeId))
             {
                 if (Cashier.Retry(reason))
                 {
@@ -1181,7 +1183,13 @@ namespace ChaoticCEO
             }
 
             watch.Mark(current);
-            return Cashier.Record(localAppData, hired, current.Day);
+            var recorded = Cashier.Record(localAppData, hired, current.Day);
+            if (plan != null)
+            {
+                RemoteCashier.Note(localAppData, rented, current.Day, plan, employeeId);
+            }
+
+            return recorded;
         }
 
         private static string? ReleaseCourse(
@@ -1944,7 +1952,9 @@ namespace ChaoticCEO
             var capacity = CapacityBridge.AlreadyMatched(localAppData, street, number);
             var contract = !Modes.SignsContract(building.businessTypeName)
                 || WholesalerBridge.HasContract(street, number);
-            var cashier = CashierBridge.HasCashier(building);
+            var rented = new BuildingRent(street, number, true, "");
+            var cashier = CashierBridge.HasCashier(building)
+                || (!StarterBridge.Inside(rented) && CashierBridge.Scheduled(building));
             return new FitOutProgress(layout, ops, capacity, contract, cashier);
         }
 
@@ -2119,24 +2129,50 @@ namespace ChaoticCEO
                         Wholesaler.StageOne(),
                         alreadySigned: false,
                         GameApi.Live());
-                    var already = CashierBridge.HasCashier(registration);
+                    var entered = StarterBridge.Inside(rented);
+                    var already = CashierBridge.HasCashier(registration)
+                        || (!entered && CashierBridge.Scheduled(registration));
                     var hired = Cashier.Hire(rented, chosen, signed, already, GameApi.Live());
                     if (!hired.Hired)
                     {
                         return "";
                     }
 
-                    if (!CashierBridge.Live(registration, hired, out var reason))
+                    if (!ApplyCashier(registration, rented, hired, out var reason, out var plan, out var employeeId))
                     {
                         return Cashier.Miss(localAppData, hired, current.Day, reason);
                     }
 
-                    return Cashier.Record(localAppData, hired, current.Day);
+                    var recorded = Cashier.Record(localAppData, hired, current.Day);
+                    if (plan != null)
+                    {
+                        RemoteCashier.Note(localAppData, rented, current.Day, plan, employeeId);
+                    }
+
+                    return recorded;
                 }
 
                 default:
                     return null;
             }
+        }
+
+        private static bool ApplyCashier(
+            BuildingRegistration registration,
+            BuildingRent rented,
+            CashierPick hired,
+            out string reason,
+            out RemoteCashierPlan? plan,
+            out string employeeId)
+        {
+            plan = null;
+            employeeId = "";
+            if (StarterBridge.Inside(rented))
+            {
+                return CashierBridge.Live(registration, hired, out reason);
+            }
+
+            return CashierBridge.LiveRemote(registration, hired, out reason, out plan, out employeeId);
         }
 
         private static bool PlayerRents(GameInstance current)

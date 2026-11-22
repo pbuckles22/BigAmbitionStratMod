@@ -212,14 +212,15 @@ namespace ChaoticCEO
                 var hourly = (decimal)employee.hourlyWage;
                 try
                 {
+                    var building = Building(employee);
                     if (employee.HasSkill(Cashier.Skill))
                     {
-                        seats.Add(new HeadcountSeat(employee.id, Cashier.Skill, hourly, scheduled));
+                        seats.Add(new HeadcountSeat(employee.id, Cashier.Skill, hourly, scheduled, building));
                     }
 
                     if (employee.HasSkill(Cleaner.Skill))
                     {
-                        seats.Add(new HeadcountSeat(employee.id, Cleaner.Skill, hourly, scheduled));
+                        seats.Add(new HeadcountSeat(employee.id, Cleaner.Skill, hourly, scheduled, building));
                     }
                 }
                 catch (System.Exception ex)
@@ -229,6 +230,31 @@ namespace ChaoticCEO
             }
 
             return seats;
+        }
+
+        private static string Building(EmployeeInstance employee)
+        {
+            try
+            {
+                var address = employee.assignedAddress;
+                if (address == null)
+                {
+                    return "";
+                }
+
+                var street = address.streetName ?? "";
+                if (street.Length == 0 || address.streetNumber <= 0)
+                {
+                    return "";
+                }
+
+                return street + " " + address.streetNumber.ToString(System.Globalization.CultureInfo.InvariantCulture);
+            }
+            catch (System.Exception ex)
+            {
+                CrashTrace.Seen(ex, "HeadcountBridge.Building.1", "");
+                return "";
+            }
         }
     }
 }

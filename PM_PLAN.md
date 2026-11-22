@@ -1,6 +1,6 @@
 # PM_PLAN — BigAmbitionStratMod
 
-In-game advisor for one Big Ambitions save, then a new-game guide and autopilot. Version scheme `MAJOR.EPIC.COUNTER`. Current public version **1.19.2.2**. The first ship of a new epic phase is `1.N.1`. When an epic runs after a higher-numbered epic, **EPIC** is `max(shipped_epic) + 1` (Epic 9 after 1.13.x → 1.14.1). Never go backwards.
+In-game advisor for one Big Ambitions save, then a new-game guide and autopilot. Version scheme `MAJOR.EPIC.COUNTER`. Current public version **1.19.3.1**. The first ship of a new epic phase is `1.N.1`. When an epic runs after a higher-numbered epic, **EPIC** is `max(shipped_epic) + 1` (Epic 9 after 1.13.x → 1.14.1). Never go backwards.
 
 ## Context
 
@@ -224,7 +224,7 @@ There is no separate “update the strategy” epic. The notes in `doc/requireme
 - **14.25** `[ ]` One pricing plan per neighborhood and business type. Two neighborhoods do not share a plan. The create call stays `PricingManagersPlanList.AddPlan`. Headless pick. The save write waits on **7.9**. Chain: `neighborhood → type → plan`. **Out:** the staff-plan write (**7.9**).
 - **14.26** `[ ]` Empire thermostat. **EmpireDefenseMargin** = 22% for **ProfitProofDays** adds **EmpireMarginBoost** = 5 points to each floor and switches contested items to a match. **EmpireConquestMargin** = 35% with cash above the reserve allows the **14.24** undercut. Headless. Chain: `empire margin → defense or conquest → 14.24`. **Out:** pricing under the floor. Rival buyout stays **10.7**.
 
-**Next:** **16.3** remote cashier when asked. **15.7** and **15.8** wait for a soak. **14.21** waits. **14.9.7** waits for Stage 2. **14.22–14.26** are written and wait. Do not stack onto the stashed **10.4** tree.
+**Next:** **16.4** remote shelf when asked. **15.7** and **15.8** wait for a soak. **14.21** waits. **14.9.7** waits for Stage 2. **14.22–14.26** are written and wait. Do not stack onto the stashed **10.4** tree.
 
 ## Epic 15 — Forensics
 
@@ -244,11 +244,11 @@ There is no separate “update the strategy” epic. The notes in `doc/requireme
 
 ## Epic 16 — Remote open
 
-**Status:** in progress. **16.1** and **16.2** are landed. Public versions are `1.19.COUNTER`. Source: `doc/gemini/dropzone/chaoticceo_smart_expansion_all_remote_pm_plan.md`. An open rent finishes layout, staff, and stock while the player stays put. Spot-hold / `lease.held` waits in Epic 17 so this epic reaches remote layout faster. `Starter.Hold` stays “no layout was chosen.”
+**Status:** in progress. **16.1**, **16.2**, and **16.3** are landed. Public versions are `1.19.COUNTER`. Source: `doc/gemini/dropzone/chaoticceo_smart_expansion_all_remote_pm_plan.md`. An open rent finishes layout, staff, and stock while the player stays put. Spot-hold / `lease.held` waits in Epic 17 so this epic reaches remote layout faster. `Starter.Hold` stays “no layout was chosen.”
 
 - **16.1** `[x]` Remote layout for an open rent. The `Inside` abort leaves that path. Soak: player does not walk in. **PASS if** the open address gets a business type. **FAIL if** the address stays blank with no `SILENT_NOOP`. A store name ends with the neighborhood initials. The address sits in front of those initials, so two stores in one neighborhood still differ. Chain: `open rent → remote layout → distinct name`. **Out:** staff, shelves, spot-hold. Human PASS 2026-11-21 on 1.19.1. Day 16 `layout.loaded` `ba:street_ninthavenue` 15 `ba:businesstype_giftshop`. Version 1.19.1.1.
 - **16.2** `[x]` `StoreOpsBridge.LiveRemote`. Cleaners, guards, and uniforms for the open address when the building is not in scene. A guard shift is not a cashier. Chain: `open rent → remote layout → ops remote`. **Out:** cashier remote. Human PASS 2026-11-21 on 1.19.2.2 at Ninth Avenue 15. Day 23 `ops.cleaner` `shift=true` `person=false` `type=CleanerEmployee` `placed=false`. Employees 1 → 2. Version 1.19.2.2.
-- **16.3** `[ ]` `CashierBridge.LiveRemote`. Dynamic `ba:skill_customerservice` registers, stale-shift purge, and open-day-only shifts. Chain: `ops remote → cashier remote`. **Out:** shelves.
+- **16.3** `[x]` `CashierBridge.LiveRemote`. Dynamic `ba:skill_customerservice` registers, stale-shift purge, and open-day-only shifts. A store with no cashier gets one even when another store already has a cashier. The next morning keeps one cashier per building. Chain: `ops remote → cashier remote`. **Out:** shelves. Human PASS 2026-11-21 on 1.19.3.1. Day 27 employees 2 → 3 at Ninth Avenue 15. `hire.cashier` `skill=ba:skill_customerservice`. `cashier.shift` `shifts=6` `closed=1` `person=false`. Day 28–29 `cashiers=2` `cleaners=1` `dropped=0`. Version 1.19.3.1.
 - **16.4** `[ ]` Remote shelf for the open address. Walks `nestedCargoInstances`. **HealStrikeMax** = 3: three identical unmet shelf heals on the same entity pause that heal loop (`breaker.tripped slug=heal-strike-windup`). Chain: `cashier remote → shelf`. **Out:** multi-store soak.
 - **16.5** `[ ]` One-morning check of that one open store, then one walk-in spot-check: zero Frame-1 staff despawn and valid walkable shelf placement. The dropzone’s 20-day apartment lockdown is not this story. Chain: `remote shelf → one store ready → walk-in`.
 

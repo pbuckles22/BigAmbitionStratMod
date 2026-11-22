@@ -8,7 +8,7 @@
 
 ## Summary
 
-**BigAmbitionStratMod** — Version **1.19.2.2** (remote ops **16.2** landed). An open store gets a cleaner while the player stays outside. Next is **16.3** remote cashier. **15.7** and **15.8** wait for a soak. **14.21** waits. **10.4** code stays stashed. Rules: [requirements/strategy.md](requirements/strategy.md).
+**BigAmbitionStratMod** — Version **1.19.3.1** (remote cashier **16.3** landed). A store with no cashier gets one while the player stays outside. Next is **16.4** remote shelf. **15.7** and **15.8** wait for a soak. **14.21** waits. **10.4** code stays stashed. Rules: [requirements/strategy.md](requirements/strategy.md).
 
 ---
 
@@ -16,7 +16,8 @@
 
 | Branch | Role |
 |--------|------|
-| **`main`** | Integration branch. Version 1.19.2.2. Remote ops **16.2**. Land `c4f58b0`. |
+| **`main`** | Integration branch. Version 1.19.3.1. Remote cashier **16.3**. |
+| **`feature/16.3-remote-cashier`** | Remote cashier. Version 1.19.3.1. Human PASS 2026-11-21. Kept after CMPH. |
 | **`feature/16.2-remote-ops`** | Remote ops. Version 1.19.2.2. Human PASS 2026-11-21. Kept after CMPH. |
 | **`feature/16.1-remote-layout`** | Remote layout. Version 1.19.1.1. Human PASS 2026-11-21. Kept after CMPH. |
 | **`feature/15.6-bare-open`** | Bare-open breaker. Version 1.18.9. Human PASS 2026-11-21. Kept after CMPH. |
