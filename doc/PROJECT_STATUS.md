@@ -16,7 +16,7 @@
 
 | Branch | Role |
 |--------|------|
-| **`main`** | Integration branch. Version 1.19.1.1. Remote layout **16.1**. Land `8f331d2`. |
+| **`main`** | Integration branch. Version 1.19.1.1. Remote layout **16.1**. Land `50157be`. |
 | **`feature/16.1-remote-layout`** | Remote layout. Version 1.19.1.1. Human PASS 2026-11-21. Kept after CMPH. |
 | **`feature/15.6-bare-open`** | Bare-open breaker. Version 1.18.9. Human PASS 2026-11-21. Kept after CMPH. |
 | **`feature/15.5-saga`** | Saga and timeline fork. Version 1.18.8. Human PASS 2026-11-21. Kept after CMPH. |

@@ -139,7 +139,7 @@ When shipping: update **PM_PLAN**, **doc/PROJECT_STATUS.md**, and **Current stat
 ## Current state
 
 - **Product:** Version **1.19.1.1** (remote layout **16.1** landed). A second store name ends with the neighborhood initials. Epic 16 stays open. Epic 14 stays open. Ladder: [PM_PLAN.md](PM_PLAN.md). Handoff: [doc/handoff/0135-HANDOFF-2026-11-21_1605.md](doc/handoff/0135-HANDOFF-2026-11-21_1605.md).
-- **On:** `origin/main @ 8f331d2`. Feature branch `feature/16.1-remote-layout` kept. **10.4** code stays stashed. The price-floor WIP is in `git stash`. https://github.com/pbuckles22/BigAmbitionStratMod
+- **On:** `origin/main @ 50157be`. Feature branch `feature/16.1-remote-layout` kept. **10.4** code stays stashed. The price-floor WIP is in `git stash`. https://github.com/pbuckles22/BigAmbitionStratMod
 - **Next:** **16.2** remote ops when asked. **15.7** and **15.8** wait for a soak. **14.21** waits. **14.9.7** waits for Stage 2. No `$100M` soak until **10.7**.
 - **Blockers:** Do not pop the **10.4** stash. Do not pop the old staff-hold stash. Do not pop the old **14.12** stash. **7.9** blocks **14.10**. Do not clip paper to register free space or drop RegisterCap to 200. Turn `StaffHold.Enabled` off before tuning HR. Empty `doc/gemini/dropzone` breaks the pytest save gate until a ledger `.hsg` is restored.
 
