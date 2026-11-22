@@ -1,5 +1,21 @@
 # Test plan (TEST_PLAN.md)
 
+## Remote layout (1.19.1.1)
+
+Where: the city, outside the rented address. This loads a business type onto an open rent and gives that store its own name. It does not hire staff, place shelves, or hold the lease.
+
+1. Restart Big Ambitions so this build loads. Stay in the city. Do not walk into the open address.
+2. Use a new game, or a save whose rented lot still has a blank business type. Note the street, the number, and the day.
+3. Let that morning run without entering the building.
+4. Open `%LocalAppData%\ChaoticCEO\ceo.log`. BizMan lists each store name.
+5. **PASS if** `mod.loaded version=1.19.1.1` and that address has a business type, with one `layout.loaded` line for that street and number naming the type. The name ends with the neighborhood initials. **FAIL if** the type stays blank and that address has no `SILENT_NOOP` `where=layout`, two stores share one name, or the version is still `1.19.1`.
+6. Evidence: `layout.loaded` (`street`, `number`, `type`) or one `SILENT_NOOP` (`where=layout`, `street`, `number`). A renamed store appends `store.named` (`street`, `number`, `name`).
+7. Version marker: public `1.19.1.1`.
+
+Tier 1: `RemoteLayoutTests` and `StoreNameTests`. Unit: an open rent the player does not enter still gets a business type. Apply wins over staying outside. Walking in gets the same type. A type that does not stick is `SILENT_NOOP`. An unloaded pick does not pretend the type landed. A gift shop name ends with the neighborhood initials, and two stores in one neighborhood differ by address. Chain: `open rent → remote layout`, the same chain when the player is inside, a blank write names `SILENT_NOOP` with `expected=ba:businesstype_giftshop`, and `open rent → remote layout → distinct name`. Command: the Tier 1 `dotnet test` suite.
+
+Measured: `dotnet test` 1346 passed (prior 1341). Release build installed `1.19.1.1+678`. Human PASS 2026-11-21 on 1.19.1: day 16 `layout.loaded` for `ba:street_ninthavenue` 15, type `ba:businesstype_giftshop`.
+
 ## Bare-open breaker (1.18.9)
 
 Where: the city. Two mornings. A rented lot whose business type is still blank. This does not fit that lot out, and it does not hold the lease.

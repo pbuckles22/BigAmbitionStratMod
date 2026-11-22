@@ -829,12 +829,8 @@ namespace ChaoticCEO
                 return NamedBlock.Record(localAppData, current.Day, "layout", "no-lot", street, number);
             }
 
-            if (!StarterBridge.Inside(new BuildingRent(street, number, true, "")))
-            {
-                return NamedBlock.Record(localAppData, current.Day, "layout", "not-inside", street, number);
-            }
-
             var rented = new BuildingRent(street, number, true, GameApi.Live().Call("clone"));
+            var entered = StarterBridge.Inside(rented);
             StarterPick chosen;
             try
             {
@@ -865,11 +861,22 @@ namespace ChaoticCEO
                 return Starter.Miss(localAppData, chosen, rented, current.Day);
             }
 
-            if (!StarterBridge.Live(registration, chosen))
+            var decided = RemoteLayout.Decide(
+                entered,
+                rented,
+                registration.businessTypeName,
+                chosen);
+            if (decided.SilentNoop || !decided.Applied)
             {
-                return Starter.Miss(localAppData, chosen, rented, current.Day);
+                return BlankLayout(localAppData, current.Day, street, number, chosen, rented, registration);
             }
 
+            if (!StarterBridge.Live(registration, chosen))
+            {
+                return BlankLayout(localAppData, current.Day, street, number, chosen, rented, registration);
+            }
+
+            Starter.RecordName(localAppData, current.Day, street, number, registration.BusinessName);
             return Checked(
                 localAppData,
                 current.Day,
@@ -1201,6 +1208,8 @@ namespace ChaoticCEO
             {
                 return null;
             }
+
+            NameDistinctStores(localAppData, current);
 
             BuildingRegistration? target = null;
             BuildingRegistration? bareBuilding = null;
@@ -1818,6 +1827,70 @@ namespace ChaoticCEO
             Modes.Record(localAppData, quote, day);
         }
 
+        private static void NameDistinctStores(string localAppData, GameInstance current)
+        {
+            var rows = new List<NamedStore>();
+            var buildings = new List<BuildingRegistration>();
+            foreach (var building in current.BuildingRegistrations)
+            {
+                if (building == null || !building.RentedByPlayer)
+                {
+                    continue;
+                }
+
+                buildings.Add(building);
+                rows.Add(new NamedStore(
+                    building.StreetName,
+                    building.StreetNumber,
+                    building.Neighborhood,
+                    building.businessTypeName,
+                    building.BusinessName));
+            }
+
+            var renamed = Starter.Distinct(rows);
+            for (var index = 0; index < buildings.Count; index++)
+            {
+                var next = renamed[index].Name;
+                if (next.Length == 0 || next == buildings[index].BusinessName)
+                {
+                    continue;
+                }
+
+                buildings[index].BusinessName = next;
+                Starter.RecordName(
+                    localAppData,
+                    current.Day,
+                    buildings[index].StreetName,
+                    buildings[index].StreetNumber,
+                    next);
+            }
+        }
+
+        private static string BlankLayout(
+            string localAppData,
+            int day,
+            string street,
+            int number,
+            StarterPick chosen,
+            BuildingRent rented,
+            BuildingRegistration registration)
+        {
+            var silent = StateCheck.Record(
+                localAppData,
+                day,
+                "layout",
+                street,
+                number,
+                chosen.BusinessType,
+                registration.businessTypeName);
+            if (silent.Length > 0)
+            {
+                return silent;
+            }
+
+            return Starter.Miss(localAppData, chosen, rented, day);
+        }
+
         private static FitOutProgress FitProgress(string localAppData, BuildingRegistration building)
         {
             var street = building.StreetName ?? "";
@@ -1849,11 +1922,7 @@ namespace ChaoticCEO
             {
                 case "layout":
                 {
-                    if (!StarterBridge.Inside(rented))
-                    {
-                        return NamedBlock.Record(localAppData, current.Day, "fitout", "not-inside", street, number);
-                    }
-
+                    var entered = StarterBridge.Inside(rented);
                     StarterPick chosen;
                     try
                     {
@@ -1879,11 +1948,22 @@ namespace ChaoticCEO
                         return Starter.Miss(localAppData, chosen, rented, current.Day);
                     }
 
-                    if (!StarterBridge.Live(registration, chosen))
+                    var decided = RemoteLayout.Decide(
+                        entered,
+                        rented,
+                        registration.businessTypeName,
+                        chosen);
+                    if (decided.SilentNoop || !decided.Applied)
                     {
-                        return Starter.Miss(localAppData, chosen, rented, current.Day);
+                        return BlankLayout(localAppData, current.Day, street, number, chosen, rented, registration);
                     }
 
+                    if (!StarterBridge.Live(registration, chosen))
+                    {
+                        return BlankLayout(localAppData, current.Day, street, number, chosen, rented, registration);
+                    }
+
+                    Starter.RecordName(localAppData, current.Day, street, number, registration.BusinessName);
                     return Checked(
                         localAppData,
                         current.Day,

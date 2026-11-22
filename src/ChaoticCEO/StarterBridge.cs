@@ -48,9 +48,16 @@ namespace ChaoticCEO
                 return false;
             }
 
+            BuildingManager? manager = null;
+            var swapped = false;
+            BuildingRegistration? previous = null;
             try
             {
-                registration.BusinessName = pick.Name;
+                registration.BusinessName = Starter.BusinessName(
+                    pick.BusinessType,
+                    registration.Neighborhood,
+                    registration.StreetName,
+                    registration.StreetNumber);
                 registration.businessTypeName = pick.BusinessType;
                 registration.Layout = pick.Layout;
                 registration.scheduleDays = Week(pick.OpenFrom, pick.OpenTo);
@@ -61,14 +68,36 @@ namespace ChaoticCEO
                     registration.creationDay = current.Day;
                 }
 
+                manager = InstanceBehavior<BuildingManager>.Instance;
+                previous = manager == null ? null : manager.buildingRegistration;
+                if (manager != null && previous != registration)
+                {
+                    manager.buildingRegistration = registration;
+                    swapped = true;
+                }
+
                 BusinessLayoutSetHelper.LoadBusinessLayoutSet(pick.Layout);
-                return true;
+                return TypeLanded(registration, pick);
             }
             catch (System.Exception ex)
             {
                 CrashTrace.Seen(ex, "StarterBridge.Live.1", "");
-                return false;
+                return TypeLanded(registration, pick);
             }
+            finally
+            {
+                if (swapped && manager != null)
+                {
+                    manager.buildingRegistration = previous;
+                }
+            }
+        }
+
+        private static bool TypeLanded(BuildingRegistration registration, StarterPick pick)
+        {
+            return pick.BusinessType.Length > 0
+                && pick.BusinessType != "ba:businesstype_empty"
+                && registration.businessTypeName == pick.BusinessType;
         }
 
         private static List<ScheduleDay> Week(int openFrom, int openTo)
