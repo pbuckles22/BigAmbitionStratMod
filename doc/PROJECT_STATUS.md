@@ -16,7 +16,7 @@
 
 | Branch | Role |
 |--------|------|
-| **`main`** | Integration branch. Version 1.19.2.2. Remote ops **16.2**. |
+| **`main`** | Integration branch. Version 1.19.2.2. Remote ops **16.2**. Land `c4f58b0`. |
 | **`feature/16.2-remote-ops`** | Remote ops. Version 1.19.2.2. Human PASS 2026-11-21. Kept after CMPH. |
 | **`feature/16.1-remote-layout`** | Remote layout. Version 1.19.1.1. Human PASS 2026-11-21. Kept after CMPH. |
 | **`feature/15.6-bare-open`** | Bare-open breaker. Version 1.18.9. Human PASS 2026-11-21. Kept after CMPH. |
